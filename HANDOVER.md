@@ -1,3 +1,5 @@
+> **2026-09-06 (course session 81f223c7):** `PROTOCOL.md` §6 adds **streaming + triggered capture as binary frames** (Decision #26 in the course repo) — specified, not implemented. Implement in `blocks/base/` first (internal ADC via `analogContinuous*` / ADC DMA, frame encoder), then the PWA **Scope** tab (roll / single / auto, timebase, cursor, CSV download) and `instrument.py scope|capture`. Also required for day 1 (Decision #25): `blocks/base/` must ship a **worked example of one button + one status number** that students copy for E2.
+
 # HANDOVER — class-board-2026
 
 Latest entry first. Every session appends one entry: done / verified / next / gotchas. Decisions the instructor has confirmed go under "Decision record" and are not re-litigated.
