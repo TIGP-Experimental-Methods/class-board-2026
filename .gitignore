@@ -1,0 +1,34 @@
+# PlatformIO
+firmware/.pio/
+firmware/.vscode/
+# generated: copied from host/pwa by scripts/copy_pwa.py
+firmware/data/
+firmware/include/secrets.h
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+host/build/
+host/dist/
+.venv/
+.ruff_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# KiCad backups (hardware/ is managed separately)
+hardware/**/*-backups/
+hardware/**/*.kicad_prl
+hardware/**/fp-info-cache
+
+# hardware/lib generation scratch
+hardware/lib/*.log
+hardware/lib/*_done.txt
+hardware/lib/e2k_slow*
+hardware/lib/class_board/
+hardware/lib/symbol/

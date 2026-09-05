@@ -1,0 +1,87 @@
+(version 1)
+
+# Class board custom DRC rules — KiCad 10. Source: 10-Class-Board-Design-Brief.md §8.
+# Net classes are defined in the board setup; rule areas ZONE_BASE, ZONE_B1..ZONE_B5, ZONE_OPT are drawn on the PCB.
+# TODO(verify): wildcard matching ("?" in reference patterns) and insideArea() semantics against the KiCad 10 DRC expression docs
+#               (https://docs.kicad.org/10.0/en/pcbnew/pcbnew.html#custom_design_rules) before relying on the owner rules.
+
+# ---- isolation band around the opto input side (project rule for <= 24 V isolated inputs; deliberately conservative) ----
+(rule "iso_in_clearance"
+  (condition "A.NetClass == 'ISO_IN' && B.NetClass != 'ISO_IN'")
+  (constraint clearance (min 2.5mm)))
+
+(rule "iso_in_clearance_to_edge"
+  (condition "A.NetClass == 'ISO_IN'")
+  (constraint edge_clearance (min 1.0mm)))
+
+# ---- relay contacts (<= 30 V DC, 1 A) ----
+(rule "relay_contact_clearance"
+  (condition "A.NetClass == 'RELAY_CONTACT' && B.NetClass != 'RELAY_CONTACT'")
+  (constraint clearance (min 1.0mm)))
+
+(rule "relay_contact_width"
+  (condition "A.NetClass == 'RELAY_CONTACT'")
+  (constraint track_width (min 0.5mm)))
+
+# ---- analog ----
+(rule "analog_in_clearance"
+  (condition "A.NetClass == 'ANALOG_IN'")
+  (constraint clearance (min 0.3mm)))
+
+(rule "analog_on_top_only"
+  (layer "B.Cu")
+  (condition "A.Type == 'Track' && (A.NetClass == 'ANALOG_IN' || A.NetClass == 'ANALOG_OUT')")
+  (constraint disallow track))
+
+# ---- power widths ----
+(rule "power_width"
+  (condition "A.NetClass == 'POWER'")
+  (constraint track_width (min 0.5mm)))
+
+(rule "power_raw_width"
+  (condition "A.NetClass == 'POWER_RAW'")
+  (constraint track_width (min 1.0mm)))
+
+# ---- the GND plane is untouched: no tracks on In1.Cu (vias may pass through) ----
+(rule "no_tracks_on_gnd_plane"
+  (layer "In1.Cu")
+  (condition "A.Type == 'Track'")
+  (constraint disallow track))
+
+# ---- guard ring area in the OPT zone: no vias ----
+(rule "no_vias_in_opt_guard"
+  (condition "A.Type == 'Via' && A.insideArea('OPT_GUARD')")
+  (constraint disallow via))
+
+# ---- fabrication minimums (JLC 4-layer, conservative) ----
+(rule "min_annular_ring"
+  (constraint annular_width (min 0.15mm))
+  (condition "A.Type == 'Via'"))
+
+(rule "hole_to_hole"
+  (constraint hole_to_hole (min 0.5mm)))
+
+(rule "courtyard_overlap"
+  (condition "A.Type == 'Footprint' && B.Type == 'Footprint'")
+  (constraint courtyard_clearance (min 0.0mm)))
+
+# ---- owner rules: a block's footprints must sit inside the block's rule area ----
+# Reference ranges: base 1-99, B1 1xx, B2 2xx, B3 3xx, B4 4xx, B5 5xx, OPT 6xx (all prefixes: R, C, D, U, J, K, L, F, TP, JP).
+(rule "owner_B1"
+  (condition "A.Type == 'Footprint' && A.Reference == '*1??' && !A.insideArea('ZONE_B1')")
+  (constraint disallow footprint))
+(rule "owner_B2"
+  (condition "A.Type == 'Footprint' && A.Reference == '*2??' && !A.insideArea('ZONE_B2')")
+  (constraint disallow footprint))
+(rule "owner_B3"
+  (condition "A.Type == 'Footprint' && A.Reference == '*3??' && !A.insideArea('ZONE_B3')")
+  (constraint disallow footprint))
+(rule "owner_B4"
+  (condition "A.Type == 'Footprint' && A.Reference == '*4??' && !A.insideArea('ZONE_B4')")
+  (constraint disallow footprint))
+(rule "owner_B5"
+  (condition "A.Type == 'Footprint' && A.Reference == '*5??' && !A.insideArea('ZONE_B5')")
+  (constraint disallow footprint))
+(rule "owner_OPT"
+  (condition "A.Type == 'Footprint' && A.Reference == '*6??' && !A.insideArea('ZONE_OPT')")
+  (constraint disallow footprint))

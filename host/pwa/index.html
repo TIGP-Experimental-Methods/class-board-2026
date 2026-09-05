@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1115">
+  <title>Instrument</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="title">
+      <span id="conn-dot" class="dot"></span>
+      <strong>Instrument</strong>
+      <span id="conn-text" class="muted">connecting…</span>
+    </div>
+    <nav id="tabs" aria-label="Blocks"></nav>
+  </header>
+
+  <!-- Live chart: plots one numeric status key, chosen from the dropdown. -->
+  <section class="card" id="chart-card">
+    <div class="row">
+      <label for="chart-key" class="muted">chart</label>
+      <select id="chart-key"></select>
+      <span id="chart-value" class="value"></span>
+    </div>
+    <canvas id="chart" height="140"></canvas>
+  </section>
+
+  <!-- The active block's panel renders into here. -->
+  <main id="panel" class="card"></main>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
