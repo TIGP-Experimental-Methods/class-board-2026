@@ -54,7 +54,10 @@ bool BaseBlock::handle(JsonObjectConst cmd, JsonObject reply) {
 #endif
     return true;
   }
-  // TODO(E1): add your own command here, e.g. "hello" that echoes args["text"].
+  // TODO(E2): add your own command here. Worked example (workbook ch. 1 A.4):
+  //   if (strcmp(c, "press") == 0) { presses_++; setLed(a["r"] | 255, a["g"] | 120, a["b"] | 0);
+  //                                  reply["presses"] = presses_; return true; }
+  // and in status():  out["presses"] = presses_;   (declare uint32_t presses_ = 0; in the header)
 
   reply["error"] = "unknown cmd";
   return false;

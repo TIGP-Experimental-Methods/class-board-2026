@@ -1,5 +1,5 @@
 // Panel for the "base" block: LED colour + brightness, counter, chip info.
-// Exercise E1 adds one more control here (and its handler in BaseBlock.cpp).
+// Exercise E2 adds one button + one readout here (and its handler + status key in BaseBlock.cpp).
 //
 // A panel is a plain object: { id, title, render(container, api), onStatus(status) }.
 //   render    builds the DOM once, when the tab is opened
@@ -34,7 +34,11 @@ export default {
         <label>counter</label><span class="value" id="counter">-</span>
         <button class="btn" id="counter-reset">Reset</button>
       </div>
-      <!-- TODO(E1): add your control here, e.g. a text field that sends {"cmd":"hello","args":{"text":...}} -->
+      <!-- TODO(E2): add your button + readout here. Worked example (workbook ch. 1 A.4):
+           <div class="row"><button class="btn primary" id="press">Press me</button>
+                <label>presses</label><span class="value" id="presses">-</span></div>
+           then: el.querySelector('#press').onclick = () => api.send('base', 'press', { r: 255, g: 120, b: 0 });
+           and in onStatus(st): els.presses.textContent = st.presses ?? '-'; -->
 
       <h3>Board</h3>
       <div class="kv" id="kv"></div>`;

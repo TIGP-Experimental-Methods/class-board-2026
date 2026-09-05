@@ -13,6 +13,19 @@ The teaching instrument for **Basic Skills for Experimentalists** (TIGP, 2026): 
 
 Until the class board arrives everything runs in **SIM mode** on a bare Jinhua ESP32-S3 N16R8 dev board: each block fakes its hardware, so the app, the chart and the alarms all work on day 1.
 
+## The student package (everything you need is in this repo)
+
+| What | Where |
+|---|---|
+| **Workbook** — one chapter per session + homework, the same text the tutor runs | [`workbook/`](workbook/README.md): [ch. 0](workbook/ch0-before-day-1.md) · [ch. 1](workbook/ch1-day-1-week-1.md) · [ch. 2](workbook/ch2-day-2-week-2.md) · [ch. 3](workbook/ch3-day-3-week-3.md) · [ch. 4](workbook/ch4-wrap-up-demo.md) · [A](workbook/chA-electronics-from-zero.md) · [B](workbook/chB-how-the-software-works.md) · [C cheat-sheets](workbook/chC-cheat-sheets.md) |
+| **Your block page** | [`workbook/blocks/`](workbook/blocks/): B1 · B2 · B3 · B4 · B5 |
+| **The tutor** | `/tutor L1` (etc.) in Claude Code — [`.claude/skills/tutor/`](.claude/skills/tutor/SKILL.md), rules in [`tutor/COURSE-GUIDE.md`](tutor/COURSE-GUIDE.md) |
+| **Slides** | [`slides/`](slides/) — L1 · L2 · L3 as Marp Markdown, HTML and PDF; also on the course site |
+| **Firmware + app skeleton** | `firmware/`, `host/` — flash it in 5 commands below |
+| **KiCad library package** | [`hardware/lib/`](hardware/lib/README.md) — project-local, nothing to unzip |
+| **Reference for E1a** | https://github.com/TIGP-Experimental-Methods/pendulum-example (fork it if your session stalls) |
+| **Course site** | https://tigp-experimental-methods.github.io/ |
+
 ## Flash in 5 commands (VS Code + PlatformIO)
 
 Prerequisites: VS Code with the *PlatformIO IDE* extension (installs its own Python and `pio`), git, the dev board on a USB-C **data** cable plugged into the port marked *USB* (native USB, not *UART*).

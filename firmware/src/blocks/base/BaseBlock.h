@@ -3,7 +3,8 @@
 //   * a free-running counter and the chip temperature as a "signal" so the
 //     live chart has something to draw on day 1
 //   * uptime, WiFi RSSI, free heap
-// Students' first exercise (E1) adds one more command + widget here.
+// Students' day-1 exercise E2 adds one more command + one status number here
+// (workbook ch. 1 A.4: the 'press' button + 'presses' counter is the worked example).
 #pragma once
 #include <Adafruit_NeoPixel.h>
 #include "../Block.h"
