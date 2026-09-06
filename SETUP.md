@@ -25,7 +25,7 @@ Purpose: git is the tool that records the history of a folder of files (version 
 | OS | Install |
 |---|---|
 | Windows | `winget install --id Git.Git -e --source winget` |
-| macOS | `git --version` — if a developer-tools dialog appears, accept it; otherwise `brew install git` (install Homebrew first if `brew` is missing: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`) |
+| macOS | `git --version` — if a developer-tools dialog appears, accept it; otherwise `brew install git` (install Homebrew first if `brew` is missing — the student runs this one, it asks for the login password: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`) |
 | Linux | `sudo apt install git` or `sudo dnf install git` |
 
 Then ask the student for their name and the **e-mail address of their GitHub account** (the two must match, or GitHub will not attribute their commits):
@@ -84,9 +84,9 @@ Tell the student to choose: *GitHub.com* → *HTTPS* → *Yes* (authenticate Git
 
 ## Step 4 — Join the class GitHub organization
 
-Purpose: the class repository is owned by the organization **TIGP-Experimental-Methods**; only members can clone it (download a full copy) and open pull requests.
+Purpose: the class repository is owned by the organization **TIGP-Experimental-Methods**. It is public — anyone can clone it (download a full copy) — but only members can push and open pull requests.
 
-**Manual (student).** The instructor invites the username from Step 3. The student accepts the invitation from the e-mail GitHub sends, or at https://github.com/orgs/TIGP-Experimental-Methods/invitation. If no invitation has arrived, the student e-mails their GitHub username to the instructor (s.p.bennetts@g.iams.sinica.edu.tw) and continues with Steps 6, 8, 9 and 10 meanwhile; Steps 4–5 are then finished later by re-running this file.
+**Manual (student).** The instructor invites the username from Step 3. The student accepts the invitation from the e-mail GitHub sends, or at https://github.com/orgs/TIGP-Experimental-Methods/invitation. If no invitation has arrived, the student e-mails their GitHub username to the instructor (s.p.bennetts@g.iams.sinica.edu.tw) and continues with Steps 5–10; Step 4 is re-checked later by re-running this file.
 
 ✔ `gh api user/memberships/orgs/TIGP-Experimental-Methods --jq .state` prints `active`. (`404` = no invitation or not yet accepted; `pending` = accept it in the browser.)
 
@@ -112,12 +112,12 @@ Extension:
 code --install-extension platformio.platformio-ide
 ```
 
-(If `code` is not found: macOS — VS Code Command Palette → *Shell Command: Install 'code' command in PATH*; Windows — re-run the VS Code installer with *Add to PATH* ticked, or install the extension from the Extensions view by searching *PlatformIO IDE*.)
+(If `code` is not found: macOS — VS Code Command Palette → *Shell Command: Install 'code' command in PATH*; Windows — re-run the VS Code installer with *Add to PATH* ticked, or install the extension from the Extensions view by searching *PlatformIO IDE*. Linux: the extension needs `python3-venv` — `sudo apt install python3-venv` or `sudo dnf install python3` — before it can set itself up.)
 
 Core CLI:
 
 ```sh
-uv tool install platformio
+uv tool install --python 3.12 platformio
 pio --version
 ```
 
@@ -132,13 +132,13 @@ pio run -e esp32s3-sim
 
 This downloads the Espressif platform, compiler and framework (~1 GB) into `~/.platformio`, which the VS Code extension shares, so it happens once. Do not interrupt it. **It must finish before day 1.**
 
-✔ The PlatformIO alien-head icon is in the VS Code side bar; `pio --version` prints a version; the build output ends with `[SUCCESS]`.
+✔ The PlatformIO alien-head icon is in the VS Code side bar (after *Developer: Reload Window* from the Command Palette); `pio --version` prints a version; the build output ends with `[SUCCESS]`.
 
 ## Step 7 — USB (only if the student already has the dev board)
 
 Purpose: confirm the laptop sees the board on a serial port; most students receive the board on day 1, so skip this step if there is no board yet and say so in the report.
 
-The board is a Jinhua #40729 ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins; DevKitC-1 pinout). Its connector is **USB-C**; use a **data** cable that fits the laptop (USB-C to USB-C, or USB-A to USB-C — charging-only cables carry no data), plugged into the port marked *USB* (native USB, not *UART*). No serial driver is needed on Windows or macOS. Linux: add the user to the `dialout` group (`sudo usermod -aG dialout $USER`, then log out and in) and install PlatformIO's udev rules (https://docs.platformio.org/en/latest/core/installation/udev-rules.html).
+The board is a Jinhua #40729 ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins; DevKitC-1 pinout). Its connector is **USB-C**; use a **data** cable that fits the laptop (USB-C to USB-C, or USB-A to USB-C — charging-only cables carry no data), plugged into the port marked *USB* (native USB, not *UART*). No serial driver is needed on Windows or macOS. Linux: add the user to the `dialout` group (the user group allowed to open serial ports: `sudo usermod -aG dialout $USER`, then log out and in) and install PlatformIO's udev rules (the file that tells Linux to let ordinary users talk to the board: https://docs.platformio.org/en/latest/core/installation/udev-rules.html).
 
 ```sh
 pio device list
@@ -146,7 +146,7 @@ pio device list
 
 ✔ A port is listed: Windows `COMn`, macOS `/dev/cu.usbmodem…`, Linux `/dev/ttyACM0`. If none: try another cable, the other USB port on the board, or hold **BOOT**, tap **RST**, release BOOT and retry.
 
-Flashing itself happens on day 1 (from `class-board-2026/firmware`): `pio run -e esp32s3-sim -t upload`, then `pio run -e esp32s3-sim -t uploadfs`, then `pio device monitor`. Do not run these now unless the student asks.
+Flashing itself happens on day 1, from `class-board-2026/firmware`, one command at a time: `pio run -e esp32s3-sim -t upload`, then `pio run -e esp32s3-sim -t uploadfs`, then `pio device monitor`. Do not run these now unless the student asks.
 
 ## Step 8 — Cloudflare account (manual)
 
@@ -170,7 +170,7 @@ Purpose: the class board is designed in KiCad (the free program we draw the sche
 
 Start KiCad once and accept the default library tables when asked.
 
-✔ `kicad-cli version` prints `10.x`. If deferred, write *deferred* in the report.
+✔ KiCad starts and *Help → About KiCad* shows version 10.x (on Linux `kicad-cli version` also works; on Windows and macOS `kicad-cli` is not on the PATH, so do not use it as the check). If deferred, write *deferred* in the report.
 
 ## Step 10 — Videos
 

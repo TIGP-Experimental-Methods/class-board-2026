@@ -49,7 +49,7 @@ If the upload cannot find a port: hold **BOOT**, tap **RST**, release BOOT, retr
 3. Open **http://192.168.4.1** in the browser. Tap *Red* on the Base tab: the LED changes. The chart plots `base.counter`; pick another key from the dropdown.
 4. *Add to Home screen* gives an app icon. (Full "install" prompts need HTTPS, which the board does not have; the shortcut is enough.)
 
-To use the lab WiFi instead: copy `firmware/include/secrets.h.example` to `secrets.h`, fill in SSID/password, re-flash. The LED turns **green** and the board is at `http://instrument.local` (mDNS). If joining fails within 10 s it falls back to the AP.
+To use the lab WiFi instead: copy `firmware/include/secrets.h.example` to `secrets.h`, fill in SSID/password, re-flash. The LED turns **green** and the board is at `http://instrument.local` (mDNS: the board announces its own name on the local network, so no IP address is needed). If joining fails within 10 s it falls back to the AP.
 
 ## Python client
 

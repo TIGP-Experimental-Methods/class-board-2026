@@ -4,8 +4,17 @@
 //     live chart has something to draw on day 1
 //   * uptime, WiFi RSSI, free heap
 // Students' day-1 exercise E2 adds one command + one live measurement here
-// (workbook ch. 1 A.4: set_avg {n} + adc_v / adc_sd from a 1 kHz ring buffer on GPIO 4;
-//  the LED 'press' button + 'presses' counter is the minimal fallback).
+// (workbook ch. 1 A.4). Default: a ring buffer of ADC_MAX_N = 4096 uint16_t
+// samples (mV) filled at 1 kHz from GPIO 4 in loop() - sampling only, no
+// statistics there; command set_avg {n}, n in 1..1024; statistics computed in
+// status() at 20 Hz: adc_v = mean of the most recent n samples (V), adc_sd =
+// standard deviation of the block means (split the 4096 samples into
+// floor(4096/n) consecutive blocks of n, take each block's mean, take the sd
+// of those means, V) = "the noise of one n-sample average", avg_n = n.
+// The LED 'press' button + 'presses' counter is the minimal fallback.
+// Private members the recipe adds:
+//   static constexpr int ADC_PIN = 4, ADC_MAX_N = 4096;
+//   uint16_t adcBuf_[ADC_MAX_N]; int adcHead_ = 0, adcN_ = 16; uint32_t lastSample_ = 0;
 #pragma once
 #include <Adafruit_NeoPixel.h>
 #include "../Block.h"

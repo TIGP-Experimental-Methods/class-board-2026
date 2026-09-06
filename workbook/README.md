@@ -1,6 +1,8 @@
 # Workbook — Basic Skills for Experimentalists (TIGP 2026)
 
-One source for two readers: **you** (read it like a lab manual) and **the tutor** (`/tutor <chapter>` in Claude Code reads the same chapter and paces you through it, in English or Mandarin). Every chapter has checkboxes, the exact commands, and a *what you should see* line after every step. Tooling terms are explained the first time they appear in a chapter and collected in the glossary, [chapter C, *Words we use*](chC-cheat-sheets.md#c0-words-we-use).
+**What this course is.** Methods and skills for building lab equipment, instruments and tools that get used: specify, build with an agent (Claude Code working on your files), verify against a number you predicted, ship (publish it where others can open it), log, review. The class board is the shared baseline; the software, firmware (the program that runs on the microcontroller) and app around it are open — if this instrument could solve a problem in your own lab, that is what you should build.
+
+One source for two readers: **you** (read it like a lab manual) and **the tutor** (`/tutor <chapter>` in Claude Code, opened in the `class-board-2026` folder, reads the same chapter and paces you through it, in English or Mandarin). Every chapter has checkboxes, the exact commands, and a *what you should see* line after every step. Tooling terms are explained the first time they appear in a chapter and collected in the glossary, [chapter C, *Words we use*](chC-cheat-sheets.md#c0-words-we-use).
 
 | Chapter | When | `/tutor` |
 |---|---|---|
@@ -14,7 +16,7 @@ One source for two readers: **you** (read it like a lab manual) and **the tutor*
 | [C — Cheat-sheets](chC-cheat-sheets.md) — starts with *Words we use*, the glossary | always open | — |
 | [Your block](blocks/) — [B1](blocks/b1.md) · [B2](blocks/b2.md) · [B3](blocks/b3.md) · [B4](blocks/b4.md) · [B5](blocks/b5.md) | from day 1 | inside `/tutor HW1` |
 
-**Where things live.** Your project files: `docs/students/<name>/` (`PROGRESS.md`, `SPEC.md`, `notes.md` — plain-text files: what was done / verified / next / gotchas, what to build, your own notes — later `box.stl` and your video). Your personal page: your own day-1 repository (a project folder whose complete history git keeps, stored online on GitHub; it holds the page that teaches one idea). Slides and videos: the course site https://tigp-experimental-methods.github.io/. Help: stuck? ask the tutor for the fix; after that, email the instructor with a screenshot (address on the course site).
+**Where things live.** Your project files: `docs/students/<name>/` (`PROGRESS.md`, `SPEC.md`, `notes.md` — plain-text files: what was done / verified / next / gotchas, what to build, your own notes — later `box.stl` and your video). Your personal page: your own day-1 repository (a project folder whose complete history git keeps, stored online on GitHub; it holds the page that teaches one idea). Slides and videos: the course site https://tigp-experimental-methods.github.io/. Help: stuck? work with the tutor; when you want the fix, ask it for the fix; if that does not solve it, email the instructor with a screenshot (address on the course site).
 
 **The five working practices** (they are the spine of every chapter): spec first · teach the repository (`CLAUDE.md`, the file the coding agent — Claude Code working on your files — reads every session) · small fresh sessions · handover notes in Markdown (plain text with light formatting; `PROGRESS.md`) · AI writes, you verify.
 

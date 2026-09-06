@@ -55,10 +55,15 @@ bool BaseBlock::handle(JsonObjectConst cmd, JsonObject reply) {
     return true;
   }
   // TODO(E2): add your command here (workbook ch. 1 A.4). Default = the measurement:
-  //   if (strcmp(c, "set_avg") == 0) { int n = a["n"] | adcN_; if (n < 1 || n > ADC_MAX_N) { reply["error"] = "n out of range"; return false; }
+  //   if (strcmp(c, "set_avg") == 0) { int n = a["n"] | adcN_; if (n < 1 || n > 1024) { reply["error"] = "n must be 1..1024"; return false; }
   //                                    adcN_ = n; reply["n"] = adcN_; return true; }
-  //   with the 1 kHz ring buffer in loop() and out["adc_v"], out["adc_sd"], out["avg_n"] in status().
-  // Minimal fallback: "press" -> presses_++ and setLed(...), out["presses"] in status().
+  //   loop() only samples: every 1000 us (micros(), no delay()) adcBuf_[adcHead_] = analogReadMilliVolts(ADC_PIN);
+  //   adcHead_ = (adcHead_ + 1) % ADC_MAX_N.
+  //   status() does the statistics at 20 Hz: blocks = ADC_MAX_N / n; for each block k (ending k*n samples
+  //   before the newest) the mean of its n samples in V; out["adc_v"] = the newest block's mean,
+  //   out["adc_sd"] = the standard deviation of all the block means (the noise of one n-sample average),
+  //   out["avg_n"] = n. Use double accumulators. The recipe is written out in the workbook.
+  // Minimal fallback (the tutor writes it): "press" -> a presses_ counter++ and setLed(...), out["presses"] in status().
 
   reply["error"] = "unknown cmd";
   return false;

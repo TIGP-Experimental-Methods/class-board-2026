@@ -1,6 +1,6 @@
 # Chapter 0 — Before day 1
 
-The first class is hands-on from the start: everyone types `/tutor L1`, builds a simulator with Claude, deploys it (publishes it so it is live on the web) before the break, and after it flashes their own firmware (writes the program that runs on the microcontroller onto the board over USB) to an ESP32 (the microcontroller we use — a small computer on a chip, with WiFi). All of that only works if the tools already work on your laptop. Tooling terms are explained the first time they appear and collected in the glossary, [chapter C](chC-cheat-sheets.md#c0-words-we-use). You install VS Code and Claude Code by hand (0.2–0.4); Claude installs the rest (0.5). Every step has a ✔ check. If you are stuck, ask the tutor for the fix; if that does not solve it, note the error and email it to the instructor (s.p.bennetts@g.iams.sinica.edu.tw).
+The first class is hands-on from the start: everyone types `/tutor L1`, builds a simulator with Claude, deploys it (publishes it so it is live on the web) before the break, and after it flashes their own firmware (writes the program that runs on the microcontroller onto the board over USB) to an ESP32 (the microcontroller we use — a small computer on a chip, with WiFi). All of that only works if the tools already work on your laptop. Tooling terms are explained the first time they appear and collected in the glossary, [chapter C](chC-cheat-sheets.md#c0-words-we-use). You install VS Code and Claude Code by hand (0.2–0.4); Claude installs the rest (0.5). Every step has a ✔ check. If you are stuck in 0.1–0.4, email the instructor (s.p.bennetts@g.iams.sinica.edu.tw) with a screenshot. From 0.5 onwards work with the tutor (`/tutor CH0`, see 0.5); when you want the fix, ask it for the fix; if that does not solve it, note the error and email it to the instructor.
 
 ## 0.1 A laptop you can install software on
 Windows 10/11, macOS or Linux; admin rights; ~10 GB free. The connector on the dev board (the development board: the ESP32 on a small board with a USB connector and pins) is **USB-C**. Bring a **USB-C data cable** that fits your laptop — USB-C to USB-C, or USB-A to USB-C; charging-only cables do not carry data and are the number one flashing failure. Most of you receive the board on day 1.
@@ -22,29 +22,38 @@ Open the Claude Code panel and paste exactly this:
 
 > Read https://raw.githubusercontent.com/TIGP-Experimental-Methods/class-board-2026/main/SETUP.md and follow it step by step. Ask me before installing anything, and tell me what each step is for in one sentence.
 
-Claude detects your OS and sets up, asking before each install: **git** (the tool that records the history of a folder of files; and your name + e-mail — use the **same e-mail as your GitHub account** (GitHub is the website where repositories are stored and shared), or your commits (saved snapshots of your work) will not be attributed to you) · **Python via uv** · **GitHub CLI** (GitHub's command-line tool, `gh`) and `gh auth login` · a check that you are in the class organization · a clone (a downloaded full copy) of the class repository `class-board-2026` into your folder · **PlatformIO** (the tool that builds and flashes the firmware; VS Code extension + `pio` command) and one build of the simulator environment, which **downloads the ESP32 toolchain (~1 GB) — let it finish now, not on day 1** (the toolchain is the compiler and helper programs that turn source code into firmware) · **KiCad 10** (the free program the class board is drawn and laid out in; optional now; needed for homework 1).
+Claude detects your OS and sets up, asking before each install:
+- **git** — the tool that records the history of a folder of files. It asks for your name and e-mail: use the **same e-mail as your GitHub account** (GitHub is the website where repositories are stored and shared), or your commits (saved snapshots of your work) will not be attributed to you.
+- **Python via uv**.
+- **GitHub CLI** (`gh`, GitHub's command-line tool) and `gh auth login`.
+- A check that you are a member of the class organization `TIGP-Experimental-Methods` (you can clone without it; you need it to push and open pull requests).
+- A clone (a downloaded full copy) of the class repository `class-board-2026` into your folder.
+- **PlatformIO** — the tool that builds and flashes the firmware (VS Code extension + `pio` command) — and one build of the simulator environment, which **downloads the ESP32 toolchain (~1 GB) — let it finish now, not on day 1** (the toolchain is the compiler and helper programs that turn source code into firmware).
+- **KiCad 10** — the free program the class board is drawn and laid out in; optional now, needed for homework 1.
 
 It will stop and ask you to do three things in the browser: create a **GitHub account** if you have none (professional username, two-factor on), and send the username to the instructor · accept the **invitation to the GitHub organization** `TIGP-Experimental-Methods` (e-mail, or https://github.com/orgs/TIGP-Experimental-Methods/invitation) · a **Cloudflare account** (0.7). `gh auth login` is interactive: Claude tells you what to type and click; you run it.
 
-At the end Claude prints a report ending in **toolchain OK**, or the first failure with the exact error. If it fails and the fix is not obvious, run `/tutor CH0`; if that does not solve it, email the report to the instructor.
+At the end Claude prints a report ending in **toolchain OK**, or the first failure with the exact error. If it fails and the fix is not obvious: *File → Open Folder…* → `class-board-2026` (the folder Claude just cloned), open Claude Code there and run `/tutor CH0` — the tutor lives in that folder and is not found from the folder above it. If the clone itself failed, email the report to the instructor.
 ✔ The report says **toolchain OK**.
 
 ## 0.6 The ✔ checks
-The same list Claude prints — so you can verify by hand in the VS Code terminal (the text window where you type commands):
+The same list Claude prints — so you can verify by hand in the VS Code terminal (the text window where you type commands). One command per line; on Windows the default terminal does not accept `&&` between commands.
 
 ```sh
-git --version && git config --global --list        # name, e-mail, init.defaultBranch=main
-uv --version && uv run --python 3.12 python -c "print(2**10)"   # 1024
+git --version
+git config --global --list                         # name, e-mail, init.defaultBranch=main
+uv --version
+uv run --python 3.12 python -c "print(2**10)"      # 1024
 gh auth status                                     # logged in as <username>
 gh api user/memberships/orgs/TIGP-Experimental-Methods --jq .state   # active
 ls class-board-2026/firmware/platformio.ini        # exists
 pio --version
-cd class-board-2026/firmware && pio run -e esp32s3-sim   # ends with [SUCCESS]
+cd class-board-2026/firmware
+pio run -e esp32s3-sim                             # ends with [SUCCESS]
 pio device list                                    # a port, only if you already have the board
-kicad-cli version                                  # 10.x, if installed
 ```
 
-The PlatformIO alien-head icon is in the VS Code side bar. If you have the board: it goes on the port marked *USB* (native USB, not *UART*); Windows and macOS need no driver; Linux needs the `dialout` group and PlatformIO's udev rules. No port → another cable, or hold **BOOT**, tap **RST**, release BOOT, retry.
+KiCad, if installed: it starts and *Help → About KiCad* shows 10.x. The PlatformIO alien-head icon is in the VS Code side bar. If you have the board: it goes on the port marked *USB* (native USB, not *UART*); Windows and macOS need no driver; Linux needs the `dialout` group (the user group allowed to open serial ports) and PlatformIO's udev rules (the file that lets ordinary users talk to the board; `SETUP.md` step 7 has both). No port → another cable, or hold **BOOT**, tap **RST**, release BOOT, retry.
 
 ## 0.7 A free Cloudflare account, connected to GitHub (manual)
 On day 1 you deploy your first program to the public web with Cloudflare Pages (a free service that turns a repository into a public web page), straight from a GitHub repository, no build step. Sign up at https://dash.cloudflare.com/sign-up (free plan; verify the e-mail). Then, once: *Workers & Pages → Create → Pages → Connect to Git* → authorise Cloudflare for your GitHub account — and stop there; the project itself is created in class.

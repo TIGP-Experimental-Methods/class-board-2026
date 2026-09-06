@@ -1,6 +1,6 @@
 # CLAUDE.md — class-board-2026
 
-Software for the TIGP teaching instrument (ESP32-S3 + five student blocks + phone PWA + Python CLI). Course planning lives in the sibling repo `20260910-TIGP` (docs 08, 09, 10); this repo is what students clone.
+Software for the TIGP teaching instrument (ESP32-S3 + five student blocks + phone PWA + Python CLI). Course planning lives in the sibling repository `20260910-TIGP` (docs 08, 09, 10); this repository is what students clone.
 
 ## Start and end of every session
 - Read [HANDOVER.md](HANDOVER.md) (latest entry first), then [README.md](README.md) and [firmware/PROTOCOL.md](firmware/PROTOCOL.md).
@@ -19,9 +19,12 @@ Software for the TIGP teaching instrument (ESP32-S3 + five student blocks + phon
 - `firmware/data/` is generated (from `host/pwa/` by `scripts/copy_pwa.py`) and git-ignored; edit `host/pwa/` only. `include/secrets.h` is git-ignored.
 
 ## Quick commands
+One command per line (Windows PowerShell 5.1 has no `&&`):
 ```sh
-pio run -d firmware -e esp32s3-sim -t upload && pio run -d firmware -e esp32s3-sim -t uploadfs
+pio run -d firmware -e esp32s3-sim -t upload
+pio run -d firmware -e esp32s3-sim -t uploadfs
 pio device monitor
-pip install -e host/ && instrument status
+pip install -e host/
+instrument status
 ruff check host/
 ```
