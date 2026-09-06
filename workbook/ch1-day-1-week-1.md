@@ -132,7 +132,7 @@ Default: **an averaged ADC reading and its standard deviation**, averaging lengt
 Page 1 of the schematic; one sentence per block; the 3 × 4 SMA front panel. **Block assignment: volunteers, then lots.** Your block page: [B1](blocks/b1.md) · [B2](blocks/b2.md) · [B3](blocks/b3.md) · [B4](blocks/b4.md) · [B5](blocks/b5.md).
 
 ### A.6 Homework brief (end of class)
-Checkboxes below; the LINE group for help. The tutor ends the session with your `PROGRESS.md` — class repo and your day-1 repo.
+Checkboxes below; email the instructor if you are stuck. The tutor ends the session with your `PROGRESS.md` — class repo and your day-1 repo.
 
 ---
 

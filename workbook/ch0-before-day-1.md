@@ -1,6 +1,6 @@
 # Chapter 0 — Before day 1
 
-The first class is hands-on from the start: everyone types `/tutor L1`, builds a simulator with Claude, deploys it to the public web before the break, and flashes their own firmware to an ESP32 after it. All of that only works if the tools below already work on your laptop. Every step has a ✔ check. If you are stuck on any setup problem, ask for help: note the error and post it in the course LINE group.
+The first class is hands-on from the start: everyone types `/tutor L1`, builds a simulator with Claude, deploys it to the public web before the break, and flashes their own firmware to an ESP32 after it. All of that only works if the tools below already work on your laptop. Every step has a ✔ check. If you are stuck on any setup problem, ask for help: note the error and email it to the instructor (s.p.bennetts@g.iams.sinica.edu.tw).
 
 *Tip:* once steps 2–3 are done you can ask Claude to help with the rest ("Help me install uv and Python on Windows and check that it works"). That is not cheating; it is the course.
 
@@ -64,12 +64,12 @@ On day 1 you deploy your first program to the public web with Cloudflare Pages, 
 ## 0.11 Watch V1 and V2; V0 optional
 V1 *Setup* walks through 0.2–0.9. V2 *Flash the skeleton and open the app on your phone* is exactly what you do after the break on day 1. V0 *Build, ship, log: teach one idea on the web* previews the first exercise on one topic; in class you pick your own. Links on the course site's Preparation page.
 
-## 0.12 Check in on the LINE group
-Post a screenshot of the cloned repo open in VS Code. The LINE group is where you ask for help during the course.
+## 0.12 Check in by email
+Email a screenshot of the cloned repo open in VS Code to the instructor (s.p.bennetts@g.iams.sinica.edu.tw). The same address is where you ask for help during the course when the tutor cannot get you unstuck.
 ✔ Your screenshot is in the group.
 
 ## 0.13 Know what you are going to build
 Everyone builds the same instrument: one class board with five blocks — **B1 inputs · B2 power · B3 outputs · B4 switching · B5 digital/TRIG** — one block per student, one shared repo, one phone app. On day 1 you also build something of your own first: a physics simulator on the public web. Read the course site's *Project* page.
 
 ---
-**Tutor notes (`/tutor CH0`).** Run the ✔ checks in order and stop at the first failure; suggest the fix; when the student is stuck, write the error into `docs/students/<name>/PROGRESS.md` under *gotchas* and send the student to the LINE group. Do not install anything the student did not ask for.
+**Tutor notes (`/tutor CH0`).** Run the ✔ checks in order and stop at the first failure; suggest the fix; when the student is stuck, write the error into `docs/students/<name>/PROGRESS.md` under *gotchas* and send the student to email to the instructor. Do not install anything the student did not ask for.
