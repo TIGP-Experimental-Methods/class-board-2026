@@ -37,7 +37,16 @@
 #endif
 
 static const char* kApPassword = "instrument";
-static const char* kHostname = "instrument";
+// Hostname = "instrument-XXXX" (last 4 hex digits of the MAC), the same name as the access point,
+// so six boards on one lab network do not collide on mDNS / OTA. Filled in by hostName().
+static String gHostname;
+static const char* hostName() {
+  if (gHostname.isEmpty()) {
+    String mac = WiFi.macAddress();            // "AA:BB:CC:DD:EE:FF"
+    gHostname = "instrument-" + mac.substring(12, 14) + mac.substring(15, 17);
+  }
+  return gHostname.c_str();
+}
 static const uint32_t kStatusPeriodMs = 50;   // 20 Hz
 
 // ---- blocks --------------------------------------------------------------
@@ -136,7 +145,7 @@ static void broadcastStatus() {
 }
 
 static void startWiFi() {
-  WiFi.setHostname(kHostname);
+  WiFi.setHostname(hostName());
 #ifdef HAVE_SECRETS
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -148,7 +157,7 @@ static void startWiFi() {
   }
   Serial.println();
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.printf("[wifi] STA %s  http://%s/\n", WiFi.localIP().toString().c_str(), kHostname);
+    Serial.printf("[wifi] STA %s  http://%s.local/\n", WiFi.localIP().toString().c_str(), hostName());
     base.setLed(0, 40, 0);  // green = on the lab network
     return;
   }
@@ -218,8 +227,8 @@ void setup() {
 
   startWiFi();
 
-  if (MDNS.begin(kHostname)) MDNS.addService("http", "tcp", 80);
-  ArduinoOTA.setHostname(kHostname);
+  if (MDNS.begin(hostName())) MDNS.addService("http", "tcp", 80);
+  ArduinoOTA.setHostname(hostName());
   ArduinoOTA.begin();
 
   startServer();

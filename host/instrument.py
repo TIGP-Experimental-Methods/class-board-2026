@@ -9,7 +9,7 @@ Mirrors the WebSocket protocol in firmware/PROTOCOL.md one-to-one:
     instrument alarms add --block b1 --key ai1 --op gt --threshold 9 --action relay:1:off
     instrument alarms remove 3
 
-The board is found at instrument.local (mDNS), falling back to 192.168.4.1
+The board is found at instrument.local (mDNS), falling back to 192.168.4.1 (its own access point); on a shared network pass --host instrument-XXXX.local (XXXX = the four hex digits in the access-point name)
 (the board's own access point). Override with --host.
 """
 
@@ -98,7 +98,7 @@ def run(coro):
         raise typer.Exit(1) from None
 
 
-HostOpt = typer.Option(None, "--host", "-H", help="board hostname or IP (default: instrument.local, then 192.168.4.1)")
+HostOpt = typer.Option(None, "--host", "-H", help="board hostname or IP, e.g. instrument-639C.local on a shared network or 192.168.4.1 on the board's own access point (default: instrument.local, then 192.168.4.1)")
 
 
 # --------------------------------------------------------------------------
