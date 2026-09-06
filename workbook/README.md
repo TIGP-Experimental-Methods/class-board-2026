@@ -14,7 +14,7 @@ One source for two readers: **you** (read it like a lab manual) and **the tutor*
 | [C — Cheat-sheets](chC-cheat-sheets.md) | always open | — |
 | [Your block](blocks/) — [B1](blocks/b1.md) · [B2](blocks/b2.md) · [B3](blocks/b3.md) · [B4](blocks/b4.md) · [B5](blocks/b5.md) | from day 1 | inside `/tutor HW1` |
 
-**Where things live.** Your project files: `docs/students/<name>/` (`PROGRESS.md`, `SPEC.md`, `notes.md`, later `box.stl` and your video). Your personal page: your own day-1 repo (the page that teaches one idea). Slides and videos: the course site https://tigp-experimental-methods.github.io/. Help: the course LINE group (the tutor sends you there when you are stuck); office hour Wed 16:00.
+**Where things live.** Your project files: `docs/students/<name>/` (`PROGRESS.md`, `SPEC.md`, `notes.md`, later `box.stl` and your video). Your personal page: your own day-1 repo (the page that teaches one idea). Slides and videos: the course site https://tigp-experimental-methods.github.io/. Help: stuck? ask the tutor for the fix; after that, the course LINE group with a screenshot.
 
 **The five working practices** (they are the spine of every chapter): spec first · teach the repo (`CLAUDE.md`) · small fresh sessions · handover notes in Markdown (`PROGRESS.md`) · AI writes, you verify.
 

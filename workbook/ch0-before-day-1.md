@@ -1,6 +1,6 @@
 # Chapter 0 — Before day 1
 
-The first class is hands-on from the start: everyone types `/tutor L1`, builds a simulator with Claude, deploys it to the public web before the break, and flashes their own firmware to an ESP32 after it. All of that only works if the tools below already work on your laptop. Every step has a ✔ check. If a step fails, do not fight it: note the error, ask in the LINE group, and come early on day 1.
+The first class is hands-on from the start: everyone types `/tutor L1`, builds a simulator with Claude, deploys it to the public web before the break, and flashes their own firmware to an ESP32 after it. All of that only works if the tools below already work on your laptop. Every step has a ✔ check. If you are stuck on any setup problem, ask for help: note the error and post it in the course LINE group.
 
 *Tip:* once steps 2–3 are done you can ask Claude to help with the rest ("Help me install uv and Python on Windows and check that it works"). That is not cheating; it is the course.
 
