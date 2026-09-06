@@ -4,7 +4,7 @@ One source for two readers: **you** (read it like a lab manual) and **the tutor*
 
 | Chapter | When | `/tutor` |
 |---|---|---|
-| [0 — Before day 1](ch0-before-day-1.md) | before Fri 09-11 | `/tutor CH0` |
+| [0 — Before day 1](ch0-before-day-1.md) — Claude runs [`SETUP.md`](../SETUP.md) for the toolchain | before Fri 09-11 | `/tutor CH0` |
 | [1 — Day 1 + week 1: build it, ship it, log it — then your instrument](ch1-day-1-week-1.md) | Fri 09-11 + HW1 | `/tutor L1`, `/tutor HW1` |
 | [2 — Day 2 + week 2: your part of the board](ch2-day-2-week-2.md) | Fri 09-18 + HW2 | `/tutor L2`, `/tutor HW2` |
 | [3 — Day 3 + week 3: make it work, make it yours](ch3-day-3-week-3.md) | Fri 10-02 + HW3 | `/tutor L3`, `/tutor HW3` |
@@ -18,4 +18,4 @@ One source for two readers: **you** (read it like a lab manual) and **the tutor*
 
 **The five working practices** (they are the spine of every chapter): spec first · teach the repo (`CLAUDE.md`) · small fresh sessions · handover notes in Markdown (`PROGRESS.md`) · AI writes, you verify.
 
-**Beyond the baseline.** The hardware is the shared baseline — fixed by budget and timeline. The software, firmware and app are open. Whenever you are ahead: what problem in your lab could this instrument solve? A data logger to CSV · LINE/Telegram alerts from the alarm engine · remote access + a Python sweep · a calibration routine · a PID/controller block · a second node. Bring a real problem to L2; the tutor helps you write its `SPEC.md`. Not required; the demo has an optional fifth item for it.
+**Beyond the baseline.** The hardware is the shared baseline — fixed by budget and timeline. The software, firmware and app are open. Whenever you are ahead: what problem in your lab could this instrument solve? A data logger to CSV · LINE/Telegram alerts from the alarm engine · remote access + a Python sweep · a calibration routine · a PID/controller block · a second node. Bring a real problem to L2; the tutor helps you write its `SPEC.md`. Not required; the demo has an optional fifth item for it. **Talk to your instrument from LINE or Telegram** — the extension we most encourage: push notifications when a value drifts or an alarm fires, and bot commands that read a value or switch a relay from your phone, from anywhere.

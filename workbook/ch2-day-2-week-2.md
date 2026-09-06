@@ -45,7 +45,7 @@ On the projector, in the base sheet: **place** a 100 nF + 10 µF pair and wire i
 The instructor opens a PR from a student branch, requests the ring reviewer, writes one comment against the checklist, shows *Request changes* vs *Approve*.
 
 ### A.8 Homework brief
-The timeline to the order: **PR Wed 09-23 · reviews Fri 09-25 · fixes Sun 09-27 · order Mon 09-28.** Slip here = slip everywhere.
+The class order goes in on **Mon 09-28**; your zone must be merged before it. Hand-in dates are agreed in class.
 
 ---
 
@@ -57,8 +57,8 @@ The timeline to the order: **PR Wed 09-23 · reviews Fri 09-25 · fixes Sun 09-2
   easyeda2kicad --full --lcsc_id C12072 --output "<absolute path>/hardware/lib/class_board"
   ```
   The symbol lands in `class_board.kicad_sym`, the footprint in `class_board.pretty`, the 3D model in `class_board.3dshapes`. Open the symbol in the schematic editor, check pin 1 against the datasheet, and swap it into your sheet in place of the instructor's copy (or add it as the second footprint alternative). Commit `hardware/lib/`. *Teaches:* where parts come from — the LCSC → JLC pipeline.
-- [ ] **E9 PR by Wed 09-23.** `git add hardware/` (your sheet, the PCB, the library) → commit → push → `gh pr create` with the 3D screenshot in the description → *Reviewers:* your ring reviewer. CI must be green.
-- [ ] **E10 Review your peer by Fri 09-25; fix yours by Sun 09-27.** Open their PR → *Files changed* → check out the branch locally → open the PCB → walk the checklist below → leave **≥ 2 comments** → *Approve* or *Request changes*. Then address the comments on your own PR. *Teaches:* reading someone else's layout; being reviewed.
+- [ ] **E9 Open your PR.** `git add hardware/` (your sheet, the PCB, the library) → commit → push → `gh pr create` with the 3D screenshot in the description → *Reviewers:* your ring reviewer. CI must be green.
+- [ ] **E10 Review your peer, then fix yours.** Open their PR → *Files changed* → check out the branch locally → open the PCB → walk the checklist below → leave **≥ 2 comments** → *Approve* or *Request changes*. Then address the comments on your own PR. *Teaches:* reading someone else's layout; being reviewed.
 
 **The review checklist** (also in [chapter C](chC-cheat-sheets.md); the instructor uses the same list at merge):
 ERC 0 / DRC 0 · `LCSC` field on every part · values match the PDF · decoupling next to the pins · nothing on In1.Cu · nothing outside your rule area · pin 1 marked on the silkscreen · ground pour joined · B4 creepage ≥ 2.5 mm · a silkscreen label on every connector · CI green.
@@ -66,4 +66,4 @@ ERC 0 / DRC 0 · `LCSC` field on every part · values match the PDF · decouplin
 **Mon 09-28 (instructor):** paste-merge the five zones (select everything inside `ZONE_B<N>` on your branch → *Paste Special → in place* on `main`), full DRC, Gerbers/BOM/CPL, JLC quote with assembly, **order**. The PCB file is never text-merged; schematic sheets are separate files and merge in git.
 
 ---
-**Tutor notes (`/tutor L2`, `/tutor HW2`).** E6: for every placed part ask for value **and** footprint field; ERC 0 before moving on. E7: nothing outside `ZONE_B<N>`, nothing on In1.Cu, do not edit net classes or the instructor's tracks; read each DRC message aloud with the student. E8: `--output` must be an absolute path; then the footprint field. E9: PR description needs the 3D screenshot and the reviewer request. E10: at least two comments, each pointing to a checklist line. Deadlines are gates — say the dates.
+**Tutor notes (`/tutor L2`, `/tutor HW2`).** E6: for every placed part ask for value **and** footprint field; ERC 0 before moving on. E7: nothing outside `ZONE_B<N>`, nothing on In1.Cu, do not edit net classes or the instructor's tracks; read each DRC message aloud with the student. E8: `--output` must be an absolute path; then the footprint field. E9: PR description needs the 3D screenshot and the reviewer request. E10: at least two comments, each pointing to a checklist line. The order date (Mon 09-28) is the gate — say it; hand-in dates are agreed in class.

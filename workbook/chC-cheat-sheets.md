@@ -69,7 +69,7 @@ Scope: `stream {ch, rate_hz, chunk}` (rolling; `rate_hz: 0` stops) · `capture {
 ## 2026-09-18 — L2 (class)
 - Done: placed the 4 missing parts on b3_gapped; ERC 0; half of ZONE_B3 routed
 - Verified: DRC shows only unrouted items; 3D view looks like the PDF
-- Next: finish AO2 routing; E8 OPA2192 from LCSC; PR by Wed
+- Next: finish AO2 routing; E8 OPA2192 from LCSC; open the PR
 - Gotchas: F8 put the new footprints outside my zone — drag them in first
 ```
 

@@ -17,6 +17,7 @@ Until the class board arrives everything runs in **SIM mode** on a bare Jinhua E
 
 | What | Where |
 |---|---|
+| **Setup (before day 1)** | [SETUP.md](SETUP.md) — paste the prompt from workbook ch. 0 into Claude Code and it installs the toolchain |
 | **Workbook** — one chapter per session + homework, the same text the tutor runs | [`workbook/`](workbook/README.md): [ch. 0](workbook/ch0-before-day-1.md) · [ch. 1](workbook/ch1-day-1-week-1.md) · [ch. 2](workbook/ch2-day-2-week-2.md) · [ch. 3](workbook/ch3-day-3-week-3.md) · [ch. 4](workbook/ch4-wrap-up-demo.md) · [A](workbook/chA-electronics-from-zero.md) · [B](workbook/chB-how-the-software-works.md) · [C cheat-sheets](workbook/chC-cheat-sheets.md) |
 | **Your block page** | [`workbook/blocks/`](workbook/blocks/): B1 · B2 · B3 · B4 · B5 |
 | **The tutor** | `/tutor L1` (etc.) in Claude Code — [`.claude/skills/tutor/`](.claude/skills/tutor/SKILL.md), rules in [`tutor/COURSE-GUIDE.md`](tutor/COURSE-GUIDE.md) |

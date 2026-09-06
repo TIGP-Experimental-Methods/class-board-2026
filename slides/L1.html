@@ -283,7 +283,7 @@ footer { color: #888; font-size: 0.55em; }
 <div class="two">
 <div class="box">
 <p><strong>E1a · Build</strong><br />
-your topic, your repo · five-line <code>SPEC.md</code> — learner outcome + a number predicted on paper · plan · one <code>index.html</code> · the check · commit</p>
+your topic, your repo · five-line <code>SPEC.md</code> — learner outcome + one result worked out by hand before the code exists · plan · one <code>index.html</code> · the check · commit</p>
 <p><strong>E1b · Ship + log</strong><br />
 push · Cloudflare Pages · URL on your phone · <code>PROGRESS.md</code> · push → redeploys itself</p>
 </div>
@@ -320,7 +320,8 @@ footer { color: #888; font-size: 0.55em; }
 <p><strong>Pick a topic you know</strong> — EM · electronics · classical mechanics · PID · your research. Build the thing that teaches it: a page with sliders and a live plot, a simulation, a game.</p>
 <pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-sh">gh repo create &lt;you&gt;/rc-filter --public --<span class="hljs-built_in">clone</span> &amp;&amp; <span class="hljs-built_in">cd</span> rc-filter &amp;&amp; code .
 </code></pre>
-<p><strong>You write <code>SPEC.md</code> — five lines:</strong> what the learner can do afterwards · what it shows · <strong>the check: a number predicted on paper</strong> (1 kΩ, 100 nF → f_c = 1591.5 Hz, −3 dB, −45°) · a teaching check (a question with a hidden answer) · one file, canvas + JS, no framework, no build, works on a phone.</p>
+<p><span class="small"><code>--public</code> or <code>--private</code> — your choice. Cloudflare Pages deploys private repos too; the GitHub Pages fallback needs a public one.</span></p>
+<p><strong>You write <code>SPEC.md</code> — five lines:</strong> what the learner can do afterwards · what it shows · <strong>the check: one result you can work out by hand before any code exists</strong> (1 kΩ, 100 nF → f_c = 1591.5 Hz, −3 dB, −45°) · a teaching check (a question with a hidden answer) · one file, canvas + JS, no framework, no build, works on a phone.</p>
 <p>Then: <em>&quot;Read SPEC.md. Plan in five bullets. Then write index.html.&quot;</em> Reject a plan that draws a picture instead of computing the physics. Open it. <strong>Read your number off the page.</strong> Prediction vs result into <code>SPEC.md</code>. Commit.</p>
 <p><span class="small">Topics with a check: RC filter (f_c) · PID (settling time from the poles) · two charges (field on the axis) · cart-pole (period × √(M/(M+m))) · orbit (T² ∝ a³) · standing waves (f_n). Options with reference repos: CSV → scope lab tool · cart-pole. Stretch: a real teaching check · a second idea · the explainer video (show-your-work, your own YouTube channel).</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
@@ -636,6 +637,7 @@ The <strong>software, firmware and app are open.</strong> That is where you show
 <li>a <strong>PID / controller block</strong> — today's PID page, made real · a <strong>second node</strong> (S3-CAM on a gauge)</li>
 </ul>
 <p>Bring a real problem to Lecture 2; the tutor helps you write its <code>SPEC.md</code>. Optional fifth item at the demo.</p>
+<p><strong>Most encouraged: talk to your instrument from LINE or Telegram</strong> — push notifications when a value drifts, bot commands that read a value or switch a relay, from anywhere.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -661,7 +663,7 @@ footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="19" data-size="16:9">
 <h1 id="homework-1">Homework 1</h1>
 <ul>
-<li>[ ] <strong>E2 finish + merge</strong> — instructor reviews Mon; address one comment; merge</li>
+<li>[ ] <strong>E2 finish + merge</strong> — merge once reviewed</li>
 <li>[ ] <strong>E3 read your block</strong> — V3, two answers <strong>and the design number</strong> in <code>notes.md</code></li>
 <li>[ ] <strong>E4 KiCad ready</strong> — V4, install KiCad 10 (the library is in the repo), screenshot your zone</li>
 <li>[ ] <strong>E5 your SPEC paragraph</strong> — what, <strong>the number you will measure</strong>, how you show it</li>
