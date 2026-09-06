@@ -35,7 +35,12 @@ Every tooling term in this workbook is explained the first time it appears in a 
 | **PlatformIO** | the tool (and VS Code extension) that builds and flashes the firmware for us |
 | **`pio run -t upload`** | the PlatformIO command that builds the firmware and flashes it |
 | **SIM mode** | a build in which the firmware fakes its hardware, so the app and chart work on the bare dev board before the class board exists |
-| **access point (AP)** | the board's own WiFi network, which your phone joins |
+| **access point (AP)** | the board's own WiFi network, which your phone joins (LED blue) |
+| **STA (station) mode** | the board joins an existing WiFi network instead of making its own (LED green); needs the network's name and password in `firmware/include/secrets.h` |
+| **secret** | a password, a WiFi key, an API token — anything that lets someone else in; never in a chat, a file that is committed, or a screenshot |
+| **serial port / serial monitor** | the text connection over USB on which the board prints its log (Windows `COMn`); the monitor is the program that shows it |
+| **USB-Serial/JTAG** | the USB-to-serial converter built into the ESP32-S3 chip; because it is inside the chip, the port disappears and reappears at every reset |
+| **download mode** | the chip waiting to be flashed instead of running the firmware (log says `waiting for download`); a press of RST leaves it |
 | **PWA / the app** | the phone app is a web page served by the board that behaves like an app (progressive web app) |
 | **WebSocket** | a live two-way connection between the phone page and the board |
 | **JSON** | a plain-text format for structured data, e.g. `{"cmd":"led","r":255}` |
@@ -93,7 +98,21 @@ pio device monitor                     # serial console, 115200
 pio device list                        # which port is the board on
 pio run -e esp32s3 -t upload           # the REAL board (no SIM) — wrap-up only
 ```
-No port found: hold **BOOT**, tap **RST**, release BOOT, retry; use the **USB** connector (not UART); use a **data** cable. Upload works but the app is old: you forgot `uploadfs`. LED colours: blue = access point, green = on the lab WiFi.
+**Flashing and serial**
+- A board flashed in class shows in `pio device list` as `USB VID:PID=303A:1001` (the chip's built-in USB-Serial/JTAG); `upload` and `uploadfs` reset it by themselves — no buttons.
+- A factory-fresh board shows as `303A:4001` and `upload` fails with *"No serial data received"*: hold **BOOT**, tap **RST**, release BOOT. It comes back as `303A:1001` on a **new COM port** — `pio device list` again and flash to that port (`--upload-port COMx`). Once only.
+- No port at all: a **data** cable, the **USB** connector (not UART), then the same BOOT+RST.
+- Every reset makes the port disappear and reappear; the serial monitor must reconnect and the first boot lines are lost. Normal.
+- Boot log (`pio device monitor`, 115200): `[boot] class-board firmware …` · `[registry] … ready` · `[wifi] AP "instrument-XXXX" password "instrument"  http://192.168.4.1/` (LED blue) or `[wifi] STA <ip>  http://instrument-XXXX.local/` (LED green) · `[http] server started`. `alarms.json does not exist` on the first boot is harmless.
+- Log stops at `boot:0x0 (DOWNLOAD(USB/UART0))` / `waiting for download`: the chip is in download mode — press RST (or flash).
+- `XXXX` = the last four hex digits of the board's MAC address, printed in the boot log. Windows' own WiFi list may lag behind; the phone's list is the real test.
+- Upload works but the app is old: you forgot `uploadfs`. LED colours: blue = access point, green = on the lab WiFi.
+
+**Secrets**
+- Never type a password, WiFi key or API token into a Claude chat, a prompt, `PROGRESS.md`, `SPEC.md`, `notes.md`, a commit message, a pull request, an issue or a screenshot. Transcripts are stored; repositories are shared or public; commits are forever.
+- Lab WiFi: copy `firmware/include/secrets.h.example` → `firmware/include/secrets.h` (network name filled in, password as `PUT-THE-PASSWORD-HERE`) · **you** type the password into the file in the editor · `git check-ignore -v firmware/include/secrets.h` must print a line (nothing printed → stop, do not commit, tell the instructor) · `git status` before every commit: no `secrets.h` · rebuild, flash.
+- The tutor never asks for a secret. Pasted one anyway? Remove it from the chat history if you can, treat it as exposed, tell the instructor.
+- Later in the course, bot tokens (LINE / Telegram) and cloud tokens (Cloudflare, GitHub) go the same way: a git-ignored config file or an environment variable, never source code that is committed.
 
 ## C.3 KiCad 10 — the six operations and their keys
 | Operation | Where | Key |

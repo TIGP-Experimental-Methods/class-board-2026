@@ -12,7 +12,7 @@ The agent does the installs and checks; the student reads along, answers questio
 2. **One sentence per step** saying what the step is for, then the command(s), then the ✔ check.
 3. **Ask before every install.** Install nothing that is not listed here. If a tool is already present and passes its ✔ check, say so and move on.
 4. **Interactive commands** (`gh auth login`, anything that opens a browser or asks for a password) are run by the student in the VS Code terminal (the text window where you type commands); tell them what to type and what to click, then wait.
-5. **Never store secrets** anywhere in the repository: no tokens, passwords or WiFi credentials in files, commits (saved snapshots of the work) or `CLAUDE.md` (the plain-text file that tells the agent how the project is set up). `gh` keeps its own credentials; leave them there.
+5. **Never store secrets** anywhere in the repository: no tokens, passwords or WiFi credentials in files, commits (saved snapshots of the work) or `CLAUDE.md` (the plain-text file that tells the agent how the project is set up). Never ask the student to type a password or token into the chat either — the student types those into the terminal or the editor themselves. `gh` keeps its own credentials; leave them there.
 6. **Stop on the first failure.** Print the exact command and the exact error text, apply only the fallbacks named in that step, and if it still fails end with the final report marked as failed. Do not improvise other installers or manual downloads.
 7. **PATH.** After an installer, new binaries may not be visible in the current terminal. Windows: refresh with `$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")`. macOS/Linux: open a new terminal or `source ~/.zshrc` / `source ~/.bashrc`. Try that before declaring a tool missing.
 8. **Working folder.** Everything is created inside the folder VS Code has open. If that path contains spaces or lives under OneDrive / Google Drive / Dropbox / iCloud, warn the student (sync folders corrupt git repositories and PlatformIO caches) and ask whether to continue or to create e.g. `C:\Users\<user>\tigp-2026` / `~/tigp-2026` instead.
@@ -144,7 +144,7 @@ The board is a Jinhua #40729 ESP32-S3 N16R8 dev board (the development board: th
 pio device list
 ```
 
-✔ A port is listed: Windows `COMn`, macOS `/dev/cu.usbmodem…`, Linux `/dev/ttyACM0`. If none: try another cable, the other USB port on the board, or hold **BOOT**, tap **RST**, release BOOT and retry.
+✔ A port is listed: Windows `COMn`, macOS `/dev/cu.usbmodem…`, Linux `/dev/ttyACM0`, with a hardware ID of either `USB VID:PID=303A:1001` — the board already carries our firmware (the chip's built-in USB-Serial/JTAG; flashing later needs no buttons) — or `USB VID:PID=303A:4001` — a factory-fresh board with the firmware it shipped with; both pass. On a `4001` board the first `upload` will end with *"No serial data received"*: hold **BOOT**, tap **RST**, release BOOT, run `pio device list` again — the board comes back as `303A:1001` on a different port — and flash to that port; this is needed once only. The boards handed out in class are already flashed. If no port at all: try another cable, the other USB port on the board, or the same BOOT+RST and retry.
 
 Flashing itself happens on day 1, from `class-board-2026/firmware`, one command at a time: `pio run -e esp32s3-sim -t upload`, then `pio run -e esp32s3-sim -t uploadfs`, then `pio device monitor`. Do not run these now unless the student asks.
 

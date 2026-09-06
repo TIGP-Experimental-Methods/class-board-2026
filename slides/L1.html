@@ -661,7 +661,7 @@ footer { color: #888; font-size: 0.55em; }
 <p><span class="small"><code>esp32s3-sim</code> is the build for the bare dev board. <code>upload</code> builds the firmware and flashes it; <code>uploadfs</code> sends the app's files to the board. The tutor writes the scaffolding; <strong>you</strong> write the statistics, the command and the widget (one control or readout on the phone app).</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-class="compact" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
 section h1 { color: #0e2a52; font-size: 1.6em; }
 section h2 { color: #0e2a52; }
 section.lead { text-align: center; justify-content: center; }
@@ -672,7 +672,7 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; align-self: start; }
 footer { color: #888; font-size: 0.55em; }
-" lang="en-US" data-marpit-pagination="18" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+" lang="en-US" class="compact" data-marpit-pagination="18" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--class:compact;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
 section h1 { color: #0e2a52; font-size: 1.6em; }
 section h2 { color: #0e2a52; }
 section.lead { text-align: center; justify-content: center; }
@@ -690,7 +690,8 @@ footer { color: #888; font-size: 0.55em; }
 <li>On your branch <code>e2-&lt;name&gt;</code> (your own line of work inside the shared repository, made by the tutor at the start): commit · <code>git push -u origin e2-&lt;name&gt;</code> · <code>gh pr create --fill</code> · <strong>the table + one sentence + a screenshot in the PR</strong></li>
 </ol>
 <p><strong>Done when your phone sets N and shows the mean and its noise live, and the table — N, measured, predicted — with its explanation is in the PR.</strong></p>
-<p><span class="small">Flash fails? Hold BOOT, tap RST, release, retry · check the USB driver · pick the right port · use a USB-C <strong>data</strong> cable in the connector marked <em>USB</em>. Fallback for a late flash failure only: the LED <code>press</code> button + counter (the tutor writes it); finish the measurement version in Homework 1.</span></p>
+<p><span class="small">Flash says <em>No serial data received</em>? Hold BOOT, tap RST, release — the board comes back on a <strong>new COM port</strong>; flash again. The port disappears and reappears at every reset — normal. USB-C <strong>data</strong> cable in the connector marked <em>USB</em>. Fallback for a late flash failure only: the LED <code>press</code> button + counter (the tutor writes it); finish the measurement version in Homework 1.</span></p>
+<p><span class="small"><strong>Secrets never go into the chat.</strong> WiFi passwords and tokens live in <code>firmware/include/secrets.h</code> (git-ignored); you type the password there yourself; <code>git status</code> before every commit.</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }

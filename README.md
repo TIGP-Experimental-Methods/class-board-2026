@@ -41,6 +41,7 @@ pio device monitor                      # watch it boot; note the AP name
 
 (In VS Code: PlatformIO sidebar → `esp32s3-sim` → *Upload*, then *Upload Filesystem Image*, then *Monitor*.)
 If the upload cannot find a port: hold **BOOT**, tap **RST**, release BOOT, retry. Windows needs no driver for native USB.
+If the upload says *"No serial data received"* (a factory-fresh board, USB ID `303A:4001`): hold **BOOT**, tap **RST**, release BOOT — the board comes back as `303A:1001` on a **new COM port**; `pio device list` again and flash to that port. Once only; the port also disappears and reappears at every reset, which is normal. All flashing and serial symptoms, and the secrets rule, are on one page: [workbook ch. C, §C.2](workbook/chC-cheat-sheets.md#c2-platformio).
 
 ## Open the app on your phone
 
@@ -49,7 +50,7 @@ If the upload cannot find a port: hold **BOOT**, tap **RST**, release BOOT, retr
 3. Open **http://192.168.4.1** in the browser. Tap *Red* on the Base tab: the LED changes. The chart plots `base.counter`; pick another key from the dropdown.
 4. *Add to Home screen* gives an app icon. (Full "install" prompts need HTTPS, which the board does not have; the shortcut is enough.)
 
-To use the lab WiFi instead: copy `firmware/include/secrets.h.example` to `secrets.h`, fill in SSID/password, re-flash. The LED turns **green** and the board is at `http://instrument.local` (mDNS: the board announces its own name on the local network, so no IP address is needed). If joining fails within 10 s it falls back to the AP.
+To use the lab WiFi instead: copy `firmware/include/secrets.h.example` to `secrets.h`, fill in SSID/password — type the password into that file yourself, never into a Claude chat; the file is git-ignored (`git check-ignore -v firmware/include/secrets.h` prints a line) — and re-flash. The LED turns **green** and the board is at `http://instrument-XXXX.local` (mDNS: the board announces its own name on the local network, so no IP address is needed; `XXXX` is the same suffix as its access-point name, so several boards can share one network). If joining fails within 10 s it falls back to the AP.
 
 ## Python client
 
