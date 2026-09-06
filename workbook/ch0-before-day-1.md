@@ -59,12 +59,7 @@ KiCad, if installed: it starts and *Help → About KiCad* shows 10.x. The Platfo
 On day 1 you deploy your first program to the public web with Cloudflare Pages (a free service that turns a repository into a public web page), straight from a GitHub repository, no build step. Sign up at https://dash.cloudflare.com/sign-up (free plan; verify the e-mail). Then, once: *Workers & Pages → Create → Pages → Connect to Git* → authorise Cloudflare for your GitHub account — and stop there; the project itself is created in class.
 ✔ Signed in to the dashboard; the *Connect to Git* screen lists your GitHub account. (If sign-up fails, GitHub Pages is the fallback in class; nothing else to install.)
 
-## 0.8 Watch V1 and V2; V0 optional (not yet online)
-**The recordings are not online yet.** Skip this step for now; the links will appear on the Preparation page. Everything the videos show is also in this chapter or happens together in class.
-
-V1 *Setup* walks through 0.2–0.7 from your side of the screen. V2 *Flash the skeleton and open the app on your phone* is exactly what you do after the break on day 1. V0 *Build, ship, log: teach one idea on the web* (*ship*: publish it where others can open it) previews the first exercise on one topic; in class you pick your own. Links on the course site's Preparation page: https://tigp-experimental-methods.github.io/preparation.html
-
-## 0.9 Know what you are going to build
+## 0.8 Know what you are going to build
 Everyone builds the same instrument: one class board with five blocks — **B1 inputs · B2 power · B3 outputs · B4 switching · B5 digital/TRIG** — one block per student, one shared repository, one phone app. On day 1 you also build something of your own first: a physics simulator on the public web. Read the course site's *Project* page.
 
 ---

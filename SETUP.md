@@ -86,7 +86,7 @@ Tell the student to choose: *GitHub.com* → *HTTPS* → *Yes* (authenticate Git
 
 Purpose: the class repository is owned by the organization **TIGP-Experimental-Methods**. It is public — anyone can clone it (download a full copy) — but only members can push and open pull requests.
 
-**Manual (student).** The instructor invites the username from Step 3. The student accepts the invitation from the e-mail GitHub sends, or at https://github.com/orgs/TIGP-Experimental-Methods/invitation. If no invitation has arrived, the student e-mails their GitHub username to the instructor (s.p.bennetts@g.iams.sinica.edu.tw) and continues with Steps 5–10; Step 4 is re-checked later by re-running this file.
+**Manual (student).** The instructor invites the username from Step 3. The student accepts the invitation from the e-mail GitHub sends, or at https://github.com/orgs/TIGP-Experimental-Methods/invitation. If no invitation has arrived, the student e-mails their GitHub username to the instructor (s.p.bennetts@g.iams.sinica.edu.tw) and continues with Steps 5–9; Step 4 is re-checked later by re-running this file.
 
 ✔ `gh api user/memberships/orgs/TIGP-Experimental-Methods --jq .state` prints `active`. (`404` = no invitation or not yet accepted; `pending` = accept it in the browser.)
 
@@ -172,12 +172,6 @@ Start KiCad once and accept the default library tables when asked.
 
 ✔ KiCad starts and *Help → About KiCad* shows version 10.x (on Linux `kicad-cli version` also works; on Windows and macOS `kicad-cli` is not on the PATH, so do not use it as the check). If deferred, write *deferred* in the report.
 
-## Step 10 — Videos
-
-Purpose: V1 shows this setup from the student's side; V2 shows exactly what happens after the break on day 1 (flash the skeleton, open the app on the phone).
-
-Ask the student to watch **V1** and **V2** on the course site's Preparation page, https://tigp-experimental-methods.github.io/preparation.html. **V0** (build, ship, log: teach one idea on the web — "ship" meaning publish it where others can open it) is optional. Record the answer. If the Preparation page says the videos are not online yet, write *not yet online* and move on; this is not a failure.
-
 ## Final report
 
 Print this block at the end, filled in. On a failure, stop at that step, fill in the lines completed so far, and put the exact command and error under *First failure*. The student e-mails the whole block to the instructor (s.p.bennetts@g.iams.sinica.edu.tw) if a failure could not be fixed.
@@ -194,7 +188,6 @@ Print this block at the end, filled in. On a failure, stop at that step, fill in
 - ✔/✘/skipped USB: <port> (or: no board yet)
 - ✔/✘ Cloudflare: Connect to Git lists GitHub account <username>
 - ✔/✘/deferred KiCad <version>
-- V1, V2 watched: <yes | not yet | not yet online>
 
 **toolchain OK** — or — **First failure:** Step <n>: `<command>` → `<exact error>`
 ```
