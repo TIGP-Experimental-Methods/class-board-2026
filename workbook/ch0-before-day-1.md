@@ -51,7 +51,7 @@ On day 1 you deploy your first program to the public web with Cloudflare Pages (
 ✔ Signed in to the dashboard; the *Connect to Git* screen lists your GitHub account. (If sign-up fails, GitHub Pages is the fallback in class; nothing else to install.)
 
 ## 0.8 Watch V1 and V2; V0 optional (not yet online)
-**The recordings are not online yet.** Skip this step for now; the links will appear on the Preparation page and you will be told by email. Everything the videos show is also in this chapter or happens together in class.
+**The recordings are not online yet.** Skip this step for now; the links will appear on the Preparation page. Everything the videos show is also in this chapter or happens together in class.
 
 V1 *Setup* walks through 0.2–0.7 from your side of the screen. V2 *Flash the skeleton and open the app on your phone* is exactly what you do after the break on day 1. V0 *Build, ship, log: teach one idea on the web* (*ship*: publish it where others can open it) previews the first exercise on one topic; in class you pick your own. Links on the course site's Preparation page: https://tigp-experimental-methods.github.io/preparation.html
 
