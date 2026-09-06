@@ -176,7 +176,7 @@ Start KiCad once and accept the default library tables when asked.
 
 Purpose: V1 shows this setup from the student's side; V2 shows exactly what happens after the break on day 1 (flash the skeleton, open the app on the phone).
 
-Ask the student to watch **V1** and **V2** on the course site's Preparation page, https://tigp-experimental-methods.github.io/preparation.html. **V0** (build, ship, log: teach one idea on the web — "ship" meaning publish it where others can open it) is optional. Record the answer.
+Ask the student to watch **V1** and **V2** on the course site's Preparation page, https://tigp-experimental-methods.github.io/preparation.html. **V0** (build, ship, log: teach one idea on the web — "ship" meaning publish it where others can open it) is optional. Record the answer. If the Preparation page says the videos are not online yet, write *not yet online* and move on; this is not a failure.
 
 ## Final report
 
@@ -194,7 +194,7 @@ Print this block at the end, filled in. On a failure, stop at that step, fill in
 - ✔/✘/skipped USB: <port> (or: no board yet)
 - ✔/✘ Cloudflare: Connect to Git lists GitHub account <username>
 - ✔/✘/deferred KiCad <version>
-- V1, V2 watched: <yes | not yet>
+- V1, V2 watched: <yes | not yet | not yet online>
 
 **toolchain OK** — or — **First failure:** Step <n>: `<command>` → `<exact error>`
 ```
