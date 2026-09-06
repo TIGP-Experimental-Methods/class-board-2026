@@ -74,4 +74,4 @@ Scope: `stream {ch, rate_hz, chunk}` (rolling; `rate_hz: 0` stops) · `capture {
 ```
 
 ## C.7 Who to ask
-Tutor on your screen (`/tutor <chapter>`) → after 15 min: the course **LINE group** with a screenshot → **office hour Wed 16:00** → your ring reviewer for anything about your block's design.
+Tutor on your screen (`/tutor <chapter>`) → when stuck: the course **LINE group** with a screenshot → **office hour Wed 16:00** → your ring reviewer for anything about your block's design.

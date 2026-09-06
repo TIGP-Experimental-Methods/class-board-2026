@@ -1,4 +1,4 @@
-# Chapter A — Electronics from zero (self-study, ≈ 1 h, optional)
+# Chapter A — Electronics from zero (self-study, optional)
 
 The background deck as text, for anyone who has not read a schematic before. Every idea is pointed at a place on **our** board. Read it before lecture 2; `/tutor A` will quiz you on any section.
 
@@ -38,5 +38,5 @@ Two circuits are isolated when no copper connects them. A **relay** switches a c
 ## A.12 Rails and where the power goes
 5 V in from USB-C or the jack → **+5V_RAW** for everything not voltage-sensitive (dev board, relays, logic, LEDs) → **+3V3** from a linear regulator for the 3.3 V logic and the OLED → **±12 V** from two isolated DC-DC modules for the analog parts only → **+5VA** from +12 V through a 78L05 for the ADC and DAC. Rule (Decision #22): if it does not need a clean rail, it does not get one.
 
-## A.13 Reading a datasheet in five minutes
+## A.13 Reading a datasheet — the five places to look
 Pinout diagram (pin 1 is marked — find it on the footprint too) → absolute maximum ratings (what kills it) → recommended operating conditions (the rails) → the typical application circuit (copy its decoupling and reference capacitors — that is where the ADS8688 values on B1 come from) → the timing diagram only when you write the driver.

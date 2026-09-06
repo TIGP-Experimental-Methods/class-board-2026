@@ -1,4 +1,4 @@
-# Chapter B — How the instrument's software works (self-study, ≈ 45 min, optional)
+# Chapter B — How the instrument's software works (self-study, optional)
 
 Read before lecture 3; `/tutor B` answers questions on it. The authoritative message list is `firmware/PROTOCOL.md`.
 

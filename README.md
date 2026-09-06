@@ -33,7 +33,7 @@ Prerequisites: VS Code with the *PlatformIO IDE* extension (installs its own Pyt
 ```sh
 git clone https://github.com/TIGP-Experimental-Methods/class-board-2026.git
 cd class-board-2026/firmware
-pio run -e esp32s3-sim -t upload        # 1st time: downloads the toolchain (~10 min)
+pio run -e esp32s3-sim -t upload        # 1st time: downloads the toolchain
 pio run -e esp32s3-sim -t uploadfs      # ships host/pwa/ to the board's LittleFS
 pio device monitor                      # watch it boot; note the AP name
 ```
