@@ -23,7 +23,7 @@ Until the class board arrives everything runs in **SIM mode** on a bare Jinhua E
 | **Slides** | [`slides/`](slides/) — L1 · L2 · L3 as Marp Markdown, HTML and PDF; also on the course site |
 | **Firmware + app skeleton** | `firmware/`, `host/` — flash it in 5 commands below |
 | **KiCad library package** | [`hardware/lib/`](hardware/lib/README.md) — project-local, nothing to unzip |
-| **Reference for E1a** | https://github.com/TIGP-Experimental-Methods/pendulum-example (fork it if your session stalls) |
+| **Reference repos for E1a** | https://github.com/TIGP-Experimental-Methods/pendulum-example (cart-pole) · https://github.com/TIGP-Experimental-Methods/csv-scope-example (CSV → scope lab tool) — options, or a fork if your session stalls |
 | **Course site** | https://tigp-experimental-methods.github.io/ |
 
 ## Flash in 5 commands (VS Code + PlatformIO)

@@ -52,7 +52,10 @@ Bot alerts from the alarm engine (LINE / Telegram webhook from a PC script); **t
 - [ ] **E12 Box STL (0.75 h).** Finish the one change; `box.stl` in your folder; the instructor prints all five the following week.
 - [ ] V7 *The box: template to STL to Bambu* (6 min); this chapter's reading (0.15 h).
 
-**Assessed:** the merged driver + panel PR (block works in sim, alarm rule present, one value plotted) · `box.stl`.
+**Deliverables (by commit or PR):** the merged driver + panel PR (block works in sim, alarm rule present, one value plotted) · `box.stl`.
+
+## Beyond the baseline (optional, encouraged)
+The driver you just wrote is the baseline. From here the instrument becomes whatever your lab needs: a **data logger** that writes CSV (Scope tab → export, or `instrument.py stream --csv` on a schedule) · a **LINE / Telegram alert** from your alarm rule (`notify` → a 20-line webhook script) · **remote access** from the lab WiFi + a **Python sweep** overnight · a **calibration routine** stored on the board · a **PID / controller block** that closes a loop between an input and an output · a **second node** (an S3-CAM watching a gauge). Write its `SPEC.md` with one verifiable number, build it on a branch, and bring it to the demo as the optional fifth item.
 
 ---
 **Tutor notes (`/tutor L3`, `/tutor HW3`).** E11: SIM branch first; the student names the commands and types the SIM values; every status key shown in the panel must exist in `status()`; no `delay()` in `loop()`; make them explain one round-trip before the second flash; the alarm rule must be theirs. E12: exactly one change; STL to their folder. Pairings B3↔B1, B5↔B4: write the agreed hand-shake into both `PROGRESS.md` files.

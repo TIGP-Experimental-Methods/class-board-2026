@@ -2,7 +2,7 @@
 
 **Fri 2026-09-18, 14:20–16:20 (2 h) + Homework 2 (3 h), gated by the class PCB order on Mon 09-28.** Today you meet every IC on the board, learn the only six KiCad operations you need, place the parts missing from your sheet, and start routing your zone. This week you finish it, fetch one part from LCSC, open your PR, and review a classmate's.
 
-**Prerequisites:** HW1 done (E2 merged, two answers, KiCad 10 installed with the library package unzipped into `hardware/lib/`, `SPEC.md`). Bring your laptop; the schematic PDF is on the course site. Optional background: [chapter A](chA-electronics-from-zero.md) (self-study, before today if you have never seen a schematic).
+**Prerequisites:** HW1 done (E2 merged, two answers, KiCad 10 installed, the project opened once (the library is in `hardware/lib/`), `SPEC.md`). Bring your laptop; the schematic PDF is on the course site. Optional background: [chapter A](chA-electronics-from-zero.md) (self-study, before today if you have never seen a schematic).
 
 **The hardware model.** The MCU stays on the dev board; the **class board is a carrier** it plugs into: the analog front end done properly, isolation, buffers, robust connectors. One design, five units, one order; **JLCPCB assembles everything, SMD and through-hole**. You solder nothing. The dev board alone keeps running the app as the permanent fallback.
 

@@ -62,7 +62,7 @@ On day 1 you deploy your first program to the public web with Cloudflare Pages, 
 ✔ Signed in to the dashboard; the *Connect to Git* screen lists your GitHub account. (If sign-up fails, GitHub Pages is the fallback in class; nothing else to install.)
 
 ## 0.11 Watch V1 and V2 (13 min); V0 optional
-V1 *Setup* (8 min) walks through 0.2–0.9. V2 *Flash the skeleton and open the app on your phone* (5 min) is exactly what you do at 15:35 on day 1. V0 *Build, ship, log: a pendulum on the web* (6 min) previews the first exercise. Links on the course site's Preparation page.
+V1 *Setup* (8 min) walks through 0.2–0.9. V2 *Flash the skeleton and open the app on your phone* (5 min) is exactly what you do at 15:35 on day 1. V0 *Build, ship, log: teach one idea on the web* (6 min) previews the first exercise on one topic; in class you pick your own. Links on the course site's Preparation page.
 
 ## 0.12 Check in on the LINE group
 Post a screenshot of the cloned repo open in VS Code. The LINE group is where you ask for help during the course.

@@ -16,6 +16,10 @@ The budget is a promise: **10 hours of homework in total** (2.5 + 3 + 3 + 1.5) p
 | [C — Cheat-sheets](chC-cheat-sheets.md) | always open | — | — |
 | [Your block](blocks/) — [B1](blocks/b1.md) · [B2](blocks/b2.md) · [B3](blocks/b3.md) · [B4](blocks/b4.md) · [B5](blocks/b5.md) | from day 1 | — | inside `/tutor HW1` |
 
-**Where things live.** Your project files: `docs/students/<name>/` (`PROGRESS.md`, `SPEC.md`, `notes.md`, later `box.stl` and your video). Your personal page: your own `pendulum` repo from day 1. Slides and videos: the course site https://tigp-experimental-methods.github.io/. Help: the course LINE group (the tutor sends you there after 15 minutes stuck); office hour Wed 16:00.
+**Where things live.** Your project files: `docs/students/<name>/` (`PROGRESS.md`, `SPEC.md`, `notes.md`, later `box.stl` and your video). Your personal page: your own day-1 repo (the page that teaches one idea). Slides and videos: the course site https://tigp-experimental-methods.github.io/. Help: the course LINE group (the tutor sends you there after 15 minutes stuck); office hour Wed 16:00.
 
 **The five working practices** (they are the spine of every chapter): spec first · teach the repo (`CLAUDE.md`) · small fresh sessions · handover notes in Markdown (`PROGRESS.md`) · AI writes, you verify.
+
+**Beyond the baseline.** The hardware is the shared baseline — fixed by budget and timeline. The software, firmware and app are open. Whenever you are ahead: what problem in your lab could this instrument solve? A data logger to CSV · LINE/Telegram alerts from the alarm engine · remote access + a Python sweep · a calibration routine · a PID/controller block · a second node. Bring a real problem to L2; the tutor helps you write its `SPEC.md`. Not required; the demo has an optional fifth item for it.
+
+**Grading.** This part of the course is taught, not ranked: everyone who does the exercises, ships their block and demos it receives full marks. There is no score sheet; the feedback is on the work, in your pull requests.

@@ -1,5 +1,6 @@
 // Panel for the "base" block: LED colour + brightness, counter, chip info.
-// Exercise E2 adds one button + one readout here (and its handler + status key in BaseBlock.cpp).
+// Exercise E2 adds one control + readouts here (and its handler + status keys in BaseBlock.cpp):
+// default = an N input for set_avg and live adc_v / adc_sd readouts (workbook ch. 1 A.4).
 //
 // A panel is a plain object: { id, title, render(container, api), onStatus(status) }.
 //   render    builds the DOM once, when the tab is opened
@@ -34,11 +35,12 @@ export default {
         <label>counter</label><span class="value" id="counter">-</span>
         <button class="btn" id="counter-reset">Reset</button>
       </div>
-      <!-- TODO(E2): add your button + readout here. Worked example (workbook ch. 1 A.4):
-           <div class="row"><button class="btn primary" id="press">Press me</button>
-                <label>presses</label><span class="value" id="presses">-</span></div>
-           then: el.querySelector('#press').onclick = () => api.send('base', 'press', { r: 255, g: 120, b: 0 });
-           and in onStatus(st): els.presses.textContent = st.presses ?? '-'; -->
+      <!-- TODO(E2): add your control + readouts here (workbook ch. 1 A.4). Default:
+           <div class="row"><label>N</label><input type="number" id="avg-n" value="16" min="1" max="1000">
+                <button class="btn primary" id="avg-set">Set</button></div>
+           <div class="kv"><span>mean</span><span id="adc-v">-</span><span>sd</span><span id="adc-sd">-</span></div>
+           then: el.querySelector('#avg-set').onclick = () => api.send('base', 'set_avg', { n: Number(el.querySelector('#avg-n').value) });
+           and in onStatus(st): els.adcV.textContent = st.adc_v?.toFixed(3) + ' V'; els.adcSd.textContent = (st.adc_sd * 1000)?.toFixed(2) + ' mV'; -->
 
       <h3>Board</h3>
       <div class="kv" id="kv"></div>`;
