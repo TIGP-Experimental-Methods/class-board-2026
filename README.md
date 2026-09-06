@@ -1,30 +1,30 @@
 # class-board-2026
 
-The teaching instrument for **Basic Skills for Experimentalists** (TIGP, 2026): one ESP32-S3 board with five student-designed blocks, a phone web app, and a Python client.
+The teaching instrument for **Basic Skills for Experimentalists** (TIGP, 2026): one ESP32-S3 board (the ESP32-S3 is the microcontroller we use — a small computer on a chip, with WiFi) with five student-designed blocks, a phone web app, and a Python client.
 
 | Folder | What | Who edits it |
 |---|---|---|
-| `hardware/` | KiCad project and library | students in their zone, instructor merges |
-| `firmware/` | PlatformIO project (Arduino, ESP32-S3) | students in `src/blocks/b<N>_*/` |
+| `hardware/` | KiCad project and library (KiCad is the free program we draw the schematic and lay out the printed circuit board in; the library is the set of symbols and footprints for our parts) | students in their zone (the region of the board that is theirs), instructor merges (brings their changes into the main line) |
+| `firmware/` | PlatformIO project (Arduino, ESP32-S3) — the firmware is the program that runs on the microcontroller; PlatformIO is the tool that builds it and writes it onto the board | students in `src/blocks/b<N>_*/` |
 | `host/pwa/` | the phone app (plain HTML/JS, no build step) | students in `panels/b<N>.js` |
-| `host/instrument.py` | Python CLI mirroring the same protocol | instructor |
+| `host/instrument.py` | Python command-line client (CLI) speaking the same protocol as the phone | instructor |
 
-**Blocks:** `base` (dev board itself) · `b1_inputs` (ADS8688 8-ch ADC) · `b2_power` (rails) · `b3_outputs` (DAC8563 + ±10 V) · `b4_switching` (4 relays, 2 optos) · `b5_dio_trig` (8 TTL out, 2 fast out, TRIG). Protocol: [firmware/PROTOCOL.md](firmware/PROTOCOL.md).
+**Blocks:** `base` (dev board itself) · `b1_inputs` (ADS8688 8-ch ADC, analog-to-digital converter) · `b2_power` (rails) · `b3_outputs` (DAC8563 digital-to-analog converter + ±10 V) · `b4_switching` (4 relays, 2 optos) · `b5_dio_trig` (8 TTL out, 2 fast out, TRIG). Protocol: [firmware/PROTOCOL.md](firmware/PROTOCOL.md).
 
-Until the class board arrives everything runs in **SIM mode** on a bare Jinhua ESP32-S3 N16R8 dev board: each block fakes its hardware, so the app, the chart and the alarms all work on day 1.
+Until the class board arrives everything runs in **SIM mode** on a bare Jinhua ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins): each block fakes its hardware, so the app, the chart and the alarms all work on day 1.
 
-## The student package (everything you need is in this repo)
+## The student package (everything you need is in this repository — the project folder whose complete history git keeps, stored online on GitHub)
 
 | What | Where |
 |---|---|
-| **Setup (before day 1)** | [SETUP.md](SETUP.md) — paste the prompt from workbook ch. 0 into Claude Code and it installs the toolchain |
+| **Setup (before day 1)** | [SETUP.md](SETUP.md) — paste the prompt from workbook ch. 0 into Claude Code and it installs the toolchain (the compiler and helper programs that turn source code into firmware) |
 | **Workbook** — one chapter per session + homework, the same text the tutor runs | [`workbook/`](workbook/README.md): [ch. 0](workbook/ch0-before-day-1.md) · [ch. 1](workbook/ch1-day-1-week-1.md) · [ch. 2](workbook/ch2-day-2-week-2.md) · [ch. 3](workbook/ch3-day-3-week-3.md) · [ch. 4](workbook/ch4-wrap-up-demo.md) · [A](workbook/chA-electronics-from-zero.md) · [B](workbook/chB-how-the-software-works.md) · [C cheat-sheets](workbook/chC-cheat-sheets.md) |
 | **Your block page** | [`workbook/blocks/`](workbook/blocks/): B1 · B2 · B3 · B4 · B5 |
 | **The tutor** | `/tutor L1` (etc.) in Claude Code — [`.claude/skills/tutor/`](.claude/skills/tutor/SKILL.md), rules in [`tutor/COURSE-GUIDE.md`](tutor/COURSE-GUIDE.md) |
-| **Slides** | [`slides/`](slides/) — L1 · L2 · L3 as Marp Markdown, HTML and PDF; also on the course site |
-| **Firmware + app skeleton** | `firmware/`, `host/` — flash it in 5 commands below |
+| **Slides** | [`slides/`](slides/) — L1 · L2 · L3 as Marp Markdown (plain text with light formatting), HTML and PDF; also on the course site |
+| **Firmware + app skeleton** | `firmware/`, `host/` — flash it (write it onto the board over USB) in 5 commands below |
 | **KiCad library package** | [`hardware/lib/`](hardware/lib/README.md) — project-local, nothing to unzip |
-| **Reference repos for E1a** | https://github.com/TIGP-Experimental-Methods/pendulum-example (cart-pole) · https://github.com/TIGP-Experimental-Methods/csv-scope-example (CSV → scope lab tool) — options, or a fork if your session stalls |
+| **Reference repositories for E1a** | https://github.com/TIGP-Experimental-Methods/pendulum-example (cart-pole) · https://github.com/TIGP-Experimental-Methods/csv-scope-example (CSV → scope lab tool) — options, or a fork (your own copy of one of them on GitHub) if your session stalls |
 | **Course site** | https://tigp-experimental-methods.github.io/ |
 
 ## Flash in 5 commands (VS Code + PlatformIO)
@@ -35,7 +35,7 @@ Prerequisites: VS Code with the *PlatformIO IDE* extension (installs its own Pyt
 git clone https://github.com/TIGP-Experimental-Methods/class-board-2026.git
 cd class-board-2026/firmware
 pio run -e esp32s3-sim -t upload        # 1st time: downloads the toolchain
-pio run -e esp32s3-sim -t uploadfs      # ships host/pwa/ to the board's LittleFS
+pio run -e esp32s3-sim -t uploadfs      # copies host/pwa/ to the board's LittleFS (its file store)
 pio device monitor                      # watch it boot; note the AP name
 ```
 
@@ -44,7 +44,7 @@ If the upload cannot find a port: hold **BOOT**, tap **RST**, release BOOT, retr
 
 ## Open the app on your phone
 
-1. The board's RGB LED turns **blue** = it is an access point. Serial monitor prints `AP "instrument-XXXX" password "instrument"`.
+1. The board's RGB LED turns **blue** = it is an access point (its own WiFi network, which your phone joins). Serial monitor prints `AP "instrument-XXXX" password "instrument"`.
 2. On the phone join WiFi `instrument-XXXX`, password `instrument`.
 3. Open **http://192.168.4.1** in the browser. Tap *Red* on the Base tab: the LED changes. The chart plots `base.counter`; pick another key from the dropdown.
 4. *Add to Home screen* gives an app icon. (Full "install" prompts need HTTPS, which the board does not have; the shortcut is enough.)
@@ -70,7 +70,7 @@ It finds `instrument.local`, then `192.168.4.1`; `--host 10.0.0.42` overrides.
 3. Copy `host/pwa/panels/template.js` → `panels/b3.js`, set `id: 'b3'`, replace the example control. Add it to `PANELS` in `app.js`. `pio run -t uploadfs`; reload the phone.
 4. Register the block in `firmware/src/main.cpp` (one `registry.add(&b3)` line — the stub blocks are already registered, so for B1–B5 you only replace the stub).
 5. Fill the `#ifndef SIM` branches with the real driver using the pin constants in `firmware/include/pins.h`.
-6. Open a PR; CI builds both envs.
+6. Open a pull request (PR — a request to merge your changes into the shared project; someone reviews it first); CI (continuous integration — the automatic build GitHub runs on every pull request) builds both envs.
 
 The rules: a block talks only to its own hardware; all block code runs from `loop()` (no tasks, no locks); every status key you show in the panel is one your `status()` emits.
 

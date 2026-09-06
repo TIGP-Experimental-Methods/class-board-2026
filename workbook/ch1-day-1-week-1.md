@@ -1,16 +1,16 @@
 # Chapter 1 — Day 1 + week 1: build it, ship it, log it — then your instrument
 
-**Fri 2026-09-11, 14:20–16:20 + Homework 1.** Two deliverables today: a page that teaches one idea you know to a high-school student, on the public web, before the break; your own phone app measuring something on your ESP32 by the end.
+**Fri 2026-09-11, 14:20–16:20 + Homework 1.** Two deliverables today (a deliverable is what must exist in your repository — the project folder whose complete history git keeps — at the end): a page that teaches one idea you know to a high-school student, on the public web, before the break; your own phone app measuring something on your ESP32 (the microcontroller we use — a small computer on a chip, with WiFi) by the end. Tooling terms are explained the first time they appear and collected in the glossary, [chapter C](chC-cheat-sheets.md#c0-words-we-use).
 
-**What this course is.** Methods and skills for building lab equipment, instruments and tools that get used: specify, build with an agent, verify against a number you predicted, ship, log, review. The class board is the shared baseline — fixed by budget and timeline. The software, firmware and app around it are open: if you see a problem in your own lab that this instrument could solve, that is what you should build. Not required, always encouraged, and the demo has room for it.
+**What this course is.** Methods and skills for building lab equipment, instruments and tools that get used: specify, build with an agent (Claude Code working on your files: it reads them, writes code, runs commands, and reports back), verify against a number you predicted, ship (publish it where others can open it), log, review. The class board is the shared baseline — fixed by budget and timeline. The software, firmware (the program that runs on the microcontroller) and app around it are open: if you see a problem in your own lab that this instrument could solve, that is what you should build. Not required, always encouraged, and the demo has room for it.
 
 **Why the first exercise is a teaching page.** The skill is working with an agent that writes code you did not write: **specify** before it starts, **verify** with a number you predicted, **ship** where others can see it, **log** so the next session can resume. Something whose correct behaviour you can compute by hand is the fair test of that loop — and explaining an idea you know to someone who does not is the fastest way to find out whether the code has it right. You are the author; the agent is the junior engineer. The ESP32 comes second because there the answer is not known in advance.
 
 **The five working practices** (a short lecture; the rest of the day is practice):
-1. **Spec first** — `SPEC.md`, not chat scrollback; a plan before code.
-2. **Teach the repo, not the session** — `CLAUDE.md`: conventions, pinout, build/flash/test commands.
-3. **Small, fresh sessions** — one task, one session; finish, commit, start clean.
-4. **Handover notes, in Markdown** — `PROGRESS.md`: done / verified / next / gotchas. The lab notebook for this course and what the agent reads first next time.
+1. **Spec first** — `SPEC.md` (a plain-text file saying what to build), not chat scrollback; a plan before code.
+2. **Teach the repository, not the session** — `CLAUDE.md` (the file the agent reads at the start of every session): conventions, pinout, build/flash/test commands.
+3. **Small, fresh sessions** — one task, one session; finish, commit (save a snapshot of your changes with a one-line message), start clean.
+4. **Handover notes, in Markdown** (plain text with light formatting) — `PROGRESS.md`: done / verified / next / gotchas. The lab notebook for this course and what the agent reads first next time.
 5. **AI writes, you verify** — a number or an observation, written down, or it does not ship.
 
 *Thesis:* an agent is a junior engineer with no memory — as good as the documentation, the spec and the verification you give it.
@@ -20,7 +20,7 @@
 ## Part A — In class
 
 ### A.0 Tutor on
-Open Claude Code **in the class repo**, type `/tutor L1`, answer its questions (language; what you have built; `expert` if you want each step's whole recipe instead of pacing). It runs the toolchain check and creates `docs/students/<name>/PROGRESS.md`.
+Open Claude Code **in the class repository**, type `/tutor L1`, answer its questions (language; what you have built; `expert` if you want each step's whole recipe instead of pacing). It runs the toolchain check (the toolchain is the compiler and helper programs that turn source code into firmware) and creates `docs/students/<name>/PROGRESS.md`.
 - [ ] `git --version` · `gh auth status` · `pio --version` · board on a port (`pio device list`) · Cloudflare dashboard signed in
 - ✔ **toolchain OK**
 
@@ -32,16 +32,16 @@ Open Claude Code **in the class repo**, type `/tutor L1`, answer its questions (
 | **RC low-pass filter explorer** — sliders for R and C, live Bode plot | predict the cut-off of any RC pair and what happens to the phase | R = 1 kΩ, C = 100 nF → f_c = 1/(2πRC) = 1591.5 Hz; −3.01 dB and −45.0° there; −20 dB at 10 f_c |
 | **PID on a cart or a heater** — three sliders, step response | say what P, I and D each do to overshoot and settling | settling time and overshoot from the closed-loop poles for the gains you set |
 | **Field of two charges** — drag the charges, see the lines | superposition | the field at one point on the axis, computed by hand |
-| **Cart-pole / pendulum** — push the cart, toggle balance | small oscillations, feedback | period 2π√(L/g) × √(M/(M+m)) (reference repo: pendulum-example) |
+| **Cart-pole / pendulum** — push the cart, toggle balance | small oscillations, feedback | period 2π√(L/g) × √(M/(M+m)) (reference repository: pendulum-example) |
 | **Two-body orbit** — launch speed slider | Kepler's laws | T² ∝ a³ across three orbits |
 | **Standing waves on a string** — frequency slider | resonance, nodes | f_n = n·v/2L |
-| *Lab tool instead of a teaching page:* **CSV → scope** — drop a scope CSV, get stats + FFT + sine fit | — | mean, sd = √(A²/2 + σ²), f, amplitude (reference repo: csv-scope-example) |
+| *Lab tool instead of a teaching page:* **CSV → scope** — drop a scope CSV, get stats + FFT + sine fit | — | mean, sd = √(A²/2 + σ²), f, amplitude (reference repository: csv-scope-example) |
 
-1. **Repo** (in a terminal *outside* the class repo; pick a short name for your topic):
+1. **Repository** (in a terminal — the text window where you type commands — *outside* the class repository; pick a short name for your topic):
    ```sh
    gh repo create <your-github-user>/rc-filter --public --clone && cd rc-filter && code .
    ```
-   `--public` or `--private` — your choice. Cloudflare Pages deploys private repos too; the GitHub Pages fallback needs a public one.
+   `--public` or `--private` — your choice. Cloudflare Pages (a free service that turns a repository into a public web page) deploys private repositories too; the fallback, GitHub Pages (the same service from GitHub, the website where repositories are stored and shared), needs a public one.
 2. **`SPEC.md` — you write it, before any code.** Five lines; the two checks are the lines that matter:
    ```markdown
    # rc-filter — SPEC
@@ -60,11 +60,11 @@ Open Claude Code **in the class repo**, type `/tutor L1`, answer its questions (
    ```
 - ✔ Page runs; predictions vs results in `SPEC.md`; one commit.
 - **Stretch (if you finish early — the part worth your time):** make the **teaching check** real — the page asks the learner a question and grades the answer · add a **second idea** that builds on the first (RC → RLC resonance; PID → a disturbance) · or start the **explainer video**: the lab's [show-your-work](https://github.com/iams-yb-lab/show-your-work) `education-video` skill turns your `SPEC.md` and page into a script, narration and picture; post it on a YouTube channel of your own and embed it in the page. Optional today; the recommended route for your 60-second video in the wrap-up.
-- **Options (same rules — one output predicted before the code exists):** the **CSV → scope lab tool** (every lab has the problem; reference repo `csv-scope-example`) · the **cart-pole** (reference repo `pendulum-example`). Pick with the tutor. *Stuck on tooling, not on the problem?* Fork a reference repo (links on the course site) and do the check on it.
+- **Options (same rules — one output predicted before the code exists):** the **CSV → scope lab tool** (every lab has the problem; reference repository `csv-scope-example`) · the **cart-pole** (reference repository `pendulum-example`). Pick with the tutor. *Stuck on tooling, not on the problem?* Fork a reference repository (make your own copy of it on GitHub; links on the course site) and do the check on it.
 
 ### A.2 Exercise E1b — ship + log (before the break)
-1. `git push -u origin main`
-2. Cloudflare → *Workers & Pages → Create → Pages → Connect to Git* → your repo → branch `main` → build command **blank**, output directory `/` → *Save and Deploy* → `https://rc-filter-xxxx.pages.dev` within a minute. *Fallback:* GitHub → *Settings → Pages → Deploy from a branch → main → /*.
+1. `git push -u origin main` (push: upload your commits to GitHub; `main` is the main branch, the version everyone builds on)
+2. Cloudflare → *Workers & Pages → Create → Pages → Connect to Git* → your repository → branch `main` → build command **blank**, output directory `/` → *Save and Deploy* → `https://rc-filter-xxxx.pages.dev` within a minute. *Fallback:* GitHub → *Settings → Pages → Deploy from a branch → main → /*.
 3. Open it on your phone; move a slider. Send the link to someone who is not a physicist and ask them the first teaching question.
 4. `PROGRESS.md`, four lines, your words:
    ```markdown
@@ -76,22 +76,22 @@ Open Claude Code **in the class repo**, type `/tutor L1`, answer its questions (
    - Gotchas: Cloudflare output directory must be "/"; first plan drew the Bode curve from a lookup table — rejected
    ```
    Commit, push; watch the redeploy. That is continuous deployment.
-- ✔ Public URL works on your phone; `PROGRESS.md` on GitHub. This repo is your course page from now on: the wrap-up video and your measured number go here too.
+- ✔ Public URL (web address) works on your phone; `PROGRESS.md` on GitHub. This repository is your course page from now on: the wrap-up video and your measured number go here too.
 
 ### A.3 The instrument on your phone (after the break)
-Your dev board is pre-flashed with the skeleton and is a WiFi access point (LED blue).
+Your dev board (the development board: the ESP32 on a small board with a USB connector and pins) is pre-flashed (the firmware already written onto it over USB) with the skeleton and is a WiFi access point (its own WiFi network, which your phone joins; LED blue).
 1. Phone joins `instrument-XXXX` (label on the board; password `instrument`); open **http://192.168.4.1**. Tap *Red*; the chart plots `base.counter`.
 2. The two files a control touches — open them:
    - `firmware/src/blocks/base/BaseBlock.cpp`: `handle()` receives `{"cmd":"led","args":{"r":255,"g":0,"b":0}}`; `status()` fills the numbers the phone sees at 20 Hz.
    - `host/pwa/panels/base.js`: `render()` builds the controls and calls `api.send('base','led',{r,g,b})`; `onStatus(st)` updates the readouts.
-   One JSON message phone → board, one reply, twenty status messages a second board → phone. Firmware ↔ WebSocket ↔ phone app ↔ Python (`host/instrument.py` speaks the same messages). Everything runs from `loop()`; nothing may block. Full protocol: `firmware/PROTOCOL.md` — including §6, the streaming and capture frames a tool of yours could one day read.
+   One JSON message (JSON: the plain-text format for structured data you see in the braces above) phone → board, one reply, twenty status messages a second board → phone. Firmware ↔ WebSocket (a live two-way connection between the phone page and the board) ↔ phone app ↔ Python (`host/instrument.py` speaks the same messages). Everything runs from `loop()`; nothing may block. Full protocol: `firmware/PROTOCOL.md` — including §6, the streaming and capture frames a tool of yours could one day read.
 - ✔ Your phone controls your board.
 
 ### A.4 Exercise E2 — your phone app measures something on your ESP32
-**One command out, one live measurement back — with its noise.** You add one command and two status values to the base block, one control and two readouts to its panel, flash, verify against a prediction, and open a pull request. The tutor writes boilerplate; you write the message name, the handler body, the statistics and the widget.
+**One command out, one live measurement back — with its noise.** You add one command and two status values to the base block, one control and two readouts to its panel, flash, verify against a prediction, and open a pull request (PR — a request to merge your changes into the shared project; someone reviews it first, comments, and approves). The tutor writes boilerplate; you write the message name, the handler body (the piece of firmware that acts on one command), the statistics and the widget (one control or readout on the phone app).
 
-Default: **an averaged ADC reading and its standard deviation**, averaging length set from the phone — the smallest possible version of a data logger.
-1. `firmware/src/blocks/base/BaseBlock.h`, `private:` — a ring buffer and its bookkeeping:
+Default: **an averaged ADC (analog-to-digital converter) reading and its standard deviation**, averaging length set from the phone — the smallest possible version of a data logger.
+1. `firmware/src/blocks/base/BaseBlock.h`, `private:` — a ring buffer (a fixed-size list that overwrites its oldest entry) and its bookkeeping:
    ```cpp
    static constexpr int ADC_PIN = 4;          // free GPIO on the bare dev board (ADC1_CH3)
    static constexpr int ADC_MAX_N = 1000;
@@ -122,18 +122,18 @@ Default: **an averaged ADC reading and its standard deviation**, averaging lengt
    `status()`: `out["adc_v"] = adcV_; out["adc_sd"] = adcSd_; out["avg_n"] = adcN_;`
 4. `host/pwa/panels/base.js`, at the `TODO(E2)` marker — a number input `N` with a *Set* button → `api.send('base','set_avg',{n: Number(...)})`; two readouts for `adc_v` (V, 3 decimals) and `adc_sd` (mV, 2 decimals) filled in `onStatus`.
 5. **Flash**: `pio run -e esp32s3-sim -t upload && pio run -e esp32s3-sim -t uploadfs` (no port: hold BOOT, tap RST, release; data cable; *USB* connector).
-6. **Verify against a prediction.** GPIO 4 floating or with a jumper wire in it. N = 1, 4, 16, 64, 256; record `adc_sd` each time (chart `base.adc_sd`). White noise predicts sd ∝ 1/√N — a factor 16 from N = 1 to 256. It will not be exactly that. Say what you see and why: a quantisation floor? 50/60 Hz pickup on the wire (correlated noise does not average as 1/√N — try N spanning whole mains periods)? Touch the wire. The five numbers and one explanatory sentence go in the PR description. **That is the deliverable**, not the widget.
-7. **Ship**: `git switch -c e2-<name>` → commit → `git push -u origin e2-<name>` → `gh pr create --fill` → paste the numbers and a phone screenshot.
+6. **Verify against a prediction.** GPIO 4 (a general-purpose pin on the microcontroller) floating or with a jumper wire in it. N = 1, 4, 16, 64, 256; record `adc_sd` each time (chart `base.adc_sd`). White noise predicts sd ∝ 1/√N — a factor 16 from N = 1 to 256. It will not be exactly that. Say what you see and why: a quantisation floor? 50/60 Hz pickup on the wire (correlated noise does not average as 1/√N — try N spanning whole mains periods)? Touch the wire. The five numbers and one explanatory sentence go in the PR description. **That is the deliverable**, not the widget.
+7. **Ship** (publish it where others can open it): `git switch -c e2-<name>` (a new branch — a separate line of work, so several people can change things without treading on each other) → commit → `git push -u origin e2-<name>` → `gh pr create --fill` → paste the numbers and a phone screenshot.
 - ✔ Your phone sets N and shows the mean and sd live; five sd values with an explanation in the PR.
-- *Minimal fallback if a flash problem eats your time:* one command that sets the LED colour and one status counter (`press`/`presses`, snippet in the base block comments). Merge it in HW1 and do the measurement version then.
-- *Rules that bite:* status keys shown must exist in `status()`; no `delay()` in `loop()`; `esp32s3-sim` is the env for a bare dev board.
+- *Minimal fallback if a flash problem eats your time:* one command that sets the LED colour and one status counter (`press`/`presses`, snippet in the base block comments). Merge it (bring the branch's changes into the main line) in HW1 and do the measurement version then.
+- *Rules that bite:* status keys shown must exist in `status()`; no `delay()` in `loop()`; `esp32s3-sim` is the build environment (env) for a bare dev board — SIM mode, in which the firmware fakes the hardware it does not have.
 - **Think ahead:** this is a two-number data logger. What would you log in your lab with it — a photodiode, a temperature, a pressure gauge's analog out — and what would you want the phone to do when the number drifts? Write one line into `PROGRESS.md` under *Next*. That line may become your project.
 
 ### A.5 The class board and your block
-Page 1 of the schematic; one sentence per block; the 3 × 4 SMA front panel. **Block assignment: volunteers, then lots.** Your block page: [B1](blocks/b1.md) · [B2](blocks/b2.md) · [B3](blocks/b3.md) · [B4](blocks/b4.md) · [B5](blocks/b5.md).
+Page 1 of the schematic (the circuit drawing); one sentence per block; the 3 × 4 SMA front panel. **Block assignment: volunteers, then lots.** Your block page: [B1](blocks/b1.md) · [B2](blocks/b2.md) · [B3](blocks/b3.md) · [B4](blocks/b4.md) · [B5](blocks/b5.md).
 
 ### A.6 Homework brief (end of class)
-Checkboxes below; email the instructor if you are stuck. The tutor ends the session with your `PROGRESS.md` — class repo and your day-1 repo.
+Checkboxes below; email the instructor if you are stuck. The tutor ends the session with your `PROGRESS.md` — class repository and your day-1 repository.
 
 ---
 
@@ -141,14 +141,14 @@ Checkboxes below; email the instructor if you are stuck. The tutor ends the sess
 
 - [ ] **E2 finish + merge.** Complete the measurement version if class ran out; merge once it has been reviewed.
 - [ ] **E3 Read your block.** Watch V3. Your block page: **the two questions** (short answers that show the why, in `docs/students/<name>/notes.md`) and **the design number** — a calculation with a numeric answer that feeds a real open item in the design (`notes.md`, with the working). The tutor has the expected magnitude, not your answer.
-- [ ] **E4 KiCad ready.** Watch V4. KiCad 10; the library is in the repo (`hardware/lib/`, nothing to unzip); open `hardware/class-board.kicad_pro` → PCB → your rule area `ZONE_B<N>` → `docs/students/<name>/zone.png`.
+- [ ] **E4 KiCad ready.** Watch V4. KiCad (the free program we draw the schematic in and lay out the printed circuit board with) 10; the library (the set of symbols and footprints for our parts) is in the repository (`hardware/lib/`, nothing to unzip); open `hardware/class-board.kicad_pro` → PCB (the physical board design) → your rule area `ZONE_B<N>` (the outlined region of the board that is yours to route) → `docs/students/<name>/zone.png`.
 - [ ] **E5 Your SPEC paragraph.** `docs/students/<name>/SPEC.md`: what your block must do; **the number you will measure in the wrap-up, with its expected value and how you will measure it** (your block page names it); how you show it on demo day. Add a second paragraph if you want one: *the extension* — the software or app feature that would make this instrument useful in your lab, and the number that would show it works.
 - [ ] Reading: [chapter C](chC-cheat-sheets.md) git and KiCad sections; [chapter A](chA-electronics-from-zero.md) only where you need it.
 
-**Deliverables by the end of the week (in a repo, by commit or PR):** your day-1 page URL + `SPEC.md` with predictions vs results + `PROGRESS.md` · merged E2 with the 1/√N numbers · `notes.md` (two answers + the design number) · `zone.png` · `SPEC.md`.
+**Deliverables by the end of the week (in a repository, by commit or PR):** your day-1 page URL + `SPEC.md` with predictions vs results + `PROGRESS.md` · merged E2 with the 1/√N numbers · `notes.md` (two answers + the design number) · `zone.png` · `SPEC.md`.
 
 ## Beyond the baseline (from today, optional, encouraged)
-The hardware is the shared baseline — fixed by budget and timeline, and JLC builds it. The software, firmware and app are open, and that is where you can show what you can do. Whenever you finish early, the question is: *what problem in your lab could this instrument solve?* Things it could become with the skills from this chapter alone: a **data logger** that writes CSV a tool of yours reads (E2 → the Scope tab → export) · a **LINE / Telegram alert** when a number drifts (the alarm engine's `notify` + a 20-line webhook script) · **remote access** from the lab WiFi (`secrets.h`, mDNS) with a **Python script that runs a sweep** overnight · a **calibration routine** stored on the board · a **PID / controller block** (the day-1 PID page made real) · a second node (an S3-CAM watching a gauge). Bring a real problem from your lab to L2; the tutor will help you write its `SPEC.md`. Not required; the demo has an optional fifth item for it. **Talk to your instrument from LINE or Telegram** — the extension we most encourage: push notifications when a value drifts or an alarm fires, and bot commands that read a value or switch a relay from your phone, from anywhere.
+The hardware is the shared baseline — fixed by budget and timeline, and JLC (JLCPCB, the factory that makes and assembles our boards) builds it. The software, firmware and app are open, and that is where you can show what you can do. Whenever you finish early, the question is: *what problem in your lab could this instrument solve?* Things it could become with the skills from this chapter alone: a **data logger** that writes CSV a tool of yours reads (E2 → the Scope tab → export) · a **LINE / Telegram alert** when a number drifts (the alarm engine's `notify` + a 20-line webhook script) · **remote access** from the lab WiFi (`secrets.h`, mDNS) with a **Python script that runs a sweep** overnight · a **calibration routine** stored on the board · a **PID / controller block** (the day-1 PID page made real) · a second node (an S3-CAM watching a gauge). Bring a real problem from your lab to L2; the tutor will help you write its `SPEC.md`. Not required; the demo has an optional fifth item for it. **Talk to your instrument from LINE or Telegram** — the extension we most encourage: push notifications when a value drifts or an alarm fires, and bot commands that read a value or switch a relay from your phone, from anywhere.
 
 ---
-**Tutor notes (`/tutor L1`, `/tutor HW1`).** Assume competence; offer expert mode. E1a: the student picks the topic and writes `SPEC.md` — a learner outcome, the correctness check — one result you can work out by hand before the code exists, a teaching check — before any code; reject plans that draw a picture instead of computing the physics; the student compares prediction and result and explains any miss; push the stretch (a real teaching check, a second idea, the explainer video) on anyone who finishes early; the reference repos are for tooling trouble, or by choice from the start. E2: the student writes the statistics and the command; the deliverable is the sd-vs-N table with an explanation; do not supply the explanation — ask what changes when N spans a mains period, when the wire is touched, when the pin is grounded; end with "what would you log with this in your lab?" and write the answer under *Next*. E3: the design number needs working and a unit. Never run `pio run -t upload` without naming env and port. Whenever a student finishes early: ask what problem in their lab this could solve, and help them scope it as a `SPEC.md`.
+**Tutor notes (`/tutor L1`, `/tutor HW1`).** Assume competence; offer expert mode. E1a: the student picks the topic and writes `SPEC.md` — a learner outcome, the correctness check — one result you can work out by hand before the code exists, a teaching check — before any code; reject plans that draw a picture instead of computing the physics; the student compares prediction and result and explains any miss; push the stretch (a real teaching check, a second idea, the explainer video) on anyone who finishes early; the reference repositories are for tooling trouble, or by choice from the start. E2: the student writes the statistics and the command; the deliverable is the sd-vs-N table with an explanation; do not supply the explanation — ask what changes when N spans a mains period, when the wire is touched, when the pin is grounded; end with "what would you log with this in your lab?" and write the answer under *Next*. E3: the design number needs working and a unit. Never run `pio run -t upload` without naming env and port. Whenever a student finishes early: ask what problem in their lab this could solve, and help them scope it as a `SPEC.md`.

@@ -29,7 +29,7 @@ footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="16" data-size="16:9">
 <h1 id="electronics-101--from-the-dev-board-to-the-class-board">Electronics 101 — from the dev board to the class board</h1>
 <p><strong>Lecture 2 · Fri 18 Sep 2026 · 14:20–16:20 · R311 IAMS</strong></p>
-<p>Six ideas on our schematic · KiCad's six operations · place your missing parts · route your zone · your first PR into the class board</p>
+<p>Six ideas on our schematic (the circuit drawing) · KiCad's six operations (KiCad — the free circuit-design program) · place your missing parts · route (draw the copper tracks in) your zone · your first pull request (PR) into the class board</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -53,9 +53,9 @@ footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="16" data-size="16:9">
 <h1 id="where-we-are">Where we are</h1>
 <ul>
-<li>Every phone talks to its ESP32 (E2 merged). Every student has a block and a <code>SPEC.md</code> with a number.</li>
-<li>The <strong>full schematic</strong> exists (PDF on the site). Your <strong>gapped sheet</strong> is missing 3–4 parts. The <strong>PCB</strong> has every footprint pre-placed and your rule area <code>ZONE_B&lt;N&gt;</code> with your name on it.</li>
-<li><strong>JLC assembles everything.</strong> You solder nothing. The dev board stays the fallback.</li>
+<li>Every phone talks to its ESP32 (E2 merged into the shared project). Every student has a block and a <code>SPEC.md</code> with a number.</li>
+<li>The <strong>full schematic</strong> exists (PDF on the site). Your <strong>gapped sheet</strong> is missing 3–4 parts. The <strong>PCB</strong> (the physical board layout) has every footprint (the copper pattern a part is soldered onto) pre-placed and your rule area (the outlined region that is yours to route) <code>ZONE_B&lt;N&gt;</code> with your name on it.</li>
+<li><strong>JLC (JLCPCB, the board factory) assembles everything.</strong> You solder nothing. The dev board stays the fallback.</li>
 <li><strong>Order: Mon 28 Sep.</strong> Your zone must be merged before it; hand-in dates are agreed in class.</li>
 </ul>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101</footer>
@@ -111,7 +111,7 @@ footer { color: #888; font-size: 0.55em; }
 </tr>
 <tr>
 <td><strong>B5</strong></td>
-<td>74AHCT541 (8 × TTL), 74HCT125, 74LVC1T45 (TRIG), TCXO (DNP)</td>
+<td>74AHCT541 (8 × TTL), 74HCT125, 74LVC1T45 (TRIG), TCXO (DNP — not fitted)</td>
 <td>≈ 15</td>
 </tr>
 </tbody>
@@ -233,9 +233,9 @@ footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="16" data-size="16:9">
 <h1 id="d-isolation--b4">(d) Isolation — B4</h1>
 <ul>
-<li>A <strong>relay</strong>: coil and contacts share no copper. ULN2003 drives four coils from GPIO; its COM pin carries the flyback diodes that eat the coil's kick.</li>
+<li>A <strong>relay</strong>: coil and contacts share no copper. ULN2003 drives four coils from GPIO (the microcontroller's general-purpose pins); its COM pin carries the flyback diodes that eat the coil's kick.</li>
 <li>An <strong>optocoupler</strong> (6N137): LED and transistor share no copper; 5–24 V in, 3.3 V out, fast.</li>
-<li><strong>Creepage</strong>: the distance that keeps it so — <strong>2.5 mm band</strong>, no copper of any other net under it, on any layer. DRC checks it; your reviewer checks it.</li>
+<li><strong>Creepage</strong>: the distance that keeps it so — <strong>2.5 mm band</strong>, no copper of any other net (a set of pins connected together) under it, on any layer. DRC (KiCad's design rule check) checks it; your reviewer checks it.</li>
 <li>Contacts: <strong>≤ 30 V DC, 1 A. Never mains.</strong></li>
 </ul>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101</footer>
@@ -291,10 +291,10 @@ footer { color: #888; font-size: 0.55em; }
 <h1 id="f-the-buses-that-tie-it-together--base">(f) The buses that tie it together — base</h1>
 <div class="two">
 <div>
-<p><strong>SPI</strong> — three shared wires (SCLK 12, MOSI 11, MISO 13) + one chip-select per device: ADC <code>/CS</code> 10, DAC <code>/SYNC</code> 5. 33 Ω series on the data lines; short, one direction from the socket.</p>
+<p><strong>SPI</strong> (a common wiring standard for chips to talk to the microcontroller) — three shared wires (SCLK 12, MOSI 11, MISO 13) + one chip-select per device: ADC <code>/CS</code> 10, DAC <code>/SYNC</code> 5. 33 Ω series on the data lines; short, one direction from the socket.</p>
 </div>
 <div>
-<p><strong>I²C</strong> — two wires (SDA 1, SCL 2), 4.7 kΩ pull-ups, addresses: OLED 0x3C, two Qwiic connectors for anything else.</p>
+<p><strong>I²C</strong> (the other common one) — two wires (SDA 1, SCL 2), 4.7 kΩ pull-ups, addresses: OLED 0x3C, two Qwiic connectors for anything else.</p>
 <p>Every block's driver is &quot;write a few bytes on one of these, read a few back&quot;.</p>
 </div>
 </div>
@@ -360,7 +360,7 @@ footer { color: #888; font-size: 0.55em; }
 <tbody>
 <tr>
 <td>1</td>
-<td><strong>Place</strong> <code>A</code> — project library <code>class_board</code></td>
+<td><strong>Place</strong> <code>A</code> — project library <code>class_board</code> (our symbols and footprints)</td>
 <td></td>
 </tr>
 <tr>
@@ -370,7 +370,7 @@ footer { color: #888; font-size: 0.55em; }
 </tr>
 <tr>
 <td>3</td>
-<td><strong>Annotate</strong>, <strong>ERC</strong></td>
+<td><strong>Annotate</strong>, <strong>ERC</strong> (electrical rule check)</td>
 <td></td>
 </tr>
 <tr>
@@ -415,9 +415,9 @@ footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="16" data-size="16:9">
 <h1 id="e6--schematic-gaps">E6 — schematic gaps</h1>
 <ol>
-<li><code>git switch -c b&lt;N&gt;-&lt;name&gt;</code> · open <code>hardware/class-board.kicad_pro</code> · your sheet <code>student/b&lt;N&gt;_gapped.kicad_sch</code></li>
+<li><code>git switch -c b&lt;N&gt;-&lt;name&gt;</code> (a new branch — your own line of work) · open <code>hardware/class-board.kicad_pro</code> · your sheet <code>student/b&lt;N&gt;_gapped.kicad_sch</code></li>
 <li>Full PDF page for your block beside it. Your block page lists the <strong>3–4 deleted parts</strong>.</li>
-<li>Each: place → wire → value → <strong>footprint field</strong> → keep the PDF's <strong>reference designator</strong></li>
+<li>Each: place → wire → value → <strong>footprint field</strong> → keep the PDF's <strong>reference designator</strong> (the part's label: R12, C3 …)</li>
 <li><strong>ERC → 0 errors.</strong></li>
 </ol>
 <table>
@@ -500,9 +500,10 @@ footer { color: #888; font-size: 0.55em; }
 <ol>
 <li><code>git add hardware/ &amp;&amp; git commit &amp;&amp; git push -u origin b&lt;N&gt;-&lt;name&gt;</code> → <code>gh pr create</code> — <strong>3D screenshot in the description</strong></li>
 <li><em>Reviewers</em> → your ring reviewer · CI must be green</li>
-<li>Reviewer: <em>Files changed</em>, check out the branch, open the PCB, walk <strong>the checklist</strong>, ≥ 2 comments, <em>Approve</em> / <em>Request changes</em></li>
 </ol>
-<p><strong>The checklist</strong> (chapter C, the instructor's merge list): ERC 0 / DRC 0 · <code>LCSC</code> on every part · values match the PDF · decoupling next to pins · nothing on In1.Cu · nothing outside the zone · pin 1 marked · ground pour joined · B4 band ≥ 2.5 mm · silkscreen on every connector · CI green</p>
+<p><span class="small">commit = save a snapshot with a message · push = upload it to GitHub · <code>gh pr create</code> opens the pull request from the terminal · CI = the automatic build GitHub runs on every pull request, green or red.</span><br />
+3. Reviewer: <em>Files changed</em>, check out the branch, open the PCB, walk <strong>the checklist</strong>, ≥ 2 comments, <em>Approve</em> / <em>Request changes</em></p>
+<p><strong>The checklist</strong> (chapter C, the instructor's merge list): ERC 0 / DRC 0 · an <code>LCSC</code> part number (the factory's catalogue) on every part · values match the PDF · decoupling next to pins · nothing on In1.Cu · nothing outside the zone · pin 1 marked · ground pour joined · B4 band ≥ 2.5 mm · silkscreen (printed label) on every connector · CI green</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -546,7 +547,7 @@ footer { color: #888; font-size: 0.55em; }
 </tr>
 </tbody>
 </table>
-<p><strong>Mon 28 Sep:</strong> the instructor paste-merges the five zones, full DRC, Gerbers/BOM/CPL, quote, <strong>order</strong> — 5 assembled + 2 bare + 6 front panels. Boards back ≈ 12 Oct.</p>
+<p><strong>Mon 28 Sep:</strong> the instructor paste-merges the five zones, full DRC, Gerbers (manufacturing files) / BOM (parts list) / CPL (placement file), quote, <strong>order</strong> — 5 assembled + 2 bare + 6 front panels. Boards back ≈ 12 Oct.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101" data-class="lead" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -569,7 +570,7 @@ code { font-size: 0.85em; }
 footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="16" data-size="16:9">
 <h1 id="fri-2-oct-firmware-and-mechanical-101">Fri 2 Oct: Firmware and Mechanical 101</h1>
-<p>Your block's driver and phone panel in sim mode · one alarm rule · your box from the template</p>
+<p>Your block's driver and phone panel in sim mode (the firmware fakes its hardware, on the dev board) · one alarm rule · your box from the template</p>
 <p>No homework the week of 28 Sep. <code>/tutor HW2</code> until then.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 2 — Electronics 101</footer>
 </section>

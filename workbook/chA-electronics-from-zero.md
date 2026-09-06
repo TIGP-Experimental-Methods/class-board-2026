@@ -3,10 +3,10 @@
 The background deck as text, for anyone who has not read a schematic before. Every idea is pointed at a place on **our** board. Read it before lecture 2; `/tutor A` will quiz you on any section.
 
 ## A.1 Charge, voltage, current — and what a schematic is
-Current (A) is charge flowing; voltage (V) is the push between two points; a schematic is a graph of *which pins are connected*, nothing else — position on the page means nothing, the net names mean everything. **Ours:** every wire on the board is a net with a name (`+5V_RAW`, `AI1`, `SPI_SCLK`); the same name on two pages is the same wire.
+Current (A) is charge flowing; voltage (V) is the push between two points; a schematic is a graph of *which pins are connected*, nothing else — position on the page means nothing, the net names (a net is one set of pins that are connected together) mean everything. **Ours:** every wire on the board is a net with a name (`+5V_RAW`, `AI1`, `SPI_SCLK`); the same name on two pages is the same wire.
 
 ## A.2 Ohm's law and the resistor jobs
-V = I·R. Resistors on our board do four jobs: **limit current** (1 kΩ in series with every analog input, 2.2 kΩ before every LED), **set a ratio** (the 10 kΩ/40 kΩ pair that makes 4× in B3), **pull a line to a known level** (10 kΩ pull-ups on the ADC's /RST), and **terminate or isolate a cable** (49.9 Ω at each output, 33 Ω on the SPI data line).
+V = I·R. Resistors on our board do four jobs: **limit current** (1 kΩ in series with every analog input, 2.2 kΩ before every LED), **set a ratio** (the 10 kΩ/40 kΩ pair that makes 4× in B3), **pull a line to a known level** (10 kΩ pull-ups on the /RST of the ADC, the analog-to-digital converter), and **terminate or isolate a cable** (49.9 Ω at each output, 33 Ω on the SPI data line — SPI is one of the two wiring standards chips use to talk to the microcontroller).
 
 ## A.3 Impedance and 50 Ω
 A cable is a transmission line; a 50 Ω coax "looks like" 50 Ω to a fast edge. Our outputs have 49.9 Ω in series so the cable sees a matched source; the scope's input can be 1 MΩ (you see the full amplitude) or 50 Ω (you see half — B3's number depends on which). TTL into 50 Ω gives ≈ 2.5 V; into 1 MΩ ≈ 5 V — the note on B5's panel.
@@ -21,22 +21,22 @@ Current always returns. Relay coils and the USB supply return large, noisy curre
 A diode conducts one way. **BAV99** pairs clamp our inputs and outputs to the ±12 V rails: a 30 V accident flows into the rail, not into the chip. **SS34** Schottky diodes let USB and the jack both feed +5V without fighting (the higher one wins). The **ULN2003** has a diode per channel that absorbs the relay coil's kick when it switches off. A **TVS** is a diode built to eat a static discharge.
 
 ## A.7 The op-amp as a black box
-An op-amp with two resistors is an **amplifier with a gain set by their ratio**; with a reference on one input it also **shifts** the signal. B3: `AO = 4 × (DAC − 2.5 V)` turns 0–5 V into −10…+10 V. Rules of thumb: it needs supply rails wider than the swing (±12 V for ±10 V), it dislikes driving a capacitor (the cable) directly — hence the 49.9 Ω — and its output cannot exceed its rails (that is what "clipped" means, B3's alarm).
+An op-amp with two resistors is an **amplifier with a gain set by their ratio**; with a reference on one input it also **shifts** the signal. B3: `AO = 4 × (DAC − 2.5 V)` (DAC: the digital-to-analog converter's output voltage) turns 0–5 V into −10…+10 V. Rules of thumb: it needs supply rails wider than the swing (±12 V for ±10 V), it dislikes driving a capacitor (the cable) directly — hence the 49.9 Ω — and its output cannot exceed its rails (that is what "clipped" means, B3's alarm).
 
 ## A.8 ADCs: bits, sample rate, aliasing
 16 bits over ±10 V = 0.3 mV per LSB; noise is measured in LSB rms (B1's number). Sampling at rate *f* sees nothing above *f*/2 correctly; anything above it **aliases** back as a false low frequency — the 1 kΩ + 1 nF network in front of each input is a gentle low-pass that helps, and the anti-alias filter in the instructor's conditioning chain does it properly. The Scope tab's rolling mode is limited by WiFi (tens of kS/s), its burst mode by the ADC (500 kS/s aggregate).
 
 ## A.9 DACs and reconstruction
-A DAC outputs a staircase; a sine at 1 kHz made of 100 steps per period looks fine on a scope, 8 steps do not. The DAC8563 is 16-bit, so amplitude is exact to 0.3 mV, but the *shape* depends on the update rate the firmware achieves over SPI. B3's demo item is a sine; B3's number is its amplitude accuracy.
+A DAC outputs a staircase; a sine at 1 kHz made of 100 steps per period looks fine on a scope, 8 steps do not. The DAC8563 is 16-bit, so amplitude is exact to 0.3 mV, but the *shape* depends on the update rate the firmware (the program on the microcontroller) achieves over SPI. B3's demo item is a sine; B3's number is its amplitude accuracy.
 
 ## A.10 Logic levels
-The ESP32 is a **3.3 V** part: it outputs 0 / 3.3 V and must never see 5 V on a pin. **5 V TTL** equipment expects a high above 2 V and outputs up to 5 V. A **74AHCT541** takes 3.3 V in and gives 5 V out (that is B5); a **74LVC1T45** translates either way under a direction pin (TRIG); optocouplers accept 5–24 V in and give 3.3 V out (B4). "5 V-tolerant" means an input that survives 5 V — the ESP32's are not.
+The ESP32 (our microcontroller) is a **3.3 V** part: it outputs 0 / 3.3 V and must never see 5 V on a pin. **5 V TTL** equipment expects a high above 2 V and outputs up to 5 V. A **74AHCT541** takes 3.3 V in and gives 5 V out (that is B5); a **74LVC1T45** translates either way under a direction pin (TRIG); optocouplers accept 5–24 V in and give 3.3 V out (B4). "5 V-tolerant" means an input that survives 5 V — the ESP32's are not.
 
 ## A.11 Isolation
-Two circuits are isolated when no copper connects them. A **relay** switches a contact with a magnet; an **optocoupler** sends light across a gap. The gap on the PCB is the **creepage** distance (2.5 mm in B4's rule); copper of any other net under the gap defeats it. Relays here switch ≤ 30 V DC / 1 A — never mains.
+Two circuits are isolated when no copper connects them. A **relay** switches a contact with a magnet; an **optocoupler** sends light across a gap. The gap on the PCB (the printed circuit board) is the **creepage** distance (2.5 mm in B4's rule); copper of any other net under the gap defeats it. Relays here switch ≤ 30 V DC / 1 A — never mains.
 
 ## A.12 Rails and where the power goes
 5 V in from USB-C or the jack → **+5V_RAW** for everything not voltage-sensitive (dev board, relays, logic, LEDs) → **+3V3** from a linear regulator for the 3.3 V logic and the OLED → **±12 V** from two isolated DC-DC modules for the analog parts only → **+5VA** from +12 V through a 78L05 for the ADC and DAC. Rule (Decision #22): if it does not need a clean rail, it does not get one.
 
 ## A.13 Reading a datasheet — the five places to look
-Pinout diagram (pin 1 is marked — find it on the footprint too) → absolute maximum ratings (what kills it) → recommended operating conditions (the rails) → the typical application circuit (copy its decoupling and reference capacitors — that is where the ADS8688 values on B1 come from) → the timing diagram only when you write the driver.
+Pinout diagram (pin 1 is marked — find it on the footprint, the copper pattern the part is soldered onto, too) → absolute maximum ratings (what kills it) → recommended operating conditions (the rails) → the typical application circuit (copy its decoupling and reference capacitors — that is where the ADS8688 values on B1 come from) → the timing diagram only when you write the driver.

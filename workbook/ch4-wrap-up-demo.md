@@ -3,18 +3,18 @@
 **Wrap-up: in the week of 10-19 (boards back ≈ 10-12, bench-checked and boxed by the instructor). Demo: a scheduled slot in the week of 10-26; length and format agreed in class.**
 
 ## Bring-up checklist (instructor, week of 10-12 — you do not repeat it, but read it)
-Rails at the test points (+5V, +3V3, ±12 V, +5VA) with no dev board → dev board in, LED blue, AP up, app opens → `esp32s3` build flashed (no SIM) → each block's smoke test: B1 AI1 reads a known voltage · B2 rail LEDs · B3 AO1 sine seen on a scope · B4 relay 1 clicks, opto 1 counts · B5 DIO1 toggles on a scope → boxed.
+Rails at the test points (+5V, +3V3, ±12 V, +5VA) with no dev board → dev board in, LED blue, AP (the board's own WiFi network) up, app opens → `esp32s3` build flashed (written onto the board over USB; no SIM — the firmware talks to real hardware instead of faking it) → each block's smoke test: B1 AI1 reads a known voltage · B2 rail LEDs · B3 AO1 sine seen on a scope · B4 relay 1 clicks, opto 1 counts · B5 DIO1 toggles on a scope → boxed.
 
 ## Exercise E13 — `/tutor WRAP`
 - [ ] **E13a Real hardware.** Board on the *USB* port. Build **without SIM**: `pio run -e esp32s3 -t upload && pio run -e esp32s3 -t uploadfs`. Open your panel. See your block move real hardware:
   B1 a voltage on AI1 · B2 rail LEDs and your status panel · B3 a sine on AO1 into AI1 · B4 relay click and an opto count · B5 a TTL line and TRIG direction.
-  Fix one thing with the tutor (there is always one thing). Commit.
+  Fix one thing with the tutor (there is always one thing). Commit (save a snapshot with a one-line message).
 - [ ] **E13b One measured number.** Your block page says which; your `SPEC.md` says what you expected. Measure it, write the value **and the method** under the expectation:
   B1 noise floor of one input (LSB rms, 4000-sample capture, SMA terminated) · B2 the four rail voltages + USB current · B3 amplitude accuracy of a 1 kHz sine at ±5 V · B4 relay switching time from an opto timestamp · B5 TTL edge rate on a scope.
   Expected vs measured, and one sentence on the difference. That sentence is the physics.
 - [ ] **E13c 60-second phone video.** Landscape, one take is fine: your panel on the phone, your block doing its thing, the number on the scope or multimeter, your name and block at the start. Upload to `docs/students/<name>/` (≤ 50 MB; otherwise a link) and add it to your day-1 page — it is your course page. Recommended route if you like: the lab's `show-your-work` `education-video` skill (script, narration, picture from your `SPEC.md`), posted on your own YouTube channel and embedded in the page; a phone video is equally fine.
 
-**Deliverables:** the number with its method in `SPEC.md`; the video linked from your page.
+**Deliverables** (what must exist in the repository at the end)**:** the number with its method in `SPEC.md`; the video linked from your page.
 
 ## Exercise E14 — the demo (`/tutor DEMO` to rehearse)
 The format is discussed and agreed with the class; this is the current plan. From the class checklist, in this order:

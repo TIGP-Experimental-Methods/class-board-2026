@@ -1,5 +1,73 @@
 # Chapter C — Cheat-sheets
 
+## C.0 Words we use
+
+Every tooling term in this workbook is explained the first time it appears in a chapter; this table collects them all in one place.
+
+| Term | Meaning |
+|---|---|
+| **repository (repo)** | a project folder whose complete history git keeps; on GitHub it also lives online |
+| **GitHub** | the website where repositories are stored and shared |
+| **git** | the tool that records the history of a folder of files |
+| **commit** | save a snapshot of your changes with a one-line message |
+| **push** | upload your commits to GitHub |
+| **clone** | download a full copy of a repository to your laptop |
+| **branch** | a separate line of work inside a repository, so several people can change things without treading on each other |
+| **merge** | bring a branch's changes into the main line |
+| **pull request (PR)** | a request to merge your branch into the shared project; someone reviews it first, comments, and approves |
+| **fork** | your own copy of someone else's repository on GitHub |
+| **main** | the main branch, the version everyone builds on |
+| **CI (continuous integration)** | an automatic build that GitHub runs on every pull request and reports green or red |
+| **GitHub CLI (`gh`)** | GitHub's command-line tool (log in, create repositories, open pull requests from the terminal) |
+| **terminal** | the text window where you type commands |
+| **Markdown** | plain text with light formatting (`#` headings, `-` lists); what README, SPEC and PROGRESS files are written in |
+| **SPEC.md / PROGRESS.md / CLAUDE.md** | plain-text files in the repository: what to build · what was done, verified, next, gotchas · how the project is set up (read by the agent every session) |
+| **agent / coding agent** | Claude Code working on your files: it reads them, writes code, runs commands, and reports back |
+| **Cloudflare Pages / GitHub Pages** | free services that turn a repository into a public web page |
+| **deploy** | publish the page so it is live on the web |
+| **ship** | publish it where others can open it |
+| **URL** | a web address |
+| **firmware** | the program that runs on the microcontroller |
+| **microcontroller / dev board** | a small computer on a chip; the *development board* carries it with a USB connector and pins so you can use it directly |
+| **ESP32-S3** | the microcontroller we use; it has WiFi |
+| **flash / upload** | write the firmware onto the board over USB |
+| **toolchain** | the compiler and helper programs that turn source code into firmware |
+| **PlatformIO** | the tool (and VS Code extension) that builds and flashes the firmware for us |
+| **`pio run -t upload`** | the PlatformIO command that builds the firmware and flashes it |
+| **SIM mode** | a build in which the firmware fakes its hardware, so the app and chart work on the bare dev board before the class board exists |
+| **access point (AP)** | the board's own WiFi network, which your phone joins |
+| **PWA / the app** | the phone app is a web page served by the board that behaves like an app (progressive web app) |
+| **WebSocket** | a live two-way connection between the phone page and the board |
+| **JSON** | a plain-text format for structured data, e.g. `{"cmd":"led","r":255}` |
+| **status message** | the numbers the board sends the phone many times a second |
+| **handler** | the piece of firmware that acts on one command |
+| **widget** | one control or readout on the phone app |
+| **Python client / `instrument.py`** | a Python program on your PC that talks to the board with the same messages as the phone |
+| **OTA (over-the-air)** | updating the firmware over WiFi instead of USB |
+| **LittleFS** | the small file store on the board where the app's files live |
+| **KiCad** | the free program we draw the schematic and lay out the printed circuit board in |
+| **schematic** | the circuit drawing |
+| **PCB / layout** | the physical board design with copper tracks |
+| **footprint** | the copper pattern a part is soldered onto |
+| **symbol** | a part's drawing in the schematic |
+| **library** | the set of symbols and footprints for our parts |
+| **ERC / DRC** | KiCad's electrical / design rule checks; zero errors means the checks pass |
+| **rule area / zone** | the outlined region of the board that is yours to route |
+| **routing** | drawing the copper tracks between parts |
+| **net** | a set of pins that are connected together |
+| **JLCPCB / LCSC** | the factory that makes and assembles our boards, and its parts catalogue |
+| **BOM** | the bill of materials, the parts list |
+| **Gerbers** | the manufacturing files sent to the factory |
+| **STL / STEP** | 3D file formats (for printing / for CAD exchange) |
+| **Onshape** | the browser CAD program for the box |
+| **ADC / DAC** | analog-to-digital and digital-to-analog converters |
+| **GPIO** | a general-purpose pin on the microcontroller |
+| **SPI / I²C** | two common wiring standards for chips to talk to the microcontroller |
+| **ring buffer** | a fixed-size list that overwrites its oldest entry |
+| **the check / the test** | one result you can work out by hand before any code exists (e.g. the cut-off frequency of an RC filter for a given R and C), which the finished page must reproduce |
+| **hand-in / deliverable** | what must exist in the repository at the end |
+| **ring reviewer** | the classmate who reviews your pull request (A reviews B, B reviews C, …, E reviews A) |
+
 ## C.1 git and GitHub — the ten commands you use
 ```sh
 git status                          # what changed
@@ -13,7 +81,7 @@ git log --oneline -10               # what happened
 git diff                            # what you changed, unstaged
 git restore <file>                  # undo an unstaged change to one file
 ```
-Rules: `main` is protected; one PR per deliverable; the PR description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. Stuck in a merge conflict? Do not fight it — ask on LINE.
+Rules: `main` is protected; one PR per deliverable; the PR description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then email the instructor (C.7).
 
 ## C.2 PlatformIO
 ```sh

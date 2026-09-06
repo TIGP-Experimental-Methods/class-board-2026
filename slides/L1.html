@@ -28,12 +28,13 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="ai-101--build-it-ship-it-log-it--then-your-instrument">AI 101 — build it, ship it, log it — then your instrument</h1>
 <p><strong>Lecture 1 · Fri 11 Sep 2026 · 14:20–16:20 · R311 IAMS</strong></p>
 <p>Two promises for today:<br />
 a page that teaches one idea, on the public web, <strong>before the break</strong> ·<br />
 your own phone app measuring your ESP32 <strong>by the end</strong></p>
+<p><span class="small">&quot;ship&quot; = publish it where others can open it · &quot;log&quot; = write down what you did, in plain text</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -56,11 +57,11 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="what-we-build-together">What we build together</h1>
 <div class="two">
 <div>
-<p><strong>One class instrument</strong> — an ESP32-S3 dev board on a class board with <strong>five blocks</strong>, one per student:</p>
+<p><strong>One class instrument</strong> — an ESP32-S3 dev board (a small WiFi computer-on-a-chip, on a board with USB and pins) on a class board with <strong>five blocks</strong>, one per student:</p>
 <ul>
 <li><strong>B1</strong> precision inputs (8 × ±10 V, 16-bit)</li>
 <li><strong>B2</strong> power &amp; rails</li>
@@ -70,9 +71,9 @@ footer { color: #888; font-size: 0.55em; }
 </ul>
 </div>
 <div>
-<p><strong>One repo</strong> <code>class-board-2026</code>, <strong>one phone app</strong>, <strong>one Python client</strong>.</p>
-<p>You read your block, route it, write its driver and demo it.</p>
-<p>The board is ordered <strong>Mon 28 Sep</strong> from everyone's pull requests. Boards back ≈ 12 Oct. Demos week of 26 Oct.</p>
+<p><strong>One repository</strong> (a project folder whose complete history git keeps, shared on GitHub) <code>class-board-2026</code>, <strong>one phone app</strong>, <strong>one Python client</strong>.</p>
+<p>You read your block, route it (draw its copper tracks), write its driver and demo it.</p>
+<p>The board is ordered <strong>Mon 28 Sep</strong> from everyone's pull requests (your changes, reviewed and merged into the shared project). Boards back ≈ 12 Oct. Demos week of 26 Oct.</p>
 </div>
 </div>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
@@ -97,7 +98,7 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="why-we-start-away-from-the-project">Why we start away from the project</h1>
 <p>AI-assisted work is a <strong>general skill</strong>. The same three moves serve a simulation, a website, a video, a report, a KiCad board, a firmware driver:</p>
 <div class="two">
@@ -113,6 +114,7 @@ footer { color: #888; font-size: 0.55em; }
 <li>the <strong>ESP32 in your hand</strong> — a phone app that measures something. The answer is not known yet.</li>
 </ol>
 <p>Electronics design is <em>one</em> application of AI, not the syllabus.</p>
+<p><span class="small">KiCad — the free program we draw circuit boards in · firmware — the program that runs on the microcontroller.</span></p>
 </div>
 </div>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
@@ -137,13 +139,14 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="the-one-sentence-thesis">The one-sentence thesis</h1>
 <blockquote>
 <p>An AI agent is a <strong>junior engineer with no memory</strong>.<br />
 It is exactly as good as the project documentation, the task specification and the verification you give it.</p>
 </blockquote>
 <p>Everything today follows from that sentence.</p>
+<p><span class="small"><em>Agent</em> — Claude Code working on your files: it reads them, writes code, runs commands and reports back.</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -166,12 +169,12 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="the-five-working-practices">The five working practices</h1>
 <ol>
 <li><strong>Spec first.</strong> Requirements live in <code>SPEC.md</code>, not in chat scrollback. Ask for a plan before code.</li>
-<li><strong>Teach the repo, not the session.</strong> <code>CLAUDE.md</code>: conventions, pinout, build/flash commands, how to test. Written once, loaded every session.</li>
-<li><strong>Small, fresh sessions.</strong> One task = one session. Finish, commit, start clean. Long sessions rot.</li>
+<li><strong>Teach the repository, not the session.</strong> <code>CLAUDE.md</code>: conventions, pinout, build and flash (write firmware to the board) commands, how to test. Written once, loaded every session.</li>
+<li><strong>Small, fresh sessions.</strong> One task = one session. Finish, commit (save a snapshot), start clean. Long sessions rot.</li>
 <li><strong>Handover notes.</strong> <code>PROGRESS.md</code> at the end of every session: done / verified / next / gotchas.</li>
 <li><strong>AI writes, you verify.</strong> No verification plan → not yours to ship.</li>
 </ol>
@@ -197,21 +200,32 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="markdown-is-your-lab-notebook">Markdown is your lab notebook</h1>
-<p><code>PROGRESS.md</code>, <code>SPEC.md</code>, <code>notes.md</code>, <code>README.md</code>, this deck, the workbook — all plain text.</p>
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="words-you-will-hear-today">Words you will hear today</h1>
+<div class="two small">
+<div>
 <ul>
-<li>it <strong>diffs</strong> and lives in git next to the code</li>
-<li>it is <strong>searchable</strong> and readable on a phone, on GitHub, in ten years</li>
-<li>the AI <strong>reads it first</strong> at the start of the next session</li>
-<li>the lingua franca of AI work: specs, logs, slides, reports</li>
+<li><strong>repository</strong> — a project folder whose complete history git keeps; on GitHub it also lives online</li>
+<li><strong>GitHub</strong> — the website where repositories are stored and shared</li>
+<li><strong>commit</strong> — save a snapshot of your changes with a one-line message</li>
+<li><strong>push</strong> — upload your commits to GitHub</li>
+<li><strong>pull request (PR)</strong> — a request to merge your changes into the shared project; someone reviews it first</li>
+<li><strong>clone</strong> — download a full copy of a repository to your laptop</li>
+<li><strong>Markdown</strong> — plain text with light formatting (<code>#</code> headings, <code>-</code> lists)</li>
 </ul>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-markdown"><span class="hljs-section">## 2026-09-11 — session 1</span>
-<span class="hljs-bullet">-</span> Done: rc-filter teaching page from SPEC.md; deployed to https://rc-filter-xxxx.pages.dev
-<span class="hljs-bullet">-</span> Verified: f<span class="hljs-emphasis">_c 1591 Hz (pred. 1591.5), −3.0 dB / −45° there; sliders work on my phone
-- Next: the teaching questions grade the answer; RLC as idea two
-- Gotchas: Cloudflare output directory must be &quot;/&quot;
-</span></code></pre>
+</div>
+<div>
+<ul>
+<li><strong>agent</strong> — Claude Code working on your files: reads them, writes code, runs commands, reports back</li>
+<li><strong>deploy</strong> — publish the page so it is live on the web</li>
+<li><strong>firmware</strong> — the program that runs on the microcontroller</li>
+<li><strong>flash</strong> — write the firmware onto the board over USB</li>
+<li><strong>toolchain</strong> — the compiler and helper programs that turn source code into firmware</li>
+<li><strong>access point</strong> — the board's own WiFi network, which your phone joins</li>
+<li><strong>the check</strong> — one result you can work out by hand before any code exists, which the finished page must reproduce</li>
+</ul>
+</div>
+</div>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -234,28 +248,21 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="verify-means-a-number-or-an-observation">&quot;Verify&quot; means a number or an observation</h1>
-<table>
-<thead>
-<tr>
-<th>Today</th>
-<th>Later</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Is f_c where <strong>1/(2πRC)</strong> said it would be?</td>
-<td>Does DRC say <strong>0</strong>?</td>
-</tr>
-<tr>
-<td>Does sd fall as <strong>1/√N</strong> on your phone — and if not, why?</td>
-<td>Does the scope show <strong>±5.00 V</strong>?</td>
-</tr>
-</tbody>
-</table>
-<p>&quot;It looks right&quot; is not verification. &quot;It works&quot; is not verification.<br />
-Write the number down. That is the whole trick.</p>
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="markdown-is-your-lab-notebook">Markdown is your lab notebook</h1>
+<p><code>PROGRESS.md</code>, <code>SPEC.md</code>, <code>notes.md</code>, <code>README.md</code>, this deck, the workbook — all plain text with light formatting.</p>
+<ul>
+<li>it <strong>diffs</strong> and lives in git (the tool that records a folder's history) next to the code</li>
+<li>it is <strong>searchable</strong> and readable on a phone, on GitHub, in ten years</li>
+<li>the AI <strong>reads it first</strong> at the start of the next session</li>
+<li>the lingua franca of AI work: specs, logs, slides, reports</li>
+</ul>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-markdown"><span class="hljs-section">## 2026-09-11 — session 1</span>
+<span class="hljs-bullet">-</span> Done: rc-filter teaching page from SPEC.md; deployed to https://rc-filter-xxxx.pages.dev
+<span class="hljs-bullet">-</span> Verified: f<span class="hljs-emphasis">_c 1591 Hz (pred. 1591.5), −3.0 dB / −45° there; sliders work on my phone
+- Next: the teaching questions grade the answer; RLC as idea two
+- Gotchas: Cloudflare output directory must be &quot;/&quot;
+</span></code></pre>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="8" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -278,21 +285,28 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="the-loop-in-miniature--todays-two-exercises">The loop in miniature — today's two exercises</h1>
-<div class="two">
-<div class="box">
-<p><strong>E1a · Build</strong><br />
-your topic, your repo · five-line <code>SPEC.md</code> — learner outcome + one result worked out by hand before the code exists · plan · one <code>index.html</code> · the check · commit</p>
-<p><strong>E1b · Ship + log</strong><br />
-push · Cloudflare Pages · URL on your phone · <code>PROGRESS.md</code> · push → redeploys itself</p>
-</div>
-<div class="box">
-<p><strong>E2 · Your phone app measures your ESP32</strong><br />
-one command out · mean + sd back · flash · sd vs N against 1/√N — explain the difference · branch · PR with the numbers</p>
-<p><strong>Nobody leaves without it.</strong></p>
-</div>
-</div>
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="verify-means-a-number-or-an-observation">&quot;Verify&quot; means a number or an observation</h1>
+<table>
+<thead>
+<tr>
+<th>Today</th>
+<th>Later</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is f_c where <strong>1/(2πRC)</strong> said it would be?</td>
+<td>Does DRC (KiCad's design rule check) say <strong>0</strong>?</td>
+</tr>
+<tr>
+<td>Does sd fall as <strong>1/√N</strong> on your phone — and if not, why?</td>
+<td>Does the scope show <strong>±5.00 V</strong>?</td>
+</tr>
+</tbody>
+</table>
+<p>&quot;It looks right&quot; is not verification. &quot;It works&quot; is not verification.<br />
+Write the number down. That is the whole trick.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="9" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -315,15 +329,22 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="e1a--build-teach-one-idea-to-a-high-school-student">E1a — build: teach one idea to a high-school student</h1>
-<p><strong>Pick a topic you know</strong> — EM · electronics · classical mechanics · PID · your research. Build the thing that teaches it: a page with sliders and a live plot, a simulation, a game.</p>
-<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-sh">gh repo create &lt;you&gt;/rc-filter --public --<span class="hljs-built_in">clone</span> &amp;&amp; <span class="hljs-built_in">cd</span> rc-filter &amp;&amp; code .
-</code></pre>
-<p><span class="small"><code>--public</code> or <code>--private</code> — your choice. Cloudflare Pages deploys private repos too; the GitHub Pages fallback needs a public one.</span></p>
-<p><strong>You write <code>SPEC.md</code> — five lines:</strong> what the learner can do afterwards · what it shows · <strong>the check: one result you can work out by hand before any code exists</strong> (1 kΩ, 100 nF → f_c = 1591.5 Hz, −3 dB, −45°) · a teaching check (a question with a hidden answer) · one file, canvas + JS, no framework, no build, works on a phone.</p>
-<p>Then: <em>&quot;Read SPEC.md. Plan in five bullets. Then write index.html.&quot;</em> Reject a plan that draws a picture instead of computing the physics. Open it. <strong>Read your number off the page.</strong> Prediction vs result into <code>SPEC.md</code>. Commit.</p>
-<p><span class="small">Topics with a check: RC filter (f_c) · PID (settling time from the poles) · two charges (field on the axis) · cart-pole (period × √(M/(M+m))) · orbit (T² ∝ a³) · standing waves (f_n). Options with reference repos: CSV → scope lab tool · cart-pole. Stretch: a real teaching check · a second idea · the explainer video (show-your-work, your own YouTube channel).</span></p>
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="the-loop-in-miniature--todays-two-exercises">The loop in miniature — today's two exercises</h1>
+<div class="two">
+<div class="box">
+<p><strong>E1a · Build</strong><br />
+your topic, your repository · five-line <code>SPEC.md</code> — learner outcome + one result worked out by hand before the code exists · plan · one <code>index.html</code> · the check · commit</p>
+<p><strong>E1b · Ship + log</strong><br />
+push · Cloudflare Pages · URL on your phone · <code>PROGRESS.md</code> · push → redeploys itself</p>
+</div>
+<div class="box">
+<p><strong>E2 · Your phone app measures your ESP32</strong><br />
+one command out · mean + sd back · flash · sd vs N against 1/√N — explain the difference · branch · pull request (PR) with the numbers</p>
+<p><strong>Nobody leaves without it.</strong></p>
+</div>
+</div>
+<p><span class="small">Cloudflare Pages — a free service that turns a repository into a public web page · branch — a separate line of work inside a repository, so people do not tread on each other.</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="10" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -346,15 +367,15 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="e1b--ship--log">E1b — ship + log</h1>
-<ol>
-<li><code>git push -u origin main</code></li>
-<li>Cloudflare → <strong>Workers &amp; Pages → Create → Pages → Connect to Git</strong> → your repo → build command <em>blank</em>, output <code>/</code> → Deploy</li>
-<li>Open <code>https://rc-filter-xxxx.pages.dev</code> <strong>on your phone</strong>. Move a slider. Send it to a non-physicist.</li>
-<li><strong>You</strong> write <code>PROGRESS.md</code>: done / verified / next / gotchas. Commit, push — and watch it redeploy itself.</li>
-</ol>
-<p><span class="small">Fallback: GitHub → Settings → Pages → branch main. That is continuous deployment; you just did it. This repo is your course page from now on.</span></p>
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="e1a--build-teach-one-idea-to-a-high-school-student">E1a — build: teach one idea to a high-school student</h1>
+<p><strong>Pick a topic you know</strong> — EM · electronics · classical mechanics · PID · your research. Build the thing that teaches it: a page with sliders and a live plot, a simulation, a game.</p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-sh">gh repo create &lt;you&gt;/rc-filter --public --<span class="hljs-built_in">clone</span> &amp;&amp; <span class="hljs-built_in">cd</span> rc-filter &amp;&amp; code .
+</code></pre>
+<p><span class="small"><code>gh</code> is GitHub's command-line tool. <code>--public</code> or <code>--private</code> — your choice. Cloudflare Pages deploys private repositories too; the GitHub Pages fallback needs a public one.</span></p>
+<p><strong>You write <code>SPEC.md</code> — five lines:</strong> what the learner can do afterwards · what it shows · <strong>the check: one result you can work out by hand before any code exists</strong> (1 kΩ, 100 nF → f_c = 1591.5 Hz, −3 dB, −45°) · a teaching check (a question with a hidden answer) · one file, canvas + JS, no framework, no build, works on a phone.</p>
+<p>Then: <em>&quot;Read SPEC.md. Plan in five bullets. Then write index.html.&quot;</em> Reject a plan that draws a picture instead of computing the physics. Open it. <strong>Read your number off the page.</strong> Prediction vs result into <code>SPEC.md</code>. Commit.</p>
+<p><span class="small">Topics with a check: RC filter (f_c) · PID (settling time from the poles) · two charges (field on the axis) · cart-pole (period × √(M/(M+m))) · orbit (T² ∝ a³) · standing waves (f_n). Options with reference repositories: CSV → scope lab tool · cart-pole. Stretch: a real teaching check · a second idea · the explainer video (show-your-work, your own YouTube channel).</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="11" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -377,9 +398,15 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="break">Break</h1>
-<p>When we come back: join your board's WiFi.</p>
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="e1b--ship--log">E1b — ship + log</h1>
+<ol>
+<li><code>git push -u origin main</code></li>
+<li>Cloudflare → <strong>Workers &amp; Pages → Create → Pages → Connect to Git</strong> → your repository → build command <em>blank</em>, output <code>/</code> → Deploy</li>
+<li>Open <code>https://rc-filter-xxxx.pages.dev</code> <strong>on your phone</strong>. Move a slider. Send it to a non-physicist.</li>
+<li><strong>You</strong> write <code>PROGRESS.md</code>: done / verified / next / gotchas. Commit, push — and watch it redeploy itself.</li>
+</ol>
+<p><span class="small">Fallback: GitHub → Settings → Pages → branch main. That is continuous deployment (every push publishes itself); you just did it. This repository is your course page from now on.</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="12" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -402,24 +429,9 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="the-instrument-on-your-phone">The instrument on your phone</h1>
-<p>Your board is an <strong>access point</strong>: LED blue → phone joins <code>instrument-XXXX</code> (password <code>instrument</code>) → <strong><a href="http://192.168.4.1">http://192.168.4.1</a></strong> → tap <em>Red</em>.</p>
-<div class="two">
-<div>
-<p><strong>firmware</strong> on the ESP32-S3<br />
-⇅ one <strong>WebSocket</strong><br />
-<strong>phone app</strong> (a web page the board serves)<br />
-⇅ same messages<br />
-<strong><code>instrument.py</code></strong> in Python on a PC</p>
-</div>
-<div>
-<p>phone → board, one JSON message:<br />
-<code>{&quot;block&quot;:&quot;base&quot;,&quot;cmd&quot;:&quot;led&quot;,&quot;args&quot;:{&quot;r&quot;:255,&quot;g&quot;:0,&quot;b&quot;:0}}</code><br />
-board → phone, one reply<br />
-board → everyone, <strong>20 × per second</strong>: status numbers → the chart, the alarms</p>
-</div>
-</div>
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="break">Break</h1>
+<p>When we come back: join your board's WiFi.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -442,7 +454,47 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="the-instrument-on-your-phone">The instrument on your phone</h1>
+<p>Your board is an <strong>access point</strong> (its own WiFi network): LED blue → phone joins <code>instrument-XXXX</code> (password <code>instrument</code>) → <strong><a href="http://192.168.4.1">http://192.168.4.1</a></strong> → tap <em>Red</em>.</p>
+<div class="two">
+<div>
+<p><strong>firmware</strong> on the ESP32-S3<br />
+⇅ one <strong>WebSocket</strong> (a live two-way connection)<br />
+<strong>phone app</strong> (a web page the board serves)<br />
+⇅ same messages<br />
+<strong><code>instrument.py</code></strong> in Python on a PC</p>
+</div>
+<div>
+<p>phone → board, one JSON message (plain-text structured data):<br />
+<code>{&quot;block&quot;:&quot;base&quot;,&quot;cmd&quot;:&quot;led&quot;,&quot;args&quot;:{&quot;r&quot;:255,&quot;g&quot;:0,&quot;b&quot;:0}}</code><br />
+board → phone, one reply<br />
+board → everyone, <strong>20 × per second</strong>: status numbers → the chart, the alarms</p>
+</div>
+</div>
+<footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+section h1 { color: #0e2a52; font-size: 1.6em; }
+section h2 { color: #0e2a52; }
+section.lead { text-align: center; justify-content: center; }
+section.lead h1 { font-size: 2.1em; }
+code { font-size: 0.85em; }
+.small { font-size: 0.7em; color: #555; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
+footer { color: #888; font-size: 0.55em; }
+" lang="en-US" data-marpit-pagination="14" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+section h1 { color: #0e2a52; font-size: 1.6em; }
+section h2 { color: #0e2a52; }
+section.lead { text-align: center; justify-content: center; }
+section.lead h1 { font-size: 2.1em; }
+code { font-size: 0.85em; }
+.small { font-size: 0.7em; color: #555; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
+footer { color: #888; font-size: 0.55em; }
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="the-two-files-a-control-touches">The two files a control touches</h1>
 <div class="two">
 <div>
@@ -467,41 +519,6 @@ els.<span class="hljs-property">counter</span>.<span class="hljs-property">textC
 <p>A command is <strong>one <code>if</code> and one button</strong>. A number is <strong>one <code>out[...]</code> and one <code>&lt;span&gt;</code></strong>.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="14" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
-section h1 { color: #0e2a52; font-size: 1.6em; }
-section h2 { color: #0e2a52; }
-section.lead { text-align: center; justify-content: center; }
-section.lead h1 { font-size: 2.1em; }
-code { font-size: 0.85em; }
-.small { font-size: 0.7em; color: #555; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
-footer { color: #888; font-size: 0.55em; }
-" lang="en-US" data-marpit-pagination="14" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
-section h1 { color: #0e2a52; font-size: 1.6em; }
-section h2 { color: #0e2a52; }
-section.lead { text-align: center; justify-content: center; }
-section.lead h1 { font-size: 2.1em; }
-code { font-size: 0.85em; }
-.small { font-size: 0.7em; color: #555; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
-footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="e2--your-phone-app-measures-something-on-your-esp32">E2 — your phone app measures something on your ESP32</h1>
-<p><strong>One command out, one live measurement back — with its noise.</strong> Default recipe (workbook §A.4):</p>
-<ol>
-<li><code>BaseBlock.h</code>: a 1000-sample ring buffer, <code>adcN_ = 16</code>, <code>adcV_</code>, <code>adcSd_</code></li>
-<li><code>loop()</code>: every 1000 µs <code>analogReadMilliVolts(4)</code> into the ring; mean and sd over the last N — <strong>no <code>delay()</code></strong></li>
-<li><code>handle()</code>: <code>set_avg {n}</code> (1…1000) · <code>status()</code>: <code>adc_v</code>, <code>adc_sd</code>, <code>avg_n</code></li>
-<li><code>panels/base.js</code>: an <strong>N</strong> input + <em>Set</em> → <code>api.send('base','set_avg',{n})</code>; two readouts filled in <code>onStatus</code></li>
-<li><code>pio run -e esp32s3-sim -t upload &amp;&amp; pio run -e esp32s3-sim -t uploadfs</code></li>
-<li><strong>Verify against a prediction:</strong> sd for N = 1, 4, 16, 64, 256. White noise says 1/√N. It won't obey exactly — quantisation floor? mains pickup on the wire? <strong>Say why.</strong></li>
-<li><code>git switch -c e2-&lt;name&gt;</code> · commit · push · <code>gh pr create</code> · <strong>five numbers + one sentence + a screenshot in the PR</strong></li>
-</ol>
-<p><span class="small">The tutor writes boilerplate; you write the statistics, the command and the widget. Fallback for a late flash failure only: the LED <code>press</code> button + counter (snippet in the base block comments). Flash fails? BOOT + RST · driver · port · <strong>data</strong> cable.</span></p>
-<footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
-</section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="15" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
 section h1 { color: #0e2a52; font-size: 1.6em; }
 section h2 { color: #0e2a52; }
@@ -522,7 +539,42 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="e2--your-phone-app-measures-something-on-your-esp32">E2 — your phone app measures something on your ESP32</h1>
+<p><strong>One command out, one live measurement back — with its noise.</strong> Default recipe (workbook §A.4):</p>
+<ol>
+<li><code>BaseBlock.h</code>: a 1000-sample ring buffer (a fixed-size list that overwrites its oldest entry), <code>adcN_ = 16</code>, <code>adcV_</code>, <code>adcSd_</code></li>
+<li><code>loop()</code>: every 1000 µs <code>analogReadMilliVolts(4)</code> into the ring; mean and sd over the last N — <strong>no <code>delay()</code></strong></li>
+<li><code>handle()</code>: <code>set_avg {n}</code> (1…1000) · <code>status()</code>: <code>adc_v</code>, <code>adc_sd</code>, <code>avg_n</code></li>
+<li><code>panels/base.js</code>: an <strong>N</strong> input + <em>Set</em> → <code>api.send('base','set_avg',{n})</code>; two readouts filled in <code>onStatus</code></li>
+<li><code>pio run -e esp32s3-sim -t upload &amp;&amp; pio run -e esp32s3-sim -t uploadfs</code></li>
+<li><strong>Verify against a prediction:</strong> sd for N = 1, 4, 16, 64, 256. White noise says 1/√N. It won't obey exactly — quantisation floor? mains pickup on the wire? <strong>Say why.</strong></li>
+<li><code>git switch -c e2-&lt;name&gt;</code> · commit · push · <code>gh pr create</code> · <strong>five numbers + one sentence + a screenshot in the PR</strong></li>
+</ol>
+<p><span class="small"><code>pio run … upload</code> builds the firmware and flashes it; <code>uploadfs</code> sends the app's files to the board. The tutor writes boilerplate; you write the statistics, the command and the widget (one control or readout on the phone app). Fallback for a late flash failure only: the LED <code>press</code> button + counter (snippet in the base block comments). Flash fails? BOOT + RST · driver · port · <strong>data</strong> cable.</span></p>
+<footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+section h1 { color: #0e2a52; font-size: 1.6em; }
+section h2 { color: #0e2a52; }
+section.lead { text-align: center; justify-content: center; }
+section.lead h1 { font-size: 2.1em; }
+code { font-size: 0.85em; }
+.small { font-size: 0.7em; color: #555; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
+footer { color: #888; font-size: 0.55em; }
+" lang="en-US" data-marpit-pagination="16" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+section h1 { color: #0e2a52; font-size: 1.6em; }
+section h2 { color: #0e2a52; }
+section.lead { text-align: center; justify-content: center; }
+section.lead h1 { font-size: 2.1em; }
+code { font-size: 0.85em; }
+.small { font-size: 0.7em; color: #555; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
+footer { color: #888; font-size: 0.55em; }
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="the-class-board">The class board</h1>
 <div class="two">
 <div>
@@ -569,41 +621,9 @@ footer { color: #888; font-size: 0.55em; }
 <code>AI1 AI2 AI3 AI4</code><br />
 <code>AI5 AI6 AI7 AI8</code></p>
 <p>Base (instructor): dev-board socket, buses, LED, Qwiic, expansion header.<br />
-JLC assembles everything; you solder nothing.</p>
+JLC (JLCPCB, the factory that makes and assembles our boards) assembles everything; you solder nothing.</p>
 </div>
 </div>
-<footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
-</section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="16" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
-section h1 { color: #0e2a52; font-size: 1.6em; }
-section h2 { color: #0e2a52; }
-section.lead { text-align: center; justify-content: center; }
-section.lead h1 { font-size: 2.1em; }
-code { font-size: 0.85em; }
-.small { font-size: 0.7em; color: #555; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
-footer { color: #888; font-size: 0.55em; }
-" lang="en-US" data-marpit-pagination="16" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
-section h1 { color: #0e2a52; font-size: 1.6em; }
-section h2 { color: #0e2a52; }
-section.lead { text-align: center; justify-content: center; }
-section.lead h1 { font-size: 2.1em; }
-code { font-size: 0.85em; }
-.small { font-size: 0.7em; color: #555; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
-footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="your-block--volunteers-first-then-lots">Your block — volunteers first, then lots</h1>
-<p>Five names, five blocks. From now on:</p>
-<ul>
-<li>you <strong>read</strong> it (two questions and one design number this week)</li>
-<li>you <strong>route</strong> it (week 2, your zone of the PCB)</li>
-<li>you <strong>write its driver and panel</strong> (week 3, in sim)</li>
-<li>you <strong>measure one number</strong> on it and <strong>demo</strong> it (Oct)</li>
-</ul>
-<p>The tutor writes your block into <code>PROGRESS.md</code> and opens your block page.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="17" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -626,18 +646,16 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
-<h1 id="beyond-the-baseline">Beyond the baseline</h1>
-<p>The <strong>hardware is the shared baseline</strong> — fixed by budget and timeline; JLC builds it.<br />
-The <strong>software, firmware and app are open.</strong> That is where you show what you can do.</p>
-<p>Whenever you are ahead, the question is: <em>what problem in my lab could this instrument solve?</em></p>
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="your-block--volunteers-first-then-lots">Your block — volunteers first, then lots</h1>
+<p>Five names, five blocks. From now on:</p>
 <ul>
-<li>a <strong>data logger</strong> to CSV that a tool of yours reads · <strong>LINE / Telegram alerts</strong> from the alarm engine</li>
-<li><strong>remote access</strong> + a <strong>Python sweep</strong> overnight · a <strong>calibration routine</strong> on the board</li>
-<li>a <strong>PID / controller block</strong> — today's PID page, made real · a <strong>second node</strong> (S3-CAM on a gauge)</li>
+<li>you <strong>read</strong> it (two questions and one design number this week)</li>
+<li>you <strong>route</strong> it (week 2, your zone of the PCB — the printed circuit board layout)</li>
+<li>you <strong>write its driver and panel</strong> (week 3, in sim mode — the firmware fakes its hardware, so it runs on the bare dev board)</li>
+<li>you <strong>measure one number</strong> on it and <strong>demo</strong> it (Oct)</li>
 </ul>
-<p>Bring a real problem to Lecture 2; the tutor helps you write its <code>SPEC.md</code>. Optional fifth item at the demo.</p>
-<p><strong>Most encouraged: talk to your instrument from LINE or Telegram</strong> — push notifications when a value drifts, bot commands that read a value or switch a relay, from anywhere.</p>
+<p>The tutor writes your block into <code>PROGRESS.md</code> and opens your block page.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="18" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -660,20 +678,54 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
+<h1 id="beyond-the-baseline">Beyond the baseline</h1>
+<p>The <strong>hardware is the shared baseline</strong> — fixed by budget and timeline; JLC builds it.<br />
+The <strong>software, firmware and app are open.</strong> That is where you show what you can do.</p>
+<p>Whenever you are ahead, the question is: <em>what problem in my lab could this instrument solve?</em></p>
+<ul>
+<li>a <strong>data logger</strong> to CSV that a tool of yours reads · <strong>LINE / Telegram alerts</strong> from the alarm engine</li>
+<li><strong>remote access</strong> + a <strong>Python sweep</strong> overnight · a <strong>calibration routine</strong> on the board</li>
+<li>a <strong>PID / controller block</strong> — today's PID page, made real · a <strong>second node</strong> (S3-CAM on a gauge)</li>
+</ul>
+<p>Bring a real problem to Lecture 2; the tutor helps you write its <code>SPEC.md</code>. Optional fifth item at the demo.</p>
+<p><strong>Most encouraged: talk to your instrument from LINE or Telegram</strong> — push notifications when a value drifts, bot commands that read a value or switch a relay, from anywhere.</p>
+<footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
+</section>
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+section h1 { color: #0e2a52; font-size: 1.6em; }
+section h2 { color: #0e2a52; }
+section.lead { text-align: center; justify-content: center; }
+section.lead h1 { font-size: 2.1em; }
+code { font-size: 0.85em; }
+.small { font-size: 0.7em; color: #555; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
+footer { color: #888; font-size: 0.55em; }
+" lang="en-US" data-marpit-pagination="19" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+section h1 { color: #0e2a52; font-size: 1.6em; }
+section h2 { color: #0e2a52; }
+section.lead { text-align: center; justify-content: center; }
+section.lead h1 { font-size: 2.1em; }
+code { font-size: 0.85em; }
+.small { font-size: 0.7em; color: #555; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
+footer { color: #888; font-size: 0.55em; }
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="homework-1">Homework 1</h1>
 <ul>
-<li>[ ] <strong>E2 finish + merge</strong> — merge once reviewed</li>
+<li>[ ] <strong>E2 finish + merge</strong> — merge (bring your branch into the main line) once reviewed</li>
 <li>[ ] <strong>E3 read your block</strong> — V3, two answers <strong>and the design number</strong> in <code>notes.md</code></li>
-<li>[ ] <strong>E4 KiCad ready</strong> — V4, install KiCad 10 (the library is in the repo), screenshot your zone</li>
+<li>[ ] <strong>E4 KiCad ready</strong> — V4, install KiCad 10 (the part library is in the repository), screenshot your zone</li>
 <li>[ ] <strong>E5 your SPEC paragraph</strong> — what, <strong>the number you will measure</strong>, how you show it</li>
 <li>[ ] <strong>reading</strong> — workbook ch. C (git, KiCad); ch. A where needed</li>
 </ul>
 <p><code>/tutor HW1</code> paces it; stuck? ask it for the fix. Email the instructor after that.</p>
-<p>Every work session ends with <code>PROGRESS.md</code> + commit — your day-1 repo and the class repo alike.</p>
+<p>Every work session ends with <code>PROGRESS.md</code> + commit — your day-1 repository and the class repository alike.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>
-</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="19" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-class="lead" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+</foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="20" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101" data-class="lead" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
 section h1 { color: #0e2a52; font-size: 1.6em; }
 section h2 { color: #0e2a52; }
 section.lead { text-align: center; justify-content: center; }
@@ -683,7 +735,7 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-" lang="en-US" class="lead" data-marpit-pagination="19" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--class:lead;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
+" lang="en-US" class="lead" data-marpit-pagination="20" style="--paginate:true;--footer:Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101;--class:lead;--theme:default;--style:section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
 section h1 { color: #0e2a52; font-size: 1.6em; }
 section h2 { color: #0e2a52; }
 section.lead { text-align: center; justify-content: center; }
@@ -693,9 +745,9 @@ code { font-size: 0.85em; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .box { border: 2px solid #0e2a52; border-radius: 10px; padding: 12px 18px; }
 footer { color: #888; font-size: 0.55em; }
-;" data-marpit-pagination-total="19" data-size="16:9">
+;" data-marpit-pagination-total="20" data-size="16:9">
 <h1 id="next-friday-your-part-of-the-board">Next Friday: your part of the board</h1>
-<p>Electronics 101 on <strong>our</strong> schematic · KiCad's six operations · place your missing parts · route your zone · your first PR into the class board</p>
+<p>Electronics 101 on <strong>our</strong> schematic (the circuit drawing) · KiCad's six operations · place your missing parts · route your zone · your first PR into the class board</p>
 <p>Before then: HW1, KiCad 10 installed, the project open.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 1 — AI 101</footer>
 </section>

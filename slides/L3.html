@@ -29,7 +29,7 @@ footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="14" data-size="16:9">
 <h1 id="firmware-and-mechanical-101--polish-box-and-what-else">Firmware and Mechanical 101 — polish, box, and what else</h1>
 <p><strong>Lecture 3 · Fri 2 Oct 2026 · 14:20–16:20 · R311 IAMS</strong></p>
-<p>Your block's driver and phone panel, in sim · one alarm rule · your box from the template · what else this can do</p>
+<p>Your block's driver and phone panel, in sim mode (firmware that fakes its hardware, on the dev board) · one alarm rule · your box from the template · what else this can do</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="2" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -54,7 +54,7 @@ footer { color: #888; font-size: 0.55em; }
 <h1 id="where-we-are">Where we are</h1>
 <ul>
 <li>The five zones are merged; the board is <strong>on order</strong> since Mon 28 Sep, back ≈ 12 Oct, <strong>fully assembled</strong>. Here is the 3D view.</li>
-<li>Today everything runs in <strong>sim mode on your dev board</strong>. The driver you write today runs unchanged on the real board in the wrap-up.</li>
+<li>Today everything runs in <strong>sim mode on your dev board</strong> (the bare ESP32-S3 board). The driver you write today runs unchanged on the real board in the wrap-up.</li>
 <li><strong>The demo checklist</strong> (week of 26 Oct; format agreed in class): ① a waveform out, seen on the scope <em>and</em> on the instrument's own input · ② change it from the phone · ③ alarm → relay → notification · ④ <strong>your block</strong>, its panel, one thing it does, your number.</li>
 </ul>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
@@ -110,9 +110,10 @@ code { font-size: 0.85em; }
 footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="14" data-size="16:9">
 <h1 id="three-data-paths-on-one-websocket">Three data paths on one WebSocket</h1>
+<p>One <strong>WebSocket</strong> — a live two-way connection between phone and board — carries three kinds of traffic:</p>
 <div class="two">
 <div class="box">
-<p><strong>Command → reply</strong> (JSON)<br />
+<p><strong>Command → reply</strong> (JSON — plain-text structured data)<br />
 <code>{&quot;block&quot;:&quot;b3&quot;,&quot;cmd&quot;:&quot;sine&quot;,&quot;args&quot;:{&quot;ch&quot;:1,&quot;freq&quot;:1000,&quot;amp&quot;:5}}</code><br />
 → <code>{&quot;ok&quot;:true,&quot;result&quot;:{…}}</code></p>
 <p><strong>Status</strong> (JSON, 20 Hz)<br />
@@ -126,7 +127,7 @@ every block's numbers → the strip chart, the alarm engine</p>
 <p>Rolling: tens of kS/s (WiFi). Burst: up to the ADC (500 kS/s).</p>
 </div>
 </div>
-<p><code>instrument.py</code> speaks all three from a PC. Your E2 <code>press</code> command was already path one.</p>
+<p><code>instrument.py</code> (the Python client on your PC) speaks all three. Your E2 <code>press</code> command was already path one.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="5" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -159,7 +160,7 @@ footer { color: #888; font-size: 0.55em; }
  every 50 ms: OutputsBlock::status(out) → {&quot;ao1&quot;:…,&quot;mode1&quot;:&quot;sine&quot;}
    → broadcast → panel.onStatus(st) → the number on your screen
 </code></pre>
-<p>You will explain this to the tutor <strong>before your second flash</strong>.</p>
+<p>You will explain this to the tutor <strong>before your second flash</strong> (writing the firmware onto the board).</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -196,7 +197,7 @@ footer { color: #888; font-size: 0.55em; }
   },
 };
 </code></pre>
-<p>Every status key you show must exist in your <code>status()</code>. Vanilla JS, no build, no CDN — the board is offline.</p>
+<p>Every status key you show must exist in your <code>status()</code>. Plain JavaScript, no build step, no CDN (nothing loaded from the internet) — the board is offline.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="7" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -224,7 +225,7 @@ footer { color: #888; font-size: 0.55em; }
 <p><strong>SIM</strong> (<code>-DSIM=1</code>): your <code>#ifdef SIM</code> branch returns plausible, <em>moving</em> fake values — a slow sine, a counter, a drift towards the setpoint. Write it <strong>first</strong>; flash; see your tab; then the panel; then the real branch.</p>
 </div>
 <div>
-<p><strong>Alarms</strong> are data: <code>{block, key, op, threshold, action}</code> tested 20× per second on the same status; fire once on the rising edge; <code>notify</code> toasts every phone, <code>relay:&lt;n&gt;:on|off</code> acts on B4. Persist in <code>/alarms.json</code>.</p>
+<p><strong>Alarms</strong> are data: <code>{block, key, op, threshold, action}</code> tested 20× per second on the same status; fire once on the rising edge; <code>notify</code> pops a message (a &quot;toast&quot;) on every phone, <code>relay:&lt;n&gt;:on|off</code> acts on B4. Saved in <code>/alarms.json</code>.</p>
 <p><strong>Your one rule</strong> — B1 <code>ai1 &gt; 9 → relay 1 off</code> · B2 <code>v3v3 &lt; 3.0 → notify</code> · B3 <code>ao1 &gt; 9.5</code> · B4 opto count jump · B5 TRIG edge.</p>
 </div>
 </div>
@@ -253,11 +254,11 @@ footer { color: #888; font-size: 0.55em; }
 <ol>
 <li>Copy <code>blocks/template/</code> → <code>blocks/b&lt;N&gt;_&lt;name&gt;/</code>; rename the class; <code>name()</code> → <code>&quot;b&lt;N&gt;&quot;</code></li>
 <li><strong>SIM branch first</strong> — your status keys, your commands, moving fake values → flash <code>esp32s3-sim</code> → your tab shows them</li>
-<li><code>panels/template.js</code> → <code>panels/b&lt;N&gt;.js</code> — one control per command, one readout per key → <code>uploadfs</code> → reload</li>
+<li><code>panels/template.js</code> → <code>panels/b&lt;N&gt;.js</code> — one control per command, one readout per key → <code>uploadfs</code> (sends the app's files to the board) → reload</li>
 <li><strong>One alarm rule</strong> from a button; trigger it in sim; watch the toast (and B4's relay flip)</li>
 <li>Explain one round-trip to the tutor</li>
 <li><strong>Pair up:</strong> B3 ↔ B1 (a sine into an input) · B5 ↔ B4 (a TTL line into an opto)</li>
-<li>Branch <code>b&lt;N&gt;-fw-&lt;name&gt;</code> → PR; CI builds both envs</li>
+<li>Branch <code>b&lt;N&gt;-fw-&lt;name&gt;</code> (your own line of work) → pull request (PR); CI (GitHub's automatic build) builds both environments</li>
 </ol>
 <p><span class="small">Your block page lists your commands and keys: B1 <code>read_all set_range</code> · B2 <code>rails</code> · B3 <code>set_dc sine off</code> · B4 <code>relay relay_all opto_reset</code> · B5 <code>dio dio_mask trig_dir trig fast_out</code>.</span></p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
@@ -306,12 +307,12 @@ footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="14" data-size="16:9">
 <h1 id="boxes-for-electronics--six-things-to-know">Boxes for electronics — six things to know</h1>
 <ol>
-<li><strong>FDM tolerance:</strong> holes <strong>+0.3 mm</strong>, slots +0.2 mm; a 3.0 mm screw wants a 3.3 mm hole.</li>
+<li><strong>FDM (filament 3D printing) tolerance:</strong> holes <strong>+0.3 mm</strong>, slots +0.2 mm; a 3.0 mm screw wants a 3.3 mm hole.</li>
 <li><strong>Walls 2 mm</strong>; corners rounded; no unsupported overhang &gt; 45°.</li>
 <li><strong>Heat-set inserts</strong> for M3 — print the boss, melt the insert in.</li>
 <li><strong>Layer direction</strong> is strength direction: print the lid flat; stand-offs vertical.</li>
 <li><strong>The PCB front panel</strong> makes the cutouts trivial: one rectangle, four holes. The SMAs and the OLED live on the panel PCB, not on the box.</li>
-<li><strong>STEP from KiCad</strong> (<em>File → Export → STEP</em>) — the template already contains the merged board.</li>
+<li><strong>STEP (the 3D exchange file) from KiCad</strong> (<em>File → Export → STEP</em>) — the template already contains the merged board.</li>
 </ol>
 <p>Laser-cut acrylic is the alternative for flat panels. Not used for the box.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
@@ -337,10 +338,10 @@ footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="14" data-size="16:9">
 <h1 id="e12--your-box-started-now-finished-at-home">E12 — your box (started now, finished at home)</h1>
 <ol>
-<li>Open the instructor's <strong>Onshape template</strong> → <em>Copy workspace</em> into your account</li>
+<li>Open the instructor's <strong>Onshape</strong> (browser CAD) <strong>template</strong> → <em>Copy workspace</em> into your account</li>
 <li>The board STEP is in it; the three parameters — <strong>height, wall, foot style</strong> — are in the <em>Variables</em> table</li>
 <li>Change <strong>one thing</strong> that makes it yours: a vent pattern, an embossed name, different feet, a colour note. <strong>One.</strong></li>
-<li><em>Export → STL</em> (binary, mm) → <code>docs/students/&lt;name&gt;/box.stl</code> → commit, with a screenshot</li>
+<li><em>Export → STL</em> (the 3D-print file; binary, mm) → <code>docs/students/&lt;name&gt;/box.stl</code> → commit (save a snapshot), with a screenshot</li>
 </ol>
 <p>The instructor prints all five on the Bambu the week after. Boards back ≈ 12 Oct go straight into them.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
@@ -367,7 +368,7 @@ footer { color: #888; font-size: 0.55em; }
 <h1 id="build-something-your-lab-needs">Build something your lab needs</h1>
 <p>The hardware was the baseline. <strong>The software is yours.</strong> The same shape — blocks, one socket, a phone panel, a Python client — becomes whatever your lab needs:</p>
 <ul>
-<li><strong>Bot alerts</strong> — the alarm engine's <code>notify</code> → a PC script → LINE / Telegram webhook</li>
+<li><strong>Bot alerts</strong> — the alarm engine's <code>notify</code> → a PC script → LINE / Telegram webhook (a web address the bot listens on)</li>
 <li><strong>A data logger</strong> — the Scope tab on a real signal; <code>instrument capture</code> straight into NumPy; CSV on a schedule</li>
 <li><strong>Scripted sweeps</strong> — <code>instrument send b3 sine …</code> in a loop, <code>instrument stream b1.ai1 --csv</code></li>
 <li><strong>A controller block</strong> — close the loop between an input and an output; PID from day 1, on hardware</li>
@@ -375,7 +376,7 @@ footer { color: #888; font-size: 0.55em; }
 <li><strong>Videos, slides, reports with AI</strong> — the lab's <code>show-your-work</code> skills (<code>education-video</code>, <code>slide-deck</code>, <code>technical-report</code>, <code>showoff-render</code>): <em>live demo</em></li>
 </ul>
 <p><strong>Most encouraged:</strong> talk to your instrument from <strong>LINE or Telegram</strong> — push notifications on an alarm, bot commands that read a value or switch a relay, from anywhere.</p>
-<p>Write its <code>SPEC.md</code> with one verifiable number; build it on a branch; bring it as the optional fifth demo item.</p>
+<p>Write its <code>SPEC.md</code> with one verifiable number; build it on a branch of its own; bring it as the optional fifth demo item.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="13" data-paginate="true" data-footer="Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101" data-theme="default" data-style="section { font-family: Inter, &quot;Noto Sans TC&quot;, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 28px; padding: 48px 64px; }
@@ -440,7 +441,7 @@ code { font-size: 0.85em; }
 footer { color: #888; font-size: 0.55em; }
 ;" data-marpit-pagination-total="14" data-size="16:9">
 <h1 id="build-it-ship-it-log-it">Build it. Ship it. Log it.</h1>
-<p>You did it on a teaching page, on a dev board, on a class board, in firmware, in a box.<br />
+<p>You did it — built, published where others can open it, logged — on a teaching page, on a dev board, on a class board, in firmware, in a box.<br />
 The next instrument is yours.</p>
 <footer>Basic Skills for Experimentalists · TIGP 2026 · Lecture 3 — Firmware and Mechanical 101</footer>
 </section>
