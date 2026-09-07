@@ -47,7 +47,7 @@ If the upload says *"No serial data received"* (a factory-fresh board, USB ID `3
 
 1. The board's RGB LED turns **blue** = it is an access point (its own WiFi network, which your phone joins). Serial monitor prints `AP "instrument-XXXX" password "instrument"`.
 2. On the phone join WiFi `instrument-XXXX`, password `instrument`.
-3. Open **http://192.168.4.1** in the browser. Tap *Red* on the Base tab: the LED changes. The chart plots `base.counter`; pick another key from the dropdown.
+3. Open **http://192.168.4.1** in the browser (type the `http://`; stay connected when the phone warns about no internet, mobile data off on Android). Tap *Red* on the Base tab: the LED changes. The chart plots `base.counter`; pick another key from the dropdown.
 4. *Add to Home screen* gives an app icon. (Full "install" prompts need HTTPS, which the board does not have; the shortcut is enough.)
 
 To use the lab WiFi instead: copy `firmware/include/secrets.h.example` to `secrets.h`, fill in SSID/password — type the password into that file yourself, never into a Claude chat; the file is git-ignored (`git check-ignore -v firmware/include/secrets.h` prints a line) — and re-flash. The LED turns **green** and the board is at `http://instrument-XXXX.local` (mDNS: the board announces its own name on the local network, so no IP address is needed; `XXXX` is the same suffix as its access-point name, so several boards can share one network). If joining fails within 10 s it falls back to the AP.

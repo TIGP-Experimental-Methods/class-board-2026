@@ -82,7 +82,7 @@ Open Claude Code **in the class repository** (VS Code: *File → Open Folder…*
 
 ### A.3 The instrument on your phone (after the break)
 Your dev board (the development board: the ESP32 on a small board with a USB connector and pins) is flashed in class — you write the skeleton firmware onto it over USB yourself (A.4 step 5; a brand-new board needs BOOT+RST once) — and then it is a WiFi access point (its own WiFi network, which your phone joins; LED blue).
-1. Phone joins `instrument-XXXX` (label on the board; password `instrument`); open **http://192.168.4.1**. Tap *Red*; the chart plots `base.counter`.
+1. Phone joins `instrument-XXXX` (label on the board; password `instrument`). The phone will warn that this network has no internet: choose to stay connected, and on Android switch mobile data off for now, or the phone silently jumps back to it. Type **http://192.168.4.1** into the browser yourself, with the `http://` (the browser otherwise tries `https`, which the board does not serve). Tap *Red*; the chart plots `base.counter`.
 2. The two files a control touches — open them:
    - `firmware/src/blocks/base/BaseBlock.cpp`: `handle()` receives the message `{"id":1,"block":"base","cmd":"led","args":{"r":255,"g":0,"b":0}}` and reads `cmd` and `args`; `status()` fills the numbers the phone sees at 20 Hz.
    - `host/pwa/panels/base.js`: `render()` builds the controls and calls `api.send('base','led',{r,g,b})`; `onStatus(st)` updates the readouts.
