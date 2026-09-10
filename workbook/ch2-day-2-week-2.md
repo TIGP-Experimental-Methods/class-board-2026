@@ -40,7 +40,7 @@ Six ideas, each pointed at a page of the schematic PDF. [Chapter A](chA-electron
 We build the skeleton of the class board together; each of you adds one section — the missing parts of your block's schematic, then the copper of your zone (the outlined region of the board that is yours). The instructor's rails, connectors and dev-board socket are already there.
 
 #### 3a.1 (E6) — schematic gaps
-- [ ] `git switch -c b<N>-<name>` (a new branch: your own line of work inside the repository — the project folder whose complete history git keeps); open `hardware/class-board.kicad_pro`; open your sheet `student/b<N>_gapped.kicad_sch`.
+- [ ] New branch `b<N>-<name>` (VS Code: click the branch name bottom-left → *Create new branch…*; a branch is your own line of work inside the repository — the project folder whose complete history git keeps); open `hardware/class-board.kicad_pro`; open your sheet `student/b<N>_gapped.kicad_sch`.
 - [ ] Put the full PDF page for your block next to it. Your block page lists the 3–4 parts that were deleted. For each: `A` (add symbol — a part's drawing in the schematic) → search the **project library** `class_board` (the set of symbols and footprints for our parts) → place → wire (`W`) → set the value (`V`) and check the **footprint field** (`E`) says the right package (0603, SOT-89, …).
 - [ ] Keep the reference designators the PDF shows (the footprints on the PCB carry the same names, so *Update PCB* drops the parts exactly where the instructor placed them).
 - [ ] `Inspect → ERC` (the electrical rules check) → **0 errors** (warnings about power flags you may ignore only if the tutor agrees).

@@ -77,7 +77,7 @@ The slides teach these; you reinforce them when the moment arrives — once, in 
 - *Wrong target* — a similarly named file, the copy in the wrong folder → give explicit paths; keep the workspace tidy.
 - *Destructive actions* — deletes, force-pushes, "start clean" → work on a branch; commit first; never let the agent rewrite history.
 
-**Git with an agent** (taught from VS Code's Source Control panel; the terminal command is the equivalent, not the primary route): commit before the agent starts · small commits as it goes · review the diff, not the file · give it a branch · never let it rewrite history · tests go in git.
+**Git with an agent** (taught and used from VS Code's Source Control panel only; a terminal git command is used only when unavoidable — then you run it and say what it did): commit before the agent starts · small commits as it goes · review the diff, not the file · give it a branch · never let it rewrite history · tests go in git.
 
 **Context control:** when the context is about half full, quality drops before the window is full — the student pastes the handover prompt from the slides: *"Please finish what you are working on and document anything from this session that may be useful to future Claude sessions in .md files in this directory and a handover.md file to allow Claude to continue our work in a new session."* Then a fresh session reads those files. A mistake mid-run: stop the execution, rewind — do not argue with a poisoned context.
 

@@ -166,23 +166,23 @@ And beyond hallucination (slide 33): it invents specifics (look up every number 
 
 ## C.1 git and GitHub — from VS Code's Source Control panel (no terminal required)
 
-Source Control is the branching icon in the left bar. Changed files are marked **M**, new files **U**; click one to see its diff. The terminal command in the last column does the same thing.
+Source Control is the branching icon in the left bar. Changed files are marked **M**, new files **U**; click one to see its diff. Everything git in this course is done here; the one terminal command you will meet is the secrets check at the bottom, and Claude runs it for you.
 
-| You want to | In VS Code | Terminal equivalent |
-|---|---|---|
-| see what changed | Source Control; click a file for its diff | `git status` · `git diff` |
-| stage | **+** next to the file (or next to *Changes* for all) | `git add <path>` · `git add -A` |
-| commit | type the message, press *Commit* | `git commit -m "why, not what"` |
-| push | *Publish Branch* the first time; *Sync Changes* afterwards | `git push -u origin <branch>` · `git push` |
-| pull others' work | *Sync Changes* | `git pull` |
-| new branch | click the branch name (bottom-left) → *Create new branch…* | `git switch -c w1-<name>` |
-| back to main | branch name → `main`; then *Sync* | `git switch main` then `git pull` (two lines on Windows) |
-| history | Source Control → *Graph*; a file's *Timeline* (bottom of Explorer) | `git log --oneline -10` |
-| undo an uncommitted change | right-click the file → *Discard Changes* | `git restore <file>` |
-| undo a commit | Graph → right-click the commit → *Revert* (a new commit that reverses it) | `git revert <hash>` |
-| new repository | *Source Control → Initialize Repository*, then *Publish Branch* (public or private) | `gh repo create <user>/<name> --public --clone` |
-| open a pull request | push the branch; GitHub offers *Compare & pull request* | `gh pr create --fill` |
-| is this file ignored? | — | `git check-ignore -v <file>` (prints the rule, or nothing) |
+| You want to | In VS Code |
+|---|---|
+| see what changed | Source Control; click a file for its diff |
+| stage | **+** next to the file (or next to *Changes* for all) |
+| commit | type the message, press *Commit* |
+| push | *Publish Branch* the first time; *Sync Changes* afterwards |
+| pull others' work | *Sync Changes* |
+| new branch | click the branch name (bottom-left) → *Create new branch…* |
+| back to main | branch name → `main`; then *Sync* |
+| history | Source Control → *Graph*; a file's *Timeline* (bottom of Explorer) |
+| undo an uncommitted change | right-click the file → *Discard Changes* |
+| undo a commit | Graph → right-click the commit → *Revert* (a new commit that reverses it) |
+| new repository | *Source Control → Initialize Repository*, then *Publish Branch* (public or private) |
+| open a pull request | push the branch; GitHub offers *Compare & pull request* |
+| is this file ignored? (the secrets check) | ask Claude to run `git check-ignore -v firmware/include/secrets.h` — it must print the rule; nothing printed means the file is NOT ignored |
 
 Rules: `main` in the class repository is protected — your work goes on your branch (`w1-<name>`, later `b<N>-<name>`, `b<N>-fw-<name>`); one pull request per deliverable; the pull request description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. With an agent: commit before it starts · ask it to commit as it goes · review the diff, not the file · never let it rewrite history — say no to force-push and reset. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then e-mail the instructor (C.7).
 
