@@ -32,3 +32,6 @@ hardware/lib/*_done.txt
 hardware/lib/e2k_slow*
 hardware/lib/class_board/
 hardware/lib/symbol/
+
+# uv lock from local `uv pip install -e host/` (not used by SETUP.md or CI)
+host/uv.lock
