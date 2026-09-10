@@ -30,7 +30,7 @@ A physics graduate student — NTU or TIGP PhD level — who may have zero codin
 |---|---|---|
 | `CH0` | `workbook/ch0-before-day-1.md` + `SETUP.md` (repository root; run it step by step) | all |
 | `L1` | `workbook/ch1-day-1-week-1.md` — Workshop 1: AI for experimentalists | Part A (class: Project 1, Project 2) |
-| `HW1` | `workbook/ch1-day-1-week-1.md` | §1.6 *Between workshops* — "Before the next workshop: complete the preparation, improve your apps, build and have fun." The preparation for Workshop 2 is KiCad 10 installed and opened once, plus JLCPCB/LCSC accounts; the apps are Projects 1 and 2. `HW` in the argument means "between workshops" |
+| `HW1` | `workbook/ch1-day-1-week-1.md` | §1.6 *Between workshops* — "Before the next workshop: complete the preparation, improve your apps, build and have fun." The preparation for Workshop 2 is KiCad 10 installed and opened once, plus a JLCPCB account; the apps are Projects 1 and 2. `HW` in the argument means "between workshops" |
 | `L2` / `HW2` | `workbook/ch2-day-2-week-2.md` — Workshop 2: Designing printed circuit boards | Part A / Part B (between workshops: what must be finished for the PCB cutoff, Mon 28 Sep 2 pm; includes the student's `workbook/blocks/b<N>.md`) |
 | `L3` / `HW3` | `workbook/ch3-day-3-week-3.md` — Workshop 3: Firmware and basic mechanical design (PCB housing) | Part A / Part B (between workshops: what must be finished for the housing cutoff, Fri 9 Oct 2 pm; the driver + panel PR) |
 | `WRAP` / `DEMO` | `workbook/ch4-wrap-up-demo.md` — presentation and demonstration | E13 / E14 |
