@@ -100,7 +100,9 @@ def run(coro):
 
 
 HostOpt = typer.Option(
-    None, "--host", "-H",
+    None,
+    "--host",
+    "-H",
     help="board hostname or IP, e.g. instrument-639C.local on a shared network or 192.168.4.1 "
     "on the board's own access point (default: instrument.local, then 192.168.4.1)",
 )
