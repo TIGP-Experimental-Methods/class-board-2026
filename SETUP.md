@@ -1,6 +1,6 @@
 # SETUP.md — toolchain setup, run by Claude Code
 
-**What this is.** A step-by-step setup script for the Claude Code agent (Claude Code working on your files: it reads them, writes code, runs commands, and reports back) to follow on a student's laptop before day 1 of *Basic Skills for Experimentalists* (TIGP 2026). The student has already installed VS Code and the Claude Code extension, created a local course folder (e.g. `tigp-2026`), opened it in VS Code and pasted this prompt:
+**What this is.** A step-by-step setup script for the Claude Code agent (Claude Code working on your files: it reads them, writes code, runs commands, and reports back) to follow on a student's laptop before Workshop 1 of *Basic Skills for Experimentalists* (TIGP 2026). The student has already installed VS Code and the Claude Code extension, created a local course folder (e.g. `tigp-2026`), opened it in VS Code and pasted this prompt:
 
 > Read https://raw.githubusercontent.com/TIGP-Experimental-Methods/class-board-2026/main/SETUP.md and follow it step by step. Ask me before installing anything, and tell me what each step is for in one sentence.
 
@@ -104,7 +104,7 @@ gh repo clone TIGP-Experimental-Methods/class-board-2026
 
 ## Step 6 — PlatformIO and the ESP32 toolchain
 
-Purpose: PlatformIO builds the board's firmware (the program that runs on the ESP32-S3, the microcontroller we use) and flashes it (writes it onto the board over USB); the VS Code extension gives the buttons, the Core CLI gives `pio` in the terminal, and the first build downloads the ESP32-S3 toolchain (the compiler and helper programs that turn source code into firmware) so day 1 does not.
+Purpose: PlatformIO builds the board's firmware (the program that runs on the ESP32-S3, the microcontroller we use) and flashes it (writes it onto the board over USB); the VS Code extension gives the buttons, the Core CLI gives `pio` in the terminal, and the first build downloads the ESP32-S3 toolchain (the compiler and helper programs that turn source code into firmware) so Workshop 1 does not.
 
 Extension:
 
@@ -130,13 +130,13 @@ cd class-board-2026/firmware
 pio run -e esp32s3-sim
 ```
 
-This downloads the Espressif platform, compiler and framework (~1 GB) into `~/.platformio`, which the VS Code extension shares, so it happens once. Do not interrupt it. **It must finish before day 1.**
+This downloads the Espressif platform, compiler and framework (~1 GB) into `~/.platformio`, which the VS Code extension shares, so it happens once. Do not interrupt it. **It must finish before Workshop 1.**
 
 ✔ The PlatformIO alien-head icon is in the VS Code side bar (after *Developer: Reload Window* from the Command Palette); `pio --version` prints a version; the build output ends with `[SUCCESS]`.
 
 ## Step 7 — USB (only if the student already has the dev board)
 
-Purpose: confirm the laptop sees the board on a serial port; most students receive the board on day 1, so skip this step if there is no board yet and say so in the report.
+Purpose: confirm the laptop sees the board on a serial port; most students receive the board in Workshop 1, so skip this step if there is no board yet and say so in the report.
 
 The board is a Jinhua #40729 ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins; DevKitC-1 pinout). Its connector is **USB-C**; use a **data** cable that fits the laptop (USB-C to USB-C, or USB-A to USB-C — charging-only cables carry no data), plugged into the port marked *USB* (native USB, not *UART*). No serial driver is needed on Windows or macOS. Linux: add the user to the `dialout` group (the user group allowed to open serial ports: `sudo usermod -aG dialout $USER`, then log out and in) and install PlatformIO's udev rules (the file that tells Linux to let ordinary users talk to the board: https://docs.platformio.org/en/latest/core/installation/udev-rules.html).
 
@@ -146,11 +146,11 @@ pio device list
 
 ✔ A port is listed: Windows `COMn`, macOS `/dev/cu.usbmodem…`, Linux `/dev/ttyACM0`, with a hardware ID of either `USB VID:PID=303A:1001` — the board already carries our firmware (the chip's built-in USB-Serial/JTAG; flashing later needs no buttons) — or `USB VID:PID=303A:4001` — a factory-fresh board with the firmware it shipped with; both pass. On a `4001` board the first `upload` will end with *"No serial data received"*: hold **BOOT**, tap **RST**, release BOOT, run `pio device list` again — the board comes back as `303A:1001` on a different port — and flash to that port; this is needed once only. The boards handed out in class are already flashed. If no port at all: try another cable, the other USB port on the board, or the same BOOT+RST and retry.
 
-Flashing itself happens on day 1, from `class-board-2026/firmware`, one command at a time: `pio run -e esp32s3-sim -t upload`, then `pio run -e esp32s3-sim -t uploadfs`, then `pio device monitor`. Do not run these now unless the student asks.
+Flashing itself happens in Workshop 1 (Project 2), from `class-board-2026/firmware`, one command at a time: `pio run -e esp32s3-sim -t upload`, then `pio run -e esp32s3-sim -t uploadfs`, then `pio device monitor`. Do not run these now unless the student asks.
 
 ## Step 8 — Cloudflare account (manual)
 
-Purpose: on day 1 the student deploys (publishes, so it is live on the web) a web page to the public internet with Cloudflare Pages (a free service that turns a repository into a public web page), straight from a GitHub repository; the account and the GitHub authorisation are done in advance.
+Purpose: in Workshop 1 (Project 1) the student deploys (publishes, so it is live on the web) a web page to the public internet with Cloudflare Pages (a free service that turns a repository into a public web page), straight from a GitHub repository; the account and the GitHub authorisation are done in advance.
 
 **Manual (student, browser).**
 1. Sign up (free plan) at https://dash.cloudflare.com/sign-up and verify the e-mail.

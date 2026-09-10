@@ -11,20 +11,22 @@ The teaching instrument for **Basic Skills for Experimentalists** (TIGP, 2026): 
 
 **Blocks:** `base` (dev board itself) · `b1_inputs` (ADS8688 8-ch ADC, analog-to-digital converter) · `b2_power` (rails) · `b3_outputs` (DAC8563 digital-to-analog converter + ±10 V) · `b4_switching` (4 relays, 2 optos) · `b5_dio_trig` (8 TTL out, 2 fast out, TRIG). Protocol: [firmware/PROTOCOL.md](firmware/PROTOCOL.md).
 
-Until the class board arrives everything runs in **SIM mode** on a bare Jinhua ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins): each block fakes its hardware, so the app, the chart and the alarms all work on day 1.
+Until the class board arrives everything runs in **SIM mode** on a bare Jinhua ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins): each block fakes its hardware, so the app, the chart and the alarms all work from Workshop 1.
+
+**How this repository fits the course.** **Workshop 1: AI for experimentalists** is **Project 1** (a web app of your choice — a simulator or a game, built with the AI method) and **Project 2** (your own phone app that controls the ESP32 over WiFi). The firmware and app in this repository are the **reference for Project 2** — read them for the access point, the WebSocket and the LED — and the **fallback**: flash them if your own build stalls and you have a working app on the phone today. They are also the **base for Project 3a** (**Workshop 2: Designing printed circuit boards** — the class board in KiCad, one block per student) and **Project 3b** (**Workshop 3: Firmware and basic mechanical design (PCB housing)**). The course ends with a project presentation and demonstration, 26–30 Oct.
 
 ## The student package (everything you need is in this repository — the project folder whose complete history git keeps, stored online on GitHub)
 
 | What | Where |
 |---|---|
-| **Setup (before day 1)** | [SETUP.md](SETUP.md) — paste the prompt from workbook ch. 0 into Claude Code and it installs the toolchain (the compiler and helper programs that turn source code into firmware) |
-| **Workbook** — one chapter per session + homework, the same text the tutor runs | [`workbook/`](workbook/README.md): [ch. 0](workbook/ch0-before-day-1.md) · [ch. 1](workbook/ch1-day-1-week-1.md) · [ch. 2](workbook/ch2-day-2-week-2.md) · [ch. 3](workbook/ch3-day-3-week-3.md) · [ch. 4](workbook/ch4-wrap-up-demo.md) · [A](workbook/chA-electronics-from-zero.md) · [B](workbook/chB-how-the-software-works.md) · [C cheat-sheets](workbook/chC-cheat-sheets.md) |
-| **Your block page** | [`workbook/blocks/`](workbook/blocks/): B1 · B2 · B3 · B4 · B5 |
+| **Setup (before Workshop 1)** | [SETUP.md](SETUP.md) — paste the prompt from workbook ch. 0 into Claude Code and it installs the toolchain (the compiler and helper programs that turn source code into firmware) |
+| **Workbook** — one chapter per workshop + homework, the same text the tutor runs | [`workbook/`](workbook/README.md): [ch. 0](workbook/ch0-before-day-1.md) · [ch. 1](workbook/ch1-day-1-week-1.md) · [ch. 2](workbook/ch2-day-2-week-2.md) · [ch. 3](workbook/ch3-day-3-week-3.md) · [ch. 4](workbook/ch4-wrap-up-demo.md) · [A](workbook/chA-electronics-from-zero.md) · [B](workbook/chB-how-the-software-works.md) · [C cheat-sheets](workbook/chC-cheat-sheets.md) |
+| **Your block page** (assigned at the start of Workshop 2) | [`workbook/blocks/`](workbook/blocks/): B1 · B2 · B3 · B4 · B5 |
 | **The tutor** | `/tutor L1` (etc.) in Claude Code — [`.claude/skills/tutor/`](.claude/skills/tutor/SKILL.md), rules in [`tutor/COURSE-GUIDE.md`](tutor/COURSE-GUIDE.md) |
-| **Slides** | [`slides/`](slides/) — L1 · L2 · L3 as Marp Markdown (plain text with light formatting), HTML and PDF; also on the course site |
-| **Firmware + app skeleton** | `firmware/`, `host/` — flash it (write it onto the board over USB) in 5 commands below |
+| **Slides** | Workshop 1 as a PDF on the course site: https://tigp-experimental-methods.github.io/slides/W1-AI-for-experimentalists.pdf (Workshop 2 and 3 slides follow the same way; see [`slides/README.md`](slides/README.md)) |
+| **Firmware + app** (reference and fallback for Project 2; base for Project 3) | `firmware/`, `host/` — flash it (write it onto the board over USB) in 5 commands below |
 | **KiCad library package** | [`hardware/lib/`](hardware/lib/README.md) — project-local, nothing to unzip |
-| **Reference repositories for E1a** | https://github.com/TIGP-Experimental-Methods/pendulum-example (cart-pole) · https://github.com/TIGP-Experimental-Methods/csv-scope-example (CSV → scope lab tool) — options, or a fork (your own copy of one of them on GitHub) if your session stalls |
+| **Reference repositories for Project 1** | https://github.com/TIGP-Experimental-Methods/pendulum-example (cart-pole) · https://github.com/TIGP-Experimental-Methods/csv-scope-example (CSV → scope lab tool) — options, or a fork (your own copy of one of them on GitHub) if your session stalls |
 | **Course site** | https://tigp-experimental-methods.github.io/ |
 
 ## Flash in 5 commands (VS Code + PlatformIO)
@@ -64,7 +66,7 @@ instrument alarms list
 
 It finds `instrument.local`, then `192.168.4.1`; `--host 10.0.0.42` overrides.
 
-## Add a block (Session 3, exercise E11)
+## Add a block (Workshop 3, exercise E11)
 
 1. Copy `firmware/src/blocks/template/` → `firmware/src/blocks/b3_outputs/` (yours). Rename the class and `name()` → `"b3"`.
 2. Write the **SIM branch first**: `status()` returns plausible fake values; `handle()` accepts your commands. Flash; your tab appears with a generic key/value view.

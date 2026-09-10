@@ -1,7 +1,7 @@
 // Panel for the "base" block: LED colour + brightness, counter, chip info.
-// Exercise E2 adds one control + readouts here (and its handler + status keys in BaseBlock.cpp):
+// Project 2 (Workshop 1) may add one control + readouts here (and its handler + status keys in BaseBlock.cpp):
 // default = an N input (1..1024) for set_avg and live adc_v (mean of the newest N samples, V) /
-// adc_sd (the noise of one N-sample average, V) readouts (workbook ch. 1 A.4).
+// adc_sd (the noise of one N-sample average, V) readouts (workbook ch. 1, section 1.5).
 //
 // A panel is a plain object: { id, title, render(container, api), onStatus(status) }.
 //   render    builds the DOM once, when the tab is opened
@@ -36,7 +36,7 @@ export default {
         <label>counter</label><span class="value" id="counter">-</span>
         <button class="btn" id="counter-reset">Reset</button>
       </div>
-      <!-- TODO(E2): add your control + readouts here (workbook ch. 1 A.4). Default:
+      <!-- TODO(Project 2): add your control + readouts here (workbook ch. 1, section 1.5). Default:
            <div class="row"><label>N</label><input type="number" id="avg-n" value="16" min="1" max="1024">
                 <button class="btn primary" id="avg-set">Set</button></div>
            <div class="kv"><span>mean</span><span id="adc-v">-</span><span>sd</span><span id="adc-sd">-</span></div>

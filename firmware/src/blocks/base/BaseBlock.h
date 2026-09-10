@@ -1,10 +1,10 @@
 // "base" block: the things every board has, even a bare dev board.
 //   * RGB status LED (WS2812 on GPIO48) - colour + brightness from the phone
 //   * a free-running counter and the chip temperature as a "signal" so the
-//     live chart has something to draw on day 1
+//     live chart has something to draw in Workshop 1
 //   * uptime, WiFi RSSI, free heap
-// Students' day-1 exercise E2 adds one command + one live measurement here
-// (workbook ch. 1 A.4). Default: a ring buffer of ADC_MAX_N = 4096 uint16_t
+// Project 2 (Workshop 1) may add one command + one live measurement here
+// (workbook ch. 1, section 1.5, "Measure something"). Default: a ring buffer of ADC_MAX_N = 4096 uint16_t
 // samples (mV) filled at 1 kHz from GPIO 4 in loop() - sampling only, no
 // statistics there; command set_avg {n}, n in 1..1024; statistics computed in
 // status() at 20 Hz: adc_v = mean of the most recent n samples (V), adc_sd =

@@ -1,23 +1,40 @@
 # Workbook — Basic Skills for Experimentalists (TIGP 2026)
 
-**What this course is.** Methods and skills for building lab equipment, instruments and tools that get used: specify, build with an agent (Claude Code working on your files), verify against a number you predicted, ship (publish it where others can open it), log, review. The class board is the shared baseline; the software, firmware (the program that runs on the microcontroller) and app around it are open — if this instrument could solve a problem in your own lab, that is what you should build.
+**Course objective.** Teach key skills needed in every modern experimental physics lab: **Intelligence** (software / AI) · **Electronics** (how we interface intelligence with the real world) · **Mechanics** (creating physical hardware — CAD). We are not teaching how AI works or electronic/mechanical engineering (that takes years); we aim to give you a crash course in using the tools you need to get started with your own projects.
 
-One source for two readers: **you** (read it like a lab manual) and **the tutor** (`/tutor <chapter>` in Claude Code, opened in the `class-board-2026` folder, reads the same chapter and paces you through it, in English or Mandarin). Every chapter has checkboxes, the exact commands, and a *what you should see* line after every step. Tooling terms are explained the first time they appear in a chapter and collected in the glossary, [chapter C, *Words we use*](chC-cheat-sheets.md#c0-words-we-use).
+**Format.** Workshops Fridays 14:20–16:20, Room 311; workshop/tutorial style — you need your laptop, fully prepared before each class ([chapter 0](ch0-before-day-1.md)). Language English; Claude can translate to Mandarin. Access to Claude (Team standard) was provided to everyone enrolled — the invitation e-mail was sent on Sunday 6 Sep. Course website: https://tigp-experimental-methods.github.io/.
+
+**Assessment** is based on the project: 20 % hardware demonstration · 30 % app/software demonstration · 30 % presentation · 20 % project website.
+
+**Schedule**
+
+| Date | What |
+|---|---|
+| Fri 11 Sep | **Workshop 1: AI for experimentalists** — Project 1 (a web app: a simulator or a game) and Project 2 (your phone controls and measures from the ESP32) |
+| Fri 18 Sep | **Workshop 2: Designing printed circuit boards** — Project 3a: turning our ESP32 into a real piece of lab equipment (the class board in KiCad) |
+| Fri 25 Sep | Public holiday (no class) |
+| Mon 28 Sep, 2 pm | Cutoff for the class PCB order — final Gerber files go to manufacturing |
+| Fri 2 Oct | **Workshop 3: Firmware and basic mechanical design (PCB housing)** — Project 3b: making a housing for our instrument |
+| Fri 9 Oct, 2 pm | Cutoff for design files for 3D printing / laser cutting |
+| ~Fri 16 Oct | Collect printed enclosures and assembled PCBs |
+| 26–30 Oct | Project presentations and demonstrations, ~15 minutes each |
+
+**One source for two readers:** you (read it like a lab manual) and the tutor (`/tutor <chapter>` in Claude Code, opened in the `class-board-2026` folder, reads the same chapter and paces you through it, in English or Mandarin). Every chapter has checkboxes, the exact commands, and a *what you should see* line after every step. Tooling terms are explained the first time they appear in a chapter and collected in the glossary, [chapter C, *Words we use*](chC-cheat-sheets.md#c0-words-we-use).
 
 | Chapter | When | `/tutor` |
 |---|---|---|
-| [0 — Before day 1](ch0-before-day-1.md) — Claude runs [`SETUP.md`](../SETUP.md) for the toolchain (the compiler and helper programs that turn source code into firmware, the program on the microcontroller) | before Fri 09-11 | `/tutor CH0` |
-| [1 — Day 1 + week 1: build it, ship it, log it — then your instrument](ch1-day-1-week-1.md) (*ship*: publish it where others can open it) | Fri 09-11 + HW1 | `/tutor L1`, `/tutor HW1` |
-| [2 — Day 2 + week 2: your part of the board](ch2-day-2-week-2.md) | Fri 09-18 + HW2 | `/tutor L2`, `/tutor HW2` |
-| [3 — Day 3 + week 3: make it work, make it yours](ch3-day-3-week-3.md) | Fri 10-02 + HW3 | `/tutor L3`, `/tutor HW3` |
-| [4 — Wrap-up + demo](ch4-wrap-up-demo.md) | week of 10-19; demos 10-26 | `/tutor WRAP`, `/tutor DEMO` |
-| [A — Electronics from zero](chA-electronics-from-zero.md) | self-study, before L2 | `/tutor A` |
-| [B — How the instrument's software works](chB-how-the-software-works.md) | self-study, before L3 | `/tutor B` |
-| [C — Cheat-sheets](chC-cheat-sheets.md) — starts with *Words we use*, the glossary | always open | — |
-| [Your block](blocks/) — [B1](blocks/b1.md) · [B2](blocks/b2.md) · [B3](blocks/b3.md) · [B4](blocks/b4.md) · [B5](blocks/b5.md) | from day 1 | inside `/tutor HW1` |
+| [0 — Before Workshop 1](ch0-before-day-1.md) — Claude runs [`SETUP.md`](../SETUP.md) and installs the toolchain (the compiler and helper programs that turn source code into firmware, the program on the microcontroller) | before Fri 11 Sep | `/tutor CH0` |
+| [1 — Workshop 1: AI for experimentalists — Project 1 and Project 2](ch1-day-1-week-1.md) | Fri 11 Sep + homework 1 | `/tutor L1`, `/tutor HW1` |
+| [2 — Workshop 2: Designing printed circuit boards — Project 3a](ch2-day-2-week-2.md) | Fri 18 Sep + homework 2 | `/tutor L2`, `/tutor HW2` |
+| [3 — Workshop 3: Firmware and basic mechanical design (PCB housing) — Project 3b](ch3-day-3-week-3.md) | Fri 2 Oct + homework 3 | `/tutor L3`, `/tutor HW3` |
+| [4 — Presentation and demonstration](ch4-wrap-up-demo.md) | collect ~16 Oct; present 26–30 Oct | `/tutor WRAP`, `/tutor DEMO` |
+| [A — Electronics from zero](chA-electronics-from-zero.md) | self-study, before Workshop 2 | `/tutor A` |
+| [B — How the instrument's software works](chB-how-the-software-works.md) | self-study, before Workshop 3 | `/tutor B` |
+| [C — Cheat-sheets](chC-cheat-sheets.md) — starts with *Words we use*, then the AI method in one screen | always open | — |
+| [Your section of the class board](blocks/) — [B1](blocks/b1.md) · [B2](blocks/b2.md) · [B3](blocks/b3.md) · [B4](blocks/b4.md) · [B5](blocks/b5.md) | assigned at the start of Workshop 2 | inside `/tutor L2`, `/tutor HW2` |
 
-**Where things live.** Your project files: `docs/students/<name>/` (`PROGRESS.md`, `SPEC.md`, `notes.md` — plain-text files: what was done / verified / next / gotchas, what to build, your own notes — later `box.stl` and your video). Your personal page: your own day-1 repository (a project folder whose complete history git keeps, stored online on GitHub; it holds the page that teaches one idea). Slides and videos: the course site https://tigp-experimental-methods.github.io/. Help: stuck? work with the tutor; when you want the fix, ask it for the fix; if that does not solve it, email the instructor with a screenshot (address on the course site).
+**Where things live.** Your own repository (a project folder whose complete history git keeps, with a copy on GitHub) holds Project 1 and Project 2: the app, `SPEC.md`, `PLAN.md`, the report (`README.md`), your handover file. In the class repository, `docs/students/<name>/` holds your `PROGRESS.md` (done / verified / next / gotchas, one entry per session) and later your section's files. Slides: the course site. Help: work with the tutor; when you want the fix, ask it for the fix; if that does not solve it, e-mail the instructor with a screenshot (address on the course site).
 
-**The five working practices** (they are the spine of every chapter): spec first · teach the repository (`CLAUDE.md`, the file the coding agent — Claude Code working on your files — reads every session) · small fresh sessions · handover notes in Markdown (plain text with light formatting; `PROGRESS.md`) · AI writes, you verify.
+**The "AI method" in 5 steps** is the spine of every chapter: **Vision** (describe what you want, in detail) · **Specification / Plan** (AI writes a detailed spec and a plan of small tasks with testable deliverables; ask it to ask you questions) · **Review** (you review; an independent AI reviews — e.g. Codex reviews Claude; iterate — the first plan is never the last plan) · **Code** (agents in parallel) · **Test / Debug / Verify** (the plan includes the tests; fix one problem at a time). **Never trust AI without testing and verifying.** The habits that go with it: a written spec before code · teach the repository, not the session (`CLAUDE.md`) · one topic per session · handover notes in Markdown · AI writes, you verify. All of it in one screen: [chapter C, C.0b–C.0d](chC-cheat-sheets.md#c0b-the-ai-method-in-one-screen).
 
-**Beyond the baseline.** The hardware is the shared baseline — fixed by budget and timeline. The software, firmware and app are open. Whenever you are ahead: what problem in your lab could this instrument solve? A data logger to CSV · LINE/Telegram alerts from the alarm engine · remote access + a Python sweep · a calibration routine · a PID/controller block · a second node. Bring a real problem to L2; the tutor helps you write its `SPEC.md`. Not required; the demo has an optional fifth item for it. Or show the work: a video that introduces the board, a page of tips for working with AI or with KiCad, a polished web page, a game that teaches something. Just build something great. **Talk to your instrument from LINE or Telegram** — the extension we most encourage: push notifications when a value drifts or an alarm fires, and bot commands that read a value or switch a relay from your phone, from anywhere.
+**Beyond the baseline.** The class board's hardware is fixed by budget and timeline; the software, firmware and app are open. Whenever you are ahead: what problem in your lab could this instrument solve? Most encouraged: **talk to your instrument from LINE or Telegram** — push notifications when a value drifts or an alarm fires, bot commands that read a value or switch an output from your phone, from anywhere. Also a data logger, remote access with a Python sweep, a controller block, a second board; or show the work — a video, a project website, a game that teaches something. **Build something great.**

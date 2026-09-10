@@ -54,7 +54,7 @@ bool BaseBlock::handle(JsonObjectConst cmd, JsonObject reply) {
 #endif
     return true;
   }
-  // TODO(E2): add your command here (workbook ch. 1 A.4). Default = the measurement:
+  // TODO(Project 2): add your command here (workbook ch. 1, section 1.5). Default = the measurement:
   //   if (strcmp(c, "set_avg") == 0) { int n = a["n"] | adcN_; if (n < 1 || n > 1024) { reply["error"] = "n must be 1..1024"; return false; }
   //                                    adcN_ = n; reply["n"] = adcN_; return true; }
   //   loop() only samples: every 1000 us (micros(), no delay()) adcBuf_[adcHead_] = analogReadMilliVolts(ADC_PIN);

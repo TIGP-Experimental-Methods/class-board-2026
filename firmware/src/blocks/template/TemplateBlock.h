@@ -1,6 +1,6 @@
 // TEMPLATE BLOCK - copy this folder to blocks/b<N>_<name>/ and rename.
 //
-// Checklist (the tutor walks you through it, ~1.5 h in sim mode):
+// Checklist (the tutor walks you through it, in sim mode):
 //   1. Copy  blocks/template/  ->  blocks/b3_outputs/  (your block)
 //   2. Rename the class (TemplateBlock -> OutputsBlock) and name() ("b3")
 //   3. Replace the example command and status value with your block's

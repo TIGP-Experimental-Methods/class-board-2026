@@ -1,6 +1,6 @@
 # Chapter A — Electronics from zero (self-study, optional)
 
-The background deck as text, for anyone who has not read a schematic before. Every idea is pointed at a place on **our** board. Read it before lecture 2; `/tutor A` will quiz you on any section.
+The background deck as text, for anyone who has not read a schematic before. Every idea is pointed at a place on **our** board. Read it before Workshop 2; `/tutor A` will quiz you on any section.
 
 ## A.1 Charge, voltage, current — and what a schematic is
 Current (A) is charge flowing; voltage (V) is the push between two points; a schematic is a graph of *which pins are connected*, nothing else — position on the page means nothing, the net names (a net is one set of pins that are connected together) mean everything. **Ours:** every wire on the board is a net with a name (`+5V_RAW`, `AI1`, `SPI_SCLK`); the same name on two pages is the same wire.

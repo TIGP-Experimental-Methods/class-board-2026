@@ -103,6 +103,6 @@ The 20 Hz `status` broadcast is the slow channel. Fast data uses **binary WebSoc
 
 **Sources and realistic limits:** the dev board's internal ADC (`base`, 12-bit, noisy, GPIO 1–10) sustains a few kS/s rolling and ~80 kS/s burst via ADC continuous/DMA; the class board's ADS8688 (`b1`, 16-bit, ±10 V) gives tens of kS/s per channel rolling and up to 500 kS/s aggregate in burst. Rolling streams are capped by the WiFi link (budget ≈ 200 kB/s → ≈ 100 kS/s of int16 total across all clients); the board refuses `rate_hz` above the cap with `ok:false`.
 
-**Where it lives:** the sampler + frame encoder are instructor-owned in `base` (dev-board ADC, so it works on day 1 in sim and on the bare board); `b1` reuses the encoder with the ADS8688 (block owner extends it in E11). The PWA gets a **Scope** tab: roll / single / auto-trigger, timebase, cursor, "download CSV" of the visible buffer (Web Share on phones). `instrument.py` gets `scope` (stream to CSV/NumPy) and `capture`.
+**Where it lives:** the sampler + frame encoder are instructor-owned in `base` (dev-board ADC, so it works from Workshop 1 in sim and on the bare board); `b1` reuses the encoder with the ADS8688 (block owner extends it in E11). The PWA gets a **Scope** tab: roll / single / auto-trigger, timebase, cursor, "download CSV" of the visible buffer (Web Share on phones). `instrument.py` gets `scope` (stream to CSV/NumPy) and `capture`.
 
 **Same socket, no extra ports:** text frames stay JSON as above; the app tells them apart by frame type (`typeof data === "string"`).

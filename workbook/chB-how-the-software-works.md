@@ -1,6 +1,6 @@
 # Chapter B — How the instrument's software works (self-study, optional)
 
-Read before lecture 3; `/tutor B` answers questions on it. The authoritative message list is `firmware/PROTOCOL.md`.
+Read before Workshop 3; `/tutor B` answers questions on it. The authoritative message list is `firmware/PROTOCOL.md`.
 
 ## B.1 The shape
 ```
@@ -32,7 +32,7 @@ Text that both JavaScript and C++ (ArduinoJson) read the same way: objects `{}` 
 A block is one C++ class implementing `Block` (five methods). `main.cpp` registers each one; the `hello` message lists them; the app makes a tab per block, with a generic key/value view until a panel module exists. Students edit only their block folder and their panel file.
 
 ## B.9 SIM mode
-`pio run -e esp32s3-sim` (the build command of PlatformIO, the tool that builds and flashes the firmware) compiles with `-DSIM=1`: every block's `#ifdef SIM` branch fakes its hardware with plausible, moving values. That is why the whole app, chart and alarm engine work on a bare dev board on day 1 and why you can write your driver in week 3 while the board is at the factory. The real branch is `#ifndef SIM` and stays `TODO` until measured.
+`pio run -e esp32s3-sim` (the build command of PlatformIO, the tool that builds and flashes the firmware) compiles with `-DSIM=1`: every block's `#ifdef SIM` branch fakes its hardware with plausible, moving values. That is why the whole app, chart and alarm engine work on a bare dev board in Workshop 1 and why you can write your driver in homework 3 while the board is at the factory. The real branch is `#ifndef SIM` and stays `TODO` until measured.
 
 ## B.10 The alarm engine
 Rules are data, not code: `{block, key, op, threshold, action}`. Twenty times a second the engine tests every rule against the same status the app sees, fires once on the rising edge, runs the action (`notify` → toast on every phone; `relay:<n>:on|off` → block B4) and broadcasts an `alarm` message. Rules persist in `/alarms.json` on the board. Every block owner adds one rule — the demo's "alarm → relay → notification" step.
@@ -40,5 +40,5 @@ Rules are data, not code: `{block, key, op, threshold, action}`. Twenty times a 
 ## B.11 OTA and the flash layout
 The firmware is flashed (written onto the board) over USB once; afterwards it can update itself over WiFi (OTA, over-the-air; ArduinoOTA). The flash holds the program, a second slot for OTA, and the LittleFS partition with the web app (`pio run -t uploadfs`). Two uploads, two things: **code** (`upload`) and **web app** (`uploadfs`).
 
-## B.12 Where the E2 app fits
-Your day-1 `press` command and `presses` number were a block command and a status key on `base`. Your week-3 driver is the same idea with your block's hardware behind it, plus SIM values and one alarm rule. Nothing new in shape — that is the point.
+## B.12 Where your Project 2 app fits
+In Project 2 your phone sent a command to the ESP32 (set the LED's colour) and read a value back (a temperature, a counter, an ADC reading). In this firmware those are a block command and a status key on `base` — `handle()` acts on the command, `status()` fills the numbers the phone sees. Your block driver in Workshop 3 (E11) is the same idea with your block's hardware behind it, plus SIM values and one alarm rule. Nothing new in shape — that is the point.
