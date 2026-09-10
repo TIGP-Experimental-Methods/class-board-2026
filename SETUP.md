@@ -150,13 +150,13 @@ Flashing itself happens in Workshop 1 (Project 2), from `class-board-2026/firmwa
 
 ## Step 8 — Cloudflare account (manual)
 
-Purpose: in Workshop 1 (Project 1) the student deploys (publishes, so it is live on the web) a web page to the public internet with Cloudflare Pages (a free service that turns a repository into a public web page), straight from a GitHub repository; the account and the GitHub authorisation are done in advance.
+Purpose: in Workshop 1 the student deploys (publishes, so it is live on the web) their projects. A static page goes on GitHub Pages (the GitHub account is enough); anything with a backend, a bot webhook or a secret goes on Cloudflare Pages + Workers (a free service that turns a repository into a public web page and runs server-side code). The student may need both, so both accounts are ready before class; the Cloudflare account and its GitHub authorisation are done in advance.
 
 **Manual (student, browser).**
 1. Sign up (free plan) at https://dash.cloudflare.com/sign-up and verify the e-mail.
 2. Once: *Workers & Pages → Create → Pages → Connect to Git* → authorise Cloudflare for the GitHub account. Stop there — the Pages project is created in class.
 
-✔ Ask the student to confirm that the *Connect to Git* screen lists their GitHub account. If sign-up fails, note it in the report; GitHub Pages is the fallback used in class and needs nothing extra.
+✔ Ask the student to confirm that the *Connect to Git* screen lists their GitHub account. If sign-up fails, note it in the report; Workshop 1 can start on GitHub Pages alone (nothing extra needed), but the Cloudflare account is needed before anything with a backend is built.
 
 ## Step 9 — KiCad 10 (optional now; the preparation for Workshop 2)
 

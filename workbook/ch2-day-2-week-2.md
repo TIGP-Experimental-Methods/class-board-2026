@@ -68,7 +68,7 @@ Read your block page (E3), finish the routing (E7), fetch your LCSC part (E8), o
 
 ## Part B — Between workshops: what must be finished for the cutoff — `/tutor HW2`
 
-This is not homework: it is what the factory order needs from you before **Mon 28 Sep, 2 pm**. Besides it, keep improving your Project 1 and Project 2 apps whenever you like.
+Before the next workshop: complete the preparation, improve your apps, build and have fun. The preparation this time is what the factory order needs from you before **Mon 28 Sep, 2 pm**; the apps are your Project 1 and Project 2 — improve them whenever you like.
 
 - [ ] **E3 Read your block.** Your block page ([`workbook/blocks/b<N>.md`](blocks/)) asks **two questions** whose answers show the *why* of your circuit, and sets **one design number** to compute (working, a unit, one-line conclusion). Write all three into `docs/students/<name>/notes.md`. Ask the tutor to explain anything in the schematic — in Mandarin if that is faster.
 - [ ] **E7 Finish routing.** DRC **0 errors, 0 unrouted**; the ground pour joined (`B` refills zones); a 3D screenshot to `docs/students/<name>/zone-3d.png`. B1/B4/B5 owners have replicated channels: route one, copy the pattern.
