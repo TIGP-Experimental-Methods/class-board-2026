@@ -146,15 +146,15 @@ Slide 30 — five habits that follow from how LLMs work.
 
 ## C.0d When things go wrong
 
-**Oops, I made a mistake** (slide 39). Save your tokens: **stop the execution.** Don't rot or poison your context: **rewind.**
+**Oops, I made a mistake** (slide 38). Save your tokens: **stop the execution.** Don't rot or poison your context: **rewind.**
 
-**Context is full** (slides 40–41). Start a new session — but first:
+**Context is full** (slides 39–40). Start a new session — but first:
 
 > Please finish what you are working on and document anything from this session that may be useful to future Claude sessions in .md files in this directory and a handover.md file to allow Claude to continue our work in a new session.
 
 Commit. New session; tell it to read the handover file first. Do not rely on compaction — it is lossy. Hand over at about half the window, while the agent can still write a good summary.
 
-**Failure modes specific to agents** (slide 34) — caught by mechanism (hooks, git, tests), not by reading harder:
+**Failure modes specific to agents** (slide 32) — caught by mechanism (hooks, git, tests), not by reading harder:
 
 | Failure | What it looks like | Countermeasure |
 |---|---|---|
