@@ -113,7 +113,7 @@ Every tooling term in this workbook is explained the first time it appears in a 
 | **rule area / zone** | the outlined region of the board that is yours to route |
 | **routing** | drawing the copper tracks between parts |
 | **net** | a set of pins that are connected together |
-| **JLCPCB / LCSC** | the factory that makes and assembles our boards, and its parts catalogue |
+| **JLCPCB** | the factory that makes and assembles our boards; our parts come from its parts library, whose part numbers look like C12345 (the same numbers LCSC uses — you need no LCSC account) |
 | **BOM** | the bill of materials, the parts list |
 | **Gerbers** | the manufacturing files sent to the factory |
 | **STL / STEP** | 3D file formats (for printing / for CAD exchange) |
