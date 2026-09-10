@@ -19,7 +19,7 @@
 | ~Fri 16 Oct | Collect printed enclosures and assembled PCBs |
 | 26–30 Oct | Project presentations and demonstrations, ~15 minutes each |
 
-**One source for two readers:** you (read it like a lab manual) and the tutor (`/tutor <chapter>` in Claude Code, opened in the `class-board-2026` folder, reads the same chapter and paces you through it, in English or Mandarin). Every chapter has checkboxes, the exact commands, and a *what you should see* line after every step. Tooling terms are explained the first time they appear in a chapter and collected in the glossary, [chapter C, *Words we use*](chC-cheat-sheets.md#c0-words-we-use).
+**The tutor updates itself: at the start of every `/tutor` session it fetches the latest guide and workbook from GitHub and merges them into your copy (the instructor edits them between sessions). One source for two readers:** you (read it like a lab manual) and the tutor (`/tutor <chapter>` in Claude Code, opened in the `class-board-2026` folder, reads the same chapter and paces you through it, in English or Mandarin). Every chapter has checkboxes, the exact commands, and a *what you should see* line after every step. Tooling terms are explained the first time they appear in a chapter and collected in the glossary, [chapter C, *Words we use*](chC-cheat-sheets.md#c0-words-we-use).
 
 | Chapter | When | `/tutor` |
 |---|---|---|
