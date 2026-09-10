@@ -1,8 +1,8 @@
-# Chapter 2 — Workshop 2: Designing printed circuit boards (Fri 18 Sep) + homework 2
+# Chapter 2 — Workshop 2: Designing printed circuit boards (Fri 18 Sep) + between workshops
 
-**Fri 18 Sep, 14:20–16:20, Room 311, then homework 2.** Today the ESP32 stops being a dev board on a desk and becomes the core of a real piece of lab equipment. You learn enough electronics to understand what we are building, the six KiCad operations you need (KiCad is the free program we draw the schematic and lay out the printed circuit board in), and then we build the skeleton of our class board together — everyone designs a different section, so that as a team we produce a powerful instrument. **Be creative!**
+**Fri 18 Sep, 14:20–16:20, Room 311, then between workshops.** Today the ESP32 stops being a dev board on a desk and becomes the core of a real piece of lab equipment. You learn enough electronics to understand what we are building, the six KiCad operations you need (KiCad is the free program we draw the schematic and lay out the printed circuit board in), and then we build the skeleton of our class board together — everyone designs a different section, so that as a team we produce a powerful instrument. **Be creative!**
 
-**Prerequisites:** homework 1 done (Projects 1 and 2 — your web app is online and your phone controls the ESP32); **KiCad 10 installed and opened once**; the project `hardware/class-board.kicad_pro` opens (the library is in `hardware/lib/`). Bring your laptop; the schematic PDF is on the course site. Optional background: [chapter A](chA-electronics-from-zero.md) (self-study, before today if you have never seen a schematic).
+**Prerequisites:** Projects 1 and 2 from Workshop 1 (your web app is online and your phone controls the ESP32 — keep improving them; they are yours); **KiCad 10 installed and opened once** (the preparation for today); the project `hardware/class-board.kicad_pro` opens (the library is in `hardware/lib/`). Bring your laptop; the schematic PDF is on the course site. Optional background: [chapter A](chA-electronics-from-zero.md) (self-study, before today if you have never seen a schematic).
 
 **The hardware model.** The microcontroller stays on the dev board; the **class board is a carrier** it plugs into: the analog front end done properly, isolation, buffers, robust connectors. One design, five units, one order; **JLCPCB** (the factory that makes and assembles our boards) **assembles everything, SMD and through-hole**. You solder nothing. The dev board alone keeps running your app as the permanent fallback.
 
@@ -61,12 +61,14 @@ The instructor opens a pull request (PR — a request to merge a branch into the
 ### A.6 Firmware/software — making our instrument useful and friendly
 The board is the shared baseline; what it *does* is yours. From Workshop 3 you write your block's driver and its phone panel, and the app you built in Project 2 grows into the instrument's front end. **Can you adapt it to solve a problem in your current research?** — a logger for a slow drift, an alarm that reaches your phone, a sweep that runs overnight. Start thinking about it now; the tutor will ask.
 
-### A.7 Homework brief
-Read your block page (E3), finish the routing (E7), fetch your LCSC part (E8), open your pull request (E9), review your neighbour's (E10) — Part B below. **Gerbers go to the factory Mon 28 Sep, 2 pm — hard cutoff.** Be creative, stay inside your zone.
+### A.7 What must be finished for the cutoff
+Read your block page (E3), finish the routing (E7), fetch your LCSC part (E8), open your pull request (E9), review your neighbour's (E10) — Part B below. **Gerbers go to the factory Mon 28 Sep, 2 pm — hard cutoff.** Your section must be merged before it. Be creative, stay inside your zone.
 
 ---
 
-## Part B — Homework 2 — `/tutor HW2`
+## Part B — Between workshops: what must be finished for the cutoff — `/tutor HW2`
+
+This is not homework: it is what the factory order needs from you before **Mon 28 Sep, 2 pm**. Besides it, keep improving your Project 1 and Project 2 apps whenever you like.
 
 - [ ] **E3 Read your block.** Your block page ([`workbook/blocks/b<N>.md`](blocks/)) asks **two questions** whose answers show the *why* of your circuit, and sets **one design number** to compute (working, a unit, one-line conclusion). Write all three into `docs/students/<name>/notes.md`. Ask the tutor to explain anything in the schematic — in Mandarin if that is faster.
 - [ ] **E7 Finish routing.** DRC **0 errors, 0 unrouted**; the ground pour joined (`B` refills zones); a 3D screenshot to `docs/students/<name>/zone-3d.png`. B1/B4/B5 owners have replicated channels: route one, copy the pattern.
@@ -75,7 +77,7 @@ Read your block page (E3), finish the routing (E7), fetch your LCSC part (E8), o
   easyeda2kicad --full --lcsc_id C12072 --output "<absolute path>/hardware/lib/class_board"
   ```
   The symbol lands in `class_board.kicad_sym`, the footprint in `class_board.pretty`, the 3D model in `class_board.3dshapes`. Open the symbol in the schematic editor, check pin 1 against the datasheet, and swap it into your sheet in place of the instructor's copy (or add it as the second footprint alternative). Commit `hardware/lib/`. *Teaches:* where parts come from — the LCSC → JLC pipeline.
-- [ ] **E9 Open your pull request.** In VS Code's Source Control panel stage `hardware/` (your sheet, the PCB, the library) → commit → push (upload your commits to GitHub, the website where the repository is stored) → *Create Pull Request* (or `gh pr create`) with the 3D screenshot in the description → *Reviewers:* your ring reviewer. CI (continuous integration — the automatic build GitHub runs on every pull request) must be green.
+- [ ] **E9 Open your pull request.** In VS Code's Source Control panel stage `hardware/` (your sheet, the PCB, the library) → commit → push (upload your commits to GitHub, the website where the repository is stored) → *Create Pull Request* with the 3D screenshot in the description → *Reviewers:* your ring reviewer. CI (continuous integration — the automatic build GitHub runs on every pull request) must be green.
 - [ ] **E10 Review your peer, then fix yours.** Open their PR → *Files changed* → check out the branch locally → open the PCB → walk the checklist below → leave **≥ 2 comments** → *Approve* or *Request changes*. Then address the comments on your own PR. *Teaches:* reading someone else's layout; being reviewed.
 
 **The review checklist** (also in [chapter C](chC-cheat-sheets.md); the instructor uses the same list at merge):

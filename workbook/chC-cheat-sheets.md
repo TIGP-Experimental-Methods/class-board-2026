@@ -30,7 +30,7 @@ Every tooling term in this workbook is explained the first time it appears in a 
 | **PROGRESS.md** | your handover notes for this course: done / verified / next / gotchas, one entry per session |
 | **Markdown** | plain text with light formatting (`#` headings, `-` lists); what README, SPEC, PLAN, PROGRESS and handover files are written in |
 | **the check / the test** | a result you can predict without the program — a value worked out by hand, a conservation law, a limiting case — which the finished thing must reproduce |
-| **Codex** | OpenAI's coding agent; useful as the independent reviewer of Claude's plan |
+| **independent review** | a fresh Claude session that did not write the plan reads `SPEC.md` and `PLAN.md` and lists the flaws — same author, same blind spots, so never the session that wrote them |
 | **show-your-work** | the lab's public pipeline of five Claude skills for slides, reports, videos and renders: https://github.com/iams-yb-lab/show-your-work |
 | **hand-in / deliverable** | what must exist in a repository at the end |
 
@@ -57,7 +57,10 @@ Every tooling term in this workbook is explained the first time it appears in a 
 | **GitHub CLI (`gh`)** | GitHub's command-line tool |
 | **terminal** | the text window where you type commands |
 | **deploy** | publish so that anyone with the address can open it; the loop is commit → push → the host builds → live |
-| **GitHub Pages** | any public repository with an `index.html` becomes a website at `<user>.github.io/<repository>` |
+| **GitHub Pages** | any public repository with an `index.html` becomes a website at `<user>.github.io/<repository>/` (repository → *Settings → Pages → Deploy from a branch → main → / → Save*) |
+| **project website / project page** | `index.html` at the root of a project's repository, on GitHub Pages: title, what it is and why it is interesting, how it works, a picture or GIF or short video of it working, what was verified, links to the live app and the repository, your name. The `README.md` stays the developer-facing document |
+| **class project wall** | https://tigp-experimental-methods.github.io/showcase-2026/ — one card per project (picture, title, student, two sentences, buttons *Open the app · Project site · Video · Code*), refreshed every minute, on the projector in class. Repository `TIGP-Experimental-Methods/showcase-2026`: one file `projects/<github-username>--<slug>.json` + one picture in `images/` per project; its `README.md` documents the format |
+| **GIF** | a short looping animation in one image file; a screen recording of the app moving, or a phone clip of the LED changing, is the best picture for a project page or a wall card |
 | **Cloudflare Pages / Workers** | deploys from a GitHub repository on every push; Workers run server-side code on the free tier — for apps that store data, call an API with a key, or run on a schedule |
 | **URL** | a web address |
 | **webhook** | the platform (LINE, Telegram) calls your URL whenever a message arrives |
@@ -123,7 +126,7 @@ Slide 26 — the most important slide in the talk.
 
 1. **Vision** — describe what you want, with as much detail as possible.
 2. **Specification / Plan** — get AI to produce a detailed specification: plan the project. Break it into many small tasks with testable deliverables. Ask AI to ask you questions.
-3. **Review** — review the plan; have AI review the plan to identify improvements and flaws (e.g. use Codex to review Claude). **Iterate the plan: the first plan is never the last plan.**
+3. **Review** — review the plan; have AI review the plan to identify improvements and flaws, in a fresh Claude session that did not write it. **Iterate the plan: the first plan is never the last plan.**
 4. **Code** — tell AI to run swarms of agents in parallel to complete the build.
 5. **Test / Debug / Verify** — the plan and spec include methods to test the code. Fix problems one at a time. Iterate.
 
@@ -180,11 +183,13 @@ Source Control is the branching icon in the left bar. Changed files are marked *
 | history | Source Control → *Graph*; a file's *Timeline* (bottom of Explorer) |
 | undo an uncommitted change | right-click the file → *Discard Changes* |
 | undo a commit | Graph → right-click the commit → *Revert* (a new commit that reverses it) |
-| new repository | *Source Control → Initialize Repository*, then *Publish Branch* (public or private) |
+| new project (one repository per project, public) | a folder next to `class-board-2026` named for the project → *File → Open Folder…* → *Source Control → Initialize Repository* → *Publish Branch* → **public** |
+| publish the project website | GitHub → repository → *Settings → Pages → Deploy from a branch → main → / → Save*; `index.html` at the root is the page, the app is in `app/` |
+| put a project on the class wall | Claude clones `TIGP-Experimental-Methods/showcase-2026` next to `class-board-2026` (`gh repo clone …`; later *Sync Changes*) → write `projects/<github-username>--<slug>.json` (title, student, github, project, blurb, live_url, site_url, repo_url, image, video_url, updated — the format is in the wall's README) → picture into `images/` (under 8 MB) → Claude runs `python scripts/build.py` → stage both files, commit, *Sync Changes* |
 | open a pull request | push the branch; GitHub offers *Compare & pull request* |
 | is this file ignored? (the secrets check) | ask Claude to run `git check-ignore -v firmware/include/secrets.h` — it must print the rule; nothing printed means the file is NOT ignored |
 
-Rules: `main` in the class repository is protected — your work goes on your branch (`w1-<name>`, later `b<N>-<name>`, `b<N>-fw-<name>`); one pull request per deliverable; the pull request description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. With an agent: commit before it starts · ask it to commit as it goes · review the diff, not the file · never let it rewrite history — say no to force-push and reset. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then e-mail the instructor (C.7).
+Rules: every project is its own public repository under your own GitHub account — push at every milestone (plan reviewed, first working version, deployed, project page written). `main` in the class repository is protected — your work there goes on your branch (`w1-<name>`, later `b<N>-<name>`, `b<N>-fw-<name>`); one pull request per deliverable; the pull request description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. With an agent: commit before it starts · ask it to commit as it goes · review the diff, not the file · never let it rewrite history — say no to force-push and reset. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then e-mail the instructor (C.7).
 
 ## C.2 PlatformIO
 ```sh
@@ -255,9 +260,9 @@ Scope: `stream {ch, rate_hz, chunk}` (rolling; `rate_hz: 0` stops) · `capture {
 ## C.6 The four log lines (`PROGRESS.md`, every session)
 ```markdown
 ## 2026-09-11 — Workshop 1 (class)
-- Done: pendulum simulator from SPEC.md, deployed at https://pendulum-sim.pages.dev; class firmware flashed, phone controls the LED
+- Done: pendulum simulator from SPEC.md, app at https://alice.github.io/pendulum-sim/app/, project page drafted; class firmware flashed, phone controls the LED
 - Verified: period 2.007 s at L = 1 m (predicted 2.006 s); energy drift 0.03 % with no friction; LED red on tap
-- Next: brightness slider in my own ESP32 app; README report; KiCad installed
+- Next: brightness slider in my own ESP32 app; finish the project page and the wall entry; KiCad installed
 - Gotchas: first plan animated the swing instead of integrating it — rejected; first flash needed BOOT+RST, new COM port
 ```
 

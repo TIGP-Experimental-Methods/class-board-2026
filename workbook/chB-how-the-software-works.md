@@ -32,7 +32,7 @@ Text that both JavaScript and C++ (ArduinoJson) read the same way: objects `{}` 
 A block is one C++ class implementing `Block` (five methods). `main.cpp` registers each one; the `hello` message lists them; the app makes a tab per block, with a generic key/value view until a panel module exists. Students edit only their block folder and their panel file.
 
 ## B.9 SIM mode
-`pio run -e esp32s3-sim` (the build command of PlatformIO, the tool that builds and flashes the firmware) compiles with `-DSIM=1`: every block's `#ifdef SIM` branch fakes its hardware with plausible, moving values. That is why the whole app, chart and alarm engine work on a bare dev board in Workshop 1 and why you can write your driver in homework 3 while the board is at the factory. The real branch is `#ifndef SIM` and stays `TODO` until measured.
+`pio run -e esp32s3-sim` (the build command of PlatformIO, the tool that builds and flashes the firmware) compiles with `-DSIM=1`: every block's `#ifdef SIM` branch fakes its hardware with plausible, moving values. That is why the whole app, chart and alarm engine work on a bare dev board in Workshop 1 and why you can write your driver between Workshop 3 and the presentation, while the board is at the factory. The real branch is `#ifndef SIM` and stays `TODO` until measured.
 
 ## B.10 The alarm engine
 Rules are data, not code: `{block, key, op, threshold, action}`. Twenty times a second the engine tests every rule against the same status the app sees, fires once on the rising edge, runs the action (`notify` → toast on every phone; `relay:<n>:on|off` → block B4) and broadcasts an `alarm` message. Rules persist in `/alarms.json` on the board. Every block owner adds one rule — the demo's "alarm → relay → notification" step.

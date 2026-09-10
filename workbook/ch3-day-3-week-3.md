@@ -1,6 +1,6 @@
-# Chapter 3 — Workshop 3: Firmware and basic mechanical design (PCB housing) (Fri 2 Oct) + homework 3
+# Chapter 3 — Workshop 3: Firmware and basic mechanical design (PCB housing) (Fri 2 Oct) + between workshops
 
-**Fri 2 Oct, 14:20–16:20, Room 311, then homework 3.** The class board is at the factory (ordered Mon 28 Sep; PCBs and housings are collected together, around Fri 16 Oct). Today has two halves: **mechanical** — a tour of what IAMS can fabricate, the CAD basics, and **Project 3b: a housing for our instrument**; and **firmware** — your block's driver (the firmware that talks to its chips) and its phone panel, running in sim mode on your dev board (the firmware fakes its hardware, so your panel works before the class board exists). Your Project 2 app grows into the instrument's front end.
+**Fri 2 Oct, 14:20–16:20, Room 311, then between workshops.** The class board is at the factory (ordered Mon 28 Sep; PCBs and housings are collected together, around Fri 16 Oct). Today has two halves: **mechanical** — a tour of what IAMS can fabricate, the CAD basics, and **Project 3b: a housing for our instrument**; and **firmware** — your block's driver (the firmware that talks to its chips) and its phone panel, running in sim mode on your dev board (the firmware fakes its hardware, so your panel works before the class board exists). Your Project 2 app grows into the instrument's front end.
 
 **Prerequisites:** your zone merged (E9/E10 done); dev board and USB-C cable; **Onshape** (the browser CAD program; free education plan, https://www.onshape.com/en/education/) **or another CAD program you already use**, signed in and opened once. Optional background: [chapter B](chB-how-the-software-works.md).
 
@@ -34,7 +34,7 @@ FDM tolerances (holes **+0.3 mm**, slots +0.2), walls **2 mm**, heat-set inserts
 ### A.6 Project 3b — Making a housing for our instrument
 Use Onshape (or your favourite CAD program) to draw a housing for your instrument, for 3D printing and/or laser cutting. The **template** is the fast path; a design of your own is welcome if it fits the board and meets the deadline.
 
-**E12 — the housing (start today, finish in homework 3)**
+**E12 — the housing (start today, finish before the cutoff)**
 - [ ] Open the instructor's Onshape template (link on the course site) → *Copy workspace* into your account. (Your own CAD: import the board STEP from `hardware/` and start from its outline.)
 - [ ] Check the board STEP sits in it; the three parameters (**height, wall, foot style**) are in the *Variables* table.
 - [ ] **Make it yours** — a vent pattern, an embossed name, different feet, a laser-cut acrylic lid, a window for the LED, a colour note in the description. What you change is up to you; the tutor asks what and why.
@@ -52,7 +52,7 @@ The second half is software. The board is the shared baseline; what it does — 
 - **One panel module per block** — `host/pwa/panels/b<N>.js`: `render(el, api)` builds the DOM once, `onStatus(st)` runs 20× per second. `api.send(block, cmd, args)` returns a promise; `api.addAlarm(rule)`.
 - **`instrument.py` mirrors the same commands** from a PC (the Python client: a program that talks to the board with the same messages as the phone); **`SIM`** fakes the hardware so all of this runs on a bare dev board; the **alarm engine** evaluates rules `{block, key, op, threshold, action}` on the same status; **OTA** (over-the-air) updates over WiFi.
 
-**E11 — driver + panel in sim (start today, finish in homework 3)**
+**E11 — driver + panel in sim (start today, finish between workshops)**
 `/tutor L3`. Follow the AI method here too: the block page is your specification (commands, status keys, alarm rule); have your plan name what you will see on the phone before any code. The README's *Add a block* section is the recipe.
 1. **Copy the template:** `firmware/src/blocks/template/` → `firmware/src/blocks/b<N>_<name>/` (the stub folder already exists — replace its contents). Rename the class and `name()` → `"b<N>"`.
 2. **SIM branch first.** In `status()` return plausible fake values for your keys; in `handle()` accept your commands and store the setpoints; in `loop()` make the fake values move (a slow sine, a counter, a drift towards the setpoint). Flash (write the firmware onto the board over USB) `esp32s3-sim`: your tab shows the generic key/value view.
@@ -64,17 +64,17 @@ The second half is software. The board is the shared baseline; what it does — 
 7. Branch (a separate line of work) `b<N>-fw-<name>` → commit (save a snapshot) → push (upload it to GitHub) → pull request (PR — a request to merge your branch into the shared project; someone reviews it first) — all from VS Code's Source Control panel. CI (continuous integration — the automatic build GitHub runs on every pull request) builds both envs.
 - ✔ *You should see:* your panel controlling your block in sim; the alarm firing; PR open.
 
-**Website and video.** Your project website presents Project 1, Project 2 and your part of the instrument (GitHub Pages or Cloudflare Pages, as in Project 1). A video that describes your app or board is optional and recommended — script first, pictures last; the lab's `show-your-work` skills do the production.
+**Website and video.** Every project has its own project website — `index.html` at the root of its repository, on GitHub Pages, as in Project 1 — and its own card on the class project wall (https://tigp-experimental-methods.github.io/showcase-2026/). Your part of the instrument (your block, Project 3a, and the housing, Project 3b) gets the same treatment: a repository of its own next to the others with a project page and pictures of your zone and housing (the design files themselves stay in the class repository — link to your pull requests), and a wall entry with `project` `"3a"` or `"3b"`. A video that describes your app or board is optional and recommended — script first, pictures last; the lab's `show-your-work` skills do the production.
 
 ---
 
-## Part B — Homework 3 — `/tutor HW3`
+## Part B — Between workshops: what must be finished for the cutoff — `/tutor HW3`
+
+This is not homework: the first item is what the workshop needs from you before **Fri 9 Oct, 2 pm**; the second is what the instrument needs before the boards arrive.
 
 - [ ] **E12 Housing files — Fri 9 Oct, 2 pm, hard cutoff.** Finish making it yours; STL and/or DXF in `docs/students/<name>/housing/`, the screenshot next to them; commit and push. The workshop prints and cuts everything together.
 - [ ] **E11 Driver + panel PR.** All your commands; **one status value plotted** (pick it in the chart dropdown, screenshot); **the alarm rule**; CI green; PR reviewed by your ring reviewer (the classmate who reviews your pull request; comment only, no second fix round). Fill the `#ifndef SIM` branches as far as you can from the datasheet with `TODO` where you must measure first — pins only from `firmware/include/pins.h`.
-- [ ] **Keep building** your app, website and video towards the presentation (chapter 4).
-
-**Deliverables (by commit or PR):** the housing files, on time · the merged driver + panel PR (block works in sim, alarm rule present, one value plotted).
+- **Keep building** your apps, project websites and video towards the presentation (chapter 4) — whenever you like.
 
 ## Beyond the baseline (optional, encouraged)
 The driver you just wrote is the baseline. From here the instrument becomes whatever your lab needs: a **data logger** that writes CSV (Scope tab → export, or `instrument.py stream --csv` on a schedule) · a **LINE / Telegram alert** from your alarm rule (`notify` → a short webhook script) · **remote access** from the lab WiFi + a **Python sweep** overnight · a **calibration routine** stored on the board · a **PID / controller block** that closes a loop between an input and an output · a **second node** (an S3-CAM watching a gauge). Write its plan with one verifiable number, build it on a branch, and show it in your presentation. Or show the work: a **video that introduces the board**, a page of **tips for working with AI** or with **KiCad**, a **polished project website**, a **game** that teaches something. **Talk to your instrument from LINE or Telegram** — the extension we most encourage: push notifications when a value drifts or an alarm fires, and bot commands that read a value or switch a relay from your phone, from anywhere. **Can you adapt the instrument to solve a problem in your current research?**

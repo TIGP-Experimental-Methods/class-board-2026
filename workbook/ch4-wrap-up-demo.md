@@ -16,7 +16,7 @@ Rails at the test points (+5V, +3V3, ±12 V, +5VA) with no dev board → dev boa
   Expected vs measured, and one sentence on the difference. That sentence is the physics.
 - [ ] **E13c A video describing your app or board (optional, recommended).** Your panel on the phone, your block doing its thing, the number on the scope or multimeter, your name and block at the start. A phone video is fine; so is the lab's `show-your-work` `education-video` route (script, narration, pictures from your plan), posted on your own YouTube channel. Link it from your project website. It is also your safety net: if the live part fails in the demonstration, play the video.
 
-**Deliverables:** the measured number with its method, in your repository; the project website updated with your instrument; the video, if you made one, linked from it.
+**Deliverables:** the measured number with its method, in your repository; the project websites and their cards on the class project wall (https://tigp-experimental-methods.github.io/showcase-2026/) brought up to date with the assembled instrument — a picture or video of the real board, the `updated` date; the video, if you made one, linked from them.
 
 ## Exercise E14 — the presentation and demonstration (`/tutor DEMO` to rehearse)
 About 15 minutes each, 26–30 Oct. Present and demonstrate your project, app, website and video. **A suggested structure** — use it, or your own:
@@ -25,7 +25,7 @@ About 15 minutes each, 26–30 Oct. Present and demonstrate your project, app, w
 3. **Change it from the phone** — frequency or amplitude, live, from your app.
 4. **Alarm → relay → notification** — an input crosses a threshold, a relay clicks, the phone toasts (or your LINE / Telegram bot speaks).
 5. **Your block** — its panel and one thing it does, with your measured number and what surprised you. If the live part fails, play your video. Nobody fails a demonstration because a cable fell out.
-6. **Your website and anything beyond the baseline** — the data logger, the bot, the PID block, the tool your lab needed. Show it if you have it.
+6. **Your project websites and anything beyond the baseline** — the data logger, the bot, the PID block, the tool your lab needed. Show it if you have it. The class project wall is on the projector all week; your cards are how the others find your work afterwards.
 
 ---
 **Tutor notes (`/tutor WRAP`, `/tutor DEMO`).** WRAP: environment `esp32s3`, never `-sim`; if a smoke test fails, first check the rail LEDs and the USB port, then the block's pins in `pins.h`; the number needs a method sentence. DEMO: rehearse once against the clock (~15 minutes); the student speaks, you keep time; the video is the safety net, not the plan; the "beyond the baseline" item only if it exists — never suggest it is expected. State the assessment split if asked; anything further is the instructor's.
