@@ -31,6 +31,8 @@ Text that both JavaScript and C++ (ArduinoJson) read the same way: objects `{}` 
 ## B.8 Blocks and the registry
 A driver is one C++ class implementing `Block` (five methods — the firmware calls each driver a *block*). `main.cpp` registers each one; the `hello` message lists them; the app makes a tab per block, with a generic key/value view until a panel module exists. Students edit only the driver folders and panel files of their own section.
 
+**One of the blocks is the NMR console.** Besides the drivers for the three sections the firmware carries an **`nmr`** block, and the app an **NMR** tab: it runs the experiment end to end — the pulse, the free induction decay that comes back, the spectrum. It is shared, like the base block: it is nobody's section exercise, but it uses all three of them.
+
 ## B.9 SIM mode
 `pio run -e esp32s3-sim` (the build command of PlatformIO, the tool that builds and flashes the firmware) compiles with `-DSIM=1`: every block's `#ifdef SIM` branch fakes its hardware with plausible, moving values. That is why the whole app, chart and alarm engine work on a bare dev board in Workshop 1 and why you can write your driver between Workshop 3 and the presentation, while the board is at the factory. The real branch is `#ifndef SIM` and stays `TODO` until measured.
 

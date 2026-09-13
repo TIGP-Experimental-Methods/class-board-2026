@@ -2,9 +2,9 @@
 
 Two boards: the **main board** (ESP32-S3 dev-board carrier / lab instrument **and NMR console**, 4-layer
 **180 × 100 mm**) and the **front panel** (2-layer **180 × 65 mm** with 15 SMA, OLED socket, 3 LEDs, 2×20 link).
-Specification: [`../10-Class-Board-Design-Brief.md`](../10-Class-Board-Design-Brief.md) v0.6 as amended by the v0.7
-re-spec `notes/2026-09-13-nmr-respec-proposal.md` and the circuit design `notes/2026-09-13-v07-nmr-circuits.md` (both
-in the course repo); build/verification contract: [`../prompt.md`](../prompt.md); working instructions for this
+Specification: `10-Class-Board-Design-Brief.md` v0.6 as amended by the v0.7 re-spec
+`notes/2026-09-13-nmr-respec-proposal.md` and the circuit design `notes/2026-09-13-v07-nmr-circuits.md` (all three in
+the course repository, not here); build/verification contract: `prompt.md` (same place); working instructions for this
 directory: [`AGENTS.md`](AGENTS.md).
 
 ## What v0.7 changed (2026-09-13)
@@ -58,7 +58,7 @@ directory: [`AGENTS.md`](AGENTS.md).
 | Project-local library | `lib/class_board.kicad_sym`, `lib/class_board.pretty/`, `lib/class_board.3dshapes/` (both projects use it through their `sym-lib-table` / `fp-lib-table`) |
 | Release package | `release/<rev>/main-board/`, `release/<rev>/front-panel/` (Gerbers, drill, BOM, CPL, PDFs, SVG/PNG, STEP, reports, hashes) — only the v0.6 front panel exists so far |
 | Design record | `docs/design-decisions.md` (D-01…D-49), `docs/requirements.md` (R-01…R-44), `docs/design-review.md` (floorplan, grounding, PDN, block risks incl. §5.7 NMR, manufacturing, findings F-01…F-20, layout log), `docs/bring-up.md` (T-00…T-23), `docs/student-deletions.md` |
-| Student copies | `student/<sheet>_gapped.kicad_sch` (+ `.kicad_pro`, lib tables): section A = `b1_inputs` + `nmr_rx`, B = `b3_outputs` + `b5_dio_trig` + `nmr_tx`, C = `b4_switching` + `c_switch`.  `b2_power` is **not** gapped — the instructor keeps the power-entry block |
+| Student copies | `student/<sheet>_gapped.kicad_sch` (+ `.kicad_pro`, lib tables): section A = `b1_inputs` + `nmr_rx`, B = `b3_outputs` + `b5_dio_trig` + `nmr_tx`, C = `b4_switching` + `c_switch`.  `b2_power` is **not** gapped — the instructor keeps the power-entry block.  Each copy is a **standalone one-sheet project**: the student opens `student/<sheet>_gapped.kicad_pro`, and ERC there runs standalone (high baseline — only the difference against the ungapped sheet is meaningful, `docs/student-deletions.md`), while the PCB stays the main project |
 | Generators | `scripts/` — see `AGENTS.md`; the schematic and the placement are generated, edit the scripts |
 
 ## Reference-designator ranges

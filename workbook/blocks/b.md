@@ -3,7 +3,7 @@
 **What it does.** Everything the instrument says and everything it times. Three things live here: the **two analog outputs** AO1 and AO2 (−10 … +10 V, 16-bit, DC or waveforms, from a **DAC8563** — a DAC is a digital-to-analog converter — and an **OPA2192** dual op-amp), the **NMR transmitter** (a direct digital synthesizer that makes the 89.4 kHz carrier, a reconstruction filter that cleans it, and a power op-amp whose enable pin is the transmit gate), and the **digital lines** that let the instrument talk to other equipment — eight 5 V TTL outputs, two fast outputs, the TRIG SMA, and the I²C expander that drives them. The demonstration's first item — a waveform out, seen on a scope and on the instrument's own input — is yours, and so is the pulse that starts every NMR experiment.
 
 **Parts in your zone (≈ 95).**
-- **The analog outputs:** DAC8563SDGSR (VSSOP-10; AVDD = +5VA; internal 2.5 V reference on `VREF_DAC` with 100 nF; `/SYNC` = GPIO 5 — a GPIO is a general-purpose pin on the microcontroller — DIN = MOSI, SCLK, the SPI wiring); OPA2192 on ±12 V, each channel a **difference amplifier** with a 10 kΩ / 40 kΩ network: `AO = 4 × (DAC − VREF)`, so 0–5 V in gives −10…+10 V out; per output a 49.9 Ω series resistor then the SMA, with a BAV99 clamp to ±12 V.
+- **The analog outputs:** DAC8563SDGSR (VSSOP-10; AVDD = +5VA; internal 2.5 V reference on `VREF_DAC` with 100 nF; `/SYNC` = GPIO 5 — a GPIO is a general-purpose pin on the microcontroller — DIN = MOSI, SCLK, the SPI wiring); OPA2192 on ±12 V, each channel a **difference amplifier** with a 10 kΩ / 40.2 kΩ network: `AO = 4 × (DAC − VREF)`, so 0–5 V in gives −10…+10 V out; per output a 49.9 Ω series resistor then the SMA, with a BAV99 clamp to ±12 V.
 - **The synthesizer:** **AD9834** DDS (TSSOP-20, 28-bit, clocked at 50 MHz from Section A's clock generator) with its bias and reference capacitors, a 6.80 kΩ full-scale resistor and 200 Ω load resistors; `FSYNC` = GPIO 41, `PSELECT` = GPIO 42. Its **two phase registers** are what make 0°/90°/180°/270° phase cycling possible — you switch the transmitted phase with one pin.
 - **The reconstruction filter:** a 3rd-order Butterworth low-pass at 3 MHz (390 pF, 15 µH, 130 pF) that removes the staircase the DAC leaves behind, then a 1 µF capacitor that blocks DC into the power stage.
 - **The power stage:** **OPA564** (1.5 A, 17 MHz) on a single supply from the external power input, biased at mid-rail, with its **enable pin used as the transmit gate** (`TX_EN` = GPIO 40), a current flag and a thermal flag read back by the firmware, and its thermal pad soldered to the ground pour with a via array. AC-coupled out to the TX SMA and the coil terminal.
@@ -12,7 +12,20 @@
 
 **Reference numbers.** 3xx = the analog outputs · 5xx = DIO, TRIG and the expander · 8xx = the DDS and the power stage. Keep them: the footprints on the board carry the same names.
 
-**Schematic** (the circuit drawing)**.** The full PDF pages for your section are `b3_outputs`, `b5_dio_trig` and `nmr_tx` (link on the course site). Your **gapped sheet** is missing three or four parts — the exact list is in the class repository, `hardware/docs/student-deletions.md`, and you place them back from the PDF. Your **one part from the JLCPCB parts library** (JLCPCB is the factory that makes and assembles our boards; its part numbers look like C12345): the **AD9834, C116589** — the synthesizer itself.
+**Schematic** (the circuit drawing)**.** Your section is three sheets of the full PDF `hardware/docs/schematic-full.pdf`: **`b3_outputs`, page 5**, **`b5_dio_trig`, page 7** and **`nmr_tx`, page 11** (also on the course site). You complete a **gapped copy** of each — a small KiCad project of its own in `hardware/student/`; open the `.kicad_pro` next to the sheet:
+
+| Gapped sheet | Place back | What it is |
+|---|---|---|
+| `student/b3_outputs_gapped` (page 5) | **R305**, **R307** 10k · **R306**, **R308** 40.2k, all R0603 | the AO2 difference-amplifier resistor set (the repeated channel) |
+| | **R310** 49.9 R0603 · **D302** BAV99 SOT-23 | the AO2 output series resistor and its clamp |
+| `student/b5_dio_trig_gapped` (page 7) | **U502** 74HCT125PW TSSOP-14 · **R509**, **R510** 49.9 R0603 | the 74HCT125 fast-output channel |
+| | **C501**, **C502** 100nF C0603 | the buffer decoupling pair |
+| | **J501** KF301-5.0-2P | one TTL screw terminal |
+| `student/nmr_tx_gapped` (page 11) | **C815** 47µF 35V · **C816** 100nF C0603 | the OPA564 V+ decoupling pair |
+| | **D802** SS54 SMA | the output clamp diode to GND |
+| | **R813** 4.7 Ω 1 W R2512 | the output isolation resistor |
+
+`hardware/docs/student-deletions.md` is the authority for this list and says where each part sits on the PDF. Your **one part from the JLCPCB parts library** (JLCPCB is the factory that makes and assembles our boards; its part numbers look like C12345): the **AD9834BRUZ, C116589**, TSSOP-20 — the synthesizer U801 itself.
 
 **Your zone on the PCB** (the outlined region of the physical board that is yours to route)**.** `ZONE_B`. The DAC on the socket side and the op-amp next to the SMAs, feedback resistors tight to the op-amp; the buffers near the socket end and the terminals along the rear edge, with the fast nets short and a ground return beside them; the synthesizer, its filter and the power stage in a line towards the TX connector. **The transmit current is the enemy of Section A:** route the transmit output and its return as a close pair and keep that loop under a square centimetre, well away from the receiver's ground.
 

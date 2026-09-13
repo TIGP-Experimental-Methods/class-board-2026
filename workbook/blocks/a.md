@@ -3,7 +3,7 @@
 **What it does.** Everything the instrument hears. Two things live here: the **eight analog inputs** (±10 V, 16-bit, on the front-panel SMAs AI1–AI8, read by one **ADS8688** ADC — an analog-to-digital converter — over SPI, one of the two wiring standards chips use to talk to the microcontroller), and the **NMR receiver**, which is the reason the board is an instrument and not a breakout. The receiver takes 40 microvolts out of a tuned coil, amplifies it a thousand times, protects itself while the transmitter is on, mixes it down to an audio frequency and hands it to the ADC as two channels, I and Q. The spectrum your phone draws at the end of the course comes through your section.
 
 **Parts in your zone (≈ 80).**
-- **The eight inputs:** ADS8688IDBTR (TSSOP-38, `/CS` = GPIO 10 — a GPIO is a general-purpose pin on the microcontroller) with its supply decoupling (100 nF + 10 µF on AVDD = +5VA; DVDD = +3V3), REFCAP 10 µF + 1 µF to AGND, REFIO 100 nF, 10 kΩ pull-ups on `/RST` and `/PD`, 33 Ω series on SDO; eight identical input networks, SMA → 1 kΩ → node with 1 nF to AGND and a BAV99 dual diode clamping to ±12 V. Channels 7 and 8 carry the receiver's I and Q through a solder jumper (default: the mixer; alternate: the SMA).
+- **The eight inputs:** ADS8688IDBTR (TSSOP-38, `/CS` = GPIO 10 — a GPIO is a general-purpose pin on the microcontroller) with its supply decoupling (1 µF + 10 µF on AVDD = +5VA; DVDD = +3V3), REFCAP 10 µF + 1 µF to AGND, REFIO 100 nF, 10 kΩ pull-ups on `/RST` and `/PD`, 33 Ω series on SDO; eight identical input networks, SMA → 1 kΩ → node with 1 nF to AGND and a BAV99 dual diode clamping to ±12 V. Channels 7 and 8 carry the receiver's I and Q through a solder jumper (default: the mixer; alternate: the SMA).
 - **The tuned front end:** the RX SMA, two 1N4148W diodes back to back at the connector (the crossed-diode limiter that clips transmitter leakage at ±0.7 V), the tank capacitors (1.2 nF + trim pads; the coil and this capacitor resonate at 89.4 kHz), 100 Ω series, a 1 MΩ DC return.
 - **The low-noise amplifier:** **OPA1656** dual op-amp, stage 1 gain 101 (10 kΩ / 100 Ω), stage 2 gain 10 (9.09 kΩ / 1 kΩ), interstage coupling 10 nF / 10 kΩ, a 100 pF across the feedback resistor to roll the response off at 175 kHz.
 - **The blanking switch:** a **DG419** analog switch between the two amplifier stages, driven by `RX_BLANK` (GPIO 8), pulled so that the receiver is blanked when nothing drives the line.
@@ -12,9 +12,19 @@
 
 **Reference numbers.** 1xx = the eight inputs · 7xx = clocks and receiver · 9xx = mixer and IF. Keep them: the footprints on the board carry the same names.
 
-**Schematic** (the circuit drawing)**.** The full PDF pages for your section are `b1_inputs` and `nmr_rx` (link on the course site). Your **gapped sheet** is missing three or four parts — the exact list is in the class repository, `hardware/docs/student-deletions.md`, and you place them back from the PDF. Your **one part from the JLCPCB parts library** (JLCPCB is the factory that makes and assembles our boards; its part numbers look like C12345): the **OPA1656, C1849431** — the low-noise amplifier itself.
+**Schematic** (the circuit drawing)**.** Your section is two sheets of the full PDF `hardware/docs/schematic-full.pdf`: **`b1_inputs`, page 4** and **`nmr_rx`, page 10** (also on the course site). You complete a **gapped copy** of each — a small KiCad project of its own in `hardware/student/`; open the `.kicad_pro` next to the sheet:
 
-**Your zone on the PCB** (the outlined region of the physical board that is yours to route)**.** `ZONE_A`. The eight input networks in a row along the front edge in SMA order, the ADC in the middle on AGND copper; the receiver in its own corner with the tank pads tight to the RX SMA and **no ground pour under the tank node** (copper there adds capacitance and detunes the resonance). Rules: nothing digital under the analog inputs; the local-oscillator lines (LO_I, LO_Q and the 336 kHz clock) stay at least 5 mm away from the RX SMA, the tank and the amplifier input; SPI enters from the socket side only; nothing on layer 2; stay inside the zone.
+| Gapped sheet | Place back | What it is |
+|---|---|---|
+| `student/b1_inputs_gapped` (page 4) | **R114** 1k R0603 · **C114** 1nF C0603 · **D114** BAV99 SOT-23 | one complete AI4 input network (the repeated channel) |
+| | **C101** 1µF C0603 · **C102** 10µF C0805 | the ADS8688 AVDD decoupling pair |
+| `student/nmr_rx_gapped` (page 10) | **C722**, **C723** 100nF C0603 | the LNA (U703) ±12 V decoupling pair |
+| | **D703** 1N4148W SOD-123F | one of the two crossed limiter diodes at the RX connector |
+| | **R911** 1.00k R0603 · **C911** 10nF C0603 | one IF RC pole, the Q path |
+
+`hardware/docs/student-deletions.md` is the authority for this list and says where each part sits on the PDF. Your **one part from the JLCPCB parts library** (JLCPCB is the factory that makes and assembles our boards; its part numbers look like C12345): the **OPA1656IDR, C1849431**, SOIC-8 — the low-noise amplifier U703 itself.
+
+**Your zone on the PCB** (the outlined region of the physical board that is yours to route)**.** `ZONE_A`. The eight input networks in a row along the front edge in SMA order, the ADC in the middle on AGND copper; the receiver in its own corner with the tank pads tight to the RX SMA and **no ground pour under the tank node** (copper there adds capacitance and detunes the resonance). Rules: nothing digital under the analog inputs; the local-oscillator lines (LO_I, LO_Q and the 336 kHz clock) stay at least 5 mm away from the RX SMA, the tank and the amplifier input; SPI enters from the socket side only; no tracks on either inner layer (both are unbroken ground planes); stay inside the zone.
 
 ## The two questions (E3, between workshops) — short answers that show the *why*
 1. **Why is the receiver blanked between the two amplifier stages and not at its input?** *(think: the switch has charge as well as resistance; where does 60 pC hurt more, on a 1.25 nF tank or on a 10 nF coupling capacitor; and how long does each one take to settle)*

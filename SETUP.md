@@ -160,7 +160,7 @@ Purpose: in Workshop 1 the student deploys (publishes, so it is live on the web)
 
 ## Step 9 — KiCad 10 (optional now; the preparation for Workshop 2)
 
-Purpose: the class board is designed in KiCad (the free program we draw the schematic and lay out the printed circuit board in); each student edits their own zone (the region of the board that is theirs) of the schematic (the circuit drawing) and layout (the physical board design) from Workshop 2 onwards, so it must be installed and opened once before then. Offer this step; the student may defer it.
+Purpose: the class board is designed in KiCad (the free program we draw the schematic and lay out the printed circuit board in); each student edits their own section of the schematic (the circuit drawing) and their own zone (the region of the board that is theirs) of the layout (the physical board design) from Workshop 2 onwards, so it must be installed and opened once before then. Offer this step; the student may defer it.
 
 | OS | Install |
 |---|---|

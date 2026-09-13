@@ -118,7 +118,7 @@ Every tooling term in this workbook is explained the first time it appears in a 
 | **Gerbers** | the manufacturing files sent to the factory |
 | **STL / STEP** | 3D file formats (for printing / for CAD exchange) |
 | **Onshape** | the browser CAD program for the housing |
-| **ring reviewer** | the classmate who reviews your pull request (A reviews B, B reviews C, …, E reviews A) |
+| **ring reviewer** | the classmate who reviews your pull request (A reviews B, B reviews C, C reviews A) |
 
 ## C.0b The AI method in one screen
 
@@ -234,16 +234,16 @@ pio run -e esp32s3 -t upload           # the REAL class board (no SIM) — from 
 | Fill zones | PCB | `B` |
 | DRC | PCB | *Inspect → Design Rules Checker* |
 | 3D view | PCB | `Alt+3` |
-| Layers | PCB | F.Cu top signals · **In1.Cu = GND, do not route** · In2.Cu power (instructor) · B.Cu bottom signals |
+| Layers | PCB | F.Cu top signals · **In1.Cu and In2.Cu = unbroken ground planes, no tracks at all** · B.Cu bottom signals |
 
-Your rule area is `ZONE_A`, `ZONE_B` or `ZONE_C` — the one for your section; nothing outside it; do not touch net classes or the instructor's tracks. Library: `hardware/lib/class_board.*`; new part: `easyeda2kicad --full --lcsc_id C… --output "<abs path>/hardware/lib/class_board"`.
+Your rule area is `ZONE_A`, `ZONE_B` or `ZONE_C` — the one for your section; nothing outside it; do not touch net classes or the instructor's tracks. The board is `hardware/class-board.kicad_pro`; your **gapped sheets** are small projects of their own in `hardware/student/` — open the `.kicad_pro` next to the sheet (A: `b1_inputs_gapped`, `nmr_rx_gapped` · B: `b3_outputs_gapped`, `b5_dio_trig_gapped`, `nmr_tx_gapped` · C: `b4_switching_gapped`, `c_switch_gapped`), and what is missing from each is listed in `hardware/docs/student-deletions.md`. Library: `hardware/lib/class_board.*`; new part: `easyeda2kicad --full --lcsc_id C… --output "<abs path>/hardware/lib/class_board"`.
 
 ## C.4 The review checklist (the instructor's merge list for the class board)
 - [ ] ERC 0 errors · DRC 0 errors, 0 unrouted
 - [ ] `LCSC` field on every part
 - [ ] values match the PDF
 - [ ] decoupling capacitors next to the pins they serve
-- [ ] nothing on In1.Cu
+- [ ] no tracks on either inner layer
 - [ ] nothing outside the rule area
 - [ ] pin 1 marked on the silkscreen for every IC and connector
 - [ ] ground pour joined (no islands)
