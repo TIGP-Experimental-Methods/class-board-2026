@@ -39,4 +39,6 @@ class BaseBlock : public Block {
   uint32_t counter_ = 0;             // increments 10x per second
   uint32_t lastTick_ = 0;
   float tempC_ = 0;
+  bool expanderOk_ = false;   // TCA9535 answered at 0x20
+  bool clockgenOk_ = false;   // Si5351A answered at 0x60
 };

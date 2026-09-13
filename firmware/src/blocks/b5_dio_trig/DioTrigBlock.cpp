@@ -1,13 +1,16 @@
 #include "DioTrigBlock.h"
+
 #include "../../../include/pins.h"
+#include "../../drivers/Tca9535.h"
 
 void DioTrigBlock::begin() {
+  // The expander is started by BaseBlock::begin() and comes up with port 0 all
+  // zero, so DIO1..8 are already low. This write just makes that explicit.
+  writeDio();
 #ifndef SIM
-  for (int i = 0; i < 8; i++) pinMode(PIN_DIO[i], OUTPUT);
   pinMode(PIN_TRIG_DIR, OUTPUT);
   digitalWrite(PIN_TRIG_DIR, LOW);      // safe default: TRIG SMA is an input
   pinMode(PIN_TRIG_IO, INPUT);
-  writeDio();
   // TODO(B5): fast outputs - use the LEDC peripheral (Arduino core 2.x:
   // ledcSetup + ledcAttachPin + ledcWriteTone) or RMT on PIN_FAST_OUT[]
   // for clocks up to the 74HCT125's limit.
@@ -21,9 +24,9 @@ void DioTrigBlock::loop() {
 }
 
 void DioTrigBlock::writeDio() {
-#ifndef SIM
-  for (int i = 0; i < 8; i++) digitalWrite(PIN_DIO[i], (mask_ >> i) & 1);
-#endif
+  // One I2C write sets all eight lines at once, so they change together - an
+  // improvement on the eight separate GPIO writes this block used in v0.6.
+  expander.writePort(EXP_PORT_DIO, mask_);
 }
 
 void DioTrigBlock::setFast(int idx, float hz) {
@@ -38,6 +41,7 @@ bool DioTrigBlock::handle(JsonObjectConst cmd, JsonObject reply) {
   JsonObjectConst a = argsOf(cmd);
 
   if (strcmp(c, "dio") == 0) {            // {"n":1..8,"level":true}
+    if (!expander.present()) { reply["error"] = "expander not present"; return false; }
     int n = a["n"] | 0;
     if (n < 1 || n > 8) { reply["error"] = "n must be 1..8"; return false; }
     if (a["level"] | false) mask_ |= 1 << (n - 1); else mask_ &= ~(1 << (n - 1));
@@ -46,6 +50,7 @@ bool DioTrigBlock::handle(JsonObjectConst cmd, JsonObject reply) {
     return true;
   }
   if (strcmp(c, "dio_mask") == 0) {       // {"mask":0..255}
+    if (!expander.present()) { reply["error"] = "expander not present"; return false; }
     mask_ = a["mask"] | 0;
     writeDio();
     reply["mask"] = mask_;

@@ -1,6 +1,9 @@
-// b5_dio_trig: 8 TTL outputs (74AHCT541 on PIN_DIO[0..7]), 2 fast outputs
-// (PIN_FAST_OUT[0..1] -> 74HCT125) and the switchable TRIG SMA
-// (74LVC1T45: PIN_TRIG_IO data, PIN_TRIG_DIR 1 = output to SMA).
+// b5_dio_trig: 8 TTL outputs, 2 fast outputs (PIN_FAST_OUT[0..1] -> 74HCT125)
+// and the switchable TRIG SMA (74LVC1T45: PIN_TRIG_IO data, PIN_TRIG_DIR 1 =
+// output to SMA).
+// v0.7: DIO1..8 are no longer MCU pins. They come from port 0 of the TCA9535
+// expander U505 (drivers/Tca9535.h) into the 74AHCT541 buffer, which is why the
+// dio commands answer "expander not present" on a board that has none.
 // Commands: dio {n, level}, dio_mask {mask}, trig_dir {out}, trig {level},
 //           fast_out {n, freq_hz}   (0 = off)
 // Status:   dio (mask), dio1..dio8, trig_dir, trig, fast1_hz, fast2_hz

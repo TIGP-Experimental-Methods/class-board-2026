@@ -1,11 +1,26 @@
 #include "BaseBlock.h"
 #include <WiFi.h>
+#include <Wire.h>
 #include "../../../include/pins.h"
+#include "../../drivers/SpiBus.h"
+#include "../../drivers/Tca9535.h"
+#include "../../drivers/Si5351.h"
 
 void BaseBlock::begin() {
   pixel_.setPin(PIN_RGB_LED);
   pixel_.begin();
   showLed();
+
+  // The shared buses and the two I2C chips every section relies on (NMR-FIRMWARE.md
+  // section 4): the SPI lock, the TCA9535 expander (DIO, relays, the quadrature clear)
+  // and the Si5351A clock generator. On a bare dev board neither chip answers;
+  // present() stays false and the blocks that need them degrade quietly.
+  spibus::begin();
+#ifndef SIM
+  Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000);
+#endif
+  expanderOk_ = expander.begin(I2C_ADDR_EXPANDER);
+  clockgenOk_ = clockgen.begin(I2C_ADDR_SI5351);
 }
 
 void BaseBlock::loop() {
@@ -52,6 +67,8 @@ bool BaseBlock::handle(JsonObjectConst cmd, JsonObject reply) {
 #else
     reply["sim"] = false;
 #endif
+    reply["expander"] = expanderOk_;
+    reply["clockgen"] = clockgenOk_;
     return true;
   }
   // TODO(Project 2): add your command here (workbook ch. 1, section 1.5). Default = the measurement:

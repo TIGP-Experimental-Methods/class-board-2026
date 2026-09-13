@@ -1,39 +1,43 @@
 #include "InputsBlock.h"
+
 #include "../../../include/pins.h"
-#ifndef SIM
-#include <SPI.h>
-#endif
+#include "../../drivers/Ads8688.h"
+#include "../../drivers/SpiBus.h"
 
 void InputsBlock::begin() {
-#ifndef SIM
-  pinMode(PIN_CS_ADC, OUTPUT);
-  digitalWrite(PIN_CS_ADC, HIGH);
-  SPI.begin(PIN_SPI_SCLK, PIN_SPI_MISO, PIN_SPI_MOSI);
-  // TODO(B1): ADS8688 init - /RST and /PD are pulled high on the board.
-  // Send AUTO_RST (0xA000), then program the range register of each channel.
-#endif
+  // The ADS8688 driver (drivers/Ads8688.h) owns the chip select and the command
+  // words; BaseBlock::begin() has already started the shared SPI bus. Under SIM
+  // the driver keeps state and the readings below are synthesised.
+  spibus::begin();
+  adc.begin();
+  for (int i = 0; i < kChannels; i++) range_[i] = adc.range(i);
 }
 
 void InputsBlock::loop() {
   uint32_t now = millis();
   if (now - lastTick_ < 50) return;   // 20 Hz is enough for the status panel
   lastTick_ = now;
-  readAll();
+  // During an NMR capture the sequencer holds the bus for the whole burst; a
+  // status read that waited for it would stall the main loop, so skip this pass.
+  if (!readAll(0)) return;
 }
 
-void InputsBlock::readAll() {
+bool InputsBlock::readAll(uint32_t lock_ms) {
 #ifdef SIM
+  (void)lock_ms;
   // SIM: ch1 = 1 Hz sine 8 Vpp, ch2 = 0.5 Hz triangle, others = offsets + noise.
   float t = millis() / 1000.0f;
   volts_[0] = 4.0f * sinf(2 * PI * 1.0f * t);
   volts_[1] = 5.0f * (2 * fabsf(fmodf(t, 2.0f) - 1.0f) - 1.0f);
   for (int i = 2; i < kChannels; i++) volts_[i] = 0.1f * i + random(-50, 50) / 10000.0f;
 #else
-  // TODO(B1): for each channel send MAN_CH_n (0xC000 + n*0x0400) and read the
-  // 16-bit result in the following frame; convert with the channel's range:
-  //   +-10 V range: v = (code - 32768) * 20.0 / 65536
-  for (int i = 0; i < kChannels; i++) volts_[i] = 0;
+  // Manual mode: MAN_CH_n selects the channel, the result arrives in the next
+  // frame (drivers/Ads8688.h). The driver flips the top bit so the code is signed.
+  spibus::Guard g(lock_ms);
+  if (!g.ok) return false;
+  for (int i = 0; i < kChannels; i++) volts_[i] = adc.toVolts(i, adc.readManual(i));
 #endif
+  return true;
 }
 
 bool InputsBlock::handle(JsonObjectConst cmd, JsonObject reply) {
@@ -41,7 +45,7 @@ bool InputsBlock::handle(JsonObjectConst cmd, JsonObject reply) {
   JsonObjectConst a = argsOf(cmd);
 
   if (strcmp(c, "read_all") == 0) {
-    readAll();
+    if (!readAll(50)) { reply["error"] = "SPI bus busy (nmr capture running)"; return false; }
     JsonArray ai = reply["ai"].to<JsonArray>();
     for (int i = 0; i < kChannels; i++) ai.add(volts_[i]);
     return true;
@@ -54,9 +58,11 @@ bool InputsBlock::handle(JsonObjectConst cmd, JsonObject reply) {
       return false;
     }
     range_[ch - 1] = range;
-#ifndef SIM
-    // TODO(B1): write the range register (0x05 + ch-1) for this channel over SPI.
-#endif
+    {
+      spibus::Guard g(50);
+      if (!g.ok) { reply["error"] = "SPI bus busy (nmr capture running)"; return false; }
+      adc.setRange(ch - 1, range);   // program register 0x05 + ch-1
+    }
     reply["ch"] = ch;
     reply["range"] = range;
     return true;
