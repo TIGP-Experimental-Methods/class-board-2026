@@ -1,0 +1,196 @@
+(footprint "SMA_L4.4-W2.8-LS5.4-R-RD"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "SS54")
+	(property "Reference" "REF**"
+		(at 0 -4 0)
+		(layer "F.SilkS")
+		(uuid "d24bf138-2a18-486e-ac01-d3fdd531b56e")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "SMA_L4.4-W2.8-LS5.4-R-RD"
+		(at 0 4 0)
+		(layer "F.Fab")
+		(uuid "692f60ee-a83d-4120-b2d8-911e2f185e50")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b261773c-ed5a-4e16-8b72-5ef9f52565bf")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ef330a8e-c273-4ad1-bd05-50c136172a4a")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "LCSC Part" "C22452"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "2ee41f65-d121-4ab3-a6bb-63053ca3d2f5")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -2.65 -1.36)
+		(end 2.65 -1.36)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4cd77de6-eac6-4e38-970f-4eed9b4d991b")
+	)
+	(fp_line
+		(start -2.65 1.36)
+		(end 2.65 1.36)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "72cd46d8-d160-49b5-95c8-c0a3ed541b8f")
+	)
+	(fp_line
+		(start -1.27 -1.36)
+		(end -1.27 1.36)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "e1bef8ac-4442-408a-8b2c-7f3a9a3e791a")
+	)
+	(fp_line
+		(start 2.65 -1.36)
+		(end 2.65 -0.97)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "5ad94856-6ebc-4dea-8f23-657705e0be7f")
+	)
+	(fp_line
+		(start 2.65 1.36)
+		(end 2.65 0.97)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4e928270-bd43-4172-830c-fe6023719864")
+	)
+	(fp_circle
+		(center -2.8 1.28)
+		(end -2.77 1.28)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "1d9a8dd7-bb49-449d-8923-0d334d9ef14d")
+	)
+	(fp_poly
+		(pts
+			(xy -2.569997 -1.432408) (xy -2.569997 -0.921893) (xy -3.027197 -0.921893) (xy -3.027197 -1.432408)
+			(xy -2.569997 -1.432408)
+		)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "d56a3903-3cfe-4334-90cf-2ba9a4fc676a")
+	)
+	(fp_poly
+		(pts
+			(xy -2.569997 1.432408) (xy -2.569997 0.921893) (xy -3.027197 0.921893) (xy -3.027197 1.432408) (xy -2.569997 1.432408)
+		)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "03ef8a7c-6335-4b49-8965-cf35065cd516")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "635cd3ab-0f41-4449-8d4c-e8dd844b68f9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_rect
+		(start -3.78 -1.68)
+		(end 3.78 1.68)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "93f0c342-5f38-5265-9aaa-c399a88020f8")
+	)
+	(pad "1" smd rect
+		(at 2.5 0)
+		(size 2.063 1.539)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "e32ae9e3-9cf1-4bf6-86fc-a80cbbdf956e")
+	)
+	(pad "2" smd rect
+		(at -2.5 0)
+		(size 2.063 1.539)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "0a96626e-4244-4b0f-b2db-7b3c6e297231")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/lib/class_board.3dshapes/SMA_L4.4-W2.8-LS5.4-R-RD.wrl"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

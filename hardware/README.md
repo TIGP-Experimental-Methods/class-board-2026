@@ -1,79 +1,124 @@
-# hardware/ — the class board in KiCad 10 (rev B, v0.7)
+# TIGP class board 2026 — hardware (rev B, v0.7)
 
-**What the board is.** The class board turns the ESP32-S3 dev board into a small **NMR console**. A pair of coils makes
-a field of about **2 mT**; the protons in a bottle of water precess in it at **89 kHz**. The board synthesises a short
-pulse at that frequency, drives it into a coil, blanks its own receiver while the pulse is on, then listens: the
-**free induction decay** that comes back is amplified, mixed down to an audio frequency, sampled on two channels of the
-converter and turned into a **spectrum** on the phone. Everything a hospital scanner does is there except the magnet,
-and the same console reaches a higher field later by changing only the coil, the amplifier and the drive level.
-*Rule of thumb: the physics is set by the coil; the board is set by noise, by timing, and by what happens when you
-switch an amp off.* Around that console sit the general-purpose parts of a lab instrument: eight analog inputs, two
-±10 V outputs, eight TTL lines, a trigger, four relays and two isolated inputs.
+Two boards: the **main board** (ESP32-S3 dev-board carrier / lab instrument **and NMR console**, 4-layer
+**180 × 100 mm**) and the **front panel** (2-layer **180 × 65 mm** with 15 SMA, OLED socket, 3 LEDs, 2×20 link).
+Specification: [`../10-Class-Board-Design-Brief.md`](../10-Class-Board-Design-Brief.md) v0.6 as amended by the v0.7
+re-spec `notes/2026-09-13-nmr-respec-proposal.md` and the circuit design `notes/2026-09-13-v07-nmr-circuits.md` (both
+in the course repo); build/verification contract: [`../prompt.md`](../prompt.md); working instructions for this
+directory: [`AGENTS.md`](AGENTS.md).
 
-Design record for v0.7: `notes/2026-09-13-nmr-respec-proposal.md` and `notes/2026-09-13-v07-nmr-circuits.md` in the
-course repository; the older full specification is `10-Class-Board-Design-Brief.md` there.
+## What v0.7 changed (2026-09-13)
 
-## The KiCad project
+- **Three student sections instead of five zones** (D-30): **A** = analog inputs + NMR receiver · **B** = analog
+  outputs, digital I/O, timing + NMR transmitter · **C** = power, switching + coil switches.  The instructor keeps the
+  base (dev-board socket, buses, expansion header, link) and the front panel.  Ownership is enforced by the DRC rules
+  `owner_A` / `owner_B` / `owner_C` on each footprint's `Block` field.
+- **An NMR console replaces the OPT conditioning chain** (D-32).  Target: proton NMR at **B0 = 2.1 mT,
+  f_Larmor = 89.4 kHz**, thermal polarization, 60–250 mL of water, coil-detected; the architecture reaches ≥ 1 MHz by
+  changing only the tank, the LNA gain and the drive level.  Three new blocks:
+  - **NMR receiver** (section A, 7xx/9xx): Si5351A + 74HC74 Johnson counter for an exact quadrature LO, tuned tank
+    with a crossed-diode limiter, OPA1656 LNA (gain 1000), DG419 blanking between the stages, a double-balanced I/Q
+    commutating mixer on two TS5A23157 and IF difference amplifiers into **ADS8688 channels 7 and 8**.
+  - **NMR transmitter** (section B, 8xx): AD9834 DDS on a 50.000 MHz clock, 3 MHz Butterworth reconstruction filter,
+    OPA564 power stage running single-supply from `+VEXT` (15.9 V pp = a 417 µs 90° pulse), TX on the panel SMA and on
+    a board-edge terminal.
+  - **Power and coil switches** (section C, 9xx): an external 7–18 V / 5 A input with fuse, TVS and a P-FET
+    (`+VEXT`), a DRV8871 field-cycling H-bridge, and a UCC27517 + AOD4184A polarizer switch with three flyback
+    stuffing options (adiabatic transfer only).
+- **Board 180 × 100 mm** (D-31): everything that stood at x ≥ 129 moved +40 mm, which bought 40 mm of rear edge for
+  the three new terminals and a column for the transmitter.  The panel grows to 180 × 65 mm with a **3 × 5 SMA grid**;
+  the new column carries TX, RX and SPARE, and link pins 37–40 became RX / AGND / TX / AGND (D-45, D-46).
+- **DIO1–8 and RELAY1–4 moved to a TCA9535 I²C expander** (D-40), which freed the 7 GPIO the NMR block needs and
+  GPIO 4/6/7/15 for the expansion header.  All 4 relays, 8 DIO and 8 analog inputs are kept.
 
-The CAD files are generated on the instructor's machine and copied into this folder before Workshop 2. When they are
-here, the folder looks like this:
+## Status
 
-```
-hardware/
-  class-board.kicad_pro     ONE project: open this
-  class-board.kicad_sch     root sheet: interface table + sheet symbols
-  sheets/                   base_mcu, b1_inputs, b2_power, b3_outputs, b4_switching, b5_dio_trig,
-                            nmr_rx (receiver, mixer, clocks), nmr_tx (DDS + power stage),
-                            c_switch (H-bridge, polarizer switch, external power input), front_panel_link
-  class-board.kicad_pcb     4-layer main board with the rule areas ZONE_BASE, ZONE_A, ZONE_B, ZONE_C
-  class-board.kicad_dru     the custom design rules (loaded from the project root)
-  front-panel/              the 2-layer panel PCB: the SMA grid, OLED header, LEDs, 2x20 female link
-  student/                  the gapped schematic copies, one per section: a_gapped, b_gapped, c_gapped
-  docs/                     design-decisions, requirements, design-review, bring-up, student-deletions
-  lib/                      project-local symbols, footprints and 3D models
-  jlc/                      Gerbers, drill, BOM.csv, CPL.csv and the quote per order
-  AGENTS.md                 rules for the layout agent
-```
+**Schematic and placement are generated and current; the main board is not routed.**
 
-## How to open
-KiCad 10.0.x. Open `class-board.kicad_pro`. Libraries are project-local (`sym-lib-table`, `fp-lib-table` in this
-folder); 3D models resolve through the project path variable `CLASS_BOARD_3D`.
+- Schematic: root + **10 sheets**, 404 component instances, **ERC clean on the new sheets** (`nmr_rx`, `nmr_tx`,
+  `c_switch`); the `opt_conditioning` sheet is gone.
+- PCB: 404 footprints placed, the four `ZONE_*` owner rule areas, the GND planes and the AGND pours written,
+  **0 track segments** — routing is by hand (Workshop 2: students route their own section, the instructor routes the
+  base, the rails and SPI).
+- DRC: the custom rules now **load** (the file is at the project root, D-48) and the `owner_A/B/C` assertions pass on
+  the generated placement.  A clean DRC on a routed board does not exist yet.
+- Front panel: regenerated for v0.7 (180 × 65, 3 × 5 grid); the released `release/revA/front-panel/` package is the
+  **v0.6** panel and must be rebuilt.
+- **No hardware has been built and nothing in `docs/bring-up.md` has been executed** (T-00…T-23 all pending).
+  `docs/requirements.md` marks the honest status of every requirement.
 
-## The three sections
+## What is where
 
-| Section | What is in it | The one part you fetch from the JLCPCB parts library |
-|---|---|---|
-| **A — inputs and the NMR receiver** | ADS8688 and the eight input networks; the tuned coil input and its crossed-diode limiter, the low-noise amplifier, the blanking switch, the I/Q commutating mixer, the IF filters into converter channels 7 and 8, the Si5351A clock generator and the quadrature divider | OPA1656, `C1849431` |
-| **B — signal generation, timing and the NMR transmitter** | DAC8563 + OPA2192 (AO1/AO2); the AD9834 DDS, the reconstruction filter and the OPA564 power stage whose enable pin is the transmit gate; 74AHCT541 / 74HCT125 / 74LVC1T45, TRIG, and the I²C expander that drives the DIO lines and the relay drivers | AD9834, `C116589` |
-| **C — power and switching** | the external power input (fuse, TVS, reverse-polarity FET); four relays and two isolated inputs; the DRV8871 H-bridge for field cycling; the polarizer MOSFET switch with its three flyback options | DRV8871, `C75864` |
-| *instructor* | the base (dev-board socket, buses, link header), the front panel, and the **power-entry sheet** (USB-C, jack, ORing, the rails) — a mistake there spoils every board, so it is not a student exercise | |
+| Item | Path |
+|---|---|
+| Main-board project (KiCad 10) | `class-board.kicad_pro`, `class-board.kicad_sch`, `sheets/*.kicad_sch`, `class-board.kicad_pcb`, **`class-board.kicad_dru`** (the rules KiCad actually loads; `rules/class-board.kicad_dru` is the edit source) |
+| Schematic sheets | `base_mcu`, `b1_inputs`, `b2_power`, `b3_outputs`, `b4_switching`, `b5_dio_trig`, **`nmr_rx`**, **`nmr_tx`**, **`c_switch`**, `front_panel_link` |
+| Sheet modules (v0.7) | `scripts/sheet_nmr_rx.py`, `scripts/sheet_nmr_tx.py`, `scripts/sheet_c_switch.py` — each exposes `build(root_uuid) → Sheet` for `gen_sch.py` and a `PLACEMENT` dict for `gen_pcb.py` |
+| Front-panel project | `front-panel/front-panel.kicad_pro/.kicad_sch/.kicad_pcb/.kicad_dru` (generated by `scripts/gen_panel.py`) |
+| Project-local library | `lib/class_board.kicad_sym`, `lib/class_board.pretty/`, `lib/class_board.3dshapes/` (both projects use it through their `sym-lib-table` / `fp-lib-table`) |
+| Release package | `release/<rev>/main-board/`, `release/<rev>/front-panel/` (Gerbers, drill, BOM, CPL, PDFs, SVG/PNG, STEP, reports, hashes) — only the v0.6 front panel exists so far |
+| Design record | `docs/design-decisions.md` (D-01…D-49), `docs/requirements.md` (R-01…R-44), `docs/design-review.md` (floorplan, grounding, PDN, block risks incl. §5.7 NMR, manufacturing, findings F-01…F-20, layout log), `docs/bring-up.md` (T-00…T-23), `docs/student-deletions.md` |
+| Student copies | `student/<sheet>_gapped.kicad_sch` (+ `.kicad_pro`, lib tables): section A = `b1_inputs` + `nmr_rx`, B = `b3_outputs` + `b5_dio_trig` + `nmr_tx`, C = `b4_switching` + `c_switch`.  `b2_power` is **not** gapped — the instructor keeps the power-entry block |
+| Generators | `scripts/` — see `AGENTS.md`; the schematic and the placement are generated, edit the scripts |
 
-Sections are assigned at the start of Workshop 2 (volunteers first, then lots). Review ring: A → B → C → A.
+## Reference-designator ranges
 
-## Reference numbering (the owner rules depend on it)
-base 1–99 · 1xx inputs (A) · 2xx power entry and rails (instructor, inside C) · 3xx analog outputs (B) ·
-4xx relays and isolated inputs (C) · 5xx DIO, TRIG and the expander (B) · **7xx receiver and clocks (A)** ·
-**8xx DDS transmitter and power stage (B)** · **9xx mixer and IF (A); coil switches and the external power input (C)**.
-Keep the same references in the gapped copies so footprints keep their positions after *Update PCB from schematic*.
+| Range | Block |
+|---|---|
+| 1xx | B1 analog inputs (ADS8688 and the eight input networks) — section A |
+| 2xx | B2 power entry and rails — section C (instructor-owned within C) |
+| 3xx | B3 analog outputs (DAC8563, OPA2192) — section B |
+| 4xx | B4 relays and isolated inputs — section C |
+| 5xx | B5 digital I/O, fast outputs, TRIG, TCXO option — section B |
+| 6xx | former OPT conditioning chain — **deleted in v0.7** |
+| **7xx** | **clocks and receiver**: Si5351A, crystal, 74HC74 divider, tank, limiter, LNA, blanking — section A |
+| **8xx** | **DDS and transmitter**: AD9834, reconstruction filter, OPA564 power stage, TX terminal — section B |
+| **9xx** | **mixer, IF, coil switches and external power**: mixer switches and IF amplifiers (section A); H-bridge, polarizer switch, +VEXT input (section C) |
 
-## The two rules for students
-1. **Edit only inside your own rule area, and only your own gapped sheet.** Your rule area is `ZONE_A`, `ZONE_B` or
-   `ZONE_C` on the PCB; your schematic file is `student/<a|b|c>_gapped.kicad_sch`. Nothing outside it — not the net
-   classes, not the instructor's tracks, not another section's copper. What was deleted from your sheet is listed in
-   `docs/student-deletions.md`.
-2. **Git from VS Code's Source Control panel.** Stage, commit, push and open the pull request from the panel, never
-   from a terminal. One pull request per deliverable, reviewed by your ring neighbour.
+## Order / assembly configuration the package supports
 
-Also: nothing on In1.Cu (layer 2 is a solid ground plane), decoupling capacitors next to the pin they serve, the
-`LCSC` field filled on every part you place, 2.5 mm of clearance around the isolated inputs, and wide traces with no
-neck-downs on anything carrying amps.
+- **Main board: 7 boards, 180 × 100 mm, 4-layer** JLC04161H-7628 stack-up, 1.6 mm — **5 assembled + 2 bare**;
+  Economic PCBA, **top side only** (all parts are on F.Cu), SMD + THT; DNP parts (TCXO option, the SMBJ20A fast-dump
+  clamp, the I²C pull-ups duplicated on the RX sheet, the flag pull-ups) are excluded from BOM and CPL.
+- **Front panel: 6 boards, 180 × 65 mm, 2-layer**, 1.6 mm, all assembled; parts on the front except the 2×20 female
+  link header on the back (THT, CPL layer "Bottom").
+- BOM columns *Comment, Designator, Footprint, LCSC Part #*; CPL *Designator, Mid X, Mid Y, Layer, Rotation*, origin
+  bottom-left, mm, y up.  **Check the component rotations in JLC's upload preview** — still not done (finding F-13),
+  and v0.7 adds exposed-pad and fine-pitch packages (HSOP-20 PowerPAD, SO-8-EP, TSSOP-24, MSOP-10, TO-252).
+- 97 distinct LCSC lines (v0.6: 44).  **Read Basic/Preferred/Extended by hand in the JLC BOM tool before ordering**
+  (D-49): about 22 new lines, the ADI/TI/Vishay silicon certainly Extended at ≈ US$3 each per order.  Estimated order
+  cost ≈ US$720 (v0.6 ≈ US$500).  Order cutoff: **Mon 28 Sep 2 pm**.
 
-## Who else edits what
-- Layout agent: `astra-layout` branch, `AGENTS.md` rules, never the schematic.
-- Instructor: everything else; merges student zones by *copy → Paste Special (in place)* of the tracks inside each
-  `ZONE_A` / `ZONE_B` / `ZONE_C`.
+## Generation rule (v0.7) — the PCB becomes the master
 
-## Order (Mon 2026-09-28, 2 pm — hard cutoff)
-JLCPCB Economic PCBA, SMD + THT, 5 assembled + 2 bare main boards (4-layer JLC04161H-7628), 6 assembled front panels
-(2-layer). BOM columns: Comment, Designator, Footprint, LCSC Part #. CPL: Designator, Mid X, Mid Y, Layer, Rotation.
-DNP excluded.
+UUIDs are deterministic (`uuid5`, D-47), so regenerating the schematic produces a byte-identical file for identical
+inputs and every change diffs.  Therefore:
+
+> **Regenerate the schematic freely.  Never regenerate the PCB once hand routing has started** — from that moment
+> `class-board.kicad_pcb` is the hand-edited master and `scripts/gen_pcb.py` is only the placement reference.
+> Running it would delete every track.
+
+## Interface summary
+
+- Rails: +5V_RAW (USB-C / jack, LM66100 ORing) → +3V3 (AMS1117); ±12 V isolated modules → +5VA (78L05);
+  **+3V3A** (ferrite-filtered, for the Johnson divider and the mixer switches); **+VEXT** (external 7–18 V input, for
+  the OPA564, the DRV8871 and the polarizer gate driver only).  AGND ↔ GND only at the net tie NT1.  L2 and L3 are
+  unbroken GND planes (D-01).
+- ADC channel map (D-19, must match the firmware): AI1→AIN_6, AI2→AIN_7, AI3→AIN_0, AI4→AIN_1, AI5→AIN_2, AI6→AIN_3,
+  AI7→AIN_4, AI8→AIN_5.  In v0.7 **channels 7 and 8 (AIN_4/AIN_5) carry the mixer I and Q by default**; JP101/JP102
+  restore the panel SMA per channel.
+- GPIO v0.7 (D-40, root sheet carries the table): 41 DDS_FSYNC · 42 DDS_PSEL · 40 TX_EN · 8 RX_BLANK · 9/14 HB_IN1/2 ·
+  47 FET_GATE; DIO1–8 = TCA9535 P0.0–P0.7, RELAY1–4 = P1.0–P1.3; GPIO 4/6/7/15 free to the expansion header; GPIO 3
+  unused.  I²C: OLED 0x3C, TCA9535 0x20, Si5351A 0x60.
+- Link J6/J1: pinout per brief 7.8 with **pins 37–40 = RX / AGND / TX / AGND** (D-45); the panel's back-side header
+  has pairwise-swapped pad numbers (D-25), asserted geometrically by `gen_panel.py`.
+- **Power-on order: USB first, then the +VEXT bench supply** (the OPA564 requires VDIG before V+, D-35).
+- Open items to close with hardware in hand: dev-board socket row spacing 25.4 mm (D-12), panel header mating height
+  (D-25), the land patterns of the new packages (F-12), the CPL rotations (F-13).
+
+## Release status
+
+No main-board release exists.  `release/revA/verification.json` covers the v0.6 front panel only.  A v0.7 release
+requires: hand routing finished, DRC 0 errors / 0 unconnected with zones refilled, the angle audit clean, the BOM
+without missing LCSC numbers, `scripts/release.py` fixed to find `kicad-cli` (F-15), and the JLC rotation preview
+checked.

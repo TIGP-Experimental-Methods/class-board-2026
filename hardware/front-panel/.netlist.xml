@@ -1,0 +1,1443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>C:\Claude\TIGP-2026\TIGP-board\front-panel\front-panel.kicad_sch</source>
+    <date>2026-09-13T16:39:42</date>
+    <tool>Eeschema 10.0.3</tool>
+    <textvar name="BOARD">TIGP class board 2026 front panel</textvar>
+    <textvar name="REV">B</textvar>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>TIGP class board 2026 - front panel</title>
+        <company>TIGP class board 2026</company>
+        <rev>A</rev>
+        <date>2026-09-07</date>
+        <source>front-panel.kicad_sch</source>
+        <comment number="1" value="15 SMA on a 20 mm grid, OLED 1x4 socket, 3 LEDs, 2x20 female link (back side)"/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="D1">
+      <value>GREEN</value>
+      <footprint>class_board:LED0805-R-RD</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_1806151820_Hubei-KENTO-Elec-KT-0805G_C2297.pdf</datasheet>
+      <description>LED green 0805 (KENTO KT-0805G), pin 1 = K</description>
+      <fields>
+        <field name="LCSC">C2297</field>
+        <field name="JLC_CLASS">Basic</field>
+        <field name="MPN">KT-0805G</field>
+        <field name="Manufacturer">Hubei KENTO</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:LED0805-R-RD</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_1806151820_Hubei-KENTO-Elec-KT-0805G_C2297.pdf</field>
+        <field name="Description">LED green 0805 (KENTO KT-0805G), pin 1 = K</field>
+      </fields>
+      <libsource lib="class_board" part="LED_GREEN_0805" description="LED green 0805 (KENTO KT-0805G), pin 1 = K"/>
+      <property name="LCSC" value="C2297"/>
+      <property name="JLC_CLASS" value="Basic"/>
+      <property name="MPN" value="KT-0805G"/>
+      <property name="Manufacturer" value="Hubei KENTO"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b9ba3d7a-253d-5718-a87c-c20390ef301b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D2">
+      <value>YELLOW</value>
+      <footprint>class_board:LED0603-RD-YELLOW</footprint>
+      <datasheet>https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2402181505_XINGLIGHT-XL-1608UYC-06_C965802.pdf</datasheet>
+      <description>LED yellow 0603 (XINGLIGHT XL-1608UYC-06), pin 1 = K</description>
+      <fields>
+        <field name="LCSC">C965802</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">XL-1608UYC-06</field>
+        <field name="Manufacturer">XINGLIGHT</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:LED0603-RD-YELLOW</field>
+        <field name="Datasheet">https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2402181505_XINGLIGHT-XL-1608UYC-06_C965802.pdf</field>
+        <field name="Description">LED yellow 0603 (XINGLIGHT XL-1608UYC-06), pin 1 = K</field>
+      </fields>
+      <libsource lib="class_board" part="LED_YELLOW_0603" description="LED yellow 0603 (XINGLIGHT XL-1608UYC-06), pin 1 = K"/>
+      <property name="LCSC" value="C965802"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="XL-1608UYC-06"/>
+      <property name="Manufacturer" value="XINGLIGHT"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e715d0ec-5cf4-5195-820e-6a779b9a4d19</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="D3">
+      <value>GREEN</value>
+      <footprint>class_board:LED0805-R-RD</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_1806151820_Hubei-KENTO-Elec-KT-0805G_C2297.pdf</datasheet>
+      <description>LED green 0805 (KENTO KT-0805G), pin 1 = K</description>
+      <fields>
+        <field name="LCSC">C2297</field>
+        <field name="JLC_CLASS">Basic</field>
+        <field name="MPN">KT-0805G</field>
+        <field name="Manufacturer">Hubei KENTO</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:LED0805-R-RD</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_1806151820_Hubei-KENTO-Elec-KT-0805G_C2297.pdf</field>
+        <field name="Description">LED green 0805 (KENTO KT-0805G), pin 1 = K</field>
+      </fields>
+      <libsource lib="class_board" part="LED_GREEN_0805" description="LED green 0805 (KENTO KT-0805G), pin 1 = K"/>
+      <property name="LCSC" value="C2297"/>
+      <property name="JLC_CLASS" value="Basic"/>
+      <property name="MPN" value="KT-0805G"/>
+      <property name="Manufacturer" value="Hubei KENTO"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e8f68e73-d380-5b98-be3a-bb14925ad70c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="FID1">
+      <value>Fiducial</value>
+      <footprint>class_board:Fiducial_1mm_Mask2mm</footprint>
+      <description>Fiducial mark 1 mm, 2 mm mask</description>
+      <fields>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:Fiducial_1mm_Mask2mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Fiducial mark 1 mm, 2 mm mask</field>
+      </fields>
+      <libsource lib="class_board" part="Fiducial" description="Fiducial mark 1 mm, 2 mm mask"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>bf3300ae-451c-5558-86cd-5b91c0d8396f</tstamps>
+      <units>
+        <unit name="A">
+          <pins/>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="FID2">
+      <value>Fiducial</value>
+      <footprint>class_board:Fiducial_1mm_Mask2mm</footprint>
+      <description>Fiducial mark 1 mm, 2 mm mask</description>
+      <fields>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:Fiducial_1mm_Mask2mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Fiducial mark 1 mm, 2 mm mask</field>
+      </fields>
+      <libsource lib="class_board" part="Fiducial" description="Fiducial mark 1 mm, 2 mm mask"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4336fae0-7fd5-5d74-b2d7-ab2dfd558c40</tstamps>
+      <units>
+        <unit name="A">
+          <pins/>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="H1">
+      <value>M3</value>
+      <footprint>class_board:MountingHole_3.2mm_M3</footprint>
+      <description>Mounting hole 3.2 mm for M3</description>
+      <fields>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:MountingHole_3.2mm_M3</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting hole 3.2 mm for M3</field>
+      </fields>
+      <libsource lib="class_board" part="MountingHole" description="Mounting hole 3.2 mm for M3"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>bada64c8-741f-5e0c-b23a-6f05967dab11</tstamps>
+      <units>
+        <unit name="A">
+          <pins/>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="H2">
+      <value>M3</value>
+      <footprint>class_board:MountingHole_3.2mm_M3</footprint>
+      <description>Mounting hole 3.2 mm for M3</description>
+      <fields>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:MountingHole_3.2mm_M3</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting hole 3.2 mm for M3</field>
+      </fields>
+      <libsource lib="class_board" part="MountingHole" description="Mounting hole 3.2 mm for M3"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e9de9747-272b-524e-82b9-ba65afe29349</tstamps>
+      <units>
+        <unit name="A">
+          <pins/>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="H3">
+      <value>M3</value>
+      <footprint>class_board:MountingHole_3.2mm_M3</footprint>
+      <description>Mounting hole 3.2 mm for M3</description>
+      <fields>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:MountingHole_3.2mm_M3</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting hole 3.2 mm for M3</field>
+      </fields>
+      <libsource lib="class_board" part="MountingHole" description="Mounting hole 3.2 mm for M3"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f09eb7a1-2b61-54d4-bc0c-4a1d7b90c0bb</tstamps>
+      <units>
+        <unit name="A">
+          <pins/>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="H4">
+      <value>M3</value>
+      <footprint>class_board:MountingHole_3.2mm_M3</footprint>
+      <description>Mounting hole 3.2 mm for M3</description>
+      <fields>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:MountingHole_3.2mm_M3</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting hole 3.2 mm for M3</field>
+      </fields>
+      <libsource lib="class_board" part="MountingHole" description="Mounting hole 3.2 mm for M3"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>9221fab3-0422-56d6-aa82-9a4aec60aaa2</tstamps>
+      <units>
+        <unit name="A">
+          <pins/>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J1">
+      <value>Panel link 2x20 female</value>
+      <footprint>class_board:HDR-TH_40P-P2.54-V-F-R2-C20-S2.54</footprint>
+      <datasheet>https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2203281730_ZHOURI-2-54-2-20_C2977589.pdf</datasheet>
+      <description>2x20 straight female header (ZHOURI 2.54-2*20), front-panel side</description>
+      <fields>
+        <field name="LCSC">C2977589</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">2.54-2*20</field>
+        <field name="Manufacturer">ZHOURI</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:HDR-TH_40P-P2.54-V-F-R2-C20-S2.54</field>
+        <field name="Datasheet">https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2203281730_ZHOURI-2-54-2-20_C2977589.pdf</field>
+        <field name="Description">2x20 straight female header (ZHOURI 2.54-2*20), front-panel side</field>
+      </fields>
+      <libsource lib="class_board" part="HDR_2x20_FEMALE" description="2x20 straight female header (ZHOURI 2.54-2*20), front-panel side"/>
+      <property name="LCSC" value="C2977589"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="2.54-2*20"/>
+      <property name="Manufacturer" value="ZHOURI"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>0d095f49-309f-5aa6-b120-1950a888646b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="7"/>
+            <pin num="9"/>
+            <pin num="11"/>
+            <pin num="13"/>
+            <pin num="15"/>
+            <pin num="17"/>
+            <pin num="19"/>
+            <pin num="21"/>
+            <pin num="23"/>
+            <pin num="25"/>
+            <pin num="27"/>
+            <pin num="29"/>
+            <pin num="31"/>
+            <pin num="33"/>
+            <pin num="35"/>
+            <pin num="37"/>
+            <pin num="39"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="8"/>
+            <pin num="10"/>
+            <pin num="12"/>
+            <pin num="14"/>
+            <pin num="16"/>
+            <pin num="18"/>
+            <pin num="20"/>
+            <pin num="22"/>
+            <pin num="24"/>
+            <pin num="26"/>
+            <pin num="28"/>
+            <pin num="30"/>
+            <pin num="32"/>
+            <pin num="34"/>
+            <pin num="36"/>
+            <pin num="38"/>
+            <pin num="40"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J2">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a2548f76-1224-555c-b435-48fcd70b870e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J3">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ca98abd5-4f18-5bde-a705-033dc7a9f6a2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J4">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1536dd91-54a3-5879-9aba-90d1f878e649</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J5">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>86e80215-9de5-5e49-9e5c-e62530dde3dd</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J6">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8c518fcf-0658-5222-b08e-b5325183fd19</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J7">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>13acee8b-c486-54ad-9aaa-5a96777e1023</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J8">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>cbab5131-f2f6-5b7d-a0fc-43998ef5b094</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J9">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>548000f7-77a8-5908-99f8-2a72a3631f60</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J10">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1369849c-ce79-5e72-b6ba-4b7926d0793e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J11">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d733fcfd-2815-524d-8ff0-1338eb3a9e89</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J12">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c9e9dcf4-e61a-5930-b23e-bae69525bf10</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J13">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d4b10c05-797b-5505-863f-b95c7f14e7b3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J14">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8ca29bfe-02e9-5fa3-89b1-883610c618aa</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J15">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a42ff0f8-0fc6-5714-9644-d71bd87f9335</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J16">
+      <value>SMA</value>
+      <footprint>class_board:SMA-TH_BWSMA-KE-Z001</footprint>
+      <datasheet>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</datasheet>
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <fields>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+      </fields>
+      <libsource lib="class_board" part="BWSMA-KE-Z001" description="SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)"/>
+      <property name="LCSC" value="C496549"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="BWSMA-KE-Z001"/>
+      <property name="Manufacturer" value="BAT Wireless"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1c1ee7ad-5ee6-5e6b-9507-17f837fdd537</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J17">
+      <value>OLED 1x4 socket</value>
+      <footprint>class_board:PinSocket_1x04_P2.54mm_Vertical</footprint>
+      <datasheet>https://www.lcsc.com/product-detail/C2894927.html</datasheet>
+      <description>1x4 2.54 mm female header 8.5 mm (XFCN PZ254-1-04-Z-8.5) for the 0.96in OLED module (GND VCC SCL SDA)</description>
+      <fields>
+        <field name="LCSC">C2894927</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">PZ254-1-04-Z-8.5</field>
+        <field name="Manufacturer">XFCN</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:PinSocket_1x04_P2.54mm_Vertical</field>
+        <field name="Datasheet">https://www.lcsc.com/product-detail/C2894927.html</field>
+        <field name="Description">1x4 2.54 mm female header 8.5 mm (XFCN PZ254-1-04-Z-8.5) for the 0.96in OLED module (GND VCC SCL SDA)</field>
+      </fields>
+      <libsource lib="class_board" part="HDR_1x4_FEMALE" description="1x4 2.54 mm female header 8.5 mm (XFCN PZ254-1-04-Z-8.5) for the 0.96in OLED module (GND VCC SCL SDA)"/>
+      <property name="LCSC" value="C2894927"/>
+      <property name="JLC_CLASS" value="Extended"/>
+      <property name="MPN" value="PZ254-1-04-Z-8.5"/>
+      <property name="Manufacturer" value="XFCN"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>6099e749-38c1-548a-bc26-c8c298b2cabd</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R1">
+      <value>1k</value>
+      <footprint>class_board:R0603</footprint>
+      <datasheet>https://www.lcsc.com/product-detail/C21190.html</datasheet>
+      <description>Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)</description>
+      <fields>
+        <field name="LCSC">C21190</field>
+        <field name="JLC_CLASS">Basic</field>
+        <field name="MPN">0603WAF1001T5E</field>
+        <field name="Manufacturer">UNI-ROYAL</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:R0603</field>
+        <field name="Datasheet">https://www.lcsc.com/product-detail/C21190.html</field>
+        <field name="Description">Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)</field>
+      </fields>
+      <libsource lib="class_board" part="R0603_1k" description="Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"/>
+      <property name="LCSC" value="C21190"/>
+      <property name="JLC_CLASS" value="Basic"/>
+      <property name="MPN" value="0603WAF1001T5E"/>
+      <property name="Manufacturer" value="UNI-ROYAL"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fb7fc17f-02a5-5745-a39c-fab9232f507d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R2">
+      <value>1k</value>
+      <footprint>class_board:R0603</footprint>
+      <datasheet>https://www.lcsc.com/product-detail/C21190.html</datasheet>
+      <description>Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)</description>
+      <fields>
+        <field name="LCSC">C21190</field>
+        <field name="JLC_CLASS">Basic</field>
+        <field name="MPN">0603WAF1001T5E</field>
+        <field name="Manufacturer">UNI-ROYAL</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:R0603</field>
+        <field name="Datasheet">https://www.lcsc.com/product-detail/C21190.html</field>
+        <field name="Description">Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)</field>
+      </fields>
+      <libsource lib="class_board" part="R0603_1k" description="Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"/>
+      <property name="LCSC" value="C21190"/>
+      <property name="JLC_CLASS" value="Basic"/>
+      <property name="MPN" value="0603WAF1001T5E"/>
+      <property name="Manufacturer" value="UNI-ROYAL"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>44fae14c-f53e-5110-b198-48331439d6fe</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R3">
+      <value>1k</value>
+      <footprint>class_board:R0603</footprint>
+      <datasheet>https://www.lcsc.com/product-detail/C21190.html</datasheet>
+      <description>Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)</description>
+      <fields>
+        <field name="LCSC">C21190</field>
+        <field name="JLC_CLASS">Basic</field>
+        <field name="MPN">0603WAF1001T5E</field>
+        <field name="Manufacturer">UNI-ROYAL</field>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:R0603</field>
+        <field name="Datasheet">https://www.lcsc.com/product-detail/C21190.html</field>
+        <field name="Description">Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)</field>
+      </fields>
+      <libsource lib="class_board" part="R0603_1k" description="Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"/>
+      <property name="LCSC" value="C21190"/>
+      <property name="JLC_CLASS" value="Basic"/>
+      <property name="MPN" value="0603WAF1001T5E"/>
+      <property name="Manufacturer" value="UNI-ROYAL"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c5d63e52-eb5f-50cf-891f-dc73038cac9f</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="TP1">
+      <value>TP</value>
+      <footprint>class_board:TestPoint_Pad_D1.5mm</footprint>
+      <description>Test point pad 1.5 mm</description>
+      <fields>
+        <field name="Block">PANEL</field>
+        <field name="Footprint">class_board:TestPoint_Pad_D1.5mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Test point pad 1.5 mm</field>
+      </fields>
+      <libsource lib="class_board" part="TestPoint" description="Test point pad 1.5 mm"/>
+      <property name="Block" value="PANEL"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="front-panel.kicad_sch"/>
+      <property name="exclude_from_bom"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2114c0d4-c3be-5f6f-a49c-1cf6ab665ac6</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="class_board" part="BWSMA-KE-Z001">
+      <description>SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</description>
+      <docs>https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</docs>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">SMA</field>
+        <field name="Footprint">class_board:SMA-TH_BWSMA-KE-Z001</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf</field>
+        <field name="Description">SMA female vertical PCB connector, 50 ohm (5 = centre, 1-4 = shield legs)</field>
+        <field name="LCSC">C496549</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">BWSMA-KE-Z001</field>
+        <field name="Manufacturer">BAT Wireless</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GND" type="passive"/>
+        <pin num="2" name="GND" type="passive"/>
+        <pin num="3" name="GND" type="passive"/>
+        <pin num="4" name="GND" type="passive"/>
+        <pin num="5" name="SIG" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="class_board" part="Fiducial">
+      <description>Fiducial mark 1 mm, 2 mm mask</description>
+      <fields>
+        <field name="Reference">FID</field>
+        <field name="Value">Fiducial</field>
+        <field name="Footprint">class_board:Fiducial_1mm_Mask2mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Fiducial mark 1 mm, 2 mm mask</field>
+      </fields>
+    </libpart>
+    <libpart lib="class_board" part="HDR_1x4_FEMALE">
+      <description>1x4 2.54 mm female header 8.5 mm (XFCN PZ254-1-04-Z-8.5) for the 0.96in OLED module (GND VCC SCL SDA)</description>
+      <docs>https://www.lcsc.com/product-detail/C2894927.html</docs>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">OLED 1x4 socket</field>
+        <field name="Footprint">class_board:PinSocket_1x04_P2.54mm_Vertical</field>
+        <field name="Datasheet">https://www.lcsc.com/product-detail/C2894927.html</field>
+        <field name="Description">1x4 2.54 mm female header 8.5 mm (XFCN PZ254-1-04-Z-8.5) for the 0.96in OLED module (GND VCC SCL SDA)</field>
+        <field name="LCSC">C2894927</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">PZ254-1-04-Z-8.5</field>
+        <field name="Manufacturer">XFCN</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GND" type="power_in"/>
+        <pin num="2" name="VCC" type="power_in"/>
+        <pin num="3" name="SCL" type="bidirectional"/>
+        <pin num="4" name="SDA" type="bidirectional"/>
+      </pins>
+    </libpart>
+    <libpart lib="class_board" part="HDR_2x20_FEMALE">
+      <description>2x20 straight female header (ZHOURI 2.54-2*20), front-panel side</description>
+      <docs>https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2203281730_ZHOURI-2-54-2-20_C2977589.pdf</docs>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Panel link 2x20 female</field>
+        <field name="Footprint">class_board:HDR-TH_40P-P2.54-V-F-R2-C20-S2.54</field>
+        <field name="Datasheet">https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2203281730_ZHOURI-2-54-2-20_C2977589.pdf</field>
+        <field name="Description">2x20 straight female header (ZHOURI 2.54-2*20), front-panel side</field>
+        <field name="LCSC">C2977589</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">2.54-2*20</field>
+        <field name="Manufacturer">ZHOURI</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+        <pin num="4" name="4" type="passive"/>
+        <pin num="5" name="5" type="passive"/>
+        <pin num="6" name="6" type="passive"/>
+        <pin num="7" name="7" type="passive"/>
+        <pin num="8" name="8" type="passive"/>
+        <pin num="9" name="9" type="passive"/>
+        <pin num="10" name="10" type="passive"/>
+        <pin num="11" name="11" type="passive"/>
+        <pin num="12" name="12" type="passive"/>
+        <pin num="13" name="13" type="passive"/>
+        <pin num="14" name="14" type="passive"/>
+        <pin num="15" name="15" type="passive"/>
+        <pin num="16" name="16" type="passive"/>
+        <pin num="17" name="17" type="passive"/>
+        <pin num="18" name="18" type="passive"/>
+        <pin num="19" name="19" type="passive"/>
+        <pin num="20" name="20" type="passive"/>
+        <pin num="21" name="21" type="passive"/>
+        <pin num="22" name="22" type="passive"/>
+        <pin num="23" name="23" type="passive"/>
+        <pin num="24" name="24" type="passive"/>
+        <pin num="25" name="25" type="passive"/>
+        <pin num="26" name="26" type="passive"/>
+        <pin num="27" name="27" type="passive"/>
+        <pin num="28" name="28" type="passive"/>
+        <pin num="29" name="29" type="passive"/>
+        <pin num="30" name="30" type="passive"/>
+        <pin num="31" name="31" type="passive"/>
+        <pin num="32" name="32" type="passive"/>
+        <pin num="33" name="33" type="passive"/>
+        <pin num="34" name="34" type="passive"/>
+        <pin num="35" name="35" type="passive"/>
+        <pin num="36" name="36" type="passive"/>
+        <pin num="37" name="37" type="passive"/>
+        <pin num="38" name="38" type="passive"/>
+        <pin num="39" name="39" type="passive"/>
+        <pin num="40" name="40" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="class_board" part="LED_GREEN_0805">
+      <description>LED green 0805 (KENTO KT-0805G), pin 1 = K</description>
+      <docs>https://www.lcsc.com/datasheet/lcsc_datasheet_1806151820_Hubei-KENTO-Elec-KT-0805G_C2297.pdf</docs>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">GREEN</field>
+        <field name="Footprint">class_board:LED0805-R-RD</field>
+        <field name="Datasheet">https://www.lcsc.com/datasheet/lcsc_datasheet_1806151820_Hubei-KENTO-Elec-KT-0805G_C2297.pdf</field>
+        <field name="Description">LED green 0805 (KENTO KT-0805G), pin 1 = K</field>
+        <field name="LCSC">C2297</field>
+        <field name="JLC_CLASS">Basic</field>
+        <field name="MPN">KT-0805G</field>
+        <field name="Manufacturer">Hubei KENTO</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="class_board" part="LED_YELLOW_0603">
+      <description>LED yellow 0603 (XINGLIGHT XL-1608UYC-06), pin 1 = K</description>
+      <docs>https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2402181505_XINGLIGHT-XL-1608UYC-06_C965802.pdf</docs>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">YELLOW</field>
+        <field name="Footprint">class_board:LED0603-RD-YELLOW</field>
+        <field name="Datasheet">https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2402181505_XINGLIGHT-XL-1608UYC-06_C965802.pdf</field>
+        <field name="Description">LED yellow 0603 (XINGLIGHT XL-1608UYC-06), pin 1 = K</field>
+        <field name="LCSC">C965802</field>
+        <field name="JLC_CLASS">Extended</field>
+        <field name="MPN">XL-1608UYC-06</field>
+        <field name="Manufacturer">XINGLIGHT</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="class_board" part="MountingHole">
+      <description>Mounting hole 3.2 mm for M3</description>
+      <fields>
+        <field name="Reference">H</field>
+        <field name="Value">M3</field>
+        <field name="Footprint">class_board:MountingHole_3.2mm_M3</field>
+        <field name="Datasheet"/>
+        <field name="Description">Mounting hole 3.2 mm for M3</field>
+      </fields>
+    </libpart>
+    <libpart lib="class_board" part="R0603_1k">
+      <description>Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)</description>
+      <docs>https://www.lcsc.com/product-detail/C21190.html</docs>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">1k</field>
+        <field name="Footprint">class_board:R0603</field>
+        <field name="Datasheet">https://www.lcsc.com/product-detail/C21190.html</field>
+        <field name="Description">Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)</field>
+        <field name="LCSC">C21190</field>
+        <field name="JLC_CLASS">Basic</field>
+        <field name="MPN">0603WAF1001T5E</field>
+        <field name="Manufacturer">UNI-ROYAL</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="class_board" part="TestPoint">
+      <description>Test point pad 1.5 mm</description>
+      <fields>
+        <field name="Reference">TP</field>
+        <field name="Value">TP</field>
+        <field name="Footprint">class_board:TestPoint_Pad_D1.5mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">Test point pad 1.5 mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="class_board">
+      <uri>${KIPRJMOD}/../lib/class_board.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+3V3" class="POWER,Default">
+      <node ref="J1" pin="30" pinfunction="30_30" pintype="passive"/>
+      <node ref="J17" pin="2" pinfunction="VCC_2" pintype="power_in"/>
+    </net>
+    <net code="2" name="/LED_ACT_A" class="Default">
+      <node ref="D3" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="R3" pin="2" pintype="passive"/>
+    </net>
+    <net code="3" name="/LED_PWR_A" class="Default">
+      <node ref="D1" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="R1" pin="2" pintype="passive"/>
+    </net>
+    <net code="4" name="/LED_WIFI_A" class="Default">
+      <node ref="D2" pin="2" pinfunction="A_2" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
+    </net>
+    <net code="5" name="AGND" class="POWER,Default">
+      <node ref="J1" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="J1" pin="11" pinfunction="11_11" pintype="passive"/>
+      <node ref="J1" pin="13" pinfunction="13_13" pintype="passive"/>
+      <node ref="J1" pin="15" pinfunction="15_15" pintype="passive"/>
+      <node ref="J1" pin="17" pinfunction="17_17" pintype="passive"/>
+      <node ref="J1" pin="19" pinfunction="19_19" pintype="passive"/>
+      <node ref="J1" pin="21" pinfunction="21_21" pintype="passive"/>
+      <node ref="J1" pin="23" pinfunction="23_23" pintype="passive"/>
+      <node ref="J1" pin="3" pinfunction="3_3" pintype="passive"/>
+      <node ref="J1" pin="37" pinfunction="37_37" pintype="passive"/>
+      <node ref="J1" pin="39" pinfunction="39_39" pintype="passive"/>
+      <node ref="J1" pin="7" pinfunction="7_7" pintype="passive"/>
+      <node ref="J1" pin="9" pinfunction="9_9" pintype="passive"/>
+      <node ref="J10" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J10" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J10" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J10" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J11" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J11" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J11" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J11" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J12" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J12" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J12" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J12" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J13" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J13" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J13" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J13" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J14" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J14" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J14" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J14" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J15" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J15" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J15" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J15" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J16" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J16" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J16" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J16" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J2" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J2" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J2" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J2" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J3" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J3" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J3" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J3" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J4" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J4" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J4" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J4" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J5" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J5" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J5" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J5" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J6" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J6" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J6" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J6" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J7" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J7" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J7" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J7" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J8" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J8" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J8" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J8" pin="4" pinfunction="GND_4" pintype="passive"/>
+      <node ref="J9" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J9" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J9" pin="3" pinfunction="GND_3" pintype="passive"/>
+      <node ref="J9" pin="4" pinfunction="GND_4" pintype="passive"/>
+    </net>
+    <net code="6" name="AI1" class="ANALOG_IN,Default">
+      <node ref="J1" pin="10" pinfunction="10_10" pintype="passive"/>
+      <node ref="J7" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="7" name="AI2" class="ANALOG_IN,Default">
+      <node ref="J1" pin="12" pinfunction="12_12" pintype="passive"/>
+      <node ref="J8" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="8" name="AI3" class="ANALOG_IN,Default">
+      <node ref="J1" pin="14" pinfunction="14_14" pintype="passive"/>
+      <node ref="J9" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="9" name="AI4" class="ANALOG_IN,Default">
+      <node ref="J1" pin="16" pinfunction="16_16" pintype="passive"/>
+      <node ref="J10" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="10" name="AI5" class="ANALOG_IN,Default">
+      <node ref="J1" pin="18" pinfunction="18_18" pintype="passive"/>
+      <node ref="J12" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="11" name="AI6" class="ANALOG_IN,Default">
+      <node ref="J1" pin="20" pinfunction="20_20" pintype="passive"/>
+      <node ref="J13" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="12" name="AI7" class="ANALOG_IN,Default">
+      <node ref="J1" pin="22" pinfunction="22_22" pintype="passive"/>
+      <node ref="J14" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="13" name="AI8" class="ANALOG_IN,Default">
+      <node ref="J1" pin="24" pinfunction="24_24" pintype="passive"/>
+      <node ref="J15" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="14" name="AO1" class="ANALOG_OUT,Default">
+      <node ref="J1" pin="2" pinfunction="2_2" pintype="passive"/>
+      <node ref="J2" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="15" name="AO2" class="ANALOG_OUT,Default">
+      <node ref="J1" pin="4" pinfunction="4_4" pintype="passive"/>
+      <node ref="J3" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="16" name="AUX" class="Default">
+      <node ref="J1" pin="8" pinfunction="8_8" pintype="passive"/>
+      <node ref="J5" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="17" name="GND" class="Default">
+      <node ref="D1" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D2" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="D3" pin="1" pinfunction="K_1" pintype="passive"/>
+      <node ref="J1" pin="25" pinfunction="25_25" pintype="passive"/>
+      <node ref="J1" pin="27" pinfunction="27_27" pintype="passive"/>
+      <node ref="J1" pin="29" pinfunction="29_29" pintype="passive"/>
+      <node ref="J1" pin="31" pinfunction="31_31" pintype="passive"/>
+      <node ref="J1" pin="33" pinfunction="33_33" pintype="passive"/>
+      <node ref="J1" pin="35" pinfunction="35_35" pintype="passive"/>
+      <node ref="J1" pin="5" pinfunction="5_5" pintype="passive"/>
+      <node ref="J17" pin="1" pinfunction="GND_1" pintype="power_in"/>
+    </net>
+    <net code="18" name="I2C_SCL" class="Default">
+      <node ref="J1" pin="28" pinfunction="28_28" pintype="passive"/>
+      <node ref="J17" pin="3" pinfunction="SCL_3" pintype="bidirectional"/>
+    </net>
+    <net code="19" name="I2C_SDA" class="Default">
+      <node ref="J1" pin="26" pinfunction="26_26" pintype="passive"/>
+      <node ref="J17" pin="4" pinfunction="SDA_4" pintype="bidirectional"/>
+    </net>
+    <net code="20" name="LED_ACT" class="Default">
+      <node ref="J1" pin="36" pinfunction="36_36" pintype="passive"/>
+      <node ref="R3" pin="1" pintype="passive"/>
+    </net>
+    <net code="21" name="LED_PWR" class="Default">
+      <node ref="J1" pin="32" pinfunction="32_32" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+    </net>
+    <net code="22" name="LED_WIFI" class="Default">
+      <node ref="J1" pin="34" pinfunction="34_34" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
+    </net>
+    <net code="23" name="RX" class="Default">
+      <node ref="J1" pin="38" pinfunction="38_38" pintype="passive"/>
+      <node ref="J11" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="24" name="SPARE" class="Default">
+      <node ref="J16" pin="5" pinfunction="SIG_5" pintype="passive"/>
+      <node ref="TP1" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="25" name="TRIG_5V" class="FAST,Default">
+      <node ref="J1" pin="6" pinfunction="6_6" pintype="passive"/>
+      <node ref="J4" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+    <net code="26" name="TX" class="Default">
+      <node ref="J1" pin="40" pinfunction="40_40" pintype="passive"/>
+      <node ref="J6" pin="5" pinfunction="SIG_5" pintype="passive"/>
+    </net>
+  </nets>
+</export>

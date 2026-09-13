@@ -35,3 +35,8 @@ hardware/lib/symbol/
 
 # uv lock from local `uv pip install -e host/` (not used by SETUP.md or CI)
 host/uv.lock
+
+# KiCad: STEP models stay on the shared drive (125 MB); footprints reference the .wrl files
+hardware/lib/class_board.3dshapes/*.step
+hardware/.netlist.xml
+hardware/scripts/__pycache__/

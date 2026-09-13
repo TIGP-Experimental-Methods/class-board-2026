@@ -1,0 +1,13 @@
+(version 1)
+# front panel: 2-layer, AGND copper; generic manufacturing margins (JLC 2-layer: 0.127/0.127 mm, drill 0.3 mm)
+(rule "analog_in_clearance"
+	(condition "A.NetClass == 'ANALOG_IN' && A.Type == 'Track' && B.NetName != 'AGND'")
+	(constraint clearance (min 0.3mm)))
+(rule "hole_to_hole"
+	(constraint hole_to_hole (min 0.5mm))
+	(condition "A.Type == 'Via' || A.Type == 'Pad'"))
+(rule "annular_ring"
+	(constraint annular_width (min 0.15mm))
+	(condition "A.Type == 'Via'"))
+(rule "copper_to_edge"
+	(constraint edge_clearance (min 0.3mm)))
