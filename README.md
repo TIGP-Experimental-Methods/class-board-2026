@@ -1,19 +1,21 @@
 # class-board-2026
 
-The teaching instrument for **Basic Skills for Experimentalists** (TIGP, 2026): one ESP32-S3 board (the ESP32-S3 is the microcontroller we use — a small computer on a chip, with WiFi) with five student-designed blocks, a phone web app, and a Python client.
+The teaching instrument for **Basic Skills for Experimentalists** (TIGP, 2026): one ESP32-S3 board (the ESP32-S3 is the microcontroller we use — a small computer on a chip, with WiFi) with three student-designed sections, a phone web app, and a Python client. The board is a small **NMR console**: a 2 mT field, a bottle of water, a pulse at 89 kHz, and the free induction decay that comes back turned into a spectrum on your phone.
 
 | Folder | What | Who edits it |
 |---|---|---|
 | `hardware/` | KiCad project and library (KiCad is the free program we draw the schematic and lay out the printed circuit board in; the library is the set of symbols and footprints for our parts) | students in their zone (the region of the board that is theirs), instructor merges (brings their changes into the main line) |
-| `firmware/` | PlatformIO project (Arduino, ESP32-S3) — the firmware is the program that runs on the microcontroller; PlatformIO is the tool that builds it and writes it onto the board | students in `src/blocks/b<N>_*/` |
-| `host/pwa/` | the phone app (plain HTML/JS, no build step) | students in `panels/b<N>.js` |
+| `firmware/` | PlatformIO project (Arduino, ESP32-S3) — the firmware is the program that runs on the microcontroller; PlatformIO is the tool that builds it and writes it onto the board | students in the driver folders of their own section, under `src/blocks/` |
+| `host/pwa/` | the phone app (plain HTML/JS, no build step) | students in their section's panel files, under `panels/` |
 | `host/instrument.py` | Python command-line client (CLI) speaking the same protocol as the phone | instructor |
 
-**Blocks:** `base` (dev board itself) · `b1_inputs` (ADS8688 8-ch ADC, analog-to-digital converter) · `b2_power` (rails) · `b3_outputs` (DAC8563 digital-to-analog converter + ±10 V) · `b4_switching` (4 relays, 2 optos) · `b5_dio_trig` (8 TTL out, 2 fast out, TRIG). Protocol: [firmware/PROTOCOL.md](firmware/PROTOCOL.md).
+**The three sections of the board** (one student each, assigned at the start of Workshop 2): **A — inputs and the NMR receiver** (the 8-channel 16-bit converter; the tuned coil, low-noise amplifier, blanking switch, I/Q mixer, IF filters and clock generator) · **B — signal generation, timing and the NMR transmitter** (±10 V outputs; the DDS synthesizer, reconstruction filter and power stage; TTL buffers, TRIG, the I²C expander) · **C — power and switching** (rails and the external power input; relays and isolated inputs; the H-bridge and the polarizer switch). The instructor owns the base, the front panel and the power-entry sheet.
 
-Until the class board arrives everything runs in **SIM mode** on a bare Jinhua ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins): each block fakes its hardware, so the app, the chart and the alarms all work from Workshop 1.
+**Firmware drivers** (the firmware calls each driver a *block*): `base` (dev board itself) · `b1_inputs` (ADS8688 8-ch ADC, analog-to-digital converter) · `b2_power` (rails) · `b3_outputs` (DAC8563 digital-to-analog converter + ±10 V) · `b4_switching` (4 relays, 2 optos) · `b5_dio_trig` (8 TTL out, 2 fast out, TRIG). Section A owns `b1_inputs` and the receiver capture; Section B owns `b3_outputs` and `b5_dio_trig`; Section C owns `b2_power` and `b4_switching`. Protocol: [firmware/PROTOCOL.md](firmware/PROTOCOL.md).
 
-**How this repository fits the course.** **Workshop 1: AI for experimentalists** is **Project 1** (a web app of your choice — a simulator or a game, built with the AI method) and **Project 2** (your own phone app that controls the ESP32 over WiFi). The firmware and app in this repository are **Step 1 of Project 2**: every student flashes them onto their own board first — a known working hardware baseline, which separates hardware problems from software problems — then builds their own app in its own repository, reading this code for the access point, the WebSocket and the LED. They stay the **fallback**: flash them again if your own build stalls and you have a working app on the phone today. They are also the **base for Project 3a** (**Workshop 2: Designing printed circuit boards** — the class board in KiCad, one block per student) and **Project 3b** (**Workshop 3: Firmware and basic mechanical design (PCB housing)**). The course ends with a project presentation and demonstration, 26–30 Oct.
+Until the class board arrives everything runs in **SIM mode** on a bare Jinhua ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins): each driver fakes its hardware, so the app, the chart and the alarms all work from Workshop 1.
+
+**How this repository fits the course.** **Workshop 1: AI for experimentalists** is **Project 1** (a web app of your choice — a simulator or a game, built with the AI method) and **Project 2** (your own phone app that controls the ESP32 over WiFi). The firmware and app in this repository are **Step 1 of Project 2**: every student flashes them onto their own board first — a known working hardware baseline, which separates hardware problems from software problems — then builds their own app in its own repository, reading this code for the access point, the WebSocket and the LED. They stay the **fallback**: flash them again if your own build stalls and you have a working app on the phone today. They are also the **base for Project 3a** (**Workshop 2: Designing printed circuit boards** — the class board in KiCad, one section per student) and **Project 3b** (**Workshop 3: Firmware and basic mechanical design (PCB housing)**). The course ends with a project presentation and demonstration, 26–30 Oct.
 
 ## The student package (everything you need is in this repository — the project folder whose complete history git keeps, stored online on GitHub)
 
@@ -21,7 +23,7 @@ Until the class board arrives everything runs in **SIM mode** on a bare Jinhua E
 |---|---|
 | **Setup (before Workshop 1)** | [SETUP.md](SETUP.md) — paste the prompt from workbook ch. 0 into Claude Code and it installs the toolchain (the compiler and helper programs that turn source code into firmware) |
 | **Workbook** — one chapter per workshop, each with a *between workshops* part ("Before the next workshop: complete the preparation, improve your apps, build and have fun."), the same text the tutor runs | [`workbook/`](workbook/README.md): [ch. 0](workbook/ch0-before-day-1.md) · [ch. 1](workbook/ch1-day-1-week-1.md) · [ch. 2](workbook/ch2-day-2-week-2.md) · [ch. 3](workbook/ch3-day-3-week-3.md) · [ch. 4](workbook/ch4-wrap-up-demo.md) · [A](workbook/chA-electronics-from-zero.md) · [B](workbook/chB-how-the-software-works.md) · [C cheat-sheets](workbook/chC-cheat-sheets.md) |
-| **Your block page** (assigned at the start of Workshop 2) | [`workbook/blocks/`](workbook/blocks/): B1 · B2 · B3 · B4 · B5 |
+| **Your section page** (assigned at the start of Workshop 2) | [`workbook/blocks/`](workbook/blocks/): [A — inputs and the NMR receiver](workbook/blocks/a.md) · [B — signal generation, timing and the NMR transmitter](workbook/blocks/b.md) · [C — power and switching](workbook/blocks/c.md) |
 | **The tutor** (self-updating: fetches the latest guide and workbook from GitHub at the start of every session) | `/tutor L1` (etc.) in Claude Code — [`.claude/skills/tutor/`](.claude/skills/tutor/SKILL.md), rules in [`tutor/COURSE-GUIDE.md`](tutor/COURSE-GUIDE.md) |
 | **Slides** | Workshop 1 as a PDF on the course site: https://tigp-experimental-methods.github.io/slides/W1-AI-for-experimentalists.pdf (Workshop 2 and 3 slides follow the same way; see [`slides/README.md`](slides/README.md)) |
 | **Firmware + app** (Step 1 of Project 2 — the hardware baseline — and its fallback; base for Project 3) | `firmware/`, `host/` — flash it (write it onto the board over USB) in 5 commands below |
@@ -67,16 +69,16 @@ instrument alarms list
 
 It finds `instrument.local`, then `192.168.4.1`; `--host 10.0.0.42` overrides.
 
-## Add a block (Workshop 3, exercise E11)
+## Add a driver (Workshop 3, exercise E11)
 
-1. Copy `firmware/src/blocks/template/` → `firmware/src/blocks/b3_outputs/` (yours). Rename the class and `name()` → `"b3"`.
+1. Copy `firmware/src/blocks/template/` → the driver folder of your section, e.g. `firmware/src/blocks/b3_outputs/`. Rename the class and `name()` → `"b3"`.
 2. Write the **SIM branch first**: `status()` returns plausible fake values; `handle()` accepts your commands. Flash; your tab appears with a generic key/value view.
 3. Copy `host/pwa/panels/template.js` → `panels/b3.js`, set `id: 'b3'`, replace the example control. Add it to `PANELS` in `app.js`. `pio run -t uploadfs`; reload the phone.
-4. Register the block in `firmware/src/main.cpp` (one `registry.add(&b3)` line — the stub blocks are already registered, so for B1–B5 you only replace the stub).
+4. Register the driver in `firmware/src/main.cpp` (one `registry.add(&b3)` line — the stub drivers are already registered, so you only replace the stub of your own section's driver).
 5. Fill the `#ifndef SIM` branches with the real driver using the pin constants in `firmware/include/pins.h`.
 6. Open a pull request (PR — a request to merge your changes into the shared project; someone reviews it first); CI (continuous integration — the automatic build GitHub runs on every pull request) builds both envs.
 
-The rules: a block talks only to its own hardware; all block code runs from `loop()` (no tasks, no locks); every status key you show in the panel is one your `status()` emits.
+The rules: a driver talks only to its own hardware; all driver code runs from `loop()` (no tasks, no locks); every status key you show in the panel is one your `status()` emits.
 
 ## Add an alarm rule
 
@@ -86,7 +88,7 @@ Rules are data: `{block, key, op, threshold, action}`, evaluated 20× per second
 - From a panel: `api.addAlarm({ block: 'b2', key: 'v5_raw', op: 'lt', threshold: 4.9, action: 'notify' })` (see `panels/template.js`).
 - From Python: `instrument alarms add --block b1 --key ai1 --op gt --threshold 9 --action relay:1:off`.
 
-`action` is `notify` (toast on every phone, browser notification if allowed) or `relay:<n>:on|off` (block b4). Rules persist on the board in `/alarms.json`.
+`action` is `notify` (toast on every phone, browser notification if allowed) or `relay:<n>:on|off` (the switching driver, Section C). Rules persist on the board in `/alarms.json`.
 
 ## Layout
 
@@ -97,8 +99,8 @@ firmware/
   include/secrets.h.example WiFi credentials template
   scripts/copy_pwa.py       pre-build: host/pwa -> firmware/data
   src/main.cpp              WiFi, mDNS, OTA, HTTP + WebSocket, 20 Hz broadcast
-  src/blocks/Block.h        the 5-method interface
-  src/blocks/Registry.*     list of blocks
+  src/blocks/Block.h        the 5-method driver interface
+  src/blocks/Registry.*     list of drivers
   src/blocks/base/          LED, counter, temperature
   src/blocks/template/      copy-me block
   src/blocks/b1_inputs/ … b5_dio_trig/

@@ -189,7 +189,7 @@ Source Control is the branching icon in the left bar. Changed files are marked *
 | open a pull request | push the branch; GitHub offers *Compare & pull request* |
 | is this file ignored? (the secrets check) | ask Claude to run `git check-ignore -v firmware/include/secrets.h` — it must print the rule; nothing printed means the file is NOT ignored |
 
-Rules: every project is its own public repository under your own GitHub account — push at every milestone (plan reviewed, first working version, deployed, project page written). `main` in the class repository is protected — your work there goes on your branch (`w1-<name>`, later `b<N>-<name>`, `b<N>-fw-<name>`); one pull request per deliverable; the pull request description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. With an agent: commit before it starts · ask it to commit as it goes · review the diff, not the file · never let it rewrite history — say no to force-push and reset. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then e-mail the instructor (C.7).
+Rules: every project is its own public repository under your own GitHub account — push at every milestone (plan reviewed, first working version, deployed, project page written). `main` in the class repository is protected — your work there goes on your branch (`w1-<name>`, later `<section>-<name>`, `<section>-fw-<name>` — `a-`, `b-` or `c-` for your section); one pull request per deliverable; the pull request description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. With an agent: commit before it starts · ask it to commit as it goes · review the diff, not the file · never let it rewrite history — say no to force-push and reset. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then e-mail the instructor (C.7).
 
 ## C.2 PlatformIO
 ```sh
@@ -236,7 +236,7 @@ pio run -e esp32s3 -t upload           # the REAL class board (no SIM) — from 
 | 3D view | PCB | `Alt+3` |
 | Layers | PCB | F.Cu top signals · **In1.Cu = GND, do not route** · In2.Cu power (instructor) · B.Cu bottom signals |
 
-Your rule area is `ZONE_B<N>`; nothing outside it; do not touch net classes or the instructor's tracks. Library: `hardware/lib/class_board.*`; new part: `easyeda2kicad --full --lcsc_id C… --output "<abs path>/hardware/lib/class_board"`.
+Your rule area is `ZONE_A`, `ZONE_B` or `ZONE_C` — the one for your section; nothing outside it; do not touch net classes or the instructor's tracks. Library: `hardware/lib/class_board.*`; new part: `easyeda2kicad --full --lcsc_id C… --output "<abs path>/hardware/lib/class_board"`.
 
 ## C.4 The review checklist (the instructor's merge list for the class board)
 - [ ] ERC 0 errors · DRC 0 errors, 0 unrouted
@@ -247,7 +247,7 @@ Your rule area is `ZONE_B<N>`; nothing outside it; do not touch net classes or t
 - [ ] nothing outside the rule area
 - [ ] pin 1 marked on the silkscreen for every IC and connector
 - [ ] ground pour joined (no islands)
-- [ ] B4: isolation band ≥ 2.5 mm, no copper under it
+- [ ] Section C: isolation band ≥ 2.5 mm at the isolated inputs, no copper under it; high-current traces wide, no neck-downs
 - [ ] a silkscreen label on every connector
 - [ ] CI green
 
