@@ -31,11 +31,11 @@ Full schematic PDF: **page 4**, *B1: eight +-10 V inputs, ADS8688* (`docs/schema
 
 | Ref | Value | Footprint | LCSC | Item | Where on the full PDF |
 |---|---|---|---|---|---|
-| **R114** | 1k | R0603 | C21190 | one complete AI4 input network (the repeated channel: 1 k series, 1 nF, BAV99 clamp) | B1 sheet, input column 4 (AI4), between the terminal and the ADS8688 pin |
-| **C114** | 1nF | C0603 | C1588 | 〃 | 〃 |
+| **R114** | 1k | R_0603_1608Metric | C21190 | one complete AI4 input network (the repeated channel: 1 k series, 1 nF, BAV99 clamp) | B1 sheet, input column 4 (AI4), between the terminal and the ADS8688 pin |
+| **C114** | 1nF | C_0603_1608Metric | C1588 | 〃 | 〃 |
 | **D114** | BAV99 | SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR | C2500 | 〃 | 〃 |
-| **C101** | 1uF | C0603 | C15849 | the ADS8688 AVDD decoupling pair | B1 sheet, at the ADS8688 AVDD pin (top-left of U101) |
-| **C102** | 10uF | C0805 | C15850 | 〃 | 〃 |
+| **C101** | 1uF | C_0603_1608Metric | C15849 | the ADS8688 AVDD decoupling pair | B1 sheet, at the ADS8688 AVDD pin (top-left of U101) |
+| **C102** | 10uF | C_0805_2012Metric | C15850 | 〃 | 〃 |
 
 Expected ERC items: **14 new** (standalone ERC on the sheet: 28 on the full sheet, 42 on the gapped
 copy, `--severity-all`) —
@@ -54,11 +54,11 @@ Full schematic PDF: **page 10**, *NMR RX (A): tank, LNA, blanking, I/Q mixer, IF
 
 | Ref | Value | Footprint | LCSC | Item | Where on the full PDF |
 |---|---|---|---|---|---|
-| **C722** | 100nF | C0603 | C14663 | the LNA (U703 OPA1656) +-12 V decoupling pair | NMR RX sheet, block 1 (rails/decoupling strip), the C722-C727 row |
-| **C723** | 100nF | C0603 | C14663 | 〃 | 〃 |
+| **C722** | 100nF | C_0603_1608Metric | C14663 | the LNA (U703 OPA1656) +-12 V decoupling pair | NMR RX sheet, block 1 (rails/decoupling strip), the C722-C727 row |
+| **C723** | 100nF | C_0603_1608Metric | C14663 | 〃 | 〃 |
 | **D703** | 1N4148W | SOD-123F_L2.7-W1.6-LS3.8-RD | C81598 | one of the two crossed limiter diodes at the RX connector | NMR RX sheet, block 2 (receiver), at the RX pin next to D704 |
-| **R911** | 1.00k | R0603 | C110776 | one IF RC pole (Q path), R911 + C911 | NMR RX sheet, block 4 (mixer/IF), the passive 15.9 kHz pole after U901/U902 |
-| **C911** | 10nF | C0603 | C1589 | 〃 | 〃 |
+| **R911** | 1.00k | R_0603_1608Metric | C110776 | one IF RC pole (Q path), R911 + C911 | NMR RX sheet, block 4 (mixer/IF), the passive 15.9 kHz pole after U901/U902 |
+| **C911** | 10nF | C_0603_1608Metric | C1589 | 〃 | 〃 |
 
 Expected ERC items: **15 new** (standalone ERC on the sheet: 8 on the full sheet, 23 on the gapped
 copy, `--severity-all`) —
@@ -75,11 +75,11 @@ Full schematic PDF: **page 5**, *B3: DAC8563 + OPA2192 -> AO1/AO2 (+-10 V)* (`do
 
 | Ref | Value | Footprint | LCSC | Item | Where on the full PDF |
 |---|---|---|---|---|---|
-| **R305** | 10k | R0603 | C25804 | the AO2 difference-amplifier resistor set (the repeated channel) | B3 sheet, AO2 half (lower), around the second OPA2192 section |
-| **R306** | 40.2k | R0603 | C12447 | 〃 | 〃 |
-| **R307** | 10k | R0603 | C25804 | 〃 | 〃 |
-| **R308** | 40.2k | R0603 | C12447 | 〃 | 〃 |
-| **R310** | 49.9 | R0603 | C23185 | the AO2 output series resistor and its BAV99 clamp | B3 sheet, AO2 output, between the op-amp and the AO2 terminal |
+| **R305** | 10k | R_0603_1608Metric | C25804 | the AO2 difference-amplifier resistor set (the repeated channel) | B3 sheet, AO2 half (lower), around the second OPA2192 section |
+| **R306** | 40.2k | R_0603_1608Metric | C12447 | 〃 | 〃 |
+| **R307** | 10k | R_0603_1608Metric | C25804 | 〃 | 〃 |
+| **R308** | 40.2k | R_0603_1608Metric | C12447 | 〃 | 〃 |
+| **R310** | 49.9 | R_0603_1608Metric | C23185 | the AO2 output series resistor and its BAV99 clamp | B3 sheet, AO2 output, between the op-amp and the AO2 terminal |
 | **D302** | BAV99 | SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR | C2500 | 〃 | 〃 |
 
 Expected ERC items: **19 new** (standalone ERC on the sheet: 19 on the full sheet, 38 on the gapped
@@ -100,10 +100,10 @@ Full schematic PDF: **page 7**, *B5: 8 TTL DIO, 2 fast TTL outs, bidirectional T
 | Ref | Value | Footprint | LCSC | Item | Where on the full PDF |
 |---|---|---|---|---|---|
 | **U502** | 74HCT125PW | TSSOP-14_L5.0-W4.4-P0.65-LS6.4-BL | C131316 | the 74HCT125 fast-output channel parts (buffer + the two 49.9 R series resistors) | B5 sheet, fast-output block (FAST1/FAST2) |
-| **R509** | 49.9 | R0603 | C23185 | 〃 | 〃 |
-| **R510** | 49.9 | R0603 | C23185 | 〃 | 〃 |
-| **C501** | 100nF | C0603 | C14663 | the buffer decoupling pair | B5 sheet, at the 74AHCT541 (C501) and the 74HCT125 (C502) supply pins |
-| **C502** | 100nF | C0603 | C14663 | 〃 | 〃 |
+| **R509** | 49.9 | R_0603_1608Metric | C23185 | 〃 | 〃 |
+| **R510** | 49.9 | R_0603_1608Metric | C23185 | 〃 | 〃 |
+| **C501** | 100nF | C_0603_1608Metric | C14663 | the buffer decoupling pair | B5 sheet, at the 74AHCT541 (C501) and the 74HCT125 (C502) supply pins |
+| **C502** | 100nF | C_0603_1608Metric | C14663 | 〃 | 〃 |
 | **J501** | KF301-5.0-2P | CONN-TH_P5.00_KF301-5.0-2P | C474881 | one TTL screw terminal (TTL1/TTL2) | B5 sheet, fast-output block, the 2P terminal at the board edge |
 
 Expected ERC items: **30 new** (standalone ERC on the sheet: 34 on the full sheet, 64 on the gapped
@@ -125,9 +125,9 @@ Full schematic PDF: **page 11**, *NMR TX (B): AD9834 DDS, reconstruction filter,
 | Ref | Value | Footprint | LCSC | Item | Where on the full PDF |
 |---|---|---|---|---|---|
 | **C815** | 47uF 35V | CAP-SMD_BD6.3-L6.6-W6.6-FD | C59919 | the OPA564 V+ decoupling pair (47 uF bulk + 100 nF) | NMR TX sheet, power-stage block, at the OPA564 V+ pins |
-| **C816** | 100nF | C0603 | C14663 | 〃 | 〃 |
+| **C816** | 100nF | C_0603_1608Metric | C14663 | 〃 | 〃 |
 | **D802** | SS54 | SMA_L4.4-W2.8-LS5.4-R-RD | C22452 | the output clamp diode to GND | NMR TX sheet, power-stage output node, below D801 |
-| **R813** | 4.7 1W | R2512 | C2999606 | the output isolation resistor | NMR TX sheet, between the clamp node and C818 / the TX SMA |
+| **R813** | 4.7 1W | R_2512_6332Metric | C2999606 | the output isolation resistor | NMR TX sheet, between the clamp node and C818 / the TX SMA |
 
 Expected ERC items: **7 new** (standalone ERC on the sheet: 30 on the full sheet, 37 on the gapped
 copy, `--severity-all`) —
@@ -146,15 +146,15 @@ Full schematic PDF: **page 6**, *B4: 4 relays (MOSFET drive) + 2 isolated 5-24 V
 |---|---|---|---|---|---|
 | **K401** | HK4100F-DC5V-SHG | RELAY-TH_HK4100F-DC5V-SHG | C12072 | one complete relay channel (relay, coil-on LED, 2.2 k LED resistor) | B4 sheet, relay channel 1 (leftmost of the four) |
 | **D411** | YELLOW | LED0603-RD-YELLOW | C965802 | 〃 | 〃 |
-| **R421** | 2.2k | R0603 | C4190 | 〃 | 〃 |
+| **R421** | 2.2k | R_0603_1608Metric | C4190 | 〃 | 〃 |
 | **J401** | KF301-5.0-3P | CONN-TH_3P-P5.00_KF301-5.0-3P | C474882 | that channel's 3P screw terminal (NO / COM / NC) | B4 sheet, relay channel 1, at the board edge |
 | **D421** | 1N4148W | SOD-123F_L2.7-W1.6-LS3.8-RD | C81598 | one isolated-input current limiter (series diode, 220 R, 10 k bias, the two MMBT5551 and their 100 R / 1 k emitter set) | B4 sheet, isolated input 1 (lower left), between J411 and the 6N137 U401 |
-| **R431** | 220 | R0603 | C22962 | 〃 | 〃 |
-| **R441** | 10k | R0603 | C25804 | 〃 | 〃 |
+| **R431** | 220 | R_0603_1608Metric | C22962 | 〃 | 〃 |
+| **R441** | 10k | R_0603_1608Metric | C25804 | 〃 | 〃 |
 | **Q411** | MMBT5551 | SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR | C2145 | 〃 | 〃 |
 | **Q421** | MMBT5551 | SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR | C2145 | 〃 | 〃 |
-| **R451** | 100 | R0603 | C22775 | 〃 | 〃 |
-| **R461** | 1k | R0603 | C21190 | 〃 | 〃 |
+| **R451** | 100 | R_0603_1608Metric | C22775 | 〃 | 〃 |
+| **R461** | 1k | R_0603_1608Metric | C21190 | 〃 | 〃 |
 
 Expected ERC items: **33 new** (standalone ERC on the sheet: 15 on the full sheet, 48 on the gapped
 copy, `--severity-all`) —
@@ -174,7 +174,7 @@ Full schematic PDF: **page 12**, *C: external power input, DRV8871 field-cycling
 |---|---|---|---|---|---|
 | **D931** | SMBJ26A | SMB_L4.6-W3.6-LS5.3-RD | C123820 | the external-input TVS | C sheet, external power input row: J901 -> F901 -> D931 -> Q901 |
 | **F901** | 5A fast | F1206 | C57525 | the external-input fuse | C sheet, external power input row, between J901 and the TVS |
-| **R922** | 10k | R0603 | C25804 | one H-bridge input pull-down (IN2 = coast at reset) | C sheet, DRV8871 block, at the U903 IN1/IN2 pins next to R921 |
+| **R922** | 10k | R_0603_1608Metric | C25804 | one H-bridge input pull-down (IN2 = coast at reset) | C sheet, DRV8871 block, at the U903 IN1/IN2 pins next to R921 |
 
 Expected ERC items: **9 new** (standalone ERC on the sheet: 7 on the full sheet, 16 on the gapped
 copy, `--severity-all`) —

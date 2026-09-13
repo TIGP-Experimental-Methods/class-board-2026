@@ -84,6 +84,18 @@ DS = {
 
 FP = "class_board:"   # footprint library nickname
 
+# Chip resistors and ceramic capacitors use KiCad's own standard footprints (user, 2026-09-14): the
+# EasyEDA-derived R0603/C0603 lands in class_board.pretty stay in the library for anything else.
+CHIP_FP = {"R0603": "Resistor_SMD:R_0603_1608Metric", "R0805": "Resistor_SMD:R_0805_2012Metric",
+           "R1206": "Resistor_SMD:R_1206_3216Metric", "R2512": "Resistor_SMD:R_2512_6332Metric",
+           "C0603": "Capacitor_SMD:C_0603_1608Metric", "C0805": "Capacitor_SMD:C_0805_2012Metric",
+           "C1206": "Capacitor_SMD:C_1206_3216Metric", "C1210": "Capacitor_SMD:C_1210_3225Metric"}
+
+
+def chip_fp(size):
+    """Footprint id for a chip size name such as "R0603" / "C0805"; KiCad standard where one exists."""
+    return CHIP_FP.get(size, FP + size)
+
 
 class Pin:
     __slots__ = ("number", "name", "etype", "x", "y", "angle", "length", "unit", "hide")
@@ -487,7 +499,7 @@ def build_library():
          ("11k", "0603WAF1102T5E", "C25950", "Basic"), ("47k", "0603WAF4702T5E", "C25819", "Basic"),
          ("1M", "0603WAF1004T5E", "C22935", "Basic")]
     for val, mpn, lcsc, cls in R:
-        add(two_pin("R0603_" + val.replace(".", "R"), "R", val, FP + "R0603",
+        add(two_pin("R0603_" + val.replace(".", "R"), "R", val, chip_fp("R0603"),
                     "Resistor %s 1%% 0603 100 mW (Uniroyal %s)" % (val, mpn), "R",
                     fields=f(lcsc, cls, mpn, "UNI-ROYAL", "https://www.lcsc.com/product-detail/%s.html" % lcsc)))
     C = [("100nF", "CC0603KRX7R9BB104", "C14663", "C0603", "100 nF 50 V X7R 0603", "Yageo", "Basic"),
@@ -508,12 +520,12 @@ def build_library():
          ("1.2nF", "CC0603JRNPO9BN122", "C576816", "C0603", "1.2 nF 50 V NP0 5% 0603 (tank trim)", "YAGEO", "Extended"),
          ("10uF", "CL31B106KBHNNNE", "C89632", "C1206", "10 uF 50 V X7R 1206 (coil DC block)", "Samsung", "Extended")]
     for val, mpn, lcsc, fp, desc, mfr, cls in C:
-        add(two_pin("C%s_%s" % (fp[1:], val), "C", val, FP + fp, "Capacitor " + desc + " (%s %s)" % (mfr, mpn), "C",
+        add(two_pin("C%s_%s" % (fp[1:], val), "C", val, chip_fp(fp), "Capacitor " + desc + " (%s %s)" % (mfr, mpn), "C",
                     fields=f(lcsc, cls, mpn, mfr, "https://www.lcsc.com/product-detail/%s.html" % lcsc)))
     # ---- round-3 discrete passives (NMR re-spec) ---------------------------------------
     # 3.9 pF is the stocked NP0 value nearest the 4 pF the Si5351 crystal note asks for; the
     # symbol keeps the name C0603_4pF because that is the design value the sheet modules ask for.
-    add(two_pin("C0603_4pF", "C", "3.9pF", FP + "C0603",
+    add(two_pin("C0603_4pF", "C", "3.9pF", chip_fp("C0603"),
                 "Capacitor 3.9 pF 50 V NP0 0603 (Si5351 crystal load; circuits note 1.2 asks for 4 pF - "
                 "3.9 pF is the stocked NP0 value, XTAL_CL = 10 pF unchanged) (YAGEO CC0603BRNPO9BN3R9)", "C",
                 fields=f("C519107", "Extended", "CC0603BRNPO9BN3R9", "YAGEO", "https://www.lcsc.com/product-detail/C519107.html")))
@@ -523,30 +535,30 @@ def build_library():
             ("1.00k", "RT0603BRD071KL", "C110776", "IF series / difference-amp input"),
             ("10.0k", "RT0603BRD0710KL", "C95204", "stage-1 feedback and the unity-gain inverter pair"),
             ("20.0k", "RT0603BRD0720KL", "C723637", "difference-amp feedback, G_diff = 20")):
-        add(two_pin("R0603_" + val, "R", val, FP + "R0603",
+        add(two_pin("R0603_" + val, "R", val, chip_fp("R0603"),
                     "Resistor %s ohm 0.1%% 25 ppm thin film 0603 (%s; 0.1%% gives CMRR ~54 dB where 1%% gives 34 dB)" % (val, desc), "R",
                     fields=f(lcsc, "Extended", mpn, "YAGEO", "https://www.lcsc.com/product-detail/%s.html" % lcsc)))
-    add(two_pin("R0603_9R09k", "R", "9.1k", FP + "R0603",
+    add(two_pin("R0603_9R09k", "R", "9.1k", chip_fp("R0603"),
                 "Resistor 9.1 kOhm 1% 0603 fitted where the design says 9.09 kOhm (stage-2 gain 10.01 instead of 10.00). "
                 "The exact E96 9.09 kOhm is C23125 (Extended, 93 k stock) if the ratio must be exact (UNI-ROYAL 0603WAF9101T5E)", "R",
                 fields=f("C23260", "Basic", "0603WAF9101T5E", "UNI-ROYAL", "https://www.lcsc.com/product-detail/C23260.html")))
-    add(two_pin("R0603_32k", "R", "32k", FP + "R0603",
+    add(two_pin("R0603_32k", "R", "32k", chip_fp("R0603"),
                 "Resistor 32 kOhm 0.1% thin film 0603 (DRV8871 ILIM, I_TRIP = 64/R_kOhm = 2.0 A - the trip point is "
                 "directly proportional to it).  No 1% thick-film 32 k is stocked; this thin-film part is the JLC option (YAGEO RT0603BRD0732KL)", "R",
                 fields=f("C861325", "Extended", "RT0603BRD0732KL", "YAGEO", "https://www.lcsc.com/product-detail/C861325.html")))
-    add(two_pin("R0805_10R", "R", "10", FP + "R0805",
+    add(two_pin("R0805_10R", "R", "10", chip_fp("R0805"),
                 "Resistor 10 ohm 1% 0805 125 mW (MOSFET gate resistor / OPA564 output snubber; the land also takes 100 ohm)", "R",
                 fields=f("C17415", "Basic", "0805W8F100JT5E", "UNI-ROYAL", "https://www.lcsc.com/product-detail/C17415.html")))
-    add(two_pin("R2512_4R7", "R", "4.7 1W", FP + "R2512", "Resistor 4.7 ohm 1% 2512 1 W 200 V", "R",
+    add(two_pin("R2512_4R7", "R", "4.7 1W", chip_fp("R2512"), "Resistor 4.7 ohm 1% 2512 1 W 200 V", "R",
                 fields=f("C2999606", "Extended", "FRC2512F4R70TS", "Ever Ohms", "https://www.lcsc.com/product-detail/C2999606.html")))
-    add(two_pin("R2512_0R", "R", "0", FP + "R2512",
+    add(two_pin("R2512_0R", "R", "0", chip_fp("R2512"),
                 "Link 0 ohm 2512 1 W - bridges the 10 mOhm sense pads when the shunt is not fitted", "R",
                 fields=f("C2889851", "Extended", "2512 0R 1W", "Uniroyal", "https://www.lcsc.com/product-detail/C2889851.html")))
     add(two_pin("FB0603_120R_3A", "FB", "120R@100MHz 3A", FP + "L0603",
                 "Ferrite bead 120 ohm @100 MHz, 3 A, 100 mOhm DCR, 0603 (OPA564 +VEXT branch - the 600 ohm bead is a "
                 "200 mA part and must not be used there) (HCB1608KF-121T30)", "FB",
                 fields=f("C353920", "Extended", "HCB1608KF-121T30", "Hua Cheng", "https://www.lcsc.com/product-detail/C353920.html")))
-    add(two_pin("R2512_10mR", "R", "10mR", FP + "R2512", "Current-sense resistor 10 mOhm 1% 2512 2 W (polarizer current, DNP; Kelvin-connect)", "R",
+    add(two_pin("R2512_10mR", "R", "10mR", chip_fp("R2512"), "Current-sense resistor 10 mOhm 1% 2512 2 W (polarizer current, DNP; Kelvin-connect)", "R",
                 fields=f("C500718", "Extended", "GX2512-2W-10mR-1%", "Gaoxin", DS["GX2512"])))
     add(two_pin("R_5W_2R2", "R", "2.2 5W", FP + "RES-TH_BD9.5-L22.0-P28.00-D1.0",
                 "Resistor 2.2 ohm 5 W wirewound/cement axial through-hole, 22 mm body on 28 mm pads (flyback snubber, circuits note 6.1b)", "R",
