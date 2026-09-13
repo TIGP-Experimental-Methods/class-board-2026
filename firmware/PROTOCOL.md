@@ -127,21 +127,53 @@ Demo regime: protons in water at about 2.1 mT, Larmor ≈ 89.4 kHz, IF ≈ 5.4 k
 | `abort` | — | `{state:"idle"}` |
 | `pulse` | `{t_us}` 1–5000 | `{t_us}` — one transmit gate without acquisition, for a scope check |
 | `clock` | `{clk:0..1, hz}` | `{clk, hz_actual}` — low-level Si5351 test |
-| `dds` | `{hz, phase0_deg, phase1_deg, psel}` | the values programmed |
+| `dds` | `{hz, phase0_deg, phase1_deg, psel, on}` | the values programmed (`on`, default true, wakes the carrier) |
 | `blank` | `{receive:bool}` | `{receive}` — manual receiver blanking for bench tests |
-| `get_record` | — | `{n, rate_hz}`, and the last averaged record is resent as a binary frame (§7.4) |
+| `get_record` | — | `{n, rate_hz, scan}` — and the last averaged record is resent as a binary frame (§7.4) |
 | `sim_larmor` | `{hz}` (simulation build only) | `{hz}` — the simulated Larmor frequency |
 
-### 7.2 Settings (`config`), with their defaults
+### 7.2 Settings (`config`), with their defaults and limits
 
-`f_tx_hz` 89400 · `f_lo_hz` 84000 · `sequence` `"fid"` or `"echo"` · `t90_us` 417 · `t180_us` 834 ·
-`tau_us` 20000 (echo only) · `t_blank_pre_us` 20 · `t_dead_us` 1000 · `t_acq_start_us` 1200 ·
-`t_acq_ms` 2000 (max 4000) · `rate_hz` 100000 per channel · `decim` 16 · `n_avg` 1 (1–256) ·
-`cyclops` true (the pulse phase steps 0/90/180/270 across scans and the record is rotated back before
-averaging) · `t_repeat_ms` 3000 · `polarize_ms` 0 · `hb_mode` `"off"` / `"fwd"` / `"rev"`.
+`config` takes any subset; anything left out keeps the value it had. The reply is the whole effective
+set plus `f_tx_actual_hz` and `f_lo_actual_hz` (what the AD9834 and the Si5351 were really programmed
+to), `if_hz`, `n` and `record_rate_hz`. Every setting is checked, and a rejected `config` changes
+nothing at all.
 
-The record the clients receive is decimated: its sample rate is `rate_hz / decim`. Complex sampling
-covers −rate/2 to +rate/2, so the decimated rate must be more than twice the IF or the line folds over.
+| setting | default | accepted |
+|---|---|---|
+| `f_tx_hz` | 89400 | 1000 .. 1000000 |
+| `f_lo_hz` | 84000 | 1000 .. 1000000 |
+| `sequence` | `"fid"` | `"fid"` or `"echo"` |
+| `t90_us` | 417 | 1 .. 5000 |
+| `t180_us` | 834 | 1 .. 10000 |
+| `tau_us` | 20000 | 0 .. 500000 (echo only) |
+| `t_blank_pre_us` | 20 | 0 .. 10000 |
+| `t_dead_us` | 1000 | 0 .. 100000 |
+| `t_acq_start_us` | 1200 | 0 .. 100000 |
+| `t_acq_ms` | 2000 | 1 .. 4000 |
+| `rate_hz` | 100000 | 1000 .. 250000, per channel |
+| `decim` | 4 | 1 .. 1024 |
+| `n_avg` | 1 | 1 .. 256 |
+| `cyclops` | true | the pulse phase steps 0/90/180/270 across scans and the record is rotated back before averaging |
+| `t_repeat_ms` | 3000 | 0 .. 600000 |
+| `polarize_ms` | 0 | 0 .. 10000 |
+| `t_polarize_settle_ms` | 5 | 0 .. 1000 |
+| `hb_mode` | `"off"` | `"off"` / `"fwd"` / `"rev"`, during the polarize step |
+
+Two more rules are about the record itself, and both come back as `ok:false` with the reason:
+
+* **It must not fold over.** The record the clients receive is decimated: its sample rate is
+  `rate_hz / decim`. Complex sampling covers −rate/2 to +rate/2, so the decimated rate has to be more
+  than twice the IF or the line comes back at the wrong frequency, looking perfectly convincing:
+  *"rate_hz / decim must be more than twice the IF — lower decim or move f_lo"*. At the default
+  5.4 kHz IF, 100 kS/s and `decim` 4 give 25 kS/s, with room to spare.
+* **It must fit in memory.** The capture buffer holds at most 1 000 000 samples per channel (4 MB of
+  PSRAM: *"t_acq_ms x rate_hz exceeds the 4 MB capture buffer"*) and the record that goes out at most
+  131 072 complex samples (a 1 MB frame: *"record too long to send — raise decim or shorten
+  t_acq_ms"*). The defaults use 800 kB and 400 kB of the board's 8 MB.
+
+`config`, `start`, `pulse`, `clock`, `dds`, `blank` and `sim_larmor` are all refused with
+`error:"scan running"` while a scan set is in progress; `abort` and `get_record` are not.
 
 ### 7.3 Status keys
 
@@ -149,7 +181,9 @@ covers −rate/2 to +rate/2, so the decimated rate must be more than twice the I
 `f_lo_hz` · `if_hz` · `rate_hz` (the rate the ADC really achieved) · `peak_hz` (signed, relative to the
 local oscillator) · `larmor_hz` (= `f_lo_hz` + `peak_hz`) · `peak_amp` (V) · `snr_db` · `i_flag` (the
 transmit amplifier hit its current limit) · `t_flag` (thermal) · `error` (string, when `state` is
-`error`) · `sim`.
+`error`) · `sim`. `peak_hz`, `larmor_hz`, `peak_amp` and `snr_db` appear once there is a record to
+measure. `i_flag` and `t_flag` are **null** on board v0.7: the OPA564 flags reach test points only, and
+null says "not connected", which is not the same answer as false.
 
 A current-limit or thermal flag stops the scan set: the board never keeps pulsing on a flag.
 

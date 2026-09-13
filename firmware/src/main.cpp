@@ -29,7 +29,9 @@
 #include "blocks/b3_outputs/OutputsBlock.h"
 #include "blocks/b4_switching/SwitchingBlock.h"
 #include "blocks/b5_dio_trig/DioTrigBlock.h"
+#include "blocks/nmr/NmrBlock.h"
 #include "alarm/AlarmEngine.h"
+#include "net/WsOut.h"
 
 #if __has_include("secrets.h")
 #include "secrets.h"
@@ -58,11 +60,22 @@ static PowerBlock b2;
 static OutputsBlock b3;
 static SwitchingBlock b4;
 static DioTrigBlock b5;
+static NmrBlock nmr;
 static AlarmEngine alarms(registry);
 
 // ---- network -------------------------------------------------------------
 static AsyncWebServer server(80);
 static AsyncWebSocket ws("/ws");
+
+// The one way a block can put bytes on the wire (net/WsOut.h). Fast data - a
+// scope capture, an averaged NMR record - is far too big for the JSON status
+// broadcast, so it goes out as a binary frame instead. Call it from the main
+// task only: the async-TCP queue is not safe to feed from a worker task.
+void wsBinaryAll(const uint8_t* data, size_t len) {
+  if (!data || len == 0) return;
+  if (ws.count() == 0) return;          // nobody listening: do not queue a copy
+  ws.binaryAll(data, len);
+}
 
 // Incoming WebSocket messages arrive on the async-TCP task. We queue them and
 // handle them in loop(), so all block code runs on one task and blocks never
@@ -221,6 +234,7 @@ void setup() {
   registry.add(&b3);
   registry.add(&b4);
   registry.add(&b5);
+  registry.add(&nmr);
   registry.add(&tpl);      // the copy-me example; remove once every block exists
   registry.add(&alarms);
   registry.beginAll();
@@ -254,3 +268,4 @@ void loop() {
     broadcastStatus();
   }
 }
+

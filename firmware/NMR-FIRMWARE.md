@@ -212,6 +212,24 @@ exercised on a bare dev board) and `Ads8688::burst` is replaced by a synthesiser
 ≈ 18 mV at the ADC, T2* = 0.4 s, white noise 3 mV rms, a 50 Hz hum line at 2 mV, `f_larmor_sim` = 89 400 Hz
 (settable by `sim_larmor`). Averaging must visibly improve the SNR in the app.
 
+### 3.7 As built (2026-09-13)
+
+Three details of the block as written differ from §3.1–§3.6 above; they are refinements, not
+disagreements, and the code is the authority for them.
+
+* **Phase registers.** The scan-set preparation is exactly as §3.2 says (RESET → frequency → PHASE0 = 0,
+  PHASE1 = 180 → RESET off), but each scan then loads PHASE0 = the pulse phase of that scan and
+  PHASE1 = that phase + 90°, and selects PHASE0 with the PSEL pin. For a free induction decay that is
+  the same thing as §3.2; for an echo it is what lets the refocusing pulse be 90° out of phase with
+  one pin change instead of an SPI frame in the middle of a sequence.
+* **Memory.** The capture buffer is grown on demand at `config` rather than allocated for the absolute
+  maximum at `begin()`: 2 channels × 4000 ms × 250 kS/s really is 4 MB, and holding that plus the
+  outgoing record permanently would be 6 of the board's 8 MB. `config` refuses what does not fit
+  (PROTOCOL.md §7.2) and the buffer is never shrunk, so it is allocated at most a handful of times in
+  a session. The record frame doubles as the running-mean accumulator, which saves a copy of it.
+* **`dds` takes an `on` argument** (default true) so a bench test can stop the carrier again; the idle
+  console keeps the DDS asleep.
+
 ## 4. Changes to existing blocks (drivers agent)
 - `b5`: DIO1–8 through `expander.writePort(0, mask)`; `PIN_DIO[]` removed from `pins.h`. Fast outputs and TRIG
   unchanged. If the expander is absent, `dio` commands return `error:"expander not present"`.
