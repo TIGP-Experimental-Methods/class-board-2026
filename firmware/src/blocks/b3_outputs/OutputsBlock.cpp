@@ -1,5 +1,7 @@
 #include "OutputsBlock.h"
+
 #include "../../../include/pins.h"
+#include "../../drivers/SpiBus.h"
 #ifndef SIM
 #include <SPI.h>
 #endif
@@ -10,7 +12,7 @@ void OutputsBlock::begin() {
 #ifndef SIM
   pinMode(PIN_CS_DAC, OUTPUT);
   digitalWrite(PIN_CS_DAC, HIGH);
-  SPI.begin(PIN_SPI_SCLK, PIN_SPI_MISO, PIN_SPI_MOSI);
+  spibus::begin();   // the shared SPI2 bus (drivers/SpiBus.h); one lock for ADC, DAC and DDS
   // TODO(B3): DAC8563 init - enable the internal 2.5 V reference and set
   // both channels to mid-scale (= 0 V after the +-10 V stage).
 #endif
@@ -38,6 +40,10 @@ void OutputsBlock::writeDac(int ch, float volts) {
   volts = constrain(volts, -10.0f, 10.0f);
   (void)ch;
 #ifndef SIM
+  // Every DAC frame goes out under the SPI lock; if the NMR capture holds the bus
+  // this update is skipped and the next loop() pass catches up.
+  spibus::Guard g(0);
+  if (!g.ok) return;
   // TODO(B3): the stage gives AO = 4 * (DAC - VREF), VREF = 2.5 V,
   // so DAC volts = 2.5 + AO/4, code = DAC_volts / 5.0 * 65535.
   // 24-bit SPI frame: command 0x18 | ch (write and update), then the code.
