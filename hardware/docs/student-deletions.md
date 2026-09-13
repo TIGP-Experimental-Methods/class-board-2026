@@ -37,6 +37,17 @@ Full schematic PDF: **page 4**, *B1: eight +-10 V inputs, ADS8688* (`docs/schema
 | **C101** | 1uF | C0603 | C15849 | the ADS8688 AVDD decoupling pair | B1 sheet, at the ADS8688 AVDD pin (top-left of U101) |
 | **C102** | 10uF | C0805 | C15850 | 〃 | 〃 |
 
+Expected ERC items: **14 new** (standalone ERC on the sheet: 28 on the full sheet, 42 on the gapped
+copy, `--severity-all`) —
+
+- `isolated_pin_label` +1
+- `label_dangling` +1
+- `pin_not_driven` +1
+- `unconnected_wire_endpoint` +11
+
+These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
+they disappear when the parts are placed back. Any *other* ERC item is the student's own.
+
 ### Section A — `student/nmr_rx_gapped.kicad_sch`
 
 Full schematic PDF: **page 10**, *NMR RX (A): tank, LNA, blanking, I/Q mixer, IF -> ADC ch 7/8* (`docs/schematic-full.pdf`).
@@ -48,6 +59,15 @@ Full schematic PDF: **page 10**, *NMR RX (A): tank, LNA, blanking, I/Q mixer, IF
 | **D703** | 1N4148W | SOD-123F_L2.7-W1.6-LS3.8-RD | C81598 | one of the two crossed limiter diodes at the RX connector | NMR RX sheet, block 2 (receiver), at the RX pin next to D704 |
 | **R911** | 1.00k | R0603 | C110776 | one IF RC pole (Q path), R911 + C911 | NMR RX sheet, block 4 (mixer/IF), the passive 15.9 kHz pole after U901/U902 |
 | **C911** | 10nF | C0603 | C1589 | 〃 | 〃 |
+
+Expected ERC items: **15 new** (standalone ERC on the sheet: 8 on the full sheet, 23 on the gapped
+copy, `--severity-all`) —
+
+- `isolated_pin_label` +5
+- `unconnected_wire_endpoint` +10
+
+These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
+they disappear when the parts are placed back. Any *other* ERC item is the student's own.
 
 ### Section B — `student/b3_outputs_gapped.kicad_sch`
 
@@ -62,6 +82,17 @@ Full schematic PDF: **page 5**, *B3: DAC8563 + OPA2192 -> AO1/AO2 (+-10 V)* (`do
 | **R310** | 49.9 | R0603 | C23185 | the AO2 output series resistor and its BAV99 clamp | B3 sheet, AO2 output, between the op-amp and the AO2 terminal |
 | **D302** | BAV99 | SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR | C2500 | 〃 | 〃 |
 
+Expected ERC items: **19 new** (standalone ERC on the sheet: 19 on the full sheet, 38 on the gapped
+copy, `--severity-all`) —
+
+- `isolated_pin_label` +2
+- `label_dangling` +1
+- `pin_not_connected` +3
+- `unconnected_wire_endpoint` +13
+
+These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
+they disappear when the parts are placed back. Any *other* ERC item is the student's own.
+
 ### Section B — `student/b5_dio_trig_gapped.kicad_sch`
 
 Full schematic PDF: **page 7**, *B5: 8 TTL DIO, 2 fast TTL outs, bidirectional TRIG, TCXO option* (`docs/schematic-full.pdf`).
@@ -75,6 +106,18 @@ Full schematic PDF: **page 7**, *B5: 8 TTL DIO, 2 fast TTL outs, bidirectional T
 | **C502** | 100nF | C0603 | C14663 | 〃 | 〃 |
 | **J501** | KF301-5.0-2P | CONN-TH_P5.00_KF301-5.0-2P | C474881 | one TTL screw terminal (TTL1/TTL2) | B5 sheet, fast-output block, the 2P terminal at the board edge |
 
+Expected ERC items: **30 new** (standalone ERC on the sheet: 34 on the full sheet, 64 on the gapped
+copy, `--severity-all`) —
+
+- `isolated_pin_label` +6
+- `label_dangling` +2
+- `no_connect_dangling` +2
+- `pin_not_driven` -2  (fewer — the deleted symbol took its own pins with it)
+- `unconnected_wire_endpoint` +22
+
+These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
+they disappear when the parts are placed back. Any *other* ERC item is the student's own.
+
 ### Section B — `student/nmr_tx_gapped.kicad_sch`
 
 Full schematic PDF: **page 11**, *NMR TX (B): AD9834 DDS, reconstruction filter, OPA564 power stage -> TX* (`docs/schematic-full.pdf`).
@@ -85,6 +128,15 @@ Full schematic PDF: **page 11**, *NMR TX (B): AD9834 DDS, reconstruction filter,
 | **C816** | 100nF | C0603 | C14663 | 〃 | 〃 |
 | **D802** | SS54 | SMA_L4.4-W2.8-LS5.4-R-RD | C22452 | the output clamp diode to GND | NMR TX sheet, power-stage output node, below D801 |
 | **R813** | 4.7 1W | R2512 | C2999606 | the output isolation resistor | NMR TX sheet, between the clamp node and C818 / the TX SMA |
+
+Expected ERC items: **7 new** (standalone ERC on the sheet: 30 on the full sheet, 37 on the gapped
+copy, `--severity-all`) —
+
+- `pin_not_connected` +1
+- `unconnected_wire_endpoint` +6
+
+These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
+they disappear when the parts are placed back. Any *other* ERC item is the student's own.
 
 ### Section C — `student/b4_switching_gapped.kicad_sch`
 
@@ -104,6 +156,16 @@ Full schematic PDF: **page 6**, *B4: 4 relays (MOSFET drive) + 2 isolated 5-24 V
 | **R451** | 100 | R0603 | C22775 | 〃 | 〃 |
 | **R461** | 1k | R0603 | C21190 | 〃 | 〃 |
 
+Expected ERC items: **33 new** (standalone ERC on the sheet: 15 on the full sheet, 48 on the gapped
+copy, `--severity-all`) —
+
+- `isolated_pin_label` +2
+- `label_dangling` +7
+- `unconnected_wire_endpoint` +24
+
+These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
+they disappear when the parts are placed back. Any *other* ERC item is the student's own.
+
 ### Section C — `student/c_switch_gapped.kicad_sch`
 
 Full schematic PDF: **page 12**, *C: external power input, DRV8871 field-cycling H-bridge, polarizer MOSFET switch* (`docs/schematic-full.pdf`).
@@ -113,6 +175,16 @@ Full schematic PDF: **page 12**, *C: external power input, DRV8871 field-cycling
 | **D931** | SMBJ26A | SMB_L4.6-W3.6-LS5.3-RD | C123820 | the external-input TVS | C sheet, external power input row: J901 -> F901 -> D931 -> Q901 |
 | **F901** | 5A fast | F1206 | C57525 | the external-input fuse | C sheet, external power input row, between J901 and the TVS |
 | **R922** | 10k | R0603 | C25804 | one H-bridge input pull-down (IN2 = coast at reset) | C sheet, DRV8871 block, at the U903 IN1/IN2 pins next to R921 |
+
+Expected ERC items: **9 new** (standalone ERC on the sheet: 7 on the full sheet, 16 on the gapped
+copy, `--severity-all`) —
+
+- `isolated_pin_label` +2
+- `pin_not_driven` +1
+- `unconnected_wire_endpoint` +6
+
+These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
+they disappear when the parts are placed back. Any *other* ERC item is the student's own.
 
 ## How the counts were taken
 

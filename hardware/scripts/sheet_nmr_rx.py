@@ -102,7 +102,9 @@ def _C(ref, v):
 # --- clocks (section 1) -------------------------------------------------------------------
 _reg("U701", "SI5351A-B-GT")
 _reg("Y701", "X322525MOB4SI", "25 MHz")
-_C("C701", "3.9pF"); _C("C702", "3.9pF")                      # 12 pF crystal + 10 pF internal (datasheet 4.1.1)
+# The 3.9 pF NP0 symbol is named C0603_4pF (the design value); _csym would fall back to the 100 nF part.
+_reg("C701", _first(["C0603_4pF"], "C0603_100nF", "C 3.9pF"), "3.9pF")
+_reg("C702", _first(["C0603_4pF"], "C0603_100nF", "C 3.9pF"), "3.9pF")   # 12 pF crystal + 10 pF internal (datasheet 4.1.1)
 _C("C703", "100nF"); _C("C704", "1uF"); _C("C705", "100nF")
 _R("R701", "4.7k", dnp=True); _R("R702", "4.7k", dnp=True)   # base board already fits the I2C pull-ups
 _R("R703", "33")                                          # CLK0 = 50.000 MHz -> AD9834 MCLK
@@ -122,7 +124,8 @@ _R("R712", "10.0k"); _R("R713", "100"); _R("R714", "1.00k")    # G = 101; R714 =
 _reg("JP702", "SolderJumper_3_Bridged12", "G=101 / G=11")
 _C("C720", "10nF"); _R("R721", "10k")                     # f_HP = 1.59 kHz, tau = 100 us
 _reg("U704", "DG419DY-T1-E3")
-_R("R722", "9.1k"); _R("R723", "1.00k"); _C("C721", "100pF")  # G = 10, pole 175 kHz
+_reg("R722", _first(["R0603_9R09k"], "R0603_10k", "R 9.1k"), "9.1k")   # symbol named for the 9.09 k design value
+_R("R723", "1.00k"); _C("C721", "100pF")                  # G = 10, pole 175 kHz
 _reg("JP703", "SolderJumper_2_Bridged", "open = G 1")
 for _r in ("C722", "C723", "C724", "C725"):
     _C(_r, "100nF")

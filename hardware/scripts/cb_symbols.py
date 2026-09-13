@@ -75,7 +75,7 @@ DS = {
     "BZX84C": "https://www.lcsc.com/product-detail/C112551.html",
     "FUSE5A": "https://www.littelfuse.com/assetdocs/littelfuse-fuse-466-datasheet",
     "LQH32DN": "https://www.lcsc.com/product-detail/C341771.html",
-    "RVT100U": "https://www.lcsc.com/product-detail/C72479.html",
+    "RVT100U": "https://www.lcsc.com/product-detail/C37309.html",
     "HV47U": "https://www.lcsc.com/product-detail/C59919.html",
     "RAD4700U": "https://www.lcsc.com/product-detail/C45662.html",
     "GX2512": "https://www.lcsc.com/product-detail/C500718.html",
@@ -561,7 +561,7 @@ def build_library():
     # by pad 1 on the two SMD cans; the polarity stripe on the radial land is beside pad 2).
     add(two_pin("CP_100uF_35V", "C", "100uF 35V", FP + "CAP-SMD_BD8.0-L8.3-W8.3-LS9.3-FD",
                 "Aluminium electrolytic 100 uF 35 V, SMD can 8x10 mm (ROQANG RVT1V101M0810) - +VEXT bulk; PIN 1 = +", "CP",
-                fields=f("C72479", "Extended", "RVT1V101M0810", "ROQANG", DS["RVT100U"])))
+                fields=f("C37309", "Extended", "RVT1V101M0810", "ROQANG", DS["RVT100U"])))
     add(two_pin("CP_47uF_35V", "C", "47uF 35V", FP + "CAP-SMD_BD6.3-L6.6-W6.6-FD",
                 "Aluminium electrolytic 47 uF 35 V, SMD can 6.3 mm (Honor HV470M035E055ETR) - OPA564 local bulk; PIN 1 = +", "CP",
                 fields=f("C59919", "Extended", "HV470M035E055ETR", "CapXon", DS["HV47U"])))

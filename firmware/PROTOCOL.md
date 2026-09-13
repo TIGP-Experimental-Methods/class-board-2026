@@ -61,7 +61,7 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | `base` | `led` | `{r,g,b}` 0–255 | `{r,g,b}` |
 | | `brightness` | `{value}` 0–255 | `{brightness}` |
 | | `counter_reset` | — | `{counter:0}` |
-| | `info` | — | `{fw, chip, mac, ip, sim}` |
+| | `info` | — | `{fw, chip, mac, ip, sim, expander, clockgen}` (the last two: did the TCA9535 / Si5351A answer on I²C) |
 | `b1` | `read_all` | — | `{ai:[8 volts]}` |
 | | `set_range` | `{ch:1..8, range:0..6}` | `{ch, range}` |
 | `b2` | `rails` | — | `{v5_raw, v3v3, v12p, v12n, v5a, measured}` |
@@ -71,6 +71,8 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | `b4` | `relay` | `{n:1..4, on}` | `{n, on}` |
 | | `relay_all` | `{on}` | `{on}` |
 | | `opto_reset` | — | `{}` |
+| | `hbridge` | `{mode: off\|fwd\|rev\|brake}` (DRV8871 field-cycling bridge; refused while an NMR scan runs) | `{mode}` |
+| | `polarizer` | `{on}` (AOD4184A polarizer switch; refused while an NMR scan runs) | `{on}` |
 | `b5` | `dio` | `{n:1..8, level}` | `{mask}` |
 | | `dio_mask` | `{mask:0..255}` | `{mask}` |
 | | `trig_dir` | `{out}` | `{out}` |
@@ -89,7 +91,7 @@ Alarm rule fields: `op` ∈ `gt lt ge le eq ne`; `action` = `notify` or `relay:<
 
 `base`: counter, temp_c, uptime_s, rssi, heap_free, clients, led{r,g,b,brightness} ·
 `b1`: ai1…ai8, range · `b2`: v5_raw, v3v3, v12p, v12n, v5a, measured ·
-`b3`: ao1, ao2, mode1, mode2 · `b4`: relay1…relay4, opto1, opto2, opto1_level, opto2_level ·
+`b3`: ao1, ao2, mode1, mode2 · `b4`: relay1…relay4, opto1, opto2, opto1_level, opto2_level, hbridge, polarizer ·
 `b5`: dio, dio1…dio8, trig_dir, trig, fast1_hz, fast2_hz · `template`: value, setpoint · `alarms`: rules, active ·
 `nmr`: see §7
 
