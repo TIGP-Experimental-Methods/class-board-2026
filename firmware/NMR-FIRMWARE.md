@@ -158,7 +158,7 @@ Settings (defaults): `f_tx_hz` 89400 · `f_lo_hz` 84000 (IF = f_tx − f_lo = 54
 app which side of the LO the line is on) · `sequence` `"fid"` or `"echo"` · `t90_us` 417 · `t180_us` 834 ·
 `tau_us` 20000 (echo only) · `t_blank_pre_us` 20 (RX blanked this long before TX_EN rises) · `t_dead_us` 1000
 (TX_EN low → RX_BLANK high) · `t_acq_start_us` 1200 (from the end of the pulse to the first ADC sample) ·
-`t_acq_ms` 2000 (record length; max 4000) · `rate_hz` 100000 per channel · `decim` 16 · `n_avg` 1 (1..256) ·
+`t_acq_ms` 2000 (record length; max 4000) · `rate_hz` 100000 per channel · `decim` 4 (the decimated rate `rate_hz / decim` must exceed 2 x |IF| or the line folds over: 25 kS/s for a 5.4 kHz IF; `config` rejects a `decim` that breaks this) · `n_avg` 1 (1..256) ·
 `cyclops` true (pulse phase 0/90/180/270 cycled across scans, receiver record rotated back before averaging) ·
 `t_repeat_ms` 3000 (time between scans; ≥ 3 × T1 ≈ 3 s for water) · `polarize_ms` 0 (Earth's field: FET_GATE
 on for this long before the pulse, then off and `t_polarize_settle_ms` 5 before the pulse) · `hb_mode` `"off"`
@@ -185,7 +185,7 @@ received phase evolves at the IF rate, so 1 µs is ≈ 2°.
 - DC offset per channel: the receiver is blanked before the pulse, so the offset cannot be measured there.
   Rule: offset = mean of the **last 10 %** of the record when `t_acq_ms ≥ 1000` (the FID has largely decayed,
   T2* ≈ 0.3–1 s in water at 2 mT), else the mean of the whole record. Subtract per channel.
-- Decimate by `decim` (boxcar average of `decim` samples) → complex record z[k] = I + jQ at `rate_hz / decim`.
+- Decimate by `decim` (boxcar average of `decim` samples) → complex record z[k] = I + jQ at `rate_hz / decim`; the boxcar loses 0.6 dB at 5.4 kHz for decim 4 at 100 kS/s, acceptable; never let `rate_hz / decim < 2 x |IF|`.
 - CYCLOPS: multiply the record by `exp(-j·phase_pulse)`; accumulate the running mean over the scans done.
 - Spectrum for status only: radix-2 complex FFT of the averaged record zero-padded to the next power of two
   (≤ 16384 points); Hann window; report `peak_hz` (signed IF frequency, positive = above the LO), `peak_amp`
