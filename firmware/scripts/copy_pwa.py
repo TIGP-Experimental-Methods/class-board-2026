@@ -18,7 +18,9 @@ dst = project_dir / "data"
 if src.is_dir():
     if dst.exists():
         shutil.rmtree(dst)
-    shutil.copytree(src, dst)
+    # dev-*.html are bench harnesses for a panel with no board attached; they
+    # are opened from a laptop, so they do not belong on the board's file store.
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("dev-*.html"))
     n = sum(1 for p in dst.rglob("*") if p.is_file())
     print(f"copy_pwa: copied {n} files from {src} -> {dst}")
 else:

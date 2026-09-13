@@ -1,10 +1,10 @@
 // Service worker: cache the app shell so the page opens instantly and works
 // while the board is rebooting. Network first, cache as fallback, so a
 // re-flashed web app is picked up on the next load.
-const CACHE = 'instrument-v1';
+const CACHE = 'instrument-v2';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icon.svg',
   'panels/base.js', 'panels/b1.js', 'panels/b2.js', 'panels/b3.js', 'panels/b4.js', 'panels/b5.js',
-  'panels/template.js', 'panels/alarms.js'];
+  'panels/nmr.js', 'panels/template.js', 'panels/alarms.js'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -8,10 +8,15 @@ import b2 from './panels/b2.js';
 import b3 from './panels/b3.js';
 import b4 from './panels/b4.js';
 import b5 from './panels/b5.js';
+import nmr from './panels/nmr.js';
 import template from './panels/template.js';
 import alarms from './panels/alarms.js';
 
-const PANELS = [base, b1, b2, b3, b4, b5, template, alarms];
+const PANELS = [base, b1, b2, b3, b4, b5, nmr, template, alarms];
+
+// Binary frames (fast data: scope captures, NMR records) share the WebSocket
+// with the JSON text messages. Header layout: PROTOCOL.md section 6.
+const BINARY_HEADER_BYTES = 28;
 
 // ---------------------------------------------------------------------------
 // WebSocket client with reconnect. api.send(block, cmd, args) -> Promise(result)
@@ -20,7 +25,7 @@ const api = (() => {
   let ws = null;
   let nextId = 1;
   const waiting = new Map();      // id -> {resolve, reject, timer}
-  const listeners = { status: [], hello: [], alarm: [], open: [], close: [] };
+  const listeners = { status: [], hello: [], alarm: [], open: [], close: [], binary: [] };
   let backoff = 500;
 
   function emit(kind, data) { for (const fn of listeners[kind]) fn(data); }
@@ -28,6 +33,7 @@ const api = (() => {
   function connect() {
     const url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
     ws = new WebSocket(url);
+    ws.binaryType = 'arraybuffer';          // so binary frames arrive as ArrayBuffer, not Blob
     ws.onopen = () => { backoff = 500; emit('open'); };
     ws.onclose = () => {
       emit('close');
@@ -38,6 +44,7 @@ const api = (() => {
     };
     ws.onerror = () => ws.close();
     ws.onmessage = (ev) => {
+      if (typeof ev.data !== 'string') { onBinary(ev.data); return; }   // fast data
       let msg;
       try { msg = JSON.parse(ev.data); } catch { return; }
       if (msg.type) { emit(msg.type, msg); return; }          // broadcast
@@ -47,6 +54,31 @@ const api = (() => {
       clearTimeout(w.timer);
       msg.ok ? w.resolve(msg.result ?? {}) : w.reject(new Error(msg.error || 'error'));
     };
+  }
+
+  // Unpack the 28-byte little-endian header and hand panels the fields plus the
+  // rest of the frame as a DataView; each panel picks the `kind` it cares about
+  // (1 = stream chunk, 2 = capture, 3 = NMR record).
+  function onBinary(data) {
+    if (!(data instanceof ArrayBuffer)) {                   // a browser that ignored binaryType
+      if (data && typeof data.arrayBuffer === 'function') data.arrayBuffer().then(onBinary);
+      return;
+    }
+    if (data.byteLength < BINARY_HEADER_BYTES) return;
+    const h = new DataView(data);
+    emit('binary', {
+      kind: h.getUint8(0),
+      block_id: h.getUint8(1),
+      ch: h.getUint8(2),
+      bits: h.getUint8(3),
+      t_ms: h.getUint32(4, true),
+      rate_hz: h.getUint32(8, true),
+      n: h.getUint32(12, true),
+      trig_index: h.getInt32(16, true),
+      volts_per_lsb: h.getFloat32(20, true),
+      offset_v: h.getFloat32(24, true),
+      payload: new DataView(data, BINARY_HEADER_BYTES),
+    });
   }
 
   function send(block, cmd, args = {}) {

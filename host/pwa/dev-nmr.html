@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NMR panel - dev harness</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- A bench for the NMR panel with no board attached: it builds a fake api and
+       feeds the panel a synthetic binary frame (kind 3), so the form, the
+       progress line and both canvases can be looked at in a browser.
+
+       Modules will not load from a file:// path, so serve this folder first:
+         python -m http.server 8000        (run it in host/pwa)
+       then open  http://localhost:8000/dev-nmr.html  -->
+  <header>
+    <div class="title"><span class="dot on"></span><strong>NMR panel</strong>
+      <span class="muted">dev harness - no board, synthetic data</span></div>
+  </header>
+  <div class="card">
+    <div class="row">
+      <button class="btn primary" id="feed">Send a frame</button>
+      <button class="btn" id="run">Run 8 scans</button>
+      <label class="muted">SNR<input type="range" id="snr" min="0" max="60" value="26"></label>
+      <span class="value" id="snr-val">26 dB</span>
+    </div>
+    <p class="help">Every frame is an exponentially decaying complex sine at 5.4 kHz plus white noise.
+      Averaging n scans is modelled by dividing the noise by the square root of n.</p>
+  </div>
+  <main id="panel" class="card"></main>
+  <div id="toasts"></div>
+
+  <script type="module">
+    import nmr from './panels/nmr.js';
+
+    const HEADER_BYTES = 28;
+    const RATE = 12500;          // decimated rate, must be more than twice the IF
+    const IF_HZ = 5400;
+    const T_ACQ_MS = 2000;
+    const AMP_V = 0.018;         // about what the receiver gives for water at 2 mT
+    const T2_S = 0.4;
+
+    const listeners = { binary: [], status: [] };
+    let status = { state: 'idle', scan: 0, n_avg: 1, f_tx_hz: 89400, f_lo_hz: 84000, if_hz: IF_HZ,
+                   rate_hz: 100000, i_flag: false, t_flag: false, sim: true };
+
+    function toast(text) {
+      const el = document.createElement('div');
+      el.className = 'toast info';
+      el.textContent = text;
+      document.getElementById('toasts').appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    const api = {
+      send(block, cmd, args = {}) {
+        toast(`${block}.${cmd} ${JSON.stringify(args)}`);
+        if (cmd === 'config') {
+          Object.assign(status, args);
+          status.if_hz = (args.f_tx_hz ?? status.f_tx_hz) - (args.f_lo_hz ?? status.f_lo_hz);
+          return Promise.resolve({ ...args, f_tx_actual_hz: args.f_tx_hz, f_lo_actual_hz: args.f_lo_hz });
+        }
+        if (cmd === 'start') { runScans(status.n_avg || 1); return Promise.resolve({ state: 'running' }); }
+        if (cmd === 'abort') { status.state = 'idle'; return Promise.resolve({ state: 'idle' }); }
+        return Promise.resolve({});
+      },
+      on(kind, fn) { (listeners[kind] ||= []).push(fn); },
+      toast,
+    };
+
+    // One synthetic record, packed exactly like the firmware would pack it.
+    function makeFrame(scans, noiseV) {
+      const n = Math.round((T_ACQ_MS / 1000) * RATE);
+      const buf = new ArrayBuffer(HEADER_BYTES + n * 8);
+      const h = new DataView(buf);
+      h.setUint8(0, 3);                 // kind = NMR record
+      h.setUint8(1, 9);                 // block_id
+      h.setUint8(2, 0);
+      h.setUint8(3, 32);                // float32 pairs
+      h.setUint32(4, Date.now() % 1e9, true);
+      h.setUint32(8, RATE, true);
+      h.setUint32(12, n, true);
+      h.setInt32(16, scans, true);      // scans averaged so far
+      h.setFloat32(20, 1.0, true);
+      h.setFloat32(24, status.if_hz ?? IF_HZ, true);
+      const body = new DataView(buf, HEADER_BYTES);
+      const ifHz = status.if_hz ?? IF_HZ;
+      const gauss = () => (Math.random() + Math.random() + Math.random() + Math.random() - 2) * 0.577;
+      for (let k = 0; k < n; k++) {
+        const t = k / RATE;
+        const env = AMP_V * Math.exp(-t / T2_S);
+        const ph = 2 * Math.PI * ifHz * t;
+        body.setFloat32(k * 8, env * Math.cos(ph) + noiseV * gauss(), true);
+        body.setFloat32(k * 8 + 4, env * Math.sin(ph) + noiseV * gauss(), true);
+      }
+      return buf;
+    }
+
+    function noiseFor(scans) {
+      const snrDb = Number(document.getElementById('snr').value);
+      return (AMP_V / Math.pow(10, snrDb / 20)) / Math.sqrt(scans);
+    }
+
+    function emitFrame(scans) {
+      const buf = makeFrame(scans, noiseFor(scans));
+      const h = new DataView(buf);
+      const frame = {
+        kind: h.getUint8(0), block_id: h.getUint8(1), ch: h.getUint8(2), bits: h.getUint8(3),
+        t_ms: h.getUint32(4, true), rate_hz: h.getUint32(8, true), n: h.getUint32(12, true),
+        trig_index: h.getInt32(16, true), volts_per_lsb: h.getFloat32(20, true),
+        offset_v: h.getFloat32(24, true), payload: new DataView(buf, HEADER_BYTES),
+      };
+      for (const fn of listeners.binary) fn(frame);
+    }
+
+    let timer = null;
+    function runScans(total) {
+      clearInterval(timer);
+      status.state = 'running';
+      status.scan = 0;
+      status.n_avg = total;
+      timer = setInterval(() => {
+        status.scan += 1;
+        status.rate_hz = 99800 + Math.round(Math.random() * 400);
+        emitFrame(status.scan);
+        if (status.scan >= total) { clearInterval(timer); status.state = 'done'; }
+      }, 700);
+    }
+
+    nmr.render(document.getElementById('panel'), api);
+    setInterval(() => nmr.onStatus(status), 250);
+
+    document.getElementById('snr').oninput = (e) => {
+      document.getElementById('snr-val').textContent = `${e.target.value} dB`;
+    };
+    document.getElementById('feed').onclick = () => emitFrame(1);
+    document.getElementById('run').onclick = () => runScans(8);
+    emitFrame(1);
+  </script>
+</body>
+</html>
