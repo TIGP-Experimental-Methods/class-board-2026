@@ -358,17 +358,17 @@ def build(root_uuid):
     c.pwr_pin(R816, 2, "GND")
     sh.text("-20 dB pad: 100/(910+100) = 0.099 into a high-Z load.", 303.0, 96.0, 1.2)
 
-    # TX node -> front-panel link pin 39 (panel SMA J801) and the 2P terminal J802
+    # TX node -> the panel link J6 (pins 19 and 21, two pins for the coil current)
+    # v0.8: the board-edge screw terminal J802 is gone; the TX coil is connected on the front
+    # panel, at the 2P screw terminal beside the TX SMA (Decision #49).
     pt = JP2.pin_pos(2)
     sh.wire(pt[0], pt[1], pt[0], 146.05)
-    J802 = c.place("J802", "KF301-5.0-2P", 388.62, 144.78, 180)
-    sh.wire(pt[0], 146.05, J802.pin_pos(1)[0], J802.pin_pos(1)[1])
+    sh.wire(pt[0], 146.05, 372.11, 146.05)
     sh.wire(372.11, 146.05, 372.11, 152.4)
     sh.label("TX", 372.11, 152.4, 90, "global")
-    c.pwr_pin(J802, 2, "GND", 5.08)
-    sh.text("TX leaves on the front-panel link (pin 39 -> panel SMA J801) and on J802 KF301-5.0-2P at the", 300.0, 195.0, 1.2)
-    sh.text("board edge (pin 1 = TX, pin 2 = GND). Route TX and its return as a close pair, loop area < 1 cm2;", 300.0, 198.2, 1.2)
-    sh.text("up to 1 A of coil current must never share copper with the receiver pour (re-spec 8.2).", 300.0, 201.4, 1.2)
+    sh.text("TX leaves this sheet as a global label -> panel link J6 pins 19 and 21 (AGND on 20 and 22)", 300.0, 195.0, 1.2)
+    sh.text("-> the TX SMA and the 2P screw terminal on the panel. Route TX and its return as a close pair,", 300.0, 198.2, 1.2)
+    sh.text("loop area < 1 cm2; up to 1 A of coil current must never share copper with the receiver pour.", 300.0, 201.4, 1.2)
 
     # ---- level / bandwidth table -----------------------------------------------------------------------
     rows = [["JP801 / R808", "G", "V_out pp", "f_3dB = 17 MHz / G", "SR limit = 40/(pi V_pp)"],
@@ -392,8 +392,8 @@ def build(root_uuid):
 # outline, so the free block in ZONE_B is now x 129.2 - 170.5, y 36.5 - 99.5 (nearest
 # neighbours: R513 / R515 at x <= 128.9, the J501-J507 terminal column at x >= 170.8).
 #   left column  x 129.8 - 150.0 : AD9834, reconstruction filter, mid-rail bias, gain leg
-#   right column x 150.6 - 170.4 : OPA564, its supplies and the whole output chain,
-#                                  directly above J802 so the coil loop stays short
+#   right column x 150.6 - 170.4 : OPA564, its supplies and the whole output chain
+# v0.8: J802 and the J501-J507 terminal column left the board, so the right edge is free area.
 PLACEMENT = {
     # --- AD9834 DDS and its decoupling / set-up passives ---
     "U801": (134.01, 41.24, 0),
@@ -426,5 +426,4 @@ PLACEMENT = {
     #     It cannot go on the right edge as first planned: terminal J505 reaches y 87.2 and
     #     mounting hole H4 (172.6-179.4 / 92.5-99.5) takes the corner, leaving a 5.1 mm gap
     #     where the 2P terminal needs 11.2 mm.
-    "J802": (166.50, 95.10, 180),
 }

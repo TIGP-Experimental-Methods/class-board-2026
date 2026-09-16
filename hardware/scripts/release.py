@@ -56,7 +56,13 @@ def bom_cpl(board, out_dir, name):
     groups = {}
     cpl_rows = []
     skipped = []
+    hand = []
     for ref, c in sorted(comps.items(), key=lambda kv: (kv[0][0], int("".join(ch for ch in kv[0][1:] if ch.isdigit()) or 0))):
+        if c.fields.get("Assembly", "").lower() == "hand" and not c.dnp:
+            # bought separately and soldered by the instructor: never in the JLC BOM or CPL
+            hand.append([ref, c.value, c.footprint.split(":")[-1], c.fields.get("MPN", ""),
+                         c.fields.get("Purchase", "") or c.fields.get("LCSC", "")])
+            continue
         if c.dnp or not c.in_bom:
             skipped.append((ref, "DNP" if c.dnp else "not in BOM"))
             continue
@@ -78,7 +84,11 @@ def bom_cpl(board, out_dir, name):
         w = csv.writer(fh)
         w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
         w.writerows(cpl_rows)
-    return len(groups), len(cpl_rows), skipped
+    with open(os.path.join(out_dir, name + "-hand-solder.csv"), "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["Designator", "Value", "Footprint", "MPN", "LCSC (suggestion)"])
+        w.writerows(hand)
+    return len(groups), len(cpl_rows), skipped, hand
 
 
 def export_board(name, board, rel):
@@ -93,7 +103,7 @@ def export_board(name, board, rel):
     run([KICAD_CLI, "pcb", "export", "drill", "--format", "excellon", "--excellon-separate-th", "--drill-origin", "plot",
          "--excellon-units", "mm", "--generate-map", "--map-format", "gerberx2", "-o", os.path.join(out, "gerbers") + os.sep, pcb])
     # BOM / CPL
-    n_lines, n_parts, skipped = bom_cpl(board, out, board["project"])
+    n_lines, n_parts, skipped, hand = bom_cpl(board, out, board["project"])
     # schematic PDF (whole hierarchy) and per-block PDFs
     run([KICAD_CLI, "sch", "export", "pdf", "-o", os.path.join(out, board["project"] + ".pdf"), sch])
     if board["sheets"]:
@@ -148,6 +158,7 @@ def export_board(name, board, rel):
         "DRC error types: %s" % dict(Counter(v["type"] for v in drc_err)),
         "track angle audit (0/45/90 only): ok=%s segments=%s vias=%s" % (audit.get("ok"), audit.get("segments"), audit.get("vias")),
         "BOM lines: %d   CPL parts: %d   skipped (DNP / not in BOM / missing): %d" % (n_lines, n_parts, len(skipped)),
+        "hand-soldered parts (Assembly = hand, own CSV, NOT in the JLC BOM/CPL): %d  %s" % (len(hand), [h[0] for h in hand]),
         "skipped: %s" % skipped,
         "STEP export: %s %s" % ("ok" if step_ok else "FAILED", "" if step_ok else step_note.replace("\n", " ")[:600]),
     ]

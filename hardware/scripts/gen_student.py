@@ -71,9 +71,9 @@ SECTIONS = [
              ("the buffer decoupling pair",
               ["C501", "C502"],
               "B5 sheet, at the 74AHCT541 (C501) and the 74HCT125 (C502) supply pins"),
-             ("one TTL screw terminal (TTL1/TTL2)",
-              ["J501"],
-              "B5 sheet, fast-output block, the 2P terminal at the board edge"),
+             ("one TTL output series resistor (TTL1)",
+              ["R501"],
+              "B5 sheet, at the 74AHCT541 outputs, the first of the R501-R508 column"),
          ]),
          ("nmr_tx", [
              ("the OPA564 V+ decoupling pair (47 uF bulk + 100 nF)",

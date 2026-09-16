@@ -32,6 +32,7 @@ DS = {
     "78L05G": "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_UTC-Unisonic-Tech-78L05G-AB3-R_C71136.pdf",
     "B0512S": "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2304271700_YLPTEC-B0512S-2WR3_C5369475.pdf",
     "HK4100F": "https://www.lcsc.com/datasheet/lcsc_datasheet_2406241551_Ningbo-Keke-New-Era-Appliance-HK4100F-DC5V-SHG_C12072.pdf",
+    "JQC3FF": "https://www.lcsc.com/product-detail/C9221.html",
     "USBC": "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588920841703079936",
     "DC005": "https://www.lcsc.com/datasheet/lcsc_datasheet_2211071100_SOFNG-DC005-T20_C111567.pdf",
     "SMA": "https://www.lcsc.com/datasheet/lcsc_datasheet_2405210917_BAT-WIRELESS-BWSMA-KE-Z001_C496549.pdf",
@@ -42,6 +43,9 @@ DS = {
     "HDR2x20F": "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2203281730_ZHOURI-2-54-2-20_C2977589.pdf",
     "HDR2x10": "https://www.lcsc.com/datasheet/lcsc_datasheet_2003191007_XFCN-PZ254V-12-20P_C492427.pdf",
     "QWIIC": "https://jlcpcb.com/partdetail/XYECONN-XY_SM04B_SRSSTB/C51940130",
+    "QWIIC_V": "https://jlcpcb.com/partdetail/XYECONN-XY_BM04B_SRSSTB/C51940129",
+    "KF128-10P": "https://www.lcsc.com/product-detail/C474928.html",
+    "KF128-2P": "https://www.lcsc.com/product-detail/C474950.html",
     "TCXO": "https://www.lcsc.com/datasheet/lcsc_datasheet_1912111437_KDS-Daishinku-1XTV10000MDA_C253701.pdf",
     "BAV99": "https://www.lcsc.com/datasheet/lcsc_datasheet_2407250951_Nexperia-BAV99-215_C2500.pdf",
     "1N4148W": "https://www.lcsc.com/datasheet/lcsc_datasheet_1811061725_ST-Semtech-1N4148W_C81598.pdf",
@@ -803,6 +807,16 @@ def build_library():
     add(box_symbol("HK4100F-DC5V-SHG", "K", "HK4100F-DC5V-SHG", FP + "RELAY-TH_HK4100F-DC5V-SHG", "Relay SPDT 5 V coil 125 ohm, 3 A 30 VDC contacts (1=NO 2=NC 3/4=coil 5/6=COM)",
         left=[("3", "COIL+", "passive"), ("4", "COIL-", "passive")], right=[("1", "NO", "passive"), ("5", "COM", "passive"), ("2", "NC", "passive"), ("6", "COM", "passive")],
         fields=f("C12072", "Extended", "HK4100F-DC5V-SHG", "Ningbo Huike", DS["HK4100F"]), width=12.7))
+    # v0.8 (D-51, 2026-09-16): the four switching channels must survive a student plugging a wall socket
+    # into them, so the relay is a 10 A "sugar cube" on the KiCad standard Hongfa land.  Pin NUMBERS are the
+    # footprint pad names, which use the IEC/EN 50005 relay numbering: A1/A2 = coil (A1 is the + terminal by
+    # convention; the coil has no internal diode, so the polarity is only a drawing convention), 11 = common,
+    # 12 = normally-closed (break), 14 = normally-open (make).  The Songle SRD-05VDC-SL-C fits the same land.
+    add(box_symbol("JQC-3FF-005-1ZS", "K", "JQC-3FF/005-1ZS", "Relay_THT:Relay_SPDT_Hongfa_JQC-3FF_0XX-1Z",
+        "Relay SPDT 5 V coil 70 ohm, 10 A 277 V AC / 28 V DC contacts, pins per footprint",
+        left=[("A1", "COIL+", "passive"), ("A2", "COIL-", "passive")],
+        right=[("14", "NO", "passive"), ("11", "COM", "passive"), ("12", "NC", "passive")],
+        fields=f("C9221", "Extended", "JQC-3FF/005-1ZS(551)", "Hongfa", DS["JQC3FF"]), width=12.7))
 
     # ---- connectors --------------------------------------------------------------------
     add(box_symbol("USB-C-16P-2MD-073", "J", "USB-C 16P", FP + "USB-C-SMD_TYPE-C-16PIN-2MD-073", "USB Type-C receptacle 16-pin, power + USB 2.0",
@@ -838,16 +852,41 @@ def build_library():
     add(box_symbol("HDR_2x20_RA_MALE", "J", "Panel link 2x20 R/A", FP + "HDR-TH_40P-P2.54-H-R2-C20-S2.54-W10.0", "2x20 right-angle male header (Ckmtw B-2100R40P-B110), front-panel link",
         left=[(str(i), str(i), "passive") for i in range(1, 41, 2)], right=[(str(i), str(i), "passive") for i in range(2, 41, 2)],
         fields=f("C124369", "Extended", "B-2100R40P-B110", "Ckmtw", DS["HDR2x20RA"]), width=7.62))
-    add(box_symbol("HDR_2x20_FEMALE", "J", "Panel link 2x20 female", FP + "HDR-TH_40P-P2.54-V-F-R2-C20-S2.54", "2x20 straight female header (ZHOURI 2.54-2*20), front-panel side",
+    # Panel link, main-board side: three of these sit on the BOTTOM of the main board (v0.8).
+    # Hand-soldered by the instructor from a separately bought bag, so in_bom=False (out of the
+    # JLC BOM and CPL) and Assembly = "hand" (release.py lists them for the instructor instead).
+    add(box_symbol("HDR_2x20_MALE", "J", "Panel link 2x20 male", "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical",
+        "2x20 straight male pin header, 2.54 mm, KiCad standard footprint. Bottom side of the main board, hand-soldered from the top; mates the panel's female headers.",
         left=[(str(i), str(i), "passive") for i in range(1, 41, 2)], right=[(str(i), str(i), "passive") for i in range(2, 41, 2)],
-        fields=f("C2977589", "Extended", "2.54-2*20", "ZHOURI", DS["HDR2x20F"]), width=7.62))
+        fields={"Assembly": "hand", "MPN": "2x20 straight pin header 2.54 mm", "Manufacturer": "any", "Purchase": "C5224014",
+                "Datasheet": "https://www.lcsc.com/product-detail/C5224014.html"}, width=7.62, in_bom=False))
+    # Panel link, panel side: three of these on the panel's inner face, also hand-soldered.
+    add(box_symbol("HDR_2x20_FEMALE", "J", "Panel link 2x20 female", "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical",
+        "2x20 straight female header 8.5 mm, 2.54 mm, KiCad standard footprint. Panel inner face, hand-soldered; mates the main board's male headers.",
+        left=[(str(i), str(i), "passive") for i in range(1, 41, 2)], right=[(str(i), str(i), "passive") for i in range(2, 41, 2)],
+        fields={"Assembly": "hand", "MPN": "2x20 female header 8.5 mm", "Manufacturer": "any", "Purchase": "C5124634",
+                "Datasheet": "https://www.lcsc.com/product-detail/C5124634.html"}, width=7.62, in_bom=False))
     add(box_symbol("HDR_2x10_MALE", "J", "Expansion 2x10", FP + "HDR-TH_20P-P2.54-V-M-R2-C10-S2.54", "2x10 straight male header (XFCN PZ254V-12-20P), expansion",
         left=[(str(i), str(i), "passive") for i in range(1, 21, 2)], right=[(str(i), str(i), "passive") for i in range(2, 21, 2)],
         fields=f("C492427", "Extended", "PZ254V-12-20P", "XFCN", DS["HDR2x10"]), width=7.62))
+    # Panel screw terminals (v0.8): the TTL strip and the TX coil pair move to the panel.
+    add(box_symbol("KF128-2.54-10P", "J", "KF128-2.54-10P", FP + "CONN-TH_10P-P2.54_KF128-2.54-10P",
+        "Screw terminal 2.54 mm 10P, wire entry from the top (vertical), 130 V 8 A",
+        right=[(str(i), str(i), "passive") for i in range(1, 11)],
+        fields=f("C474928", "Extended", "KF128-2.54-10P", "Cixi Kefa", DS["KF128-10P"]), width=10.16))
+    add(box_symbol("KF128-5.0-2P", "J", "KF128-5.0-2P", FP + "CONN-TH_P5.00_KF128-5.0-2P",
+        "Screw terminal 5.0 mm 2P, wire entry from the top (vertical), 250 V 24 A",
+        right=[("1", "1", "passive"), ("2", "2", "passive")],
+        fields=f("C474950", "Extended", "KF128-5.0-2P", "Cixi Kefa", DS["KF128-2P"]), width=10.16))
+    # Vertical (top-entry) Qwiic for the panel; the horizontal one below stays on the main board.
+    add(box_symbol("QWIIC_BM04B-SRSS", "J", "Qwiic (vertical)", FP + "CONN-SMD_BM04B-SRSS-TB",
+        "JST-SH 1.0 mm 4-pin vertical / top entry (Qwiic: 1=GND 2=3V3 3=SDA 4=SCL; 5,6 = shell)",
+        right=[("1", "GND", "power_in"), ("2", "3V3", "power_in"), ("3", "SDA", "bidirectional"), ("4", "SCL", "bidirectional"), ("5", "SHELL", "passive"), ("6", "SHELL", "passive")],
+        fields=f("C51940129", "Extended", "XY-BM04B-SRSS-TB", "XYECONN", DS["QWIIC_V"]), width=10.16))
     add(box_symbol("QWIIC_SM04B-SRSS", "J", "Qwiic", FP + "CONN-SMD_4P-P1.00_XY-SM04B-SRSS-TB", "JST-SH 1.0 mm 4-pin horizontal (Qwiic: 1=GND 2=3V3 3=SDA 4=SCL; 5,6 = shell)",
         right=[("1", "GND", "power_in"), ("2", "3V3", "power_in"), ("3", "SDA", "bidirectional"), ("4", "SCL", "bidirectional"), ("5", "SHELL", "passive"), ("6", "SHELL", "passive")],
         fields=f("C51940130", "Extended", "XY-SM04B-SRSS-TB", "XYECONN", DS["QWIIC"]), width=10.16))
-    add(box_symbol("HDR_1x4_FEMALE", "J", "OLED 1x4 socket", FP + "PinSocket_1x04_P2.54mm_Vertical", "1x4 2.54 mm female header 8.5 mm (XFCN PZ254-1-04-Z-8.5) for the 0.96in OLED module (GND VCC SCL SDA)",
+    add(box_symbol("HDR_1x4_FEMALE", "J", "OLED 1x4 socket, right-angle", "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Horizontal", "1x4 2.54 mm female header, right-angle, so the 0.96in OLED module lies flat on the panel (GND VCC SCL SDA)",
         right=[("1", "GND", "power_in"), ("2", "VCC", "power_in"), ("3", "SCL", "bidirectional"), ("4", "SDA", "bidirectional")],
         fields=f("C2894927", "Extended", "PZ254-1-04-Z-8.5", "XFCN", "https://www.lcsc.com/product-detail/C2894927.html"), width=10.16))
 

@@ -587,3 +587,173 @@ the circuit document, the script is the record and the deviation is stated below
   purchase list's classes come from the component-search API, and every line must still be checked by hand in the JLC
   BOM tool before the 28 Sep order (≈ 22 new lines, the ADI/TI/Vishay parts certainly Extended at ~US$3 each).
 - Verify: release BOM reconciliation; JLC BOM tool at order time.
+
+## D-50 The panel stacks on the BACK of the board: three 2x20 link headers, connectors move to the panel (2026-09-16)
+
+User decisions #45-#49 (course repo `DECISIONS.md`, proposal `notes/2026-09-14-panel-rework-proposal.md`): the front
+panel no longer hangs off the front edge on one right-angle 2x20 header; it lies flat on the **back** of the main
+board on three **straight 2x20 male headers** (J6 analog at x ~ 12 mm, J7 digital at x ~ 90 mm, J8 power + spares at
+x ~ 168 mm), mounted on the **bottom side (B.Cu)** and hand-soldered from the top.
+
+What was done on the schematic side (`scripts/gen_sch.py`, `cb_symbols.py`, `sheet_nmr_tx.py`):
+
+- New symbol `HDR_2x20_MALE`, KiCad standard footprint `Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical`;
+  `HDR_2x20_FEMALE` (panel side) moved to `Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical`.  Both are
+  bought separately and soldered by the instructor, so both are `in_bom = no` **and** carry the field
+  `Assembly = hand`: `release.py` skips them in the JLC BOM/CPL and writes them to `<board>-hand-solder.csv`
+  instead, with the field `Purchase` as the suggested C-number (male C5224014, female 8.5 mm C5124634; the stack is
+  8.5 + 2.5 = **11 mm**, so the M3 stand-offs are 11 mm).
+- Pin assignment in the dicts `LINK_A` / `LINK_B` / `LINK_C`: odd pin = signal, the even pin beside it = that
+  signal's return (AGND on J6, GND on J7 and J8).  Tables in the proposal note section 2.  No RESET / BOOT pins.
+- Off the main board: `J501`-`J507` (the TTL and fast-TTL edge terminals, B5), `J802` (the TX coil terminal, NMR TX)
+  and `J3` (the second Qwiic, base).  `TTL1..8` and `FASTTTL1/2` now leave the B5 sheet as **global** labels so the
+  link sheet can reach them; `J4` stays as the internal Qwiic.  The right edge and the front-right corner of the
+  main board become free area.
+- New panel-side symbols for the parts that took over: `KF128-2.54-10P` (C474928, 10-way 2.54 mm vertical-entry
+  screw terminal, 8 A: TTL1..8 + 2 x GND), `KF128-5.0-2P` (C474950, 24 A: the TX coil), `QWIIC_BM04B-SRSS`
+  (C51940129, vertical JST-SH 4-pin); `HDR_1x4_FEMALE` (the OLED socket) becomes right-angle
+  (`Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Horizontal`) so the module lies flat on the panel.
+  The three EasyEDA footprints were repaired the usual way (prefix stripped, `fp upgrade --force`, courtyard
+  rewritten) and the two mechanical shell pads of the JST footprint were numbered 5 / 6 to match the symbol.
+- Housekeeping found on the way: the link sheet and `sheet_nmr_rx.py` both numbered their power symbols from 7000,
+  which gave duplicate `#PWR` references (`kicad-cli` then warned "schematic has annotation errors").  The link
+  sheet now uses the 6xxx range that the deleted OPT sheet left free.
+
+Verified: ERC 0 errors (the one remaining warning is the pre-existing 0.0254 mm root-sheet wire); the netlist puts
+each of TTL1-8, FASTTTL1/2, TRIG_5V, AI1-8, RX, AO1/AO2, AUX, I2C_SDA/SCL, LED_WIFI/LED_ACT on exactly one link pin
+and TX on two (J6 19 and 21); `J3`, `J501`-`J507` and `J802` are gone; the six sheets that should not have changed
+are identical apart from UUIDs.  **The PCB was not touched** (rule 1): `gen_pcb.py` still holds the old placement and
+must not be run; the instructor does `Update PCB from Schematic` by hand and places J6/J7/J8 on **B.Cu**.
+
+
+### D-50a Panel generated: `gen_panel.py` rewritten for 180 x 100 (2026-09-16)
+
+`front-panel/front-panel.kicad_{sch,pro,pcb,dru}` are regenerated from `scripts/gen_panel.py`; the old 180 x 65
+one-header panel is gone.
+
+- **Coordinate convention.** The panel is drawn with its **outer face as F.Cu**, so panel coordinates are mirrored
+  in x against the main board: `panel x = 180 - main x`, `panel y = main y`.  The main board's rear edge (y = 0) is
+  therefore the panel's top edge, marked `REAR / TOP EDGE` on both silkscreens.  Consequence: the analog header
+  **J6 (main x 12) is panel J1 at panel x 168** and the power header **J8 (main x 168) is panel J3 at panel x 12**.
+- **Main-board side (`MAIN_HEADERS`, must match the master PCB).**  Footprint
+  `Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical` on **B.Cu**, pad block centred on (12, 50), (90, 50),
+  (168, 50), **rotation 180** - KiCad `at` values (13.27, 25.87) / (91.27, 25.87) / (169.27, 25.87), pin 1 at the
+  rear edge.  The footprint's long axis is already along y at rotation 0, so the "rotation 90" of the first
+  placement note would have laid the headers across the 180 mm direction (J8 would leave the board); 180 keeps them
+  along y and puts pin 1 at the rear.  M3 holes (4, 4) (176, 4) (4, 96) (176, 96) on both boards.
+- **Mating.** With that mirror **panel pad k mates main pin k on all 120 pins**: D-25's pairwise swap does not come
+  back, because the KiCad `PinSocket` footprint already carries the mating mirror in its own pad geometry (even pins
+  at local x = -2.54 against the header's +2.54).  `check_link_mating()` derives each male pin's physical position,
+  maps it into panel coordinates and asserts the female pad there carries the same net, for all 120 pins, before the
+  board is written; `print_mating_table()` prints the table.
+- **Panel layout** (panel coordinates, outer face): SMA grid 3 x 6 at 20 mm pitch, columns **40/60/80/100/120/140**
+  (the proposal's 30..130 would have put a column on the centre header at x = 90), rows 25/45/65; 17 fitted
+  (J10-J26, row-major; the 18th position, J27, is empty).  OLED socket J30 (right-angle 1x4) pads at y 38 running
+  left from x 163, module area 145.7-172.7 x 11-38, held by **H5/H6, M2 (2.2 mm), 23.5 mm apart at y 13.5**; LEDs
+  D1-D3 with R1-R3 at x 148/155/162, y 50 and 57; TTL strip J31 (KF128-2.54-10P) centred (33, 88); TX terminal J32
+  (KF128-5.0-2P) at (120, 88), under the TX SMA column; Qwiic J33 at (150, 88); TP1 (SPARE) at (128, 72); FID1 (20, 8),
+  FID2 (160, 95).  Keep-out: the three female headers are through-hole, so they block both faces over
+  x = 12/90/168 +- 2.7 mm, y = 24.4..75.6; `check_keepouts()` asserts no outer-face pad enters those bands.
+- **Spare link pins** are left unconnected on the panel (the proposal wanted labelled test pads; only TP1 for the
+  SPARE SMA is fitted).  GPIO4/6/7/15/43/44 and +5V_RAW reach the panel but nothing on it uses them yet.
+- **Tooling.** `gen_panel.py` now loads KiCad standard footprints (`PinSocket_2x20`, `PinSocket_1x04` horizontal,
+  `R_0603_1608Metric`, `MountingHole_2.2mm_M2`) straight from the KiCad installation beside `lib/class_board.pretty`
+  and writes each footprint with its own library nickname (`PanelBoard.footprint_sexp`); the project `fp-lib-table`
+  still lists only `class_board`, the standard libraries come from the global table.  H5/H6 use the shared M3
+  mounting-hole symbol with a per-instance footprint override (`PanelSheet.inst_sexp`).  The router cannot join
+  +5V_RAW's two neighbouring pins with a 1.0 mm POWER_RAW track, so `build()` draws that one link pad to pad.
+- **Verified 2026-09-16:** ERC **0 errors** (6 warnings: the six GPIO global labels have one pin each), DRC
+  **0 errors, 0 unconnected items, 0 schematic-parity issues** (2 cosmetic warnings: J30 and J31 carry their own
+  reference text inside their own silk outline), keep-out and 120-pin mating audits pass, two consecutive runs
+  byte-identical.  Board: 39 footprints, 43 nets, 681 tracks, 79 vias.
+- **Renders:** `docs/front-panel-v07-stacked-top.png` / `-bottom.png` (bottom mirrored).  `kicad-cli pcb render`
+  hangs at "Loading 3D models..." on this machine (no 3D context in a headless console), so the pictures are the
+  2D layer plots the release script already uses: `pcb export svg` of F/B copper + silk + mask + Edge.Cuts,
+  rasterised with pymupdf.
+
+## D-51 The relay channels are built for mains: 10 A relay, MAINS net class, 5 mm reinforced spacing (2026-09-16)
+
+User decision #50 (course repo `DECISIONS.md`, analysis `notes/2026-09-16-mains-safe-relays.md`): *"Make sure the
+relays are capable of switching 110 V AC wall plug.  It isn't the aim but it will almost certainly happen if you give
+someone a relay and a controller.  Let's make sure it is safe."*  A prohibition printed on the silkscreen is not a
+design, so the channels are built for the use that will happen.
+
+**Relay.**  `HK4100F-DC5V-SHG` (C12072, SPDT 3 A, coil 125 Ω) is replaced by **Hongfa `JQC-3FF/005-1ZS(551)`,
+LCSC C9221**: SPDT **10 A @ 277 V AC / 10 A @ 28 V DC** (AgCdO), coil 5 V **70 Ω = 71 mA**, 19 × 15.5 × 15 mm,
+5 pins, on the KiCad standard footprint `Relay_THT:Relay_SPDT_Hongfa_JQC-3FF_0XX-1Z`.  About +US$0.2 per relay.
+The Songle `SRD-05VDC-SL-C` (C35449) is a drop-in alternate: its KiCad footprint
+`Relay_SPDT_SANYOU_SRD_Series_Form_C` is the same pattern as the Hongfa land, shifted only in origin — the five pad
+positions agree to within 0.05 mm — so either part can be fitted to the board.  The HK4100F symbol stays in
+`cb_symbols.py` for reference, unused.
+
+**Pin numbers are the footprint pad names**, which use the IEC / EN 50005 relay numbering:
+**A1, A2 = coil** (A1 is the + terminal by convention; the coil has no internal diode, so the polarity is only a
+drawing convention — the flyback diode sets the direction), **11 = COM**, **12 = NC** (break), **14 = NO** (make).
+The symbol declares exactly those numbers, so the netlist maps pin to pad without a translation table.  The relay
+case also prints its own contact diagram: check a sample with a meter at bring-up (T-08) before any mains test.
+
+**Wiring (B4 sheet).**  A1 → +5V_RAW; A2 → the AO3400A drain, with the 1N4148W flyback across the coil and the
+yellow coil-on LED unchanged; 11/14/12 → J40x pads 2/1/3 (COM / NO / NC, the terminal order the sheet already used).
+The single COM pin replaces the HK4100F's two, so the short COM drop wire is gone.
+
+**Board rating.**  The relay is 10 A; the **board** is rated **250 V AC 5 A MAX per channel, load fused ≤ 5 A** —
+3 mm of 1 oz outer copper carries 5 A with a small rise, and short-circuit protection comes from the load circuit,
+not from the board.  IEC 62368-1 for 250 V rms working voltage, pollution degree 2, FR4 (material group IIIb):
+basic clearance ≈ 1.5 mm, **reinforced = 2 × = 5.0 mm**.  Taiwan is 110 V, but 220 V outlets exist and two channels
+can sit on different legs, so the rules are written for 250 V.
+
+**Net classes** (`gen_sch.write_project`): `RELAY_CONTACT` (0.2 mm clearance, 0.5 mm track) is replaced by **`MAINS`**
+(clearance **5.0 mm**, track **3.0 mm**, via 0.6/0.3 as Default — vias are forbidden by a rule) plus the four channel
+classes **`MAINS1…MAINS4`** with the same numbers.  Patterns: `/b4_switching/RLY_*` → MAINS and
+`/b4_switching/RLY_*1…*4` → MAINS1…MAINS4.  **KiCad 10 puts a net in every class whose pattern matches**, which is
+what makes the channel rules possible; verified by DRC (the `mains_between_channels*` rules fire, and they can only
+match a net that is in MAINS *and* in MAINSn).  `RLY_IN1…4` (the expander gate nets) are global labels with no sheet
+path, so the pattern does not catch them.
+
+**Design rules** (`class-board.kicad_dru`, identical copy in `rules/`):
+
+| Rule | Constraint | Why |
+|---|---|---|
+| `mains_to_other` | clearance ≥ 5.0 mm to any non-MAINS item, all layers, zones included | reinforced insulation between the mains side and the SELV instrument a student touches |
+| `mains_between_channels1…4` | ≥ 5.0 mm between different channel classes | two channels can be on different 110 V legs (220 V between them) |
+| `mains_within_channel1…4` | ≥ 2.0 mm between the nets of one channel | basic spacing at the switched voltage |
+| `mains_edge` | edge clearance ≥ 2.0 mm | a metal lid or a hand at the board edge |
+| `mains_layers_inner` / `mains_layers_back` / `mains_no_via` | `disallow track zone` on inner and B.Cu, `disallow via` | mains never enters the inner layers or the bottom side, where the panel headers are |
+| `mains_width` | track width ≥ 3.0 mm | 5 A on 1 oz outer copper |
+
+Pad pairs **inside one footprint** are excluded from the clearance rules (`A.memberOfFootprint(B)`): the
+coil-to-contact distance of the relay itself is the manufacturer's isolation (1 500 V AC test, basic), not a spacing
+the layout may change.
+
+**Rule order matters and cost an hour.**  KiCad applies the **last** matching rule, not the most specific one: with
+the MAINS block written in the middle of the file, the generic `copper_to_edge` (0.3 mm) silently replaced
+`mains_edge` (2.0 mm), and `analog_in_clearance` (0.3 mm) would have replaced `mains_to_other` for an
+analog-track-to-mains pair.  The MAINS block therefore stands **last** in the file, with a comment saying so.  For
+the same reason the 2.0 mm within-channel rule wins over the 5.0 mm MAINS *net class* clearance — a custom rule
+always beats a net class.
+
+**Rails.**  4 × 71 mA = **285 mA** of coil current from +5V_RAW, against 160 mA before: the root-sheet rails table
+estimate goes from 1.0–1.2 A to **1.15–1.35 A** against the ≤ 1.5 A budget.
+
+**Verified 2026-09-16.**  Library 141 symbols; `gen_sch.py` clean; **ERC 0 errors** (the one pre-existing cosmetic
+root-wire warning); netlist: K401–K404 carry `Relay_THT:Relay_SPDT_Hongfa_JQC-3FF_0XX-1Z` / C9221, `RLY_NO/COM/NC1–4`
+land on relay pads 14/11/12 and terminal pads 1/2/3, coil A1 on +5V_RAW and A2 on the driver drain; `gen_student.py`
+regenerates (K401 is still a Section C place-back item, now with the new footprint and LCSC number); an
+md5-with-UUIDs-blanked comparison against a rebuild from the previous scripts shows **only** `b4_switching` and the
+root sheet changed.  Rules test on a scratch copy of the board: **no parse errors**, and on the current (pre-mains)
+placement the rules fire **60 clearance errors** — 51 `mains_to_other` + 9 `mains_between_channels2/3/4` — while a
+synthetic board with a deliberately bad track also fires `mains_width`, `mains_layers_inner`, `mains_layers_back`,
+`mains_no_via`, `mains_edge` and `mains_within_channel1`.  (The master board has no tracks yet, so only the
+placement can violate anything.)
+
+**Still to do on the master PCB (instructor, KiCad GUI — the PCB is hand-edited, never regenerated):**
+*Update PCB from Schematic* swaps K401–K404 to the larger footprint in place; then re-space the relay row and the
+four 3P terminals along the rear edge at ≈ 22 mm pitch with each terminal **directly behind its own relay** and the
+coil pins pointing inward; run DRC and clear what the MAINS rules flag; add the per-channel silkscreen rating
+("250 V AC 5 A MAX — load must have its own fuse ≤ 5 A") and a mains-warning symbol; optionally route a 1 mm slot
+between the coil pins and the contact pins of each relay (free at JLC, adds creepage).  `gen_pcb.py` must not be run
+(rule 1) — and it could not be anyway: it resolves footprints only from `lib/class_board.pretty`, and the new relay,
+like the panel-link headers, comes from a KiCad standard library.
+
+**Open for the instructor** (note §5): 5 A on 1 oz copper as above, or order the main board in **2 oz outer copper**
+and label the channels 10 A (a JLC price step)?  And: fit the optional slot or not?

@@ -49,13 +49,13 @@ CLASS_PATTERNS = [("POWER_RAW", "+5V_RAW"), ("POWER_RAW", "+5V_RAW_OR"),
                   ("FAST", "SPI_*"), ("FAST", "CS_*"), ("FAST", "FAST_OUT?"), ("FAST", "TRIG_*"),
                   ("FAST", "/b3_outputs/DAC_*"), ("FAST", "/base_mcu/*_MCU"),
                   ("ISO_IN", "/b4_switching/ISO*"), ("ISO_IN", "unconnected-(U401-NC*"), ("ISO_IN", "unconnected-(U402-NC*"),
-                  ("RELAY_CONTACT", "/b4_switching/RLY_*")]
+                  ("MAINS", "/b4_switching/RLY_*")]
 CLASS_WIDTH = {"Default": 0.25, "POWER_RAW": 1.0, "POWER": 0.5, "ANALOG_IN": 0.25, "ANALOG_OUT": 0.3,
-               "FAST": 0.25, "ISO_IN": 0.3, "RELAY_CONTACT": 0.5}
+               "FAST": 0.25, "ISO_IN": 0.3, "MAINS": 3.0}
 CLASS_CLR = {"Default": 0.2, "POWER_RAW": 0.2, "POWER": 0.2, "ANALOG_IN": 0.3, "ANALOG_OUT": 0.2,
-             "FAST": 0.2, "ISO_IN": 0.2, "RELAY_CONTACT": 0.6}
+             "FAST": 0.2, "ISO_IN": 0.2, "MAINS": 5.0}
 ISO_CLR = 2.5
-ORDER = ["ISO_IN", "ANALOG_IN", "ANALOG_OUT", "FAST", "POWER_RAW", "POWER", "RELAY_CONTACT", "Default"]
+ORDER = ["ISO_IN", "ANALOG_IN", "ANALOG_OUT", "FAST", "POWER_RAW", "POWER", "MAINS", "Default"]
 F_ONLY = set()                  # analog nets may use B.Cu (outer layer over the AGND pour) for the link fan-out
 LAYER_BIAS = {"FAST": (1.0, 1.15), "Default": (1.0, 1.05), "ANALOG_IN": (1.0, 1.3), "ANALOG_OUT": (1.0, 1.1)}
 

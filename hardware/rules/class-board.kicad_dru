@@ -11,14 +11,6 @@
 	(condition "A.NetClass == 'ISO_IN' && B.NetClass != 'ISO_IN' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
 	(constraint clearance (min 2.5mm)))
 
-# ---- relay contacts: 1.0 mm clearance, 0.5 mm minimum width (brief 4.3)
-(rule "relay_contact_clearance"
-	(condition "A.NetClass == 'RELAY_CONTACT' && B.NetClass != 'RELAY_CONTACT' && !(A.Type == 'Pad' && B.Type == 'Pad')")
-	(constraint clearance (min 0.6mm)))
-(rule "relay_contact_width"
-	(condition "A.NetClass == 'RELAY_CONTACT'")
-	(constraint track_width (min 0.5mm)))
-
 # ---- analog inputs: 0.3 mm clearance, outer layers only (brief 4.3)
 (rule "analog_in_clearance"
 	(condition "A.NetClass == 'ANALOG_IN' && A.Type == 'Track' && B.NetName != 'AGND'")
@@ -36,6 +28,71 @@
 	(condition "A.Type == 'Via'"))
 (rule "copper_to_edge"
 	(constraint edge_clearance (min 0.3mm)))
+
+# ---- the MAINS rules come LAST on purpose: KiCad applies the last rule that matches, so they must
+#      stand after the general clearance and edge rules above or those would override them.
+# ---- MAINS relay channels (D-51, 2026-09-16): the four relay contact circuits are built so that a 110 V or
+#      220 V wall socket wired into a terminal is safe.  Reinforced spacing for a 250 V working voltage
+#      (IEC 62368-1, pollution degree 2, FR4 material group IIIb): basic 1.5 mm, reinforced = 2 x = 5.0 mm.
+#      Every relay contact net is in the MAINS class and also in its own channel class MAINS1..MAINS4.
+#      Pad pairs inside one footprint are excluded: the coil-to-contact distance of the relay itself is the
+#      manufacturer's isolation (1.5 kV test), not a spacing the board layout may change.
+(rule "mains_to_other"
+	(condition "A.NetClass == 'MAINS' && !(B.NetClass == 'MAINS') && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
+	(constraint clearance (min 5.0mm)))
+
+# ---- one channel to another: two channels can sit on different 110 V legs (220 V between them)
+(rule "mains_between_channels1"
+	(condition "A.NetClass == 'MAINS1' && B.NetClass == 'MAINS' && !(B.NetClass == 'MAINS1')")
+	(constraint clearance (min 5.0mm)))
+(rule "mains_between_channels2"
+	(condition "A.NetClass == 'MAINS2' && B.NetClass == 'MAINS' && !(B.NetClass == 'MAINS2')")
+	(constraint clearance (min 5.0mm)))
+(rule "mains_between_channels3"
+	(condition "A.NetClass == 'MAINS3' && B.NetClass == 'MAINS' && !(B.NetClass == 'MAINS3')")
+	(constraint clearance (min 5.0mm)))
+(rule "mains_between_channels4"
+	(condition "A.NetClass == 'MAINS4' && B.NetClass == 'MAINS' && !(B.NetClass == 'MAINS4')")
+	(constraint clearance (min 5.0mm)))
+
+# ---- inside one channel (COM / NO / NC of the same relay and terminal): basic spacing at the switched
+#      voltage.  A custom rule wins over the 5.0 mm clearance of the MAINS net class, and no other rule here
+#      matches a pair of nets of the same channel, so 2.0 mm is what the DRC asks for inside a channel.
+(rule "mains_within_channel1"
+	(condition "A.NetClass == 'MAINS1' && B.NetClass == 'MAINS1' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
+	(constraint clearance (min 2.0mm)))
+(rule "mains_within_channel2"
+	(condition "A.NetClass == 'MAINS2' && B.NetClass == 'MAINS2' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
+	(constraint clearance (min 2.0mm)))
+(rule "mains_within_channel3"
+	(condition "A.NetClass == 'MAINS3' && B.NetClass == 'MAINS3' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
+	(constraint clearance (min 2.0mm)))
+(rule "mains_within_channel4"
+	(condition "A.NetClass == 'MAINS4' && B.NetClass == 'MAINS4' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
+	(constraint clearance (min 2.0mm)))
+
+# ---- a metal lid or a hand at the board edge
+(rule "mains_edge"
+	(condition "A.NetClass == 'MAINS'")
+	(constraint edge_clearance (min 2.0mm)))
+
+# ---- mains stays on the top layer and never goes through the board: no inner or bottom copper, no vias
+(rule "mains_layers_inner"
+	(layer inner)
+	(condition "A.NetClass == 'MAINS'")
+	(constraint disallow track zone))
+(rule "mains_layers_back"
+	(layer "B.Cu")
+	(condition "A.NetClass == 'MAINS'")
+	(constraint disallow track zone))
+(rule "mains_no_via"
+	(condition "A.NetClass == 'MAINS'")
+	(constraint disallow via))
+
+# ---- 3 mm of 1 oz outer copper carries the 5 A the channel is rated for with a small temperature rise
+(rule "mains_width"
+	(condition "A.NetClass == 'MAINS'")
+	(constraint track_width (min 3.0mm)))
 
 # ---- section ownership (v0.7, 2026-09-13): Block field -> owner area. A = B1/OPT/NMR_RX, B = B3/B5/NMR_TX, C = B2/B4/C_SW
 (rule "owner_A" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B1' || A.getField('Block') == 'OPT' || A.getField('Block') == 'NMR_RX' || A.getField('Block') == 'A')") (constraint assertion "A.enclosedByArea('ZONE_A')"))

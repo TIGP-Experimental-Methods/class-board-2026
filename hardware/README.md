@@ -1,16 +1,10 @@
 # TIGP class board 2026 — hardware (rev B, v0.7)
 
 Two boards: the **main board** (ESP32-S3 dev-board carrier / lab instrument **and NMR console**, 4-layer
-**180 × 100 mm**) and the **front panel** (2-layer **180 × 100 mm**), which mounts **flat on the back of the main
-board and parallel to it**, joined by **three straight 2×20 pin headers** (2.54 mm: males on the main board's bottom
-side, females on the panel's inner face, hand-soldered by the instructor).  The panel's outer face is the instrument's
-face: 17 SMA in a 3 × 6 grid, the TTL screw-terminal strip, the TX coil terminal, a Qwiic, the OLED and 3 LEDs, all
-vertical.  The main board's rear edge is the back: USB-C, the 5 V jack, the external 7–18 V input, the coil terminals
-and the relay and isolated-input terminals, every one taking its wire off the edge and recessed behind the housing's
-back wall.
-Specification: `10-Class-Board-Design-Brief.md` v0.6 as amended by the v0.7 re-spec
-`notes/2026-09-13-nmr-respec-proposal.md` and the circuit design `notes/2026-09-13-v07-nmr-circuits.md` (all three in
-the course repository, not here); build/verification contract: `prompt.md` (same place); working instructions for this
+**180 × 100 mm**) and the **front panel** (2-layer **180 × 65 mm** with 15 SMA, OLED socket, 3 LEDs, 2×20 link).
+Specification: [`../10-Class-Board-Design-Brief.md`](../10-Class-Board-Design-Brief.md) v0.6 as amended by the v0.7
+re-spec `notes/2026-09-13-nmr-respec-proposal.md` and the circuit design `notes/2026-09-13-v07-nmr-circuits.md` (both
+in the course repo); build/verification contract: [`../prompt.md`](../prompt.md); working instructions for this
 directory: [`AGENTS.md`](AGENTS.md).
 
 ## What v0.7 changed (2026-09-13)
@@ -27,24 +21,15 @@ directory: [`AGENTS.md`](AGENTS.md).
     commutating mixer on two TS5A23157 and IF difference amplifiers into **ADS8688 channels 7 and 8**.
   - **NMR transmitter** (section B, 8xx): AD9834 DDS on a 50.000 MHz clock, 3 MHz Butterworth reconstruction filter,
     OPA564 power stage running single-supply from `+VEXT` (15.9 V pp = a 417 µs 90° pulse), TX on the panel SMA and on
-    the coil terminal beside it on the panel.
+    a board-edge terminal.
   - **Power and coil switches** (section C, 9xx): an external 7–18 V / 5 A input with fuse, TVS and a P-FET
     (`+VEXT`), a DRV8871 field-cycling H-bridge, and a UCC27517 + AOD4184A polarizer switch with three flyback
     stuffing options (adiabatic transfer only).
 - **Board 180 × 100 mm** (D-31): everything that stood at x ≥ 129 moved +40 mm, which bought 40 mm of rear edge for
-  the three new terminals and a column for the transmitter.  The panel grows to **180 × 100 mm** with a
-  **3 × 6 SMA grid** (18 positions, 17 fitted: row 1 AO1 AO2 TRIG AUX TX FAST1 · row 2 AI1 AI2 AI3 AI4 RX FAST2 ·
-  row 3 AI5 AI6 AI7 AI8 SPARE), stacks flat on the back of the main board through three straight 2×20 headers, and
-  takes over the TTL screw terminals, the two fast outputs, the TX coil terminal and one Qwiic (course decisions #45,
-  #48 and #49; `notes/2026-09-14-panel-rework-proposal.md` in the course repository).
+  the three new terminals and a column for the transmitter.  The panel grows to 180 × 65 mm with a **3 × 5 SMA grid**;
+  the new column carries TX, RX and SPARE, and link pins 37–40 became RX / AGND / TX / AGND (D-45, D-46).
 - **DIO1–8 and RELAY1–4 moved to a TCA9535 I²C expander** (D-40), which freed the 7 GPIO the NMR block needs and
   GPIO 4/6/7/15 for the expansion header.  All 4 relays, 8 DIO and 8 analog inputs are kept.
-- **The four relay channels are built to switch mains** (course decision #50): **Hongfa JQC-3FF/005-1ZS** (C9221,
-  10 A @ 277 V AC, 19 × 15.5 mm, 5 pins, coil 5 V / 70 Ω ≈ 71 mA) replaces the 3 A HK4100F; the contact nets are the
-  **`MAINS`** net class — 5 mm clearance to all other copper on every layer, F.Cu only, no vias, tracks ≥ 3 mm,
-  enforced by the DRC.  System rating **250 V AC, 5 A maximum per channel** (set by the copper), the load carrying its
-  own fuse of 5 A or less, the rating on the silkscreen per channel.  The AO3400A drivers and the flyback diodes are
-  unchanged.  In the housing the rear terminals are recessed behind the back wall.
 
 ## Status
 
@@ -57,9 +42,8 @@ directory: [`AGENTS.md`](AGENTS.md).
   base, the rails and SPI).
 - DRC: the custom rules now **load** (the file is at the project root, D-48) and the `owner_A/B/C` assertions pass on
   the generated placement.  A clean DRC on a routed board does not exist yet.
-- Front panel: the generated files are still the 180 × 65, 3 × 5 version — the panel and the link sheet must be
-  regenerated for the 180 × 100 outline, the 3 × 6 grid and the three headers; the released
-  `release/revA/front-panel/` package is the **v0.6** panel and must be rebuilt.
+- Front panel: regenerated for v0.7 (180 × 65, 3 × 5 grid); the released `release/revA/front-panel/` package is the
+  **v0.6** panel and must be rebuilt.
 - **No hardware has been built and nothing in `docs/bring-up.md` has been executed** (T-00…T-23 all pending).
   `docs/requirements.md` marks the honest status of every requirement.
 
@@ -74,7 +58,7 @@ directory: [`AGENTS.md`](AGENTS.md).
 | Project-local library | `lib/class_board.kicad_sym`, `lib/class_board.pretty/`, `lib/class_board.3dshapes/` (both projects use it through their `sym-lib-table` / `fp-lib-table`) |
 | Release package | `release/<rev>/main-board/`, `release/<rev>/front-panel/` (Gerbers, drill, BOM, CPL, PDFs, SVG/PNG, STEP, reports, hashes) — only the v0.6 front panel exists so far |
 | Design record | `docs/design-decisions.md` (D-01…D-49), `docs/requirements.md` (R-01…R-44), `docs/design-review.md` (floorplan, grounding, PDN, block risks incl. §5.7 NMR, manufacturing, findings F-01…F-20, layout log), `docs/bring-up.md` (T-00…T-23), `docs/student-deletions.md` |
-| Student copies | `student/<sheet>_gapped.kicad_sch` (+ `.kicad_pro`, lib tables): section A = `b1_inputs` + `nmr_rx`, B = `b3_outputs` + `b5_dio_trig` + `nmr_tx`, C = `b4_switching` + `c_switch`.  After the panel rework `b5_dio_trig` no longer carries the TTL and fast-output terminals — those nets leave the sheet on the instructor's link sheet.  `b2_power` is **not** gapped — the instructor keeps the power-entry block.  Each copy is a **standalone one-sheet project**: the student opens `student/<sheet>_gapped.kicad_pro`, and ERC there runs standalone (high baseline — only the difference against the ungapped sheet is meaningful, `docs/student-deletions.md`), while the PCB stays the main project |
+| Student copies | `student/<sheet>_gapped.kicad_sch` (+ `.kicad_pro`, lib tables): section A = `b1_inputs` + `nmr_rx`, B = `b3_outputs` + `b5_dio_trig` + `nmr_tx`, C = `b4_switching` + `c_switch`.  `b2_power` is **not** gapped — the instructor keeps the power-entry block |
 | Generators | `scripts/` — see `AGENTS.md`; the schematic and the placement are generated, edit the scripts |
 
 ## Reference-designator ranges
@@ -84,7 +68,7 @@ directory: [`AGENTS.md`](AGENTS.md).
 | 1xx | B1 analog inputs (ADS8688 and the eight input networks) — section A |
 | 2xx | B2 power entry and rails — section C (instructor-owned within C) |
 | 3xx | B3 analog outputs (DAC8563, OPA2192) — section B |
-| 4xx | B4 relays (mains-capable channels, `MAINS` net class) and isolated inputs — section C |
+| 4xx | B4 relays and isolated inputs — section C |
 | 5xx | B5 digital I/O, fast outputs, TRIG, TCXO option — section B |
 | 6xx | former OPT conditioning chain — **deleted in v0.7** |
 | **7xx** | **clocks and receiver**: Si5351A, crystal, 74HC74 divider, tank, limiter, LNA, blanking — section A |
@@ -94,14 +78,10 @@ directory: [`AGENTS.md`](AGENTS.md).
 ## Order / assembly configuration the package supports
 
 - **Main board: 7 boards, 180 × 100 mm, 4-layer** JLC04161H-7628 stack-up, 1.6 mm — **5 assembled + 2 bare**;
-  Economic PCBA, **top side only** (every JLC-assembled part is on F.Cu; the three link headers on the bottom side are
-  hand-soldered, below), SMD + THT; DNP parts (TCXO option, the SMBJ20A fast-dump clamp, the I²C pull-ups duplicated
-  on the RX sheet, the flag pull-ups) are excluded from BOM and CPL.
-- **Front panel: 6 boards, 180 × 100 mm, 2-layer**, 1.6 mm, all assembled; every assembled part is on the outer
-  face, so assembly is single-sided on this board too.
-- **The link is hand-soldered, not assembled:** three 2×20 straight males on the main board's bottom side and three
-  2×20 straight females on the panel's inner face — the cheapest stocked pair (#49), soldered by the instructor and
-  excluded from BOM and CPL, with four M3 stand-offs matched to the stack height.
+  Economic PCBA, **top side only** (all parts are on F.Cu), SMD + THT; DNP parts (TCXO option, the SMBJ20A fast-dump
+  clamp, the I²C pull-ups duplicated on the RX sheet, the flag pull-ups) are excluded from BOM and CPL.
+- **Front panel: 6 boards, 180 × 65 mm, 2-layer**, 1.6 mm, all assembled; parts on the front except the 2×20 female
+  link header on the back (THT, CPL layer "Bottom").
 - BOM columns *Comment, Designator, Footprint, LCSC Part #*; CPL *Designator, Mid X, Mid Y, Layer, Rotation*, origin
   bottom-left, mm, y up.  **Check the component rotations in JLC's upload preview** — still not done (finding F-13),
   and v0.7 adds exposed-pad and fine-pitch packages (HSOP-20 PowerPAD, SO-8-EP, TSSOP-24, MSOP-10, TO-252).
@@ -130,13 +110,11 @@ inputs and every change diffs.  Therefore:
 - GPIO v0.7 (D-40, root sheet carries the table): 41 DDS_FSYNC · 42 DDS_PSEL · 40 TX_EN · 8 RX_BLANK · 9/14 HB_IN1/2 ·
   47 FET_GATE; DIO1–8 = TCA9535 P0.0–P0.7, RELAY1–4 = P1.0–P1.3; GPIO 4/6/7/15 free to the expansion header; GPIO 3
   unused.  I²C: OLED 0x3C, TCA9535 0x20, Si5351A 0x60.
-- Link: **three straight 2×20 headers** (2.54 mm, 120 pins) replace the single right-angle connector — one for the
-  analog signals, one for the digital lines, one for power and the spare pins, with a return pin beside every signal.
-  The pin assignment is rewritten together with the link sheet and `gen_panel.py`; the mirrored pad numbering of the
-  panel-side headers (D-25) must be asserted geometrically on all three.
+- Link J6/J1: pinout per brief 7.8 with **pins 37–40 = RX / AGND / TX / AGND** (D-45); the panel's back-side header
+  has pairwise-swapped pad numbers (D-25), asserted geometrically by `gen_panel.py`.
 - **Power-on order: USB first, then the +VEXT bench supply** (the OPA564 requires VDIG before V+, D-35).
-- Open items to close with hardware in hand: dev-board socket row spacing 25.4 mm (D-12), the header stack height
-  and the M3 stand-offs matched to it (#49), the land patterns of the new packages (F-12), the CPL rotations (F-13).
+- Open items to close with hardware in hand: dev-board socket row spacing 25.4 mm (D-12), panel header mating height
+  (D-25), the land patterns of the new packages (F-12), the CPL rotations (F-13).
 
 ## Release status
 

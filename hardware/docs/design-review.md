@@ -120,12 +120,17 @@ Failure prevented: decoupling capacitor close in XY but with a long loop (practi
 - 74HCT125 shifter on +5V_RAW next to the DAC; its outputs (5 V logic edges) are kept ≥ 3 mm from VREF/VOUT copper.
 - Verify: T-06 (DAC codes vs AO), T-07 (loop-back through AI).
 
-### 5.3 B4 — relays
-- Coil loop: +5V_RAW → coil → MOSFET → GND; flyback diode across the coil (short loop); the coil current (40 mA switched)
-  returns in the plane at the rear.  Contacts: COM/NO/NC to the 3P terminal on 0.5 mm tracks with 1.0 mm clearance
-  (RELAY_CONTACT class), board rating ≤ 30 V DC 1 A on the silkscreen; contact tracks never enter other zones.
+### 5.3 B4 — relays (mains-capable, D-51)
+- Coil loop: +5V_RAW → coil → MOSFET → GND; flyback diode across the coil (short loop); the coil current
+  (71 mA switched per relay, 285 mA for four) returns in the plane at the rear.
+- Contacts: COM/NO/NC to the 3P terminal on **3 mm tracks with 5 mm clearance to everything that is not the
+  same channel** (MAINS / MAINS1…4 classes), **F.Cu only, no vias, 2 mm to the board edge**; board rating
+  **250 V AC 5 A MAX per channel, load fused ≤ 5 A** on the silkscreen.  The terminal sits directly behind its
+  own relay on the rear edge so the mains copper is as short as the placement allows; contact tracks never
+  enter other zones.  The relay's own coil-to-contact spacing is the manufacturer's isolation (1.5 kV test)
+  and is excluded from the rules.
 - Gate pull-down keeps the relays off through boot; the ESP32-S3 GPIO4/6/7/15 have no strapping function.
-- Verify: DRC classes; T-08.
+- Verify: DRC `mains_*` rules; T-08 (including a meter check of the contact pin functions on a sample relay).
 
 ### 5.4 B4 — isolated inputs (safety, practices §15)
 - Working voltage ≤ 24 V DC, functional isolation only (not mains): the brief's 2.5 mm clearance on all layers is far
@@ -201,8 +206,9 @@ Critical nets and corridors:
 5. **USB D+/D−**: J201 (x 13, y 6) → J2 pins 19/20 (x 89, y 37): ≈ 85 mm (finding F-04), 0.25 mm, no stubs.
 6. **FAST_OUT / TRIG**: J1-11, J2-18 → 74HCT125 (105.5, 61); TRIG_IO/DIR J2-9/10 → LVC1T45 (114.5, 61.5);
    TRIG_5V → link pin 5 (x 51, y 95.8).
-7. **Relay drive/contact**: local to B4; contacts 0.5 mm, 0.6 mm clearance to other nets (DRU rule; the relay's own
-   pad-to-pad spacing is excluded).
+7. **Relay drive/contact**: local to B4; contacts **3.0 mm wide, 5 mm clearance** to every net that is not the
+   same mains channel, F.Cu only, no vias, 2 mm to the edge (DRU `mains_*` rules; the relay's own pad-to-pad
+   spacing is excluded).  Inside one channel the rule is 2 mm.
 8. **ISO_IN**: local, inside the keep-out, 0.3 mm; 2.5 mm to every non-ISO item (DRU rule + router masks).
 9. **DIO1..8, GPIO43/44, I2C**: socket pins → B5 / Qwiic / link on F.Cu or B.Cu (B.Cu cost ×1.05).
 Layer discipline: L2/L3 are untouched GND planes (DRU `no_inner_tracks`); every SMD GND pad has its own via (81
@@ -259,6 +265,7 @@ Power-width minimum rules were removed from the DRU because a rule cannot exempt
 | F-18 | **Low** | Silkscreen crowding | v0.6 had 98 `silk_overlap` + 28 `silk_over_copper` warnings: reference designators printed on neighbouring parts' pads | **Mitigated**: `place_reference_texts()` scores candidate positions against other footprints, pads, board texts and the edge and picks the cheapest.  Re-count after the next DRC run | DRC warning count |
 | F-19 | **Medium** | B3 courtyards | C301 (111.3, 69.7) and C308 (109.4, 72.5) overlap — a DRC **error** — while `place_check.py` reports no collision, so the two checkers disagree (state report §6.9).  Both parts keep these coordinates in v0.7 | **Open.**  Re-space the pair in `gen_pcb.placement()` and make `place_check.py` agree with the KiCad courtyard check | DRC courtyard check; `place_check.py` |
 | F-20 | **Low** | +VEXT absolute limit | No TVS both passes 24 V and clamps below the OPA564's 26 V absolute maximum (clamping ratios ~1.6×), so a 24 V input is outside what the protection can guarantee | **Accepted and documented**: silkscreen "+VEXT 7–18 V"; 24 V only with U802 unfitted.  At 18 V the 417 µs 90° pulse is unaffected (D-41) | T-14 |
+| F-21 | **High** | Relay channels vs mains | A relay and a controller in a student's hands means a wall plug in a screw terminal sooner or later; v0.7 had a 3 A signal relay and 0.6 mm contact clearance with vias allowed — a mains net beside the inner GND planes | **Fixed** (D-51, user decision #50): 10 A relay (C9221), MAINS / MAINS1…4 net classes, 5 mm reinforced clearance, F.Cu only, no vias, 3 mm tracks, 2 mm to the edge, 250 V AC 5 A MAX per channel on the silkscreen.  The **layout** still has to be redone: the master PCB keeps the old 17 mm relay pitch and fails the new rules with 60 clearance errors until the row and the terminals are re-spaced | `kicad-cli pcb drc --severity-all` names the `mains_*` rules; DRC 0 errors before release |
 
 Layout findings are appended during placement/routing (§9).
 

@@ -193,17 +193,69 @@
         "priority": 5
       },
       {
-        "name": "RELAY_CONTACT",
-        "clearance": 0.2,
-        "track_width": 0.5,
-        "via_diameter": 0.8,
-        "via_drill": 0.4,
+        "name": "MAINS",
+        "clearance": 5.0,
+        "track_width": 3.0,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
         "bus_width": 12,
         "wire_width": 6,
         "line_style": 0,
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "priority": 6
+      },
+      {
+        "name": "MAINS1",
+        "clearance": 5.0,
+        "track_width": 3.0,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "bus_width": 12,
+        "wire_width": 6,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 7
+      },
+      {
+        "name": "MAINS2",
+        "clearance": 5.0,
+        "track_width": 3.0,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "bus_width": 12,
+        "wire_width": 6,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 8
+      },
+      {
+        "name": "MAINS3",
+        "clearance": 5.0,
+        "track_width": 3.0,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "bus_width": 12,
+        "wire_width": 6,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 9
+      },
+      {
+        "name": "MAINS4",
+        "clearance": 5.0,
+        "track_width": 3.0,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "bus_width": 12,
+        "wire_width": 6,
+        "line_style": 0,
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 10
       }
     ],
     "meta": {
@@ -293,8 +345,24 @@
         "pattern": "unconnected-(U402-NC*"
       },
       {
-        "netclass": "RELAY_CONTACT",
+        "netclass": "MAINS",
         "pattern": "/b4_switching/RLY_*"
+      },
+      {
+        "netclass": "MAINS1",
+        "pattern": "/b4_switching/RLY_*1"
+      },
+      {
+        "netclass": "MAINS2",
+        "pattern": "/b4_switching/RLY_*2"
+      },
+      {
+        "netclass": "MAINS3",
+        "pattern": "/b4_switching/RLY_*3"
+      },
+      {
+        "netclass": "MAINS4",
+        "pattern": "/b4_switching/RLY_*4"
       }
     ]
   },

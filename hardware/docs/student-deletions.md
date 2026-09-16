@@ -104,14 +104,15 @@ Full schematic PDF: **page 7**, *B5: 8 TTL DIO, 2 fast TTL outs, bidirectional T
 | **R510** | 49.9 | R_0603_1608Metric | C23185 | 〃 | 〃 |
 | **C501** | 100nF | C_0603_1608Metric | C14663 | the buffer decoupling pair | B5 sheet, at the 74AHCT541 (C501) and the 74HCT125 (C502) supply pins |
 | **C502** | 100nF | C_0603_1608Metric | C14663 | 〃 | 〃 |
-| **J501** | KF301-5.0-2P | CONN-TH_P5.00_KF301-5.0-2P | C474881 | one TTL screw terminal (TTL1/TTL2) | B5 sheet, fast-output block, the 2P terminal at the board edge |
+| **R501** | 1k | R_0603_1608Metric | C21190 | one TTL output series resistor (TTL1) | B5 sheet, at the 74AHCT541 outputs, the first of the R501-R508 column |
 
-Expected ERC items: **30 new** (standalone ERC on the sheet: 34 on the full sheet, 64 on the gapped
+Expected ERC items: **23 new** (standalone ERC on the sheet: 44 on the full sheet, 67 on the gapped
 copy, `--severity-all`) —
 
-- `isolated_pin_label` +6
-- `label_dangling` +2
+- `isolated_pin_label` -5  (fewer — the deleted symbol took its own pins with it)
+- `label_dangling` +5
 - `no_connect_dangling` +2
+- `pin_not_connected` +1
 - `pin_not_driven` -2  (fewer — the deleted symbol took its own pins with it)
 - `unconnected_wire_endpoint` +22
 
@@ -129,7 +130,7 @@ Full schematic PDF: **page 11**, *NMR TX (B): AD9834 DDS, reconstruction filter,
 | **D802** | SS54 | SMA_L4.4-W2.8-LS5.4-R-RD | C22452 | the output clamp diode to GND | NMR TX sheet, power-stage output node, below D801 |
 | **R813** | 4.7 1W | R_2512_6332Metric | C2999606 | the output isolation resistor | NMR TX sheet, between the clamp node and C818 / the TX SMA |
 
-Expected ERC items: **7 new** (standalone ERC on the sheet: 30 on the full sheet, 37 on the gapped
+Expected ERC items: **7 new** (standalone ERC on the sheet: 31 on the full sheet, 38 on the gapped
 copy, `--severity-all`) —
 
 - `pin_not_connected` +1
@@ -140,11 +141,11 @@ they disappear when the parts are placed back. Any *other* ERC item is the stude
 
 ### Section C — `student/b4_switching_gapped.kicad_sch`
 
-Full schematic PDF: **page 6**, *B4: 4 relays (MOSFET drive) + 2 isolated 5-24 V inputs* (`docs/schematic-full.pdf`).
+Full schematic PDF: **page 6**, *B4: 4 mains-capable relays (MOSFET drive) + 2 isolated 5-24 V inputs* (`docs/schematic-full.pdf`).
 
 | Ref | Value | Footprint | LCSC | Item | Where on the full PDF |
 |---|---|---|---|---|---|
-| **K401** | HK4100F-DC5V-SHG | RELAY-TH_HK4100F-DC5V-SHG | C12072 | one complete relay channel (relay, coil-on LED, 2.2 k LED resistor) | B4 sheet, relay channel 1 (leftmost of the four) |
+| **K401** | JQC-3FF/005-1ZS | Relay_SPDT_Hongfa_JQC-3FF_0XX-1Z | C9221 | one complete relay channel (relay, coil-on LED, 2.2 k LED resistor) | B4 sheet, relay channel 1 (leftmost of the four) |
 | **D411** | YELLOW | LED0603-RD-YELLOW | C965802 | 〃 | 〃 |
 | **R421** | 2.2k | R_0603_1608Metric | C4190 | 〃 | 〃 |
 | **J401** | KF301-5.0-3P | CONN-TH_3P-P5.00_KF301-5.0-3P | C474882 | that channel's 3P screw terminal (NO / COM / NC) | B4 sheet, relay channel 1, at the board edge |
@@ -156,12 +157,12 @@ Full schematic PDF: **page 6**, *B4: 4 relays (MOSFET drive) + 2 isolated 5-24 V
 | **R451** | 100 | R_0603_1608Metric | C22775 | 〃 | 〃 |
 | **R461** | 1k | R_0603_1608Metric | C21190 | 〃 | 〃 |
 
-Expected ERC items: **33 new** (standalone ERC on the sheet: 15 on the full sheet, 48 on the gapped
+Expected ERC items: **32 new** (standalone ERC on the sheet: 15 on the full sheet, 47 on the gapped
 copy, `--severity-all`) —
 
 - `isolated_pin_label` +2
 - `label_dangling` +7
-- `unconnected_wire_endpoint` +24
+- `unconnected_wire_endpoint` +23
 
 These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
 they disappear when the parts are placed back. Any *other* ERC item is the student's own.
