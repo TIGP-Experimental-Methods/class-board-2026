@@ -23,7 +23,7 @@ About 15 minutes each, 26–30 Oct. Present and demonstrate your project, app, w
 1. **Who you are, what you built** — Project 1, Project 2, your section; what the instrument is, in one sentence.
 2. **Waveform out** — a sine on AO1, seen on the scope **and** on the instrument's own AI1 in the Scope tab.
 3. **Change it from the phone** — frequency or amplitude, live, from your app.
-4. **Alarm → relay → notification** — an input crosses a threshold, a relay clicks, the phone toasts (or your LINE / Telegram bot speaks).
+4. **Alarm → relay → notification** — an input crosses a threshold, a relay clicks, the phone toasts (or your LINE / Telegram bot speaks). Switch something low voltage here: the channels are built for mains (250 V AC, 5 A maximum, load fused), but mains work happens only with the instructor present and the lid on, never in class.
 5. **Your section** — its panel and one thing it does, with your measured number and what surprised you. If the live part fails, play your video. Nobody fails a demonstration because a cable fell out.
 6. **Your project websites and anything beyond the baseline** — the data logger, the bot, the PID block, the tool your lab needed. Show it if you have it. The class project wall is on the projector all week; your cards are how the others find your work afterwards.
 

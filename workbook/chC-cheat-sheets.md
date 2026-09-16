@@ -248,6 +248,7 @@ Your rule area is `ZONE_A`, `ZONE_B` or `ZONE_C` — the one for your section; n
 - [ ] pin 1 marked on the silkscreen for every IC and connector
 - [ ] ground pour joined (no islands)
 - [ ] Section C: isolation band ≥ 2.5 mm at the isolated inputs, no copper under it; high-current traces wide, no neck-downs
+- [ ] Section C: MAINS nets — 5 mm to everything on every layer, top layer only, no vias, tracks ≥ 3 mm, the rating text on the silkscreen
 - [ ] a silkscreen label on every connector
 - [ ] CI green
 

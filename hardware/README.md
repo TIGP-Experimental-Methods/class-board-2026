@@ -6,7 +6,8 @@ board and parallel to it**, joined by **three straight 2×20 pin headers** (2.54
 side, females on the panel's inner face, hand-soldered by the instructor).  The panel's outer face is the instrument's
 face: 17 SMA in a 3 × 6 grid, the TTL screw-terminal strip, the TX coil terminal, a Qwiic, the OLED and 3 LEDs, all
 vertical.  The main board's rear edge is the back: USB-C, the 5 V jack, the external 7–18 V input, the coil terminals
-and the relay and isolated-input terminals, every one taking its wire off the edge.
+and the relay and isolated-input terminals, every one taking its wire off the edge and recessed behind the housing's
+back wall.
 Specification: `10-Class-Board-Design-Brief.md` v0.6 as amended by the v0.7 re-spec
 `notes/2026-09-13-nmr-respec-proposal.md` and the circuit design `notes/2026-09-13-v07-nmr-circuits.md` (all three in
 the course repository, not here); build/verification contract: `prompt.md` (same place); working instructions for this
@@ -38,6 +39,12 @@ directory: [`AGENTS.md`](AGENTS.md).
   #48 and #49; `notes/2026-09-14-panel-rework-proposal.md` in the course repository).
 - **DIO1–8 and RELAY1–4 moved to a TCA9535 I²C expander** (D-40), which freed the 7 GPIO the NMR block needs and
   GPIO 4/6/7/15 for the expansion header.  All 4 relays, 8 DIO and 8 analog inputs are kept.
+- **The four relay channels are built to switch mains** (course decision #50): **Hongfa JQC-3FF/005-1ZS** (C9221,
+  10 A @ 277 V AC, 19 × 15.5 mm, 5 pins, coil 5 V / 70 Ω ≈ 71 mA) replaces the 3 A HK4100F; the contact nets are the
+  **`MAINS`** net class — 5 mm clearance to all other copper on every layer, F.Cu only, no vias, tracks ≥ 3 mm,
+  enforced by the DRC.  System rating **250 V AC, 5 A maximum per channel** (set by the copper), the load carrying its
+  own fuse of 5 A or less, the rating on the silkscreen per channel.  The AO3400A drivers and the flyback diodes are
+  unchanged.  In the housing the rear terminals are recessed behind the back wall.
 
 ## Status
 
@@ -77,7 +84,7 @@ directory: [`AGENTS.md`](AGENTS.md).
 | 1xx | B1 analog inputs (ADS8688 and the eight input networks) — section A |
 | 2xx | B2 power entry and rails — section C (instructor-owned within C) |
 | 3xx | B3 analog outputs (DAC8563, OPA2192) — section B |
-| 4xx | B4 relays and isolated inputs — section C |
+| 4xx | B4 relays (mains-capable channels, `MAINS` net class) and isolated inputs — section C |
 | 5xx | B5 digital I/O, fast outputs, TRIG, TCXO option — section B |
 | 6xx | former OPT conditioning chain — **deleted in v0.7** |
 | **7xx** | **clocks and receiver**: Si5351A, crystal, 74HC74 divider, tank, limiter, LNA, blanking — section A |
