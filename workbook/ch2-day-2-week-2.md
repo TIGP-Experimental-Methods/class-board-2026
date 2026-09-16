@@ -46,6 +46,8 @@ Seven ideas, each pointed at a page of the schematic PDF. [Chapter A](chA-electr
 
 **Where parts come from, and who assembles them.** Every part carries an **LCSC** number (LCSC is JLCPCB's parts catalogue); `easyeda2kicad` fetches its symbol, footprint and 3D model into our project library. From the finished design KiCad exports the **Gerbers, the BOM and the CPL** (the manufacturing files, the parts list and the placement list); JLCPCB makes the boards and places and solders every part. Rule of thumb: a part without an LCSC number is a part nobody will solder.
 
+**Optional tools, for playing at home** (SETUP.md Step 10; the tutor installs them with you): **Konnect**, an MCP server (a plug that gives Claude hands inside KiCad) that lets the tutor read and edit a schematic, run ERC and DRC and drive the **Freerouting** autorouter; and the **LCSC suite**, a KiCad plugin that searches the JLCPCB parts library from inside KiCad — stock, price, Basic or Extended — and imports a part's symbol, footprint and 3D model. Play with them on your own gapped project, on your own branch; everything that enters the shared board is a track you can explain.
+
 ### A.5 Project 3a — Turning our ESP32 into a real piece of lab equipment
 We build the skeleton of the class board together; each of you adds one section — the missing parts of your section's schematic, then the copper of your zone (the outlined region of the board that is yours). The instructor's rails, connectors and dev-board socket are already there.
 

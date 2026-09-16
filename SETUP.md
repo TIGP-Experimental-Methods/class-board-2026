@@ -172,6 +172,34 @@ Start KiCad once and accept the default library tables when asked.
 
 ✔ KiCad starts and *Help → About KiCad* shows version 10.x (on Linux `kicad-cli version` also works; on Windows and macOS `kicad-cli` is not on the PATH, so do not use it as the check). If deferred, write *deferred* in the report.
 
+## Step 10 — KiCad extras (optional; from Workshop 2 onwards; needs Step 9)
+
+Purpose: three free add-ons that the class uses alongside KiCad — **Konnect**, an MCP server (a plug that gives the Claude Code agent hands inside a program) so the agent can read and edit the schematic and the board, run the checks and drive the autorouter; **Freerouting**, the free autorouter Konnect drives; and the **LCSC suite**, a KiCad plugin that searches the JLCPCB parts library from inside KiCad (stock, price, Basic or Extended) and imports a part's symbol, footprint and 3D model into the project library. None of them is required for the class board: the section work is done by hand, and the agent may edit only the student's own gapped project and the student's own zone on the student's own branch, never `main`. Offer this step; the student may defer it or take only part of it.
+
+**10a — Turn on the KiCad API.** KiCad → *Preferences → Preferences… → Plugins* → tick *Enable KiCad API* → OK. Restart KiCad. (Konnect and the LCSC suite talk to KiCad through this socket; nothing works without it.)
+
+**10b — Konnect.** Open https://github.com/mixelpixx/Konnect/releases in the browser and download the newest `konnect-pcm-*.zip` for the student's OS (v0.11.1 or later; it is verified against KiCad 10.0.5 or later — if *Help → About KiCad* shows an older 10.0.x, update KiCad first with the Step 9 command). KiCad → *Plugin and Content Manager → Install from File…* → choose the zip → restart KiCad. On macOS, if the download is blocked by Gatekeeper, remove the quarantine flag: `xattr -dr com.apple.quarantine ~/Documents/KiCad/10.0/3rdparty/plugins/com_github_mixelpixx_konnect`. Then, in the terminal, from the class-repository folder: `konnect init` (it installs its skills and agent guidance for Claude Code; if `konnect` is not on the PATH, run the binary by its full path below).
+
+Now write the MCP configuration so Claude Code finds the server. Create `.mcp.json` in the **class-repository root** (`class-board-2026/`; the file is git-ignored — it holds a machine-specific path and must never be committed):
+
+| OS | `command` value |
+|---|---|
+| Windows | `C:\Users\<user>\Documents\KiCad\10.0\3rdparty\plugins\com_github_mixelpixx_konnect\bin\konnect.exe` |
+| macOS | `/Users/<user>/Documents/KiCad/10.0/3rdparty/plugins/com_github_mixelpixx_konnect/bin/konnect` |
+| Linux | `/home/<user>/.local/share/kicad/10.0/3rdparty/plugins/com_github_mixelpixx_konnect/bin/konnect` |
+
+```json
+{ "mcpServers": { "konnect": { "command": "<the path from the table>" } } }
+```
+
+Check that the binary exists at that path before writing the file (the plugin folder name is `com_github_mixelpixx_konnect`; if the install put it elsewhere, use the path the Plugin and Content Manager shows). Restart the Claude Code extension (or VS Code). ✔ A new Claude Code session in the class-repository folder lists the `konnect` MCP server, and with KiCad open on `hardware/student/<sheet>_gapped.kicad_pro` the prompt *"use Konnect to list the symbols in the open schematic"* returns the parts. If it fails, note it in the report and continue — Konnect is optional.
+
+**10c — Freerouting (optional, for Konnect's autorouter).** Freerouting is a Java program. Check `java -version` shows 21 or later; if not, ask, then install: Windows `winget install --id EclipseAdoptium.Temurin.21.JDK -e --source winget` · macOS `brew install --cask temurin@21` · Linux `sudo apt install openjdk-21-jre` or `sudo dnf install java-21-openjdk`. Download the newest `freerouting-*.jar` from https://github.com/freerouting/freerouting/releases into a `tools/freerouting/` folder **next to** the class repository (outside it). ✔ `java -jar <path>/freerouting-*.jar --help` prints the options; Konnect's `check_freerouting` tool reports the jar it found — if it does not find it, tell Konnect the path when it asks.
+
+**10d — The LCSC suite (KiCad 10 parts-library plugin).** From https://github.com/Hung-Chi970104/kicad-lcsc-suite : clone it into `tools/kicad-lcsc-suite/` next to the class repository and run its installer — Windows `.\install.ps1` in PowerShell, macOS/Linux `./install.sh` — which links the plugin into KiCad, creates a Python 3.12 virtual environment and installs its dependencies (PySide6, kicad-python, easyeda2kicad). Ask before running it; it needs Python 3.12 or later, which Step 2 installed. Restart KiCad. ✔ The plugin's button appears in the PCB editor's toolbar, a search for `OPA1656` shows stock and price, and an import lands the part in the project library. Two rules: a footprint imported this way is **checked against the datasheet** before it is used (the converter is not always right), and the class board's parts already have LCSC numbers — the plugin is for looking things up and for the student's own future boards.
+
+**10e — Report.** Add the three lines below to the final report. None of 10b–10d blocks the class: on any failure, write *not installed* and move on.
+
 ## Final report
 
 Print this block at the end, filled in. On a failure, stop at that step, fill in the lines completed so far, and put the exact command and error under *First failure*. The student e-mails the whole block to the instructor (s.p.bennetts@g.iams.sinica.edu.tw) if a failure could not be fixed.
@@ -188,6 +216,9 @@ Print this block at the end, filled in. On a failure, stop at that step, fill in
 - ✔/✘/skipped USB: <port> (or: no board yet)
 - ✔/✘ Cloudflare: Connect to Git lists GitHub account <username>
 - ✔/✘/deferred KiCad <version>
+- ✔/✘/not installed Konnect <version>; `.mcp.json` written (git-ignored)
+- ✔/✘/not installed Freerouting <version>; java <version>
+- ✔/✘/not installed LCSC suite
 
 **toolchain OK** — or — **First failure:** Step <n>: `<command>` → `<exact error>`
 ```

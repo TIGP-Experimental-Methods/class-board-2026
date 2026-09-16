@@ -40,3 +40,6 @@ host/uv.lock
 hardware/lib/class_board.3dshapes/*.step
 hardware/.netlist.xml
 hardware/scripts/__pycache__/
+
+# Claude Code MCP configuration (machine-specific path to the Konnect binary; SETUP.md Step 10)
+.mcp.json
