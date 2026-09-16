@@ -174,7 +174,7 @@ Start KiCad once and accept the default library tables when asked.
 
 ## Step 10 — KiCad extras (optional; from Workshop 2 onwards; needs Step 9)
 
-Purpose: three free add-ons that the class uses alongside KiCad — **Konnect**, an MCP server (a plug that gives the Claude Code agent hands inside a program) so the agent can read and edit the schematic and the board, run the checks and drive the autorouter; **Freerouting**, the free autorouter Konnect drives; and the **LCSC suite**, a KiCad plugin that searches the JLCPCB parts library from inside KiCad (stock, price, Basic or Extended) and imports a part's symbol, footprint and 3D model into the project library. None of them is required for the class board: the section work is done by hand, and the agent may edit only the student's own gapped project and the student's own zone on the student's own branch, never `main`. Offer this step; the student may defer it or take only part of it.
+Purpose: five free add-ons that the class uses alongside KiCad — **Konnect**, an MCP server (a plug that gives the Claude Code agent hands inside a program) so the agent can read and edit the schematic and the board, run the checks and drive the autorouter; **Freerouting**, the free autorouter Konnect drives; and the **LCSC suite**, a KiCad plugin that searches the JLCPCB parts library from inside KiCad (stock, price, Basic or Extended) and imports a part's symbol, footprint and 3D model into the project library; **KiCad Routing Tools**, a second, newer router; and **kicad-happy**, review skills for Claude Code. None of them is required for the class board: the section work is done by hand, and the agent may edit only the student's own gapped project and the student's own zone on the student's own branch, never `main`. Offer this step; the student may defer it or take only part of it.
 
 **10a — Turn on the KiCad API.** KiCad → *Preferences → Preferences… → Plugins* → tick *Enable KiCad API* → OK. Restart KiCad. (Konnect and the LCSC suite talk to KiCad through this socket; nothing works without it.)
 
@@ -198,7 +198,18 @@ Check that the binary exists at that path before writing the file (the plugin fo
 
 **10d — The LCSC suite (KiCad 10 parts-library plugin).** From https://github.com/Hung-Chi970104/kicad-lcsc-suite : clone it into `tools/kicad-lcsc-suite/` next to the class repository and run its installer — Windows `.\install.ps1` in PowerShell, macOS/Linux `./install.sh` — which links the plugin into KiCad, creates a Python 3.12 virtual environment and installs its dependencies (PySide6, kicad-python, easyeda2kicad). Ask before running it; it needs Python 3.12 or later, which Step 2 installed. Restart KiCad. ✔ The plugin's button appears in the PCB editor's toolbar, a search for `OPA1656` shows stock and price, and an import lands the part in the project library. Two rules: a footprint imported this way is **checked against the datasheet** before it is used (the converter is not always right), and the class board's parts already have LCSC numbers — the plugin is for looking things up and for the student's own future boards.
 
-**10e — Report.** Add the three lines below to the final report. None of 10b–10d blocks the class: on any failure, write *not installed* and move on.
+**10e — KiCad Routing Tools (the second router).** A KiCad 9/10 plugin with a Rust A* autorouter — differential pairs, length matching, BGA/QFN fan-out, a placement optimiser and ground-return via placement — the things Freerouting does not do; MIT. KiCad → *Plugin and Content Manager* → search *KiCad Routing Tools* → *Install*; if it is not listed yet, download the release zip (`KiCadRoutingTools-*.zip`) from https://github.com/drandyhaas/KiCadRoutingTools/releases and use *Install from File…*. On first start it offers to install `scipy` and `shapely` into KiCad's own Python — ask, then accept. Restart KiCad. ✔ The plugin's buttons appear in the PCB editor's toolbar and *Plan routing* opens on `hardware/class-board.kicad_pcb`. Nothing is routed on the class board with it unless the student chooses to, inside their own zone, on their own branch.
+
+**10f — kicad-happy (the review layer, in Claude Code).** Eleven Claude Code skills that read schematics, PCBs and Gerbers, run an EMC pre-check and a design review, read datasheets and look parts up (LCSC and JLCPCB included); pure Python 3.10+, no running KiCad needed; MIT. The student types in the Claude Code chat, one per line:
+
+```
+/plugin marketplace add aklofas/kicad-happy
+/plugin install kicad-happy@kicad-happy
+```
+
+✔ `/kicad` (or asking *"review the schematic hardware/student/<sheet>_gapped.kicad_sch"*) returns a review. This is the Workshop 1 habit applied to copper: a fresh reviewer that did not draw the board. Its findings are suggestions to check, not orders — read each one against the section page.
+
+**10g — Report.** Add the five lines below to the final report. None of 10b–10f blocks the class: on any failure, write *not installed* and move on.
 
 ## Final report
 
@@ -219,6 +230,8 @@ Print this block at the end, filled in. On a failure, stop at that step, fill in
 - ✔/✘/not installed Konnect <version>; `.mcp.json` written (git-ignored)
 - ✔/✘/not installed Freerouting <version>; java <version>
 - ✔/✘/not installed LCSC suite
+- ✔/✘/not installed KiCad Routing Tools <version>
+- ✔/✘/not installed kicad-happy
 
 **toolchain OK** — or — **First failure:** Step <n>: `<command>` → `<exact error>`
 ```
