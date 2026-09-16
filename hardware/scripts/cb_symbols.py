@@ -886,7 +886,7 @@ def build_library():
     add(box_symbol("QWIIC_SM04B-SRSS", "J", "Qwiic", FP + "CONN-SMD_4P-P1.00_XY-SM04B-SRSS-TB", "JST-SH 1.0 mm 4-pin horizontal (Qwiic: 1=GND 2=3V3 3=SDA 4=SCL; 5,6 = shell)",
         right=[("1", "GND", "power_in"), ("2", "3V3", "power_in"), ("3", "SDA", "bidirectional"), ("4", "SCL", "bidirectional"), ("5", "SHELL", "passive"), ("6", "SHELL", "passive")],
         fields=f("C51940130", "Extended", "XY-SM04B-SRSS-TB", "XYECONN", DS["QWIIC"]), width=10.16))
-    add(box_symbol("HDR_1x4_FEMALE", "J", "OLED 1x4 socket, right-angle", "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Horizontal", "1x4 2.54 mm female header, right-angle, so the 0.96in OLED module lies flat on the panel (GND VCC SCL SDA)",
+    add(box_symbol("HDR_1x4_FEMALE", "J", "OLED 0.96in module on 1x4 socket 8.5 mm", "class_board:OLED-0.96in-4P-module-socket", "0.96in I2C OLED module (GND VCC SCL SDA) on a vertical 8.5 mm 1x4 female header (C2894927); the footprint carries the module outline and its four M2 holes",
         right=[("1", "GND", "power_in"), ("2", "VCC", "power_in"), ("3", "SCL", "bidirectional"), ("4", "SDA", "bidirectional")],
         fields=f("C2894927", "Extended", "PZ254-1-04-Z-8.5", "XFCN", "https://www.lcsc.com/product-detail/C2894927.html"), width=10.16))
 

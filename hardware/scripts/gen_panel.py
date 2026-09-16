@@ -92,11 +92,24 @@ SMA_LABELS = [["AO1", "AO2", "TRIG", "AUX", "TX", "FAST1"],
 SMA_REF0 = 10                                   # J10..J26 row-major; J27 would be the empty position
 
 OLED_REF = "J30"
-OLED_AT = (163.0, 38.0, 270)                    # right-angle 1x4 socket: pads run left from x 163 at y 38
-OLED_MODULE = (145.7, 11.0, 172.7, 38.0)        # where the 27 x 27 module lies (silk rectangle)
-OLED_HOLES = [(147.44, 13.5), (170.94, 13.5)]   # H5, H6: M2, 23.5 mm apart, 24.5 mm from the socket row
-TTL_REF, TTL_AT = "J31", (33.0, 88.0, 0)        # KF128-2.54-10P: TTL1..TTL8, GND, GND
-TX_REF, TX_AT = "J32", (120.0, 88.0, 0)         # KF128-5.0-2P: TX coil, below the TX SMA column
+# The OLED is ONE composite footprint, class_board:OLED-0.96in-4P-module-socket (user review 2026-09-17:
+# the module must be fixed, and nothing may foul the header solder tails): the vertical 8.5 mm 1x4 socket
+# that JLC places (anchor = centre of its pad row) plus the module's outline and its four M2 holes, so the
+# module sits on four 11 mm M2 stand-offs and cannot drift from its socket.  The module PCB
+# (27.3 x 27.8, panel x 148.8..176.1, y 9.0..36.8) overhangs the solder tails of J1 (x 165..171) with 8 mm
+# of air: the PCB hangs 11 mm above the panel, the tails stand 3 mm.  No pad or hole of the footprint lies
+# in J1's keep-out band (check_keepouts proves it); the right-hand M2 holes (x 174.2) clear J1's pads by
+# 3 mm.  There is no 27 x 28 mm patch on the 180 x 100 panel that is free of BOTH the SMA field and a
+# header band, so an overhang of the header tails is the price of the 20 mm SMA grid (Decision #22).
+# Pin row 2.2 mm below the module's top edge; pin 1 = GND on the LEFT as seen from the front (the common
+# GND-VCC-SCL-SDA module; a VCC-GND-SCL-SDA module must not be plugged in).
+OLED_AT = (162.45, 11.2, 0)
+# Screw terminals flush with the panel's bottom edge, wire entry off the edge (user, 2026-09-17: "the
+# terminal blocks should be at the edge of the front panel allowing the wires to enter from the sides").
+# Both KF128 footprints draw their wire openings on the +y side, so rotation 0 faces the bottom edge
+# (y = 100); the body silk stops 0.3 mm short of the edge.
+TTL_REF, TTL_AT = "J31", (33.0, 96.2, 0)        # KF128-2.54-10P: TTL1..TTL8, GND, GND (silk to y 99.6)
+TX_REF, TX_AT = "J32", (120.0, 94.4, 0)         # KF128-5.0-2P: TX coil, below the TX SMA column (silk to y 99.7)
 QWIIC_REF, QWIIC_AT = "J33", (150.0, 88.0, 0)   # vertical JST-SH
 LED_X = [148.0, 155.0, 162.0]                   # PWR, WIFI, ACT
 LED_Y, RES_Y = 50.0, 57.0
@@ -142,7 +155,7 @@ def load_footprints(needed=()):
     """footprints keyed by their full library id ("nickname:name").
 
     fp_parse.load_library only reads lib/class_board.pretty; the panel also uses KiCad standard
-    footprints (the 2x20 socket, the right-angle 1x4 socket, the 0603 resistor, the M2 hole), which
+    footprints (the 2x20 socket, the 0603 resistor), which
     come from the global footprint library table and are read here straight from the KiCad
     installation.  Each footprint remembers the nickname it must be written to the board with.
     """
@@ -261,7 +274,7 @@ def print_mating_table(lib):
 
 # ================================================================== schematic
 class PanelSheet(Sheet):
-    """Sheet that lets one instance override its symbol's footprint (H5/H6 are M2, not M3)."""
+    """Sheet that lets one instance override its symbol's footprint (kept for one-off overrides)."""
 
     def inst_sexp(self, i, project_name, sheet_path):
         out = Sheet.inst_sexp(self, i, project_name, sheet_path)
@@ -282,7 +295,7 @@ def build_sheet():
     sh.text("With that mirror, panel pad k mates main-board pin k on all three headers (the KiCad PinSocket footprint already carries the mating mirror). gen_panel.py proves it from the pad coordinates before the board is written.", 14, 25, 1.4)
     sh.text("So the analog header J6 (main x = 12) is panel J1 at panel x = 168, the digital header J7 stays at x = 90, and the power header J8 (main x = 168) is panel J3 at panel x = 12.", 14, 29, 1.4)
     sh.text("Pins marked spare are not connected on the main board and are left unconnected here. SPARE (the 18th SMA position is empty; the fitted SPARE SMA) has its shield on AGND and its centre pin on TP1 only.", 14, 33, 1.4)
-    sh.text("H5 / H6 are M2 (2.2 mm) holes for the OLED module; the shared library only has the M3 symbol, so their footprint is overridden to MountingHole:MountingHole_2.2mm_M2.", 14, 37, 1.4)
+    sh.text("J30 is one footprint: the vertical 8.5 mm 1x4 socket (JLC C2894927) plus the OLED module's outline and its four M2 (2.2 mm) holes. The module lies flat on four 11 mm M2 stand-offs; measure the real module's hole spacing (23.5 x 23.8 assumed) before the order.", 14, 37, 1.4)
     sh.text("AO1/AO2: +-10 V, 49.9 ohm back-terminated. AI1..AI8: +-10 V, 1 kohm series on the main board. TRIG: 5 V into open circuit, about 2.4 V into 50 ohm. FAST1/FAST2 = the main-board nets FASTTTL1 / FASTTTL2.", 14, 41, 1.4)
 
     # ---- the three link headers ----------------------------------------------------------
@@ -344,7 +357,7 @@ def build_sheet():
     c.pwr_pin(O, "2", "+3V3", 12.7)
     c.glabel_pin(O, "3", "I2C_SCL", 7.62)
     c.glabel_pin(O, "4", "I2C_SDA", 7.62)
-    sh.text("0.96 in I2C OLED (0x3C) on a right-angle socket: the module lies flat, held by H5/H6 (M2)", 278, 355, 1.3)
+    sh.text("0.96 in I2C OLED (0x3C) on an 8.5 mm vertical socket: the module lies flat on four M2 stand-offs (holes in the footprint)", 278, 355, 1.3)
 
     # ---- LEDs ----------------------------------------------------------------------------
     sh.text("PWR is +3V3 from the link (1 kohm -> about 1 mA); WIFI / ACT come from GPIO43 / GPIO44 through JP1 / JP2 on the main board.", 355, 340, 1.3)
@@ -380,12 +393,7 @@ def build_sheet():
         Hh = c.place("H%d" % (i + 1), "MountingHole", 200 + 25 * i, 405, 0)
         for pin in Hh.pins():
             c.nc_pin(Hh, pin)
-    for i in range(2):
-        Hh = c.place("H%d" % (i + 5), "MountingHole", 300 + 25 * i, 405, 0, value="M2")
-        Hh.footprint_override = "MountingHole:MountingHole_2.2mm_M2"
-        for pin in Hh.pins():
-            c.nc_pin(Hh, pin)
-    sh.text("H1-H4: M3, same pattern as the main board (stand-offs).   H5/H6: M2 for the OLED module.", 200, 398, 1.2)
+    sh.text("H1-H4: M3, same pattern as the main board (stand-offs). The OLED module's M2 holes are part of J30.", 200, 398, 1.2)
     for i in range(2):
         F = c.place("FID%d" % (i + 1), "Fiducial", 360 + 20 * i, 405, 0)
         for pin in F.pins():
@@ -406,7 +414,7 @@ def write_schematic():
     pro["text_variables"] = {"REV": "B", "BOARD": "TIGP class board 2026 front panel"}
     json.dump(pro, open(os.path.join(FP_DIR, PROJECT + ".kicad_pro"), "w", encoding="utf-8", newline="\n"), indent=2)
     # Library tables: our own library is a project path; the KiCad standard footprint libraries
-    # (the 2x20 socket, the right-angle 1x4 socket, the M2 hole) come from the global table.
+    # (the 2x20 socket, the 0603 resistor) come from the global table.
     for name, uri, kind in (("sym-lib-table", "${KIPRJMOD}/../lib/class_board.kicad_sym", "sym"),
                             ("fp-lib-table", "${KIPRJMOD}/../lib/class_board.pretty", "fp")):
         with open(os.path.join(FP_DIR, name), "w", encoding="utf-8", newline="\n") as fh:
@@ -445,6 +453,11 @@ class PanelBoard(Board):
         nick = getattr(f.fp, "libnick", "class_board")
         if nick != "class_board":
             out = out.replace('"class_board:%s"' % f.fp.name, '"%s:%s"' % (nick, f.fp.name))
+        # The class_board footprints name their 3D models "${KIPRJMOD}/lib/class_board.3dshapes/..." - right
+        # for the main board, whose project file sits next to lib/, but the panel project lives in
+        # front-panel/, one level down, so KiCad's 3D viewer showed bare pads for every SMA, terminal,
+        # Qwiic and LED (user, 2026-09-17).  Rewrite the path to the shared library.
+        out = out.replace('"${KIPRJMOD}/lib/class_board.3dshapes/', '"${KIPRJMOD}/../lib/class_board.3dshapes/')
         return out
 
 
@@ -471,8 +484,6 @@ def placement(lib):
     put("TP1", TP1_AT[0], TP1_AT[1])
     for i, (x, y) in enumerate(MAIN_HOLES):
         put("H%d" % (i + 1), *to_panel(x, y))
-    for i, (x, y) in enumerate(OLED_HOLES):
-        put("H%d" % (i + 5), x, y)
     for i, (x, y) in enumerate(FID_AT):
         put("FID%d" % (i + 1), x, y)
     return P
@@ -506,16 +517,7 @@ def silkscreen(board, lib):
     for pref, mref, _pins, what in LINKS:
         cx, _cy = to_panel(*MAIN_HEADERS[mref])
         t("%s = %s" % (pref, mref), cx, 79.0, size=1.0, thickness=0.15)
-    # OLED block
-    ox0, oy0, ox1, oy1 = OLED_MODULE
-    board.gr_line(ox0, oy0, ox1, oy0, "F.SilkS", 0.15)
-    board.gr_line(ox0, oy0, ox0, oy1, "F.SilkS", 0.15)
-    board.gr_line(ox1, oy0, ox1, oy1, "F.SilkS", 0.15)
-    t("OLED 0.96 in (flat, M2)", (ox0 + ox1) / 2, oy0 - 1.6, size=1.0, thickness=0.15)
-    fp = lib["%s:%s" % ("Connector_PinSocket_2.54mm", "PinSocket_1x04_P2.54mm_Horizontal")]
-    for num, lab in (("1", "GND"), ("2", "VCC"), ("3", "SCL"), ("4", "SDA")):
-        pad = next(p for p in fp.pads if p.number == num)
-        t(lab, OLED_AT[0] - pad.y, OLED_AT[1] + 3.6, size=1.0, thickness=0.15, rot=90)
+    # OLED: outline, M2 holes and pin labels are part of the J30 footprint
     # LEDs
     for x, lab in zip(LED_X, ("PWR", "WIFI", "ACT")):
         t(lab, x, 53.4, size=1.0, thickness=0.15)
@@ -525,7 +527,7 @@ def silkscreen(board, lib):
     for num, lab in zip([str(i) for i in range(1, 11)], labels):
         pad = next(p for p in fp.pads if p.number == num)
         t(lab, TTL_AT[0] + pad.x, TTL_AT[1] - 5.2, size=1.0, thickness=0.15, rot=90)
-    t("TTL OUT 1..8  (5 V)", TTL_AT[0], TTL_AT[1] + 5.6, size=1.0, thickness=0.15)
+    t("TTL OUT 1..8  (5 V)", TTL_AT[0], TTL_AT[1] - 9.4, size=1.0, thickness=0.15)     # above the pin labels; the strip is on the edge
     t("TX COIL", TX_AT[0], TX_AT[1] - 7.2, size=1.0, thickness=0.15)
     t("QWIIC", QWIIC_AT[0], QWIIC_AT[1] - 4.4, size=1.0, thickness=0.15)
     t("TP1 SPARE", TP1_AT[0], TP1_AT[1] - 2.6, size=1.0, thickness=0.15)
@@ -570,8 +572,12 @@ def build(route=True):
     gen_pcb.W, gen_pcb.H = W, H
     gen_pcb.place_reference_texts(board)
     for f in board.footprints:
-        if f.ref in ("H5", "H6"):
-            f.ref_pos = (0, 3.0, 0)       # above the hole is the OLED module outline
+        if f.ref == TTL_REF:
+            f.ref_pos = (13.0, -9.4, 0)     # beside the "TTL OUT" caption; the strip body is on the edge
+        elif f.ref == TX_REF:
+            f.ref_pos = (7.0, -7.2, 0)      # beside the "TX COIL" caption
+        elif f.ref == OLED_REF:
+            f.ref_pos = (7.6, -3.3, 0)      # right of the pin labels, above the module's top edge
     if route:
         import router
         agnd = [(0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)]
