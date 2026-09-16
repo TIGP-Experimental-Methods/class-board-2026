@@ -238,8 +238,10 @@ class Board:
     def footprint_sexp(self, f, project_name):
         fp = f.fp
         node = parse(fp.text)      # fresh tree
+        # a board may mix libraries: a footprint is written with the nickname it was loaded from
+        fid = "%s:%s" % (getattr(fp, "libnick", "class_board"), fp.name)
         out = []
-        out.append('\t(footprint %s' % q("class_board:" + fp.name))
+        out.append('\t(footprint %s' % q(fid))
         out.append('\t\t(layer %s)' % q("B.Cu" if f.back else "F.Cu"))
         back = f.back
         FL = (lambda l: flip_layer(l)) if back else (lambda l: l)
@@ -254,7 +256,7 @@ class Board:
         comp = f.comp
         # properties: Reference/Value visible on silk/fab; others hidden
         props = [("Reference", f.ref, FL("F.SilkS"), False), ("Value", comp.get("value", ""), FL("F.Fab"), False),
-                 ("Footprint", "class_board:" + fp.name, FL("F.Fab"), True), ("Datasheet", comp.get("datasheet", ""), FL("F.Fab"), True),
+                 ("Footprint", fid, FL("F.Fab"), True), ("Datasheet", comp.get("datasheet", ""), FL("F.Fab"), True),
                  ("Description", comp.get("description", ""), FL("F.Fab"), True)]
         for k, v in comp.get("fields", {}).items():
             props.append((k, v, FL("F.Fab"), True))

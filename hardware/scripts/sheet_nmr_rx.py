@@ -447,11 +447,21 @@ _EST = {"C0603": (3.30, 1.95), "R0603": (3.30, 1.85), "L0603": (3.35, 1.80), "C0
 
 
 def _load_lib():
+    """the project library plus every KiCad standard footprint this sheet asks for.
+
+    Since Decision #47 the chip resistors and capacitors sit on KiCad's own
+    Resistor_SMD / Capacitor_SMD lands, so the packing below has to measure those too.
+    """
     try:
-        from fp_parse import load_library
-        return load_library(os.path.join(HW, "lib", "class_board.pretty"))
+        from fp_parse import load_mixed
+        ids = sorted(set(s.footprint for s in SYMBOLS.values() if s.footprint))
+        return load_mixed(os.path.join(HW, "lib", "class_board.pretty"), ids)
     except Exception:                                    # noqa: BLE001
-        return {}
+        try:
+            from fp_parse import load_library
+            return load_library(os.path.join(HW, "lib", "class_board.pretty"))
+        except Exception:                                # noqa: BLE001
+            return {}
 
 
 _LIB = _load_lib()
@@ -487,7 +497,30 @@ def _extent(ref, rot):
 def _default_rot(ref):
     """0603 passives stand on end (narrow); everything else keeps its natural orientation"""
     name = SYMBOLS[PART[ref][0]].footprint.split(":")[-1]
-    return 90 if name in ("R0603", "C0603", "L0603") else 0
+    return 90 if name in ("R0603", "C0603", "L0603", "R_0603_1608Metric", "C_0603_1608Metric",
+                          "L_0603_1608Metric") else 0
+
+
+# The three panel-link headers (J6 x 12, J7 x 90, J8 x 168) stand on the BOTTOM of the board and
+# their pins go through it, so a top-side pad may not sit in the band they sweep (y 24.6 .. 75.4).
+# gen_pcb.LINK_HEADERS is the single source of those positions; this list only has to be wide
+# enough (header pad column at centre +- 1.27, plus the pad and the clearance).
+_LINK_BANDS = [(12.0 - 3.4, 12.0 + 3.4), (90.0 - 3.4, 90.0 + 3.4), (168.0 - 3.4, 168.0 + 3.4)]
+_LINK_BAND_Y = (24.6, 75.4)
+
+
+def _step_over_bands(x, w, y):
+    """move x right until the span [x, x+w] clears every link-header band on this row"""
+    if not (_LINK_BAND_Y[0] <= y <= _LINK_BAND_Y[1]):
+        return x
+    moved = True
+    while moved:
+        moved = False
+        for (b0, b1) in _LINK_BANDS:
+            if x < b1 and x + w > b0:
+                x = b1
+                moved = True
+    return x
 
 
 def _row(P, y, x0, x1, refs, gap=0.5, rots=None):
@@ -498,6 +531,7 @@ def _row(P, y, x0, x1, refs, gap=0.5, rots=None):
         rot = (rots or {}).get(ref, _default_rot(ref))
         e = _extent(ref, rot)
         w = e[2] - e[0]
+        x = _step_over_bands(x, w, y)
         if x + w > x1 + 1e-6:
             left = refs[k:]
             break
@@ -520,8 +554,8 @@ def _placement():
     P = {}
     # ---- B1 pocket (x 84-102.5, y 71-86.8): limiter, tank, LNA, gain jumper, LNA decoupling ----
     # ZONE_A stops at x = 100, so the pocket rows end at 99.5 (copper stays inside the owner area).
-    _row(P, 73.5, 84.5, 99.5, ["U703", "R712", "R713", "R714"], rots={"U703": 90})
-    _row(P, 78.7, 84.5, 99.5, ["JP702", "R710", "R711", "C722", "C723"])
+    _row(P, 73.5, 77.5, 99.5, ["U703", "R712", "R713", "R714"], rots={"U703": 90})
+    _row(P, 78.7, 77.5, 99.5, ["JP702", "R710", "R711", "C722", "C723"])
     # crossed diodes last in the row = nearest the link pins 37/39 at x 91.6 / 94.1
     _row(P, 83.5, 84.5, 99.5, ["C710", "C711", "C712", "D703", "D704"],
          rots={"D703": 90, "D704": 90})
@@ -538,8 +572,10 @@ def _placement():
           "R706", "C707", "FB901", "C905", "C906", "C907", "C908", "C916", "C917", "C918", "C919",
           "C724", "C725", "C726", "C727", "C720", "R721", "R722", "C721", "R723", "R724",
           "JP701", "JP703", "TP701", "TP702"]
-    _fill(P, [(59.4, 14.0, 41.0), (63.2, 7.2, 41.0), (67.0, 7.2, 41.0),
-              (71.5, 17.0, 41.0), (75.3, 17.0, 41.0)], p1)
+    # the rows step around the dev-board socket J1, which sits at y 66.7 from x 33.2 (v0.7b),
+    # and around the bottom-side link header J6 at x 12 (see _step_over_bands)
+    _fill(P, [(59.4, 7.2, 41.0), (63.2, 7.2, 41.0), (69.8, 25.1, 41.0),
+              (73.0, 25.1, 41.0), (76.6, 25.1, 41.0)], p1)
     # passive band P2 (below the ICs) — the whole mixer / IF network
     p2 = ["R901", "R902", "R903", "R904", "R905", "C901", "C902", "C903", "C904",
           "R906", "R907", "R908", "R909", "D905", "D906", "D907", "D908",

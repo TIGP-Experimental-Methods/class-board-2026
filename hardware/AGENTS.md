@@ -15,6 +15,10 @@ tools).  This file only says how this directory is built and where the validated
    master and `scripts/gen_pcb.py` is only a placement reference — running it would delete every track.  The
    schematic, by contrast, may be regenerated freely: UUIDs are deterministic (D-47), so identical inputs give a
    byte-identical file and every change diffs.
+   *The one exception, taken once:* on **2026-09-16** the board still had **0 tracks and 0 vias**, so there was no
+   hand work to lose, and Decision #55 had it regenerated from the current netlist (bottom-side panel headers, the
+   new relays, the reworked rear edge) — see `docs/design-decisions.md` D-52 and the backup at
+   `release/pre-rework-20260913/`.  Rule 1 applies again from that point.
 2. **A new circuit block is a new `scripts/sheet_*.py` module**, not an edit to the 1300-line `gen_sch.py`.  Each
    module exposes `build(root_uuid) -> Sheet` (picked up by `gen_sch.main()`) and a module-level `PLACEMENT` dict
    `{ref: (x, y, rot)}` (picked up by `gen_pcb.placement()` through `sheet_modules()`).  A module that fails to

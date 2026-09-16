@@ -271,7 +271,20 @@ Layout findings are appended during placement/routing (§9).
 
 ## 9. Layout review log
 
-(still the placeholder — **routing has not started**.  In v0.7 the main board is routed **by hand**: students route
+**2026-09-16 — placement reworked and regenerated (D-52, Decision #55).**  398 footprints, 0 tracks, 0 vias.
+The three panel-link headers went on the bottom (J6/J7/J8 at the anchors `gen_panel.py` mated), the dev board moved
+10.8 mm left and 4 mm forward to clear J7 and the relay COM pins, section B2 was re-floorplanned around the J6 band,
+the four mains relays went into a row at 21.6 / 19.6 / 19.6 mm pitch with their 3P terminals directly behind them
+and every rear-edge screw terminal rotated 180° (wire entry from the edge), and section C was split around the relay
+row with J903 moved to the right edge.  `ZONE_C` grew to the board's right edge along the rear strip (`ZONE_B` lost
+the empty 10 × 35 mm rear-right corner).  DRC: **0 errors**, 499 unconnected items, no courtyard and no
+`pth_inside_courtyard` errors; `place_check.py` 0 collisions; the generator is deterministic (run twice, byte-identical).
+Renders: `docs/board-top-v07b-placement.png`, `docs/board-bottom-v07b-headers.png`, `docs/board-zones-v07b.png`.
+Routing has still **not** started.
+
+| F-22 | **Medium** | +VEXT TVS vs relay 1 | D931 was 4.63 mm from relay 1's NC pin where `mains_to_other` asks 5.00 mm: the pocket between the isolated inputs and relay 1 is 12 mm wide, and the 5 mm MAINS envelope on one side plus the 2.5 mm ISO_IN band on the other left ~0.5 mm too little for the P-FET, the TVS and the bulk capacitor in one column | **Fixed** (D-52, second pass): the side strip beside the bulk capacitor was re-stacked — C940 1.9 mm left, D931 to (68.85, 29.0, rot 90) where the envelope opens out, R940/R941/C941 to the ends of the same strip.  DRC 0 errors | `kicad-cli pcb drc --severity-all --refill-zones` |
+
+(the rest is still the placeholder — **routing has not started**.  In v0.7 the main board is routed **by hand**: students route
 their own section in Workshop 2 and the instructor routes the base, the rails and SPI, so this log is filled in from
 the finished hand layout, not from `router.py`.  It must record: distances module↔ADC and LO↔LNA, the TX/polarizer
 return loop areas, corner quality, the via list, the pour fills and the final DRC result.)

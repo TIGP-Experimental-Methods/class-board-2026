@@ -757,3 +757,112 @@ like the panel-link headers, comes from a KiCad standard library.
 
 **Open for the instructor** (note §5): 5 A on 1 oz copper as above, or order the main board in **2 oz outer copper**
 and label the channels 10 A (a JLC price step)?  And: fit the optional slot or not?
+
+## D-52 — PCB regenerated 2026-09-16 (no routing existed); placement reworked; hand-edited again from now on
+
+**Decision #55 (user, 2026-09-16): "I haven't touched the main board. Why don't you install any tools you need,
+update it and take it as far as you can. I want to see it before you route."**  The board file carried the
+2026-09-13 placement, **0 tracks and 0 vias**, and a netlist that had moved on by 8 parts, so rule 1 ("never
+regenerate the PCB") did not yet bite: there was no hand work to lose.  `scripts/gen_pcb.py` was therefore taught
+to build the board from today's netlist and re-run, and the 2026-09-13 file is kept at
+`release/pre-rework-20260913/class-board.kicad_pcb`.  **From this point rule 1 applies again**: the next change to
+the copper is the instructor's, by hand, in the GUI.
+
+**What the generator learned**
+
+* Footprints now come from the project library **and** from KiCad's own libraries.  `fp_parse.load_mixed()`
+  resolves a netlist's `nickname:name` ids against `lib/class_board.pretty` first and then
+  `share/kicad/footprints/<nickname>.pretty`, and every footprint remembers the nickname it came from;
+  `pcb_model.Board.footprint_sexp` writes that nickname instead of the hard-coded `class_board:`.  This is what
+  lets the board carry `Resistor_SMD:R_0603_1608Metric` (D-47/#47), `Relay_THT:Relay_SPDT_Hongfa_JQC-3FF_0XX-1Z`
+  (D-51/#50) and `Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical` (#45/#48).
+* Deterministic UUIDs are unchanged (D-47): footprint uuids still come from `uid_for("fp:" + ref)`, so a later
+  *Update PCB from Schematic* in the GUI still matches symbol to footprint.  The generator was run twice and the
+  two files are byte-identical.
+* `placement()` may return a fourth element, the side, so a footprint can be placed on **B.Cu**.
+* Stale entries removed: **J3** (the second Qwiic port), **J501–J507** (the TTL/FAST terminals), **J802**, and the
+  old front-edge right-angle link **J6**.  `term_y_of()` went with them.
+
+**The three panel-link headers (the change everything else follows from)**
+
+J6/J7/J8 are `PinHeader_2x20_P2.54mm_Vertical` on **B.Cu at rotation 180**, anchored at **(13.27, 25.87)**,
+**(91.27, 25.87)** and **(169.27, 25.87)** — the anchors `link_header_at()` derives from the pad-block centres
+(12, 50) (90, 50) (168, 50) that `gen_panel.py` already mated the front panel to.  Their pins go through the board,
+so each sweeps a keep-out band about 5.6 mm wide and 48 mm long (y 25.9 … 74.1) in which **no top-side pad may
+stand**.  Those three bands cut straight through the board and forced:
+
+* the **dev board 10.8 mm to the left and 4 mm forward** (`SOCK_X` 70 → 59.2, `SOCK_Y` 50 → 54).  A 2.54 mm pin row
+  can never be more than 1.27 mm from a 2.54 mm header column, so the socket cannot cross J7 at all — it has to end
+  before it (last pin x = 85.87, header column x = 88.73).  The forward move is the relay COM story below.
+  R1, R2, JP1, JP2, C107, FID3 and the I2C pull-ups R3/R4 followed;
+* **section B2 (power) re-floorplanned** around the J6 band: the two ±12 V modules now stand on end (rotation 90,
+  one pin column each) at x 16.6 and 24.3, the AMS1117 moved into the pocket at (20.4, 17.0), and the filters,
+  LED chains and test points are re-flowed into the 22 mm strip right of the band and the 8 mm strip left of it;
+* the **TCA9535 expander** (U505) out from under the dev board — it was on J7 *and* outside ZONE_B, a standing
+  `owner_B` assertion failure — to (136, 68) with C507 and TP501–TP504 beside it;
+* the transmitter's right-hand column (FB802, C816, C814, R809–R813) off J8 to x 174.5, and U801 4 mm left;
+* `sheet_nmr_rx.py` rows that now **step over** a link band (`_step_over_bands`) and around the moved socket.
+
+**The rear edge (Decision #46, #50)**
+
+Every screw terminal is at **rotation 180** so the wire enters from the board edge.  *Assumption, stated because
+the footprint has no 3D model in the project library:* the KF301/KF128 lands draw their wire openings — the two
+filled arrow marks and the open side of the body outline — on the **+y** side of the footprint, so rotation 0 takes
+the wire from the board interior (what v0.7 did, which is what the user objected to) and rotation 180 takes it from
+the edge.  Terminal pad rows sit 4 mm in, which puts the body face on the board edge and keeps the MAINS pads 2.9 mm
+from it (rule `mains_edge`, 2 mm).
+
+The four relays are the 19 × 15.5 mm JQC-3FF at **rotation 90** — long axis along y, the **NO/NC contact pins at
+y 19.5, nearest the rear edge**, the coil pins at y 31.7 and the terminal directly behind each relay.  The part's
+**COM pin is at the coil end** (KiCad pad 11 at footprint (−2, 6)); that is the pinout, not a choice, so one of the
+three contacts unavoidably faces inward.  The coil-side parts — AO3400A, 1N4148W flyback, gate resistors, LED and
+its resistor — sit in the band at y 10.5 … 13.6 between the terminal and the contact pins, which is the only place
+on this board that is more than 5 mm from every contact pad.
+
+**Why the pitch is 21.6 / 19.6 / 19.6 mm and not the 22 mm of the note**
+
+Three hard constraints fix the row:
+1. 5 mm between the channels means **≥ 19.5 mm pitch** (relay k's NO pad and relay k+1's NC pad are 12 mm apart
+   inside the part, and the pads are 2.5 mm across);
+2. a relay's courtyard may not contain a link header's pad (KiCad's `pth_inside_courtyard` — and physically the
+   pin's soldered end is on the top side, under the relay body), which forbids an anchor between 73.4 and 94.6;
+3. the COM pin's 5 mm envelope reaches y 40, which is why the dev board moved forward and why B5's R501–R508 and
+   C501 moved to y 40.5 and the transmitter's C801/C802/C806 moved out of the way.
+
+The result is **K401 at x 73.35, K402 at 95.2, K403 at 114.8, K404 at 134.4** — one relay left of J7, three right
+of it, terminals J401–J404 at 79.35 / 101.2 / 120.8 / 140.4.
+
+**Section C is split around the relay row.**  The relay row needs 77 mm of the rear strip, so `sheet_c_switch`'s
+three columns no longer fit side by side at x 128–169: the **+VEXT input chain** (J901 and its P-FET, TVS and bulk
+capacitor) moved into the 12 mm pocket between the isolated inputs and relay 1, and the **H-bridge and polarizer**
+moved right into the strip the TTL terminals left free.  **J903 (the H-bridge coil terminal) is on the RIGHT edge**
+at (174.5, 18.5, 90) — the rear edge right of the relays holds only one more terminal before the M3 hole H2, and
+the wire still enters from outside the board, which is what #46 asks for.
+
+**Zone change (reported, per the brief).**  `ZONE_C` was extended from x 169 to x 179.5 along the rear strip and
+`ZONE_B` became the plain rectangle x 100–179.5, y 36–99.5.  The 10 × 35 mm rear-right corner was B's, was empty,
+and is where the polarizer column had to go; every NMR-transmitter part is at y ≥ 37.5 and therefore still inside
+ZONE_B.  ZONE_A and ZONE_BASE are untouched.
+
+**DRC rule fix.**  `class-board.kicad_dru` (and `rules/`) excluded pads of the same footprint from the MAINS rules
+with `A.memberOfFootprint(B)`, which is not a valid KiCad expression — `memberOfFootprint` takes a reference
+string — so the 5 mm rule was being applied between a relay's own coil and contact pins, which no layout can
+satisfy.  Eight per-part rules (`inside_K401` … `inside_J404`) at the **end** of the file restore the ordinary
+0.2 mm spacing inside those footprints; the note's intent is unchanged (the spacing inside the part is the
+manufacturer's 1.5 kV isolation).
+
+**The +VEXT input pocket, second pass.**  The first arrangement left one `mains_to_other` shortfall of 0.37 mm
+between **D931** (the +VEXT TVS) and relay 1's NC pin, because the pocket is 12 mm wide and the 5 mm MAINS envelope
+on its right plus the 2.5 mm ISO_IN band on its left leave about half a millimetre too little for the P-FET, the
+TVS and the bulk capacitor in one column.  Resolved by re-stacking the **side strip** between the bulk capacitor
+and relay 1 instead of moving the TVS off the rear strip (a TVS wants to be at the input, not 60 mm up the run):
+the bulk capacitor C940 shifted 1.9 mm left (its row now starts at x 57.3, still 0.55 mm clear of the opto-coupler
+U402) and **D931 took the middle of the strip at (68.85, 29.0, rot 90)** — y 29 is the one band where a 4.4 mm wide
+part clears the envelope around the contact pins, since the relay's NC pin is at y 19.5 and the envelope opens out
+above y 26.  The three small parts of the chain moved to the two ends of the same strip, where the envelope also
+opens out: **R940 (68.85, 11.0)**, **R941 (68.85, 13.4)** and **C941 (68.85, 34.4)**, all rotation 0.  Nothing else
+moved; the relay row, the link headers and the terminals are untouched.
+
+**Result.**  `kicad-cli pcb drc --severity-all --refill-zones`: **0 errors**, 499 unconnected items (nothing is
+routed), warnings 199 silk-over-copper + 147 silk-overlap + 126 isolated-copper + 20 text-height + 1 silk-edge.
+`place_check.py` reports 0 collisions, and the generator run twice gives a byte-identical file.

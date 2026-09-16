@@ -132,11 +132,53 @@ class Footprint:
 
 
 def load_library(pretty_dir):
+    """every footprint of one .pretty directory, keyed by its bare name.
+
+    Each footprint remembers the library nickname it must be written to a board with
+    (the directory name without ".pretty"), so a board that mixes libraries keeps the
+    right "nickname:name" in the footprint field.
+    """
+    nick = os.path.basename(os.path.normpath(pretty_dir))
+    if nick.endswith(".pretty"):
+        nick = nick[:-len(".pretty")]
     lib = {}
     for fn in os.listdir(pretty_dir):
         if fn.endswith(".kicad_mod"):
             fp = Footprint(os.path.join(pretty_dir, fn))
+            fp.libnick = nick
             lib[fp.name] = fp
+    return lib
+
+
+# where KiCad keeps its own footprint libraries (the global footprint library table)
+KICAD_FP_DIR = os.environ.get("KICAD_FP_DIR", "C:/Program Files/KiCad/10.0/share/kicad/footprints")
+
+
+def load_mixed(project_pretty, footprint_ids, kicad_fp_dir=None):
+    """footprints for a netlist that mixes the project library with KiCad's standard ones.
+
+    `footprint_ids` are the "nickname:name" strings the netlist asks for.  The project
+    library is read whole (the generators look parts up by bare name as well); every other
+    nickname is resolved to "<kicad_fp_dir>/<nickname>.pretty/<name>.kicad_mod".
+    The result is keyed by BOTH the full id and the bare name, so code that looks up
+    "R0603" and code that looks up "Resistor_SMD:R_0603_1608Metric" both work.
+    """
+    kicad_fp_dir = kicad_fp_dir or KICAD_FP_DIR
+    lib = {}
+    for name, fp in load_library(project_pretty).items():
+        lib[name] = fp
+        lib["%s:%s" % (fp.libnick, name)] = fp
+    for fid in sorted(set(footprint_ids)):
+        if fid in lib:
+            continue
+        nick, _, name = fid.partition(":")
+        path = os.path.join(kicad_fp_dir, nick + ".pretty", name + ".kicad_mod")
+        if not os.path.exists(path):
+            raise SystemExit("footprint %s is neither in %s nor in %s" % (fid, project_pretty, kicad_fp_dir))
+        fp = Footprint(path)
+        fp.libnick = nick
+        lib[fid] = fp
+        lib.setdefault(name, fp)
     return lib
 
 

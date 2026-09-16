@@ -98,3 +98,32 @@
 (rule "owner_A" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B1' || A.getField('Block') == 'OPT' || A.getField('Block') == 'NMR_RX' || A.getField('Block') == 'A')") (constraint assertion "A.enclosedByArea('ZONE_A')"))
 (rule "owner_B" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B3' || A.getField('Block') == 'B5' || A.getField('Block') == 'NMR_TX' || A.getField('Block') == 'B')") (constraint assertion "A.enclosedByArea('ZONE_B')"))
 (rule "owner_C" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B2' || A.getField('Block') == 'B4' || A.getField('Block') == 'C_SW' || A.getField('Block') == 'C')") (constraint assertion "A.enclosedByArea('ZONE_C')"))
+
+# ---- inside one part: the distance between a relay's own coil and contact pins, and between the
+#      three poles of one screw terminal, is set by the part, not by the layout.  These rules come
+#      last on purpose: KiCad applies the last rule that matches, so they lift the 5 mm / 2 mm MAINS
+#      clearances for pad pairs that belong to the same footprint (and only for those).
+(rule "inside_K401"
+	(condition "A.memberOfFootprint('K401') && B.memberOfFootprint('K401')")
+	(constraint clearance (min 0.2mm)))
+(rule "inside_K402"
+	(condition "A.memberOfFootprint('K402') && B.memberOfFootprint('K402')")
+	(constraint clearance (min 0.2mm)))
+(rule "inside_K403"
+	(condition "A.memberOfFootprint('K403') && B.memberOfFootprint('K403')")
+	(constraint clearance (min 0.2mm)))
+(rule "inside_K404"
+	(condition "A.memberOfFootprint('K404') && B.memberOfFootprint('K404')")
+	(constraint clearance (min 0.2mm)))
+(rule "inside_J401"
+	(condition "A.memberOfFootprint('J401') && B.memberOfFootprint('J401')")
+	(constraint clearance (min 0.2mm)))
+(rule "inside_J402"
+	(condition "A.memberOfFootprint('J402') && B.memberOfFootprint('J402')")
+	(constraint clearance (min 0.2mm)))
+(rule "inside_J403"
+	(condition "A.memberOfFootprint('J403') && B.memberOfFootprint('J403')")
+	(constraint clearance (min 0.2mm)))
+(rule "inside_J404"
+	(condition "A.memberOfFootprint('J404') && B.memberOfFootprint('J404')")
+	(constraint clearance (min 0.2mm)))
