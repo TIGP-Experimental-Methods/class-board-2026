@@ -8,6 +8,8 @@
 
 **The hardware model.** The microcontroller stays on the dev board; the **class board is a carrier** it plugs into: the analog front end done properly, isolation, buffers, robust connectors. One design, one order; **JLCPCB** (the factory that makes and assembles our boards) **assembles everything, SMD and through-hole**. You solder nothing. The dev board alone keeps running your app as the permanent fallback.
 
+**Two boards, one instrument.** The main board is **180 × 100 mm** and 4 layers. The **front panel** is a second board of the same size that sits **flat on the back of it and parallel to it**, joined by three 2×20 pin headers (and four M3 stand-offs) that the instructor solders by hand. The panel's outer face is the face of the instrument: **17 SMA connectors** in a 3 × 6 grid — AO1 AO2 TRIG AUX TX FAST1 / AI1 AI2 AI3 AI4 RX FAST2 / AI5 AI6 AI7 AI8 SPARE — the screw terminals for TTL1–8, the TX coil terminal, a Qwiic connector (the small 4-pin socket that carries the I²C bus to a plug-in sensor), the OLED display and the three LEDs, all pointing up out of it. The back of the instrument is the main board's **rear edge**: USB-C, the 5 V jack, the external 7–18 V input, the coil terminals and the relay and isolated-input terminals, each taking its wire straight off the edge. Everything else — the dev board, the expansion header, the second Qwiic, every solder jumper — is inside, reached with the lid off. *Rule of thumb: what a user touches goes on the panel, what stays plugged in goes on the rear edge, what only you touch stays inside.*
+
 **The deadline.** The final Gerber files (the files a factory makes a board from) go for manufacturing on **Mon 28 Sep, 2 pm — a hard cutoff.** Your section must be merged before it.
 
 ---
@@ -61,6 +63,7 @@ We build the skeleton of the class board together; each of you adds one section 
 #### 3a.2 (E7, start) — route your zone
 - [ ] Open `hardware/class-board.kicad_pro` and its PCB. Every footprint of the board is already placed, the parts you put back included — the reference designators did not change — so your work here is copper, not placement. If *Update PCB from Schematic* does drop a stray footprint, drag it inside your rule area (`ZONE_A`, `ZONE_B` or `ZONE_C`), decoupling capacitors **next to the pin they serve**.
 - [ ] Route (`X`): signals on F.Cu (top), long or crossing ones on B.Cu (bottom) via `V`; **both inner layers are unbroken ground planes and carry no tracks at all** — the design rule check rejects any track you draw there. Track widths come from the net classes (a net is a set of pins that are connected together; a net class sets the rules for a group of them — do not change them).
+- [ ] Signals that leave the instrument go to the **front panel**, not to the edge of the board: route them to the link headers the instructor has placed (they are on the bottom side, where the panel plugs in). Only power, relay and coil terminals sit on the rear edge.
 - [ ] Run `Inspect → DRC` often. Read every message with the tutor; the two classics are *wrong layer* and *unconnected net*.
 - ✔ *You should see:* a good part of the zone routed; DRC shows only unrouted-net items for the rest.
 

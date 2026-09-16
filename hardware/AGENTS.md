@@ -40,7 +40,7 @@ tools).  This file only says how this directory is built and where the validated
 |---|---|
 | `class-board.kicad_pro/.kicad_sch`, `sheets/*.kicad_sch` | main board: root + 10 hierarchical sheets (`base_mcu`, `b1_inputs`, `b2_power`, `b3_outputs`, `b4_switching`, `b5_dio_trig`, `nmr_rx`, `nmr_tx`, `c_switch`, `front_panel_link`).  `opt_conditioning` was deleted in v0.7 (D-32) |
 | `class-board.kicad_pcb`, `class-board.kicad_dru` | 4-layer main board **180 × 100 mm** and the custom DRC rules KiCad loads; `rules/class-board.kicad_dru` is the edit source |
-| `front-panel/front-panel.kicad_*` | 2-layer front panel **180 × 65 mm**, 3 × 5 SMA grid; its lib tables point at `../lib` |
+| `front-panel/front-panel.kicad_*` | 2-layer front panel **180 × 100 mm**, 3 × 6 SMA grid (17 fitted), mounted flat on the back of the main board: parts vertical on its outer face, three 2×20 female headers on its inner face; its lib tables point at `../lib` |
 | `lib/class_board.kicad_sym`, `lib/class_board.pretty/`, `lib/class_board.3dshapes/` | project-local library (one symbol per BOM line, LCSC/JLC fields; EasyEDA-derived footprints with rewritten courtyards) |
 | `student/<sheet>_gapped.kicad_sch` (+ `.kicad_pro`) | student copies, three sections (brief §12); `docs/student-deletions.md` lists what was removed |
 | `release/<rev>/{main-board,front-panel}/` | Gerbers + drill (bottom-left aux origin), BOM/CPL (JLC columns), PDFs, SVG/PNG, STEP, ERC/DRC reports, `hashes.txt` |
@@ -78,8 +78,10 @@ BOM without missing LCSC numbers, and the JLC rotation preview checked by hand.
 
 ## Conventions
 
-- Board coordinates: x right (0…180), y down; rear edge (USB-C, jack, terminals) at y = 0; front edge (2×20 link,
-  TX terminal) at y = 100.  Panel coordinates in the brief are y-up; `gen_panel.py` converts.
+- Board coordinates: x right (0…180), y down; rear edge (USB-C, jack, power / relay / coil terminals) at y = 0.
+  The panel no longer hangs off the front edge: it stacks on the **bottom side** through three straight 2×20 headers,
+  and the TTL, fast-output, TX-coil and front Qwiic connectors moved onto the panel.  Panel coordinates in the brief
+  are y-up; `gen_panel.py` converts.
 - Reference ranges: 1xx B1 · 2xx B2 · 3xx B3 · 4xx B4 · 5xx B5 · 6xx deleted OPT · **7xx clocks + receiver** ·
   **8xx DDS + transmitter** · **9xx mixer/IF, coil switches, external power**.
 - A new part needs: a symbol in `cb_symbols.py` with its `LCSC`, library-type and `Datasheet` fields, a footprint in

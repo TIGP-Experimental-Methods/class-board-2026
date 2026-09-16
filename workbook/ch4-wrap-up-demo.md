@@ -8,7 +8,7 @@
 Rails at the test points (+5V, +3V3, ±12 V, +5VA) with no dev board → dev board in, LED blue, AP (the board's own WiFi network) up, app opens → `esp32s3` build flashed (written onto the board over USB; no SIM — the firmware talks to real hardware instead of faking it) → each section's smoke test: **A** AI1 reads a known voltage and the receiver passes a small test signal · **B** AO1 sine seen on a scope, the synthesizer puts a carrier on the TX connector, DIO1 toggles · **C** rail LEDs, relay 1 clicks, isolated input 1 counts.
 
 ## Exercise E13 — assemble and measure — `/tutor WRAP`
-- [ ] **E13a Assemble and run on real hardware.** Board into its housing, dev board on the *USB* port. Build **without SIM**, one command per line: `pio run -e esp32s3 -t upload`, then `pio run -e esp32s3 -t uploadfs`. Open your panel. See your section move real hardware:
+- [ ] **E13a Assemble and run on real hardware.** Both boards into the housing — the front panel is the face, the main board's rear edge the back — dev board on the *USB* port. Build **without SIM**, one command per line: `pio run -e esp32s3 -t upload`, then `pio run -e esp32s3 -t uploadfs`. Open your panel. See your section move real hardware:
   **A** a voltage on AI1, and the I and Q channels responding to a signal · **B** a sine on AO1 into AI1, a carrier from the synthesizer, a TTL line and the TRIG direction · **C** rail LEDs and your status panel, a relay click and an isolated-input count.
   Fix one thing with the tutor (there is always one thing). Commit (save a snapshot with a one-line message).
 - [ ] **E13b One measured number.** Your section page says which; your plan says what you expected. Measure it, write the value **and the method** under the expectation:
