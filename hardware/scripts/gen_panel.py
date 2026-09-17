@@ -907,9 +907,10 @@ def build(route=True):
         # The ISO keep-out passed here is only the router's "no vias" box; the real 2.5 mm isolation
         # comes from the ISO_IN class halo the router builds around every ISO_IN pad (ISO_CLR).
         router.route_board(board, comps, nets, pad_net, W, H, agnd, ((500.0, 500.0), (501.0, 501.0)), plane_gnd=True,
-                           # the headers stand along y, so their pins escape along x: J1 and J2 to the
-                           # left (SMA field, TTL strip), J3 to the right (everything it feeds)
-                           stub_hint={"J1": (-1, 0), "J2": (-1, 0), "J3": (1, 0)},
+                           # the headers stand along y, so their pins escape along x: J1 to the right
+                           # (its signal column is the outer one since the gender swap), J2 to the left
+                           # (SMA field, TTL strip), J3 to the right (everything it feeds)
+                           stub_hint={"J1": (1, 0), "J2": (-1, 0), "J3": (1, 0)},   # J1 escapes OUTWARD: with the male header its signal pins are the outer column (x 169.27) and the analog clearance does not fit between the GND pins
                            layer_hint={"J1": 1, "J2": 1, "J3": 1},     # signals fan out on B.Cu
                            priority_file=os.path.join(FP_DIR, ".route_priority.json"))
         # +5V_RAW enters on two neighbouring pads of J3 (pins 1 and 3) in the same pin column; a
