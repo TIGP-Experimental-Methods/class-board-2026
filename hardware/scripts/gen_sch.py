@@ -1111,7 +1111,7 @@ def build_link(root_uuid):
         "The three headers (and the panel's three female headers) are bought separately and soldered by the instructor: they carry the field Assembly = hand and are excluded from the JLC BOM and CPL.",
     ])
     for k, (ref, pins, what, xmm) in enumerate(LINKS):
-        J = c.place(ref, "HDR_2x20_MALE", 60 + k * 130, 150, 0)
+        J = c.place(ref, "HDR_2x20_FEMALE", 60 + k * 130, 150, 0)   # FEMALE on the main board: its pins are live (user, 2026-09-17)
         for pin, net in pins.items():
             # four stub lengths in turn, so the ground and rail symbols stand in four columns:
             # KiCad draws the label of a sideways power symbol vertically, and two labels in the

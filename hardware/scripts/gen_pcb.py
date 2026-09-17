@@ -31,7 +31,7 @@ PIN1_X = SOCK_X - 26.67
 # front-panel/ and scripts/gen_panel.py are generated to mate exactly these positions, so the numbers
 # below are fixed.  The values are the CENTRE of the 2 x 20 pad block; link_header_at() turns a centre
 # into the anchor KiCad stores ("at"), which comes out as (13.27, 25.87) (91.27, ...) (169.27, ...).
-LINK_HEADER_FP = "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical"
+LINK_HEADER_FP = "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical"   # female on the main board (live pins), male on the panel - user 2026-09-17
 LINK_HEADER_ROT = 180                      # pin 1 at the rear (small y); the 48 mm block runs along y
 LINK_HEADERS = {"J6": (12.0, 50.0), "J7": (90.0, 50.0), "J8": (168.0, 50.0)}
 # The header pins go through the board, so nothing on the TOP side may put a pad or a drill in the
@@ -50,11 +50,30 @@ ZONES = {
     # which frees the rear strip from x 38 to x 180: the instructor's block is re-laid out in one
     # piece at x 45-86 (it used to be split between a 12 mm pocket and the right-hand edge) and
     # the rear-right, x 96-180, goes to section B, which was the most crowded of the three.
+    # v0.7e (2026-09-17, Decision #59 -- even the density before routing): section A was the
+    # densest block on the board and the front-right corner (x 130-180, y 68-100) was empty.  The
+    # A/B boundary in the front therefore steps out from x 100 to x 113 below y = 71 (section A
+    # keeps the room its ADC fan-in needs), section B's analog output block moves 14 mm right into
+    # the empty corner and the B5 logic that stood between them moves to the rear-right strip.
+    # Above y = 71 the boundary stays at x 100: link header J7 sweeps x 87.2-92.8 down to y 75.4,
+    # so nothing of section A can cross it higher up anyway.
     "ZONE_INSTR": [(0.5, 0.5), (96.0, 0.5), (96.0, 36.0), (37.5, 36.0), (37.5, 57.5), (0.5, 57.5)],
     "ZONE_BASE": [(37.5, 36.0), (100.0, 36.0), (100.0, 57.0), (37.5, 57.0)],
-    "ZONE_A": [(0.5, 57.5), (45.0, 57.5), (45.0, 57.0), (100.0, 57.0), (100.0, 99.5), (0.5, 99.5)],
-    "ZONE_B": [(96.0, 0.5), (179.5, 0.5), (179.5, 99.5), (100.0, 99.5), (100.0, 36.0), (96.0, 36.0)],
+    "ZONE_A": [(0.5, 57.5), (45.0, 57.5), (45.0, 57.0), (100.0, 57.0), (100.0, 71.0), (113.0, 71.0),
+               (113.0, 99.5), (0.5, 99.5)],
+    "ZONE_B": [(96.0, 0.5), (179.5, 0.5), (179.5, 99.5), (113.0, 99.5), (113.0, 71.0), (100.0, 71.0),
+               (100.0, 36.0), (96.0, 36.0)],
 }
+
+# ---- v0.7e density rework (Decision #59) -----------------------------------------------------
+# The NMR receiver (93 footprints in a 40 x 40 mm pocket) is stretched in x about the left edge;
+# the output chain it shares with the ADC moves right with the ADC.  U703 is pinned: link header
+# J7 sweeps x 87.2-92.8 for y 24.6-75.4 and the IF amplifier sits right against that band.
+RX_SPLIT_X = 45.0                # left cluster (stretched) | right-hand output chain (shifted)
+RX_X0, RX_STRETCH = 1.0, 1.22    # x' = RX_X0 + (x - RX_X0) * RX_STRETCH: 40 mm of width becomes 47
+RX_RIGHT_DX = 12.0
+RX_PINNED = {"U703"}
+B3_DX = 14.0                     # b3_outputs: into the empty front-right corner
 
 # ---- the rear edge (Decision #46, #50) -----------------------------------------------------
 # Every screw terminal on the rear edge is rotated 180 degrees.  The KF301/KF128 footprints draw
@@ -93,22 +112,27 @@ FIXUP = {
     "D801": (144.47, 26.97, 0), "D802": (134.63, 28.09, 0),
     "R814": (147.04, 30.32, 0), "C817": (132.49, 31.23, 0),
     "JP802": (147.33, 33.24, 0), "R815": (136.27, 31.18, 0), "R816": (140.05, 33.24, 0),
-    # the 10 MHz TCXO option (eight DNP parts) leaves the TRIG cluster and takes the room the
-    # OPA564 block gave up, which is what un-crowds the middle of section B
-    "X501": (156.00, 42.00, 0), "R512": (151.00, 40.00, 90), "R513": (161.00, 42.00, 90),
-    "C505": (156.00, 46.50, 0), "U504": (156.20, 51.00, 180),
-    "R514": (151.00, 50.50, 90), "R515": (161.00, 50.50, 90), "C506": (151.00, 46.00, 90),
-    # the I2C expander was under the dev board, on link header J7 and outside ZONE_B
-    "U505": (136.0, 68.0, 0), "C507": (143.0, 68.0, 0),
+    # the 10 MHz TCXO option (eight DNP parts) leaves the TRIG cluster; v0.7e moves it on into the
+    # last empty pocket of the rear-right strip, right of the OPA564 block and left of the M3 hole
+    "X501": (162.00, 12.00, 0), "R512": (157.00, 10.00, 90), "R513": (167.00, 12.00, 90),
+    "C505": (162.00, 16.50, 0), "U504": (162.20, 21.00, 180),
+    "R514": (157.00, 20.50, 90), "R515": (167.00, 20.50, 90), "C506": (157.00, 16.00, 90),
+    # the I2C expander was under the dev board and on link header J7 in v0.7b; v0.7e puts it in the
+    # rear-right strip next to the 74AHCT541 it drives (DIO1-8) and its MOD1-7 test point with it
+    "U505": (108.0, 26.0, 0), "C507": (116.0, 26.0, 0), "TP501": (121.0, 26.0, 0),
     # the I2C pull-ups followed the dev board
     "R3": (40.0, 44.5, 0), "R4": (40.0, 47.5, 0),
 }
 # AGND pour (F.Cu + B.Cu): analog band across the front + the +-12 V / +5VA output area of B2
-AGND_POLY = [(22.0, 30.0), (37.5, 30.0), (37.5, 57.0), (100.0, 57.0), (100.0, 68.0), (129.0, 68.0), (129.0, 87.5),
+# (v0.7e: the analog band follows b3_outputs 14 mm to the right, to x 148)
+AGND_POLY = [(22.0, 30.0), (37.5, 30.0), (37.5, 57.0), (100.0, 57.0), (100.0, 68.0), (148.0, 68.0), (148.0, 87.5),
              (179.5, 87.5), (179.5, 99.5), (0.5, 99.5), (0.5, 57.0), (22.0, 57.0)]
-# AI channel networks in a row between the link (AI pins 9..23 at x 56.0..73.8) and the ADC: left -> right = AI1 .. AI8
-# (planar fan-in, see docs/design-decisions.md D-19)
-NET_ROW_X = {1: 48.2, 2: 53.0, 3: 57.8, 4: 62.6, 5: 67.4, 6: 72.2, 7: 77.0, 8: 81.8}   # 4.8 mm pitch: 1.26 mm between clamp bodies for the AIN trace
+# AI channel networks in a row between link header J6 (AI1..AI8 on pins 1..15 odd, y 25.9..43.7) and
+# the ADC: left -> right = AI1 .. AI8 (planar fan-in, see docs/design-decisions.md D-19).
+# v0.7e: 6.2 mm pitch instead of 4.8, so 2.66 mm of gap between clamp bodies for the AIN trace,
+# and the row reaches to x 93 -- the front of the board is free that far right once the receiver's
+# output chain moves right with it, and the extra width is what lets the receiver itself expand.
+NET_ROW_X = {1: 50.0, 2: 56.2, 3: 62.4, 4: 68.6, 5: 74.8, 6: 81.0, 7: 87.2, 8: 93.4}
 
 
 def dev_pin(row, n):
@@ -226,12 +250,16 @@ def placement(lib=None, comps=None):
     put("R2", 83.8, 62.5, 90)            # 33 R MOSI
     put("R3", 61.5, 34.0, 90)            # I2C pull-ups
     put("R4", 64.0, 34.0, 90)
-    put("JP1", 47.5, 70.0, 0)            # LED links (GPIO43/44 -> LED_WIFI/ACT)
-    put("JP2", 47.5, 73.5, 0)
-    put("TP1", 43.5, 73.0)               # RST
-    put("TP2", 43.5, 76.5)               # GND
-    put("TP3", 43.5, 80.0)               # +3V3
-    put("TP4", 43.5, 83.5)               # +5V_RAW
+    # v0.7e: the six base links/test points used to stand at x 42-49, in the only direction the NMR
+    # receiver could grow.  They move to the pocket between link header J7's band (pads must stay
+    # clear of x 87.2-92.8 down to y 75.4) and the star point NT1 -- which also puts JP1/JP2 next to
+    # the J7 pins their LED nets leave on (pins 31/33) instead of 45 mm away.
+    put("JP1", 95.5, 69.0, 0)            # LED links (GPIO43/44 -> LED_WIFI/ACT)
+    put("JP2", 95.5, 72.5, 0)
+    put("TP1", 95.0, 58.5)               # RST
+    put("TP2", 98.3, 58.5)               # GND
+    put("TP3", 95.0, 61.5)               # +3V3
+    put("TP4", 98.3, 61.5)               # +5V_RAW
 
     # ---- the three panel-link headers, bottom side (Decision #45/#48) --------------------------
     for ref in LINK_HEADERS:
@@ -276,17 +304,22 @@ def placement(lib=None, comps=None):
     flow([(52.6, 0.7, 8.4)], [("R210", 0), ("D204", 90)], gap=0.4, label="+3V3 LED")
     flow([(56.2, 0.7, 8.4)], [("C212", 0)], label="78L05 output cap")
 
-    # ---- B5 digital I/O (x 100-129, y 36-68); the TTL/FAST terminals left with the panel rework ---
-    put("U501", 110.5, 41.2, 270)         # 74AHCT541: inputs on the left column, outputs facing R501-R508
+    # ---- B5 digital I/O; the TTL/FAST terminals left with the panel rework ---------------------
+    # v0.7e: the 74AHCT541 TTL output block (20 + 16 pads in one 8 x 8 mm pocket) was the second
+    # densest spot on the board and stood between J5 and the dev-board socket.  It moves into the
+    # empty rear-right strip x 98-122, y 6-32 together with the expander that drives it (FIXUP),
+    # which leaves x 100-130 / y 36-70 as a wide-open lane for the SPI and TTL escapes.
+    put("U501", 108.0, 12.0, 270)         # 74AHCT541: inputs on the left column, outputs facing R501-R508
     for i in range(8):
-        put("R50%d" % (i + 1), 117.5 + (i % 2) * 3.5, 40.5 + (i // 2) * 2.4, 0)
-    put("C501", 105.0, 42.0, 90)
-    put("U502", 105.4, 61.0, 0)           # 74HCT125 fast outs (pins up/down)
-    put("R509", 101.5, 57.6, 90); put("R510", 101.5, 61.0, 90); put("C502", 109.5, 57.5, 90)
-    put("JP501", 104.4, 66.45, 0)         # GPIO44 / U502 1Y select
-    put("D501", 110.3, 66.2, 0)           # BAV99 clamp on TRIG_5V (SOT-23)
-    put("U503", 114.0, 61.2, 90)          # LVC1T45 (TRIG)
-    put("C503", 110.5, 61.2, 90); put("C504", 117.5, 61.2, 90); put("R511", 120.3, 61.2, 0)
+        put("R50%d" % (i + 1), 116.0 + (i % 2) * 3.5, 8.0 + (i // 2) * 2.4, 0)
+    put("C501", 101.0, 12.0, 90)
+    # the fast/TRIG cluster stays under J5, spread over the full width of the lane
+    put("U502", 105.6, 61.5, 0)           # 74HCT125 fast outs (pins up/down)
+    put("R509", 101.0, 57.6, 90); put("R510", 101.0, 61.0, 90); put("C502", 110.0, 58.0, 90)
+    put("JP501", 104.0, 67.0, 0)          # GPIO44 / U502 1Y select
+    put("D501", 112.5, 66.5, 0)           # BAV99 clamp on TRIG_5V (SOT-23)
+    put("U503", 119.0, 61.0, 90)          # LVC1T45 (TRIG)
+    put("C503", 114.0, 61.0, 90); put("C504", 124.0, 61.0, 90); put("R511", 127.5, 61.0, 0)
     put("X501", 124.6, 59.5, 0); put("R512", 119.5, 57.6, 90); put("R513", 128.0, 59.5, 90); put("C505", 124.6, 63.0, 0)
     put("U504", 124.8, 66.0, 180); put("R514", 121.5, 65.5, 90); put("R515", 128.0, 65.5, 90); put("C506", 118.5, 65.5, 90)
     # v0.7b: the TCA9535 expander used to sit under the dev board at x 94.5, which is (a) outside
@@ -296,32 +329,41 @@ def placement(lib=None, comps=None):
     put("C507", 127.3, 46.6, 0)           # +3V3 decoupling beside the expander
     put("TP501", 131.5, 74.0)             # EXP_P14 = Johnson-counter /CLR, the only expander test point left
 
-    # ---- B3 signal generation (right-front: x 100-129) -------------------------------------
-    put("U302", 105.6, 72.5, 0)           # 74HCT125 level shifter
-    put("C308", 109.4, 73.4, 90)
-    put("U301", 114.0, 74.8, 0)           # DAC8563 (VSSOP-10)
-    put("C301", 111.3, 69.7, 90); put("C302", 110.5, 77.4, 90); put("C303", 117.5, 76.0, 90); put("R311", 117.5, 71.0, 90)
-    put("U303", 114.0, 83.0, 0)           # OPA2192 (SOIC-8)
-    put("C304", 119.3, 80.0, 0); put("C306", 119.3, 82.6, 0); put("C305", 119.3, 85.2, 0); put("C307", 119.3, 88.0, 0)
-    put("R301", 106.5, 80.0, 90); put("R302", 106.5, 83.4, 90); put("R305", 106.5, 86.8, 90); put("R306", 106.5, 90.2, 90)
-    put("R303", 109.2, 81.0, 90); put("R307", 109.2, 87.0, 90)
-    put("R304", 109.2, 90.5, 90); put("R308", 112.0, 91.5, 0)
-    put("R309", 123.3, 84.0, 0); put("D301", 127.0, 84.0, 90); put("R310", 123.3, 89.0, 0); put("D302", 127.0, 89.0, 90)
-    put("TP301", 121.0, 93.5)
+    # ---- B3 signal generation (right-front) -------------------------------------------------
+    # v0.7e: the block keeps its internal geometry and moves B3_DX = 14 mm right, into the corner
+    # that the relay rework left empty.  AO1/AO2 reach link header J6 on the far left either way;
+    # 14 mm on two nets buys 25 footprints' worth of density out of the middle of the board.
+    def put3(ref, x, y, rot=0):
+        put(ref, x + B3_DX, y, rot)
+    put3("U302", 105.6, 72.5, 0)          # 74HCT125 level shifter
+    put3("C308", 109.4, 73.4, 90)
+    put3("U301", 114.0, 74.8, 0)          # DAC8563 (VSSOP-10)
+    put3("C301", 111.3, 69.7, 90); put3("C302", 110.5, 77.4, 90); put3("C303", 117.5, 76.0, 90); put3("R311", 117.5, 71.0, 90)
+    put3("U303", 114.0, 83.0, 0)          # OPA2192 (SOIC-8)
+    put3("C304", 119.3, 80.0, 0); put3("C306", 119.3, 82.6, 0); put3("C305", 119.3, 85.2, 0); put3("C307", 119.3, 88.0, 0)
+    put3("R301", 106.5, 80.0, 90); put3("R302", 106.5, 83.4, 90); put3("R305", 106.5, 86.8, 90); put3("R306", 106.5, 90.2, 90)
+    put3("R303", 109.2, 81.0, 90); put3("R307", 109.2, 87.0, 90)
+    put3("R304", 109.2, 90.5, 90); put3("R308", 112.0, 91.5, 0)
+    put3("R309", 123.3, 84.0, 0); put3("D301", 127.0, 84.0, 90); put3("R310", 123.3, 89.0, 0); put3("D302", 127.0, 89.0, 90)
+    put3("TP301", 121.0, 93.5)
 
     # ---- B1 inputs (centre-front) ---------------------------------------------------------
-    put("U101", 65.0, 76.0, 270)          # ADS8688
-    put("C104", 55.5, 74.5, 90); put("C101", 55.5, 77.8, 90)
-    put("C105", 51.5, 74.5, 90); put("C106", 51.5, 79.8, 90)
+    # v0.7e: the ADC and its left-hand decoupling move 3 mm right, so that the package sits in the
+    # middle of the wider AI clamp row; C102/C103/R101 and U703 (the receiver's IF amplifier, which
+    # cannot move -- link header J7) pin the right-hand side, so the DVDD pair moves above the
+    # package instead of beside it.
+    put("U101", 68.0, 76.0, 270)          # ADS8688
+    put("C104", 58.5, 74.5, 90); put("C101", 58.5, 77.8, 90)
+    put("C105", 54.5, 74.5, 90); put("C106", 54.5, 79.8, 90)
     put("C103", 75.5, 75.5, 90); put("C102", 75.5, 79.5, 90)
-    put("C107", 79.0, 69.6, 0); put("C108", 84.0, 69.4, 0)           # DVDD 10 uF + 100 nF above the package
-    put("R101", 73.2, 79.0, 90); put("R102", 51.3, 69.0, 0)
+    put("C107", 71.0, 69.4, 0); put("C108", 75.5, 69.4, 0)           # DVDD 10 uF + 100 nF above the package
+    put("R101", 73.2, 79.0, 90); put("R102", 54.3, 69.0, 0)
     for ai, x in NET_ROW_X.items():          # AI clamp networks, left -> right = AI1 .. AI8
         put("R11%d" % ai, x, 90.5, 90)
         put("C11%d" % ai, x, 87.6, 0)
         put("D11%d" % ai, x, 84.2, 90)
-    put("JP101", 97.5, 89.5, 90); put("JP102", 97.5, 95.0, 90)      # AI7/AI8 source select
-    put("TP101", 91.0, 88.0)
+    put("JP101", 106.0, 89.5, 90); put("JP102", 106.0, 95.0, 90)    # AI7/AI8 source select (v0.7e: +8.5)
+    put("TP101", 99.5, 95.0)
 
     # ---- placements contributed by the extra sheet modules (scripts/sheet_*.py, PLACEMENT dict) ----
     for mod in sheet_modules():
@@ -337,6 +379,20 @@ def placement(lib=None, comps=None):
     # ---- parts of the two NMR sheets that would stand on a link header -----------------------
     for ref, pos in FIXUP.items():
         put(ref, pos[0], pos[1], pos[2])
+    # ---- v0.7e: give the NMR receiver the room the base links and the ADC row gave up ---------
+    # sheet_nmr_rx.PLACEMENT draws the receiver as rows of 0603 parts at ~2 mm pitch in a 40 mm
+    # wide pocket; an x-stretch about the left edge keeps every row, every group and the order of
+    # the circuit exactly as drawn and simply opens the gaps (2.0 -> 2.3 mm between bodies).  The
+    # output chain on the right (the mixer/IF parts that feed the ADC) follows the ADC instead.
+    for ref, comp in (comps or {}).items():
+        if ref not in P or comp.fields.get("Block") != "NMR_RX" or ref in RX_PINNED:
+            continue
+        pos = P[ref]
+        if pos[0] < RX_SPLIT_X:
+            x = RX_X0 + (pos[0] - RX_X0) * RX_STRETCH
+        else:
+            x = pos[0] + RX_RIGHT_DX
+        P[ref] = (round(x, 3),) + tuple(pos[1:])
     return P
 
 
@@ -411,8 +467,8 @@ def build(route=True):
     board.gr_text("A: NMR RECEIVER", 22.0, 62.0, size=1.0, thickness=0.15)
     board.gr_text("B: NMR TX", 175.0, 60.0, size=1.0, thickness=0.15, rot=90)
     board.gr_text("INSTRUCTOR: POWER + COIL SWITCHES", 60.0, 38.5, size=1.0, thickness=0.15)
-    board.gr_text("NO MAINS ON THIS BOARD", 112.0, 19.5, size=1.0, thickness=0.15)
-    board.gr_text("MOD1-7 -> 5V TTL ON THE PANEL", 112.0, 22.5, size=1.0, thickness=0.15)
+    board.gr_text("NO MAINS ON THIS BOARD", 155.0, 90.0, size=1.0, thickness=0.15)
+    board.gr_text("MOD1-7 -> 5V TTL ON THE PANEL", 155.0, 93.5, size=1.0, thickness=0.15)
     board.gr_text("+VEXT 7-18V DC  FUSE 5A", 51.0, 8.7, size=1.0, thickness=0.15)
     board.gr_text("POWER UP: USB FIRST, THEN BENCH SUPPLY", 60.0, 55.0, size=1.0, thickness=0.15)
     board.gr_text("H-BRIDGE COIL", 62.7, 8.7, size=1.0, thickness=0.15)

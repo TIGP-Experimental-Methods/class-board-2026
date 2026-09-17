@@ -3,7 +3,7 @@
 WHAT THE PANEL IS (Decisions #45-#49, notes/2026-09-14-panel-rework-proposal.md)
 ------------------------------------------------------------------------------
 The panel lies flat on the BACK of the main board, parallel to it, carried by three straight 2x20
-headers (male on the main board's bottom side, female on the panel's inner face) and four M3
+headers (FEMALE sockets on the main board's bottom side, MALE headers on the panel's inner face) and four M3
 stand-offs.  The panel's OUTER face is the instrument's front: 17 SMA, the OLED, three LEDs, the
 10-way TTL screw-terminal strip, the TX coil terminal and a Qwiic socket.
 
@@ -23,10 +23,12 @@ which is what the "REAR / TOP EDGE" marker on the silkscreen says.  A consequenc
 the analog header J6 (main x = 12, left) becomes panel J1 at panel x = 168 (right), and the power
 header J8 (main x = 168) becomes panel J3 at panel x = 12.
 
-The female footprints are B.Cu (inner face).  KiCad's PinSocket footprint carries the mating
-mirror in its own pad geometry (even pins at local x = -2.54, the header has them at +2.54), so
-with the x mirror above the numbering comes out unchanged: panel pad k mates main pin k for all
-120 pins.  check_link_mating() proves that from the pad coordinates rather than trusting it.
+The panel's link footprints are B.Cu (inner face).  Genders (user, 2026-09-17): the MAIN board
+carries the FEMALE sockets (its pins are live), the panel the MALE headers.  KiCad's PinSocket
+footprint carries the mating mirror in its own pad geometry (even pins at local x = -2.54, the
+header has them at +2.54), so with the x mirror above the numbering comes out unchanged: panel
+pad k mates main pin k for all 120 pins.  check_link_mating() proves that from the pad coordinates
+rather than trusting it - run it after ANY change of footprint or gender.
 
 WHAT CHANGED ON 2026-09-17 (instructor's re-spec round 3)
 --------------------------------------------------------
@@ -81,14 +83,14 @@ KICAD_FP = os.environ.get("KICAD_FP_DIR", "C:/Program Files/KiCad/10.0/share/kic
 #   * side B.Cu (bottom), hand-soldered from the top
 #   * MAIN_HEADERS values are the CENTRE of the 2x20 pad block, not the footprint anchor: the anchor
 #     (what KiCad shows as "at") is printed by main_header_at() and in the report.
-#   * rotation 180 with the KiCad standard footprint PinHeader_2x20_P2.54mm_Vertical puts the long
+#   * rotation 180 with the KiCad standard footprint PinSocket_2x20_P2.54mm_Vertical puts the long
 #     axis along y (the 50.8 mm block runs across the 100 mm direction, as the proposal asks) with
 #     PIN 1 AT THE REAR (small y).  The footprint is already along y at rotation 0; "rotation 90"
 #     would lay the header across the 180 mm direction, where J8 would hang off the board.
 MAIN_W, MAIN_H = 180.0, 100.0
 MAIN_HEADERS = {"J6": (12.0, 50.0), "J7": (90.0, 50.0), "J8": (168.0, 50.0)}
 MAIN_HEADER_ROT = 180
-MAIN_HEADER_FP = ("Connector_PinHeader_2.54mm", "PinHeader_2x20_P2.54mm_Vertical")
+MAIN_HEADER_FP = ("Connector_PinSocket_2.54mm", "PinSocket_2x20_P2.54mm_Vertical")    # FEMALE on the main board (its pins are live) - user 2026-09-17
 MAIN_HOLES = [(4.0, 4.0), (176.0, 4.0), (4.0, 96.0), (176.0, 96.0)]     # M3, same pattern on both boards
 
 # The instructor's LINK_C map (2026-09-17): J8 = panel J3 now also carries the eight module lines
@@ -119,7 +121,7 @@ PANEL_LINK_C[33] = "MOD8"
 LINKS = [("J1", "J6", gen_sch.LINK_A, "analog"),
          ("J2", "J7", gen_sch.LINK_B, "digital"),
          ("J3", "J8", PANEL_LINK_C, "power + spares")]
-PANEL_HEADER_FP = ("Connector_PinSocket_2.54mm", "PinSocket_2x20_P2.54mm_Vertical")
+PANEL_HEADER_FP = ("Connector_PinHeader_2.54mm", "PinHeader_2x20_P2.54mm_Vertical")    # MALE on the panel (passive board) - user 2026-09-17
 PANEL_HEADER_ROT = 180
 
 # ------------------------------------------------------------------ panel placement (panel coordinates, mm)
@@ -410,9 +412,9 @@ def build_sheet():
                     "17 SMA, OLED, 3 LEDs, TTL strip, TX terminal, Qwiic, module header, 2 isolated inputs; three 2x20 female headers on the inner face")
     c = Ctx(sh, "PANEL", 100)
     sh.box(10, 10, 584, 412, "FRONT PANEL - 4 layers, 180 x 100 mm; outer copper = AGND, In1.Cu = AGND plane, In2.Cu = GND plane, joined to GND only at the main-board star point NT1")
-    sh.text("The panel lies FLAT ON THE BACK of the main board (Decision #45). J1 / J2 / J3 are 2x20 FEMALE headers on the panel's INNER face (B.Cu); they mate J6 / J7 / J8, the male headers on the main board's bottom side.", 14, 17, 1.4)
+    sh.text("The panel lies FLAT ON THE BACK of the main board (Decision #45). J1 / J2 / J3 are 2x20 MALE headers on the panel's INNER face (B.Cu); they mate J6 / J7 / J8, the FEMALE sockets on the main board's bottom side (its pins are live - user 2026-09-17).", 14, 17, 1.4)
     sh.text("Panel coordinates are mirrored in x against the main board (panel x = 180 - main x, panel y = main y), because the panel is drawn from its OUTER face. The main board's REAR edge is therefore the panel's TOP edge.", 14, 21, 1.4)
-    sh.text("With that mirror, panel pad k mates main-board pin k on all three headers (the KiCad PinSocket footprint already carries the mating mirror). gen_panel.py proves it from the pad coordinates before the board is written.", 14, 25, 1.4)
+    sh.text("With that mirror, panel pad k mates main-board pin k on all three headers (the KiCad PinSocket footprint on the main board carries the mating mirror). gen_panel.py proves it from the pad coordinates before the board is written.", 14, 25, 1.4)
     sh.text("So the analog header J6 (main x = 12) is panel J1 at panel x = 168, the digital header J7 stays at x = 90, and the power header J8 (main x = 168) is panel J3 at panel x = 12.", 14, 29, 1.4)
     sh.text("Pins marked spare are not connected on the main board and are left unconnected here. SPARE (the 18th SMA position is empty; the fitted SPARE SMA) has its shield on AGND and its centre pin on TP1 only.", 14, 33, 1.4)
     sh.text("J30 is one footprint: the vertical 8.5 mm 1x4 socket (JLC C2894927) plus the OLED module's outline and its four M2 (2.2 mm) holes. The module lies flat on four 11 mm M2 stand-offs; hole spacing 24 x 26 mm (instructor, 2026-09-17), 2.4 mm holes; confirm on the delivered modules.", 14, 37, 1.4)
@@ -421,7 +423,7 @@ def build_sheet():
     # ---- the three link headers ----------------------------------------------------------
     for k, (pref, mref, pins, what) in enumerate(LINKS):
         x0 = 90 + 170 * k
-        J = c.place(pref, "HDR_2x20_FEMALE", x0, 130, 0)
+        J = c.place(pref, "HDR_2x20_MALE", x0, 130, 0)
         sh.text("%s - %s (inner face): mates %s, the %s header" % (pref, what, mref, what), x0 - 45, 100, 1.6, True)
         sh.text("panel x = %.0f mm (main board x = %.0f mm)" % (to_panel(*MAIN_HEADERS[mref])[0], MAIN_HEADERS[mref][0]), x0 - 45, 104, 1.3)
         for pin in range(1, 41):
