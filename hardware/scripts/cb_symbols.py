@@ -467,6 +467,16 @@ def power_symbol(net, style="bar"):
         g.append(poly([(-1.27, -1.27), (1.27, -1.27)], 0.254))
         s.pin(1, net, "power_in", 0, 0, 270, 0)
         s.value_pos = (0, -2.54)
+    elif style == "arrow":          # KiCad-style up arrow (user preference, 2026-09-17)
+        g.append(poly([(0, 0), (0, 1.27)], 0))
+        g.append(poly([(-0.762, 1.27), (0.762, 1.27), (0, 2.54), (-0.762, 1.27)], 0.254, "outline"))
+        s.pin(1, net, "power_in", 0, 0, 90, 0)
+        s.value_pos = (0, 3.81)
+    elif style == "arrow_down":     # negative rail: the same arrow pointing down
+        g.append(poly([(0, 0), (0, -1.27)], 0))
+        g.append(poly([(-0.762, -1.27), (0.762, -1.27), (0, -2.54), (-0.762, -1.27)], 0.254, "outline"))
+        s.pin(1, net, "power_in", 0, 0, 270, 0)
+        s.value_pos = (0, -3.81)
     else:
         g.append(poly([(0, 0), (0, 1.27)], 0))
         g.append(poly([(-1.27, 1.27), (1.27, 1.27)], 0.254))
@@ -953,8 +963,8 @@ def build_library():
     fid.graphics[0].append(circle(0, 0, 1.27, 0.254))
     fid.ref_pos, fid.value_pos, fid.bbox = (0, 2.54), (0, -2.54), (-1.27, -1.27, 1.27, 1.27)
     add(fid)
-    for net, style in (("GND", "gnd"), ("AGND", "agnd"), ("+5V_RAW", "bar"), ("+3V3", "bar"), ("+12V", "bar"), ("-12V", "neg"), ("+5VA", "bar"), ("VREF_DAC", "bar"),
-                      ("+3V3A", "bar"), ("+VEXT", "bar"), ("+VCOIL", "bar"), ("V_MID", "bar")):
+    for net, style in (("GND", "gnd"), ("AGND", "agnd"), ("+5V_RAW", "arrow"), ("+3V3", "arrow"), ("+12V", "arrow"), ("-12V", "arrow_down"), ("+5VA", "arrow"), ("VREF_DAC", "arrow"),
+                      ("+3V3A", "arrow"), ("+VEXT", "arrow"), ("+VCOIL", "arrow"), ("V_MID", "arrow")):   # arrows: user preference 2026-09-17
         add(power_symbol(net, style))
     pf = Symbol("PWR_FLAG", "#FLG", "PWR_FLAG", "", "Power flag: marks a net as driven (grounds without a power_out pin)",
                 power=True, in_bom=False, hide_pin_numbers=True, hide_pin_names=True, pin_name_offset=0)

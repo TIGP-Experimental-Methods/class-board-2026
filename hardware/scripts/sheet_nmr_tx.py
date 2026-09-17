@@ -124,8 +124,16 @@ def rail_at(c, x, y, net, rot=0, lrot=0):
 
 
 # ================================================================== sheet
+# Layout rework 2026-09-17 (geometry only -- no reference, value, footprint, pin or net changed):
+#   * the sheet moved from A3 to A2 so every block has room to breathe,
+#   * every rail / ground symbol sits on its own stub (c.tap / c.comb / c.pwr_pin), never mid-wire,
+#   * adjacent ground pins (AGND+DGND on the DDS, the seven V- pins on the OPA564) share one comb
+#     with a single symbol on a tail,
+#   * label rotations corrected: a label on an UPWARD stub is rot 90, on a DOWNWARD stub rot 270
+#     (the opposite convention put the text back over its own part and wire),
+#   * passive columns at >= 10.16 mm pitch, free text moved into bands that carry no geometry.
 def build(root_uuid):
-    sh = Sheet("nmr_tx", "NMR TX (B): AD9834 DDS, reconstruction filter, OPA564 power stage -> TX", "A3", 11,
+    sh = Sheet("nmr_tx", "NMR TX (B): AD9834 DDS, reconstruction filter, OPA564 power stage -> TX", "A2", 11,
                "AD9834 on a 50 MHz MCLK -> 3 MHz Butterworth reconstruction filter -> OPA564 single-supply power stage from +VEXT -> TX")
     c = Ctx(sh, BLOCK, 8000)
     sheet_frame(sh, BLOCK, "NMR TX (section B) — AD9834 DDS + reconstruction filter + OPA564 power stage -> TX", [
@@ -142,250 +150,252 @@ def build(root_uuid):
     ])
 
     # ============================================================ AD9834 DDS
-    U1 = c.place("U801", "AD9834BRUZ", 129.54, 127.0, 0)
+    U1 = c.place("U801", "AD9834BRUZ", 149.86, 149.86, 0)
+    U1.field_pos["Value"] = (134.62, 181.61, 0, "left top")   # default lands on the AGND/DGND pin names
 
     # ---- +3V3 -> FB801 -> +3V3D bus above the device -----------------------------------------
-    fb = c.place("FB801", "FB0603_600R", 129.54, 83.82, 0)
+    fb = c.place("FB801", "FB0603_600R", 149.86, 99.06, 0)
     c.pwr_pin(fb, 1, "+3V3", 5.08)
-    ybus = 91.44
+    ybus = 111.76
     sh.wire(fb.pin_pos(2)[0], fb.pin_pos(2)[1], fb.pin_pos(2)[0], ybus)
-    sh.wire(107.95, ybus, 149.86, ybus)
-    sh.label(V3D, 107.95, ybus, 180, "global")
-    c.flag(140.97, ybus, 180)
+    sh.wire(109.22, ybus, 172.72, ybus)          # the bus ENDS on C802's pin: no dangling tail
+    sh.label(V3D, 109.22, ybus, 180, "global")
+    c.tap(140.97, ybus, "PWR_FLAG", 2.54)        # flag on its own stub, not sitting on the bus
     for pin in ("4", "5"):                       # AVDD, DVDD
         p = U1.pin_pos(pin)
         sh.wire(p[0], p[1], p[0], ybus)
-    for ref, lib, x in (("C806", C_10U, 110.49), ("C801", C_100N, 118.11), ("C802", C_100N, 147.32)):
+    for ref, lib, x in (("C806", C_10U, 118.11), ("C801", C_100N, 130.81), ("C802", C_100N, 172.72)):
         cap = pl(c, ref, lib, x, ybus + 3.81, 0)
         c.pwr_pin(cap, 2, "AGND")
-    sh.text("+3V3 -> FB801 -> +3V3D: AVDD (C801) and DVDD (C802) 100 nF each plus C806 10 uF bulk, all returned to AGND", 105.0, 77.0, 1.3)
+    sh.text("+3V3 -> FB801 -> +3V3D: AVDD (C801) and DVDD (C802) 100 nF each plus C806 10 uF bulk, all returned to AGND", 186.69, 97.79, 1.3)
 
     # ---- digital inputs (left side) -----------------------------------------------------------
     for pin, net in (("13", "SPI_MOSI"), ("14", "SPI_SCLK"), ("15", "DDS_FSYNC"), ("8", "CLK0_MCLK"),
                      ("11", "DDS_RESET"), ("12", "DDS_SLEEP"), ("10", "DDS_PSEL")):
-        c.glabel_pin(U1, pin, net, 10.16)
-    c.pwr_pin(U1, "9", "AGND", 10.16)            # FSELECT tied to DGND (= AGND at the device)
+        c.glabel_pin(U1, pin, net, 12.7)
+    # FSELECT runs out PAST the label column on a clear lane (the neighbouring pins are 2.54 mm
+    # away, so an AGND symbol anywhere between the pin and the labels would sit on their stubs).
+    c.pwr_pin(U1, "9", "AGND", 25.4)             # FSELECT tied to DGND (= AGND at the device)
     c.nc_pin(U1, "16")                           # SIGNBITOUT unused
 
     # 10 k pull-downs: the AD9834 RESET is ACTIVE HIGH, so an undriven line must not reset the
     # part, and SLEEP must not put it to sleep.  Both lines go to TCA9535 spare pins later.
     for k, (ref, net) in enumerate((("R817", "DDS_RESET"), ("R818", "DDS_SLEEP"))):
-        r = pl(c, ref, R_10K, 45.72 + k * 12.7, 165.1, 0)
+        r = pl(c, ref, R_10K, 62.23 + k * 13.97, 243.84, 0)
         e = sh.stub(r, 1, 5.08)
-        sh.label(net, e[0], e[1], 270, "global")
+        sh.label(net, e[0], e[1], 90, "global")  # stub points UP -> the label must extend UP
         c.pwr_pin(r, 2, "AGND")
-    sh.text("R817 / R818: 10 k pull-downs (RESET is active HIGH on the AD9834).", 38.1, 178.0, 1.2)
-    sh.text("Both lines go to TCA9535 spare pins P1.5 / P1.6 — global labels until", 38.1, 181.2, 1.2)
-    sh.text("the expander sheet claims them.", 38.1, 184.4, 1.2)
 
     # ---- analog set-up pins: fan down to a row below the device --------------------------------
-    yrow = 160.02
-    analog = [("1", 38.1, "R801", R_6R8K, "AGND"),       # FS ADJUST 6.80 k
-              ("2", 30.48, "C804", C_10N, "AGND"),       # REFOUT 10 nF
-              ("3", 22.86, "C805", C_10N, V3D),          # COMP -> AVDD
-              ("6", 15.24, "C803", C_100N, "AGND"),      # CAP/2.5V 100 nF
-              ("17", 7.62, "R804", R_10K, "AGND")]       # VIN (comparator unused) -> AGND
+    # descending ladder (the highest pin gets the longest stub) so no two stubs cross; columns 10.16 apart
+    yrow = 186.69
+    analog = [("1", 50.80, "R801", R_6R8K, "AGND"),      # FS ADJUST 6.80 k
+              ("2", 40.64, "C804", C_10N, "AGND"),       # REFOUT 10 nF
+              ("3", 30.48, "C805", C_10N, V3D),          # COMP -> AVDD
+              ("6", 20.32, "C803", C_100N, "AGND"),      # CAP/2.5V 100 nF
+              ("17", 10.16, "R804", R_10K, "AGND")]      # VIN (comparator unused) -> AGND
     for pin, ln, ref, lib, ret in analog:
         e = sh.stub(U1, pin, ln)
         sh.wire(e[0], e[1], e[0], yrow)
         prt = pl(c, ref, lib, e[0], yrow + 3.81, 0)
         if ret == V3D:
             e2 = sh.stub(prt, 2, 5.08)
-            sh.label(V3D, e2[0], e2[1], 90, "global")
+            sh.label(V3D, e2[0], e2[1], 270, "global")     # stub points DOWN -> the label extends DOWN; global like the bus label
         else:
             c.pwr_pin(prt, 2, ret)
-    sh.text("R801 6.80 k: I_OUT,FS = 18 x V_REFOUT / R_SET = 18 x 1.20 / 6800 = 3.18 mA. C805 decouples COMP to AVDD (datasheet Fig. 1).", 38.1, 193.0, 1.2)
 
-    # ---- AGND / DGND tied at the device --------------------------------------------------------
-    a = sh.stub(U1, "18", 5.08)
-    d = sh.stub(U1, "7", 5.08)
-    sh.wire(a[0], a[1], d[0], d[1])
-    sh.wire(d[0], d[1], d[0], d[1] + 3.81)
-    c.power_at(d[0], d[1] + 3.81, "AGND", 0)
-    sh.text("AGND (18) and DGND (7) tied at the device; both on the AGND pour (re-spec 8.1)", 138.43, 171.0, 1.2)
+    # ---- AGND / DGND tied at the device: one comb, ONE symbol on a tail -------------------------
+    c.comb(U1, ["18", "7"], "AGND", 5.08, 5.08)
+    sh.text("AGND (18) and DGND (7) tied at the device; both on the AGND pour (re-spec 8.1)", 160.02, 189.23, 1.2)
 
     # ============================================================ DAC load + reconstruction filter
-    yf = U1.pin_pos("19")[1]                     # IOUT line, y = 109.22
+    yf = U1.pin_pos("19")[1]                     # IOUT line
     n0 = sh.stub(U1, "19", 10.16)
     e20 = sh.stub(U1, "20", 5.08)
     R803 = pl(c, "R803", R_200, e20[0], e20[1] + 3.81, 0)
     c.pwr_pin(R803, 2, "AGND")
-    for ref, lib, x in (("R802", R_200, 154.94), ("C807", C_20P, 165.1), ("C808", C_390P, 175.26)):
+    for ref, lib, x in (("R802", R_200, 189.23), ("C807", C_20P, 201.93), ("C808", C_390P, 214.63)):
         prt = pl(c, ref, lib, x, yf + 3.81, 0)
         c.pwr_pin(prt, 2, "AGND")
-    sh.wire(n0[0], yf, 185.42, yf)
-    L1 = pl(c, "L801", L_15UH, 189.23, yf, 90)          # rot 90: pin 1 left, pin 2 right
-    sh.wire(L1.pin_pos(2)[0], yf, 203.2, yf)
-    C809 = pl(c, "C809", C_130P, 203.2, yf + 3.81, 0)
+    L1 = pl(c, "L801", L_15UH, 227.33, yf, 90)          # rot 90: pin 1 left, pin 2 right
+    sh.wire(n0[0], yf, L1.pin_pos(1)[0], yf)
+    sh.wire(L1.pin_pos(2)[0], yf, 241.30, yf)
+    C809 = pl(c, "C809", C_130P, 241.30, yf + 3.81, 0)
     c.pwr_pin(C809, 2, "AGND")
-    sh.wire(203.2, yf, 213.36, yf)
-    C810 = pl(c, "C810", C_1U, 217.17, yf, 90)
-    sh.wire(C810.pin_pos(2)[0], yf, 228.6, yf)
-    sh.label("TX_VMID", 228.6, yf, 0)
-    sh.text("Singly-terminated 3rd-order Butterworth, f_c = 3 MHz, R = 200 R (the DAC load doubles as the filter source):", 152.4, 135.0, 1.2)
-    sh.text("C808 = 1.5/(2 pi f_c R) = 398 pF, L801 = 1.3333 R/(2 pi f_c) = 14.1 uH, C809 = 0.5/(2 pi f_c R) = 133 pF.", 152.4, 138.2, 1.2)
-    sh.text("C810 is the ONLY connection between the AGND (DDS) domain and the GND (power-stage) domain.", 152.4, 141.4, 1.2)
+    C810 = pl(c, "C810", C_1U, 257.81, yf, 90)
+    sh.wire(241.30, yf, C810.pin_pos(1)[0], yf)
+    sh.wire(C810.pin_pos(2)[0], yf, 274.32, yf)
+    sh.label("TX_VMID", 274.32, yf, 0)
+    sh.text("Singly-terminated 3rd-order Butterworth, f_c = 3 MHz, R = 200 R (the DAC load doubles as the filter source):", 176.53, 151.13, 1.2)
+    sh.text("C808 = 1.5/(2 pi f_c R) = 398 pF, L801 = 1.3333 R/(2 pi f_c) = 14.1 uH, C809 = 0.5/(2 pi f_c R) = 133 pF.", 176.53, 154.33, 1.2)
+    sh.text("C810 is the ONLY connection between the AGND (DDS) domain and the GND (power-stage) domain.", 176.53, 157.53, 1.2)
 
     # ============================================================ mid-rail bias network
-    xm, ym = 236.22, 160.02
-    sh.wire(xm - 15.24, ym, xm + 15.24, ym)
-    sh.label("TX_VMID", xm - 15.24, ym, 180)
-    R805 = pl(c, "R805", R_100K, xm - 7.62, ym - 3.81, 0)
+    ym = 214.63
+    sh.wire(278.13, ym, 328.93, ym)
+    sh.label("TX_VMID", 278.13, ym, 180)
+    R805 = pl(c, "R805", R_100K, 290.83, ym - 3.81, 0)
     e = sh.stub(R805, 1, 7.62)
-    sh.label(VEXT_TX, e[0], e[1], 270)
-    for ref, lib, x in (("R806", R_100K, xm), ("C811", C_10U, xm + 7.62), ("C812", C_100N, xm + 15.24)):
+    sh.label(VEXT_TX, e[0], e[1], 90)            # stub points UP
+    for ref, lib, x in (("R806", R_100K, 303.53), ("C811", C_10U, 316.23), ("C812", C_100N, 328.93)):
         prt = pl(c, ref, lib, x, ym + 3.81, 0)
         c.pwr_pin(prt, 2, "GND")
-    sh.text("Mid-rail bias: V_mid = VEXT/2 = 9.0 V at 18 V; 100 k || 100 k = 50 k filtered by C811/C812 (f = 0.32 Hz).", 160.0, 182.8, 1.2)
+    sh.text("Mid-rail bias: V_mid = VEXT/2 = 9.0 V at 18 V; 100 k || 100 k = 50 k filtered by C811/C812 (f = 0.32 Hz).", 278.13, 234.95, 1.2)
 
     # ============================================================ OPA564 power stage
-    U2 = c.place("U802", "OPA564AIDWPR", 279.4, 127.0, 0)
+    U2 = c.place("U802", "OPA564AIDWPR", 400.05, 179.07, 0)
+    U2.field_pos["Value"] = (387.35, 168.91, 0, "right bottom")   # default lands on the V- pin stack
+    U2.field_pos["Reference"] = (389.89, 160.02, 0, "left bottom")  # default sits on the V+ pin numbers
     e = sh.stub(U2, "5", 7.62)                   # +IN
     sh.label("TX_VMID", e[0], e[1], 180)
     e = sh.stub(U2, "6", 7.62)                   # -IN
     sh.label("TX_FB", e[0], e[1], 180)
 
     # ---- enable and current limit ---------------------------------------------------------------
-    e = sh.stub(U2, "4", 10.16)                  # E/S
+    # E/S runs out on a long line with R810 hanging from it; ISET stays SHORT so that R809 sits
+    # under the E/S line and clear of R810 -- no stub crosses another part.
+    e = sh.stub(U2, "4", 25.4)                   # E/S
     sh.label("TX_EN", e[0], e[1], 180, "global")
-    R810 = pl(c, "R810", R_10K, 259.08, e[1] + 3.81, 0)
+    R810 = pl(c, "R810", R_10K, 370.84, e[1] + 3.81, 0)
     c.pwr_pin(R810, 2, "GND")
-    e = sh.stub(U2, "9", 2.54)                   # ISET
-    sh.wire(e[0], e[1], e[0], 139.7)
-    R809 = pl(c, "R809", R_11K, e[0], 143.51, 0)
+    e = sh.stub(U2, "9", 7.62)                   # ISET
+    R809 = pl(c, "R809", R_11K, e[0], e[1] + 3.81, 0)
     c.pwr_pin(R809, 2, "GND")
     c.nc_pin(U2, "12")                           # T_SENSE unused (datasheet: may be left open)
 
     # ---- supplies --------------------------------------------------------------------------------
-    vp = [sh.stub(U2, p, 7.62) for p in ("2", "17", "18", "19")]
+    vp = [sh.stub(U2, p, 15.24) for p in ("2", "17", "18", "19")]
     yvp = vp[0][1]
     # FB802: >= 3 A ferrite bead between +VEXT and the OPA564 V+ branch (circuits note 7, last
     # row), separate from FB801 which filters +3V3 for the DDS.  Everything on this side of the
     # bead is the local net +VEXT_TX: C815/C816, the R805 half of the mid-rail divider and the
     # D801 output clamp.
-    FB2 = pl(c, "FB802", FB_3A, 247.65, yvp, 90)          # rot 90: pin 1 left, pin 2 right
-    rail_pin(c, FB2, 1, VEXT, 5.08)
+    FB2 = pl(c, "FB802", FB_3A, 353.06, yvp, 90)          # rot 90: pin 1 left, pin 2 right
+    FB2.field_pos["Reference"] = (354.33, 143.00, 0, "left bottom")  # its own lane: the 14-char value runs up past it
+    rail_pin(c, FB2, 1, VEXT, 7.62)
     sh.wire(FB2.pin_pos(2)[0], yvp, vp[-1][0], yvp)
-    for ref, lib, x in (("C816", C_100N, 259.08), ("C815", CP_47U, 266.7)):
+    for ref, lib, x in (("C816", C_100N, 368.30), ("C815", CP_47U, 381.00)):
         prt = pl(c, ref, lib, x, yvp + 3.81, 0)
         c.pwr_pin(prt, 2, "GND")
-    sh.wire(271.78, yvp, 271.78, 99.06)
-    sh.label(VEXT_TX, 271.78, 99.06, 270)
-    c.flag(254.0, yvp)          # +VEXT_TX is behind a bead: flag it as driven, like +3V3D
-    sh.text("FB802 (120 R @ 100 MHz, 3 A) isolates the OPA564 V+ branch from the +VEXT input; C815 47 uF + C816 100 nF sit after it, at the V+ pins (SBOS372E Fig. 35).", 226.0, 85.0, 1.2)
-    sh.text("Single +VEXT 7-18 V; total supply <= 24 V, absolute max 26 V. D801 clamps the output to +VEXT_TX, the same post-bead node.", 226.0, 88.2, 1.2)
+    sh.wire(388.62, yvp, 388.62, 139.70)
+    sh.label(VEXT_TX, 388.62, 139.70, 90)        # branch points UP
+    c.tap(360.68, yvp, "PWR_FLAG", 5.08)         # +VEXT_TX is behind a bead: flag it, on its own stub
+    sh.text("FB802 (120 R @ 100 MHz, 3 A) isolates the OPA564 V+ branch from the +VEXT input; C815 47 uF + C816 100 nF sit after it, at the V+ pins (SBOS372E Fig. 35).", 330.20, 119.38, 1.2)
+    sh.text("Single +VEXT 7-18 V; total supply <= 24 V, absolute max 26 V. D801 clamps the output to +VEXT_TX, the same post-bead node.", 330.20, 122.58, 1.2)
 
-    ed = sh.stub(U2, "7", 5.08)                  # VDIG
-    sh.wire(ed[0], ed[1], 292.1, ed[1])
-    sh.wire(ed[0], ed[1], ed[0], 99.06)
-    c.power_at(ed[0], 99.06, "+3V3", 0)
-    C814 = pl(c, "C814", C_100N, 292.1, ed[1] + 3.81, 0)
+    ed = sh.stub(U2, "7", 10.16)                 # VDIG
+    sh.wire(ed[0], ed[1], ed[0], 142.24)
+    c.power_at(ed[0], 142.24, "+3V3", 0)
+    sh.wire(ed[0], ed[1], 417.83, ed[1])
+    C814 = pl(c, "C814", C_100N, 417.83, ed[1] + 3.81, 0)
     c.pwr_pin(C814, 2, "GND")
 
-    vm = [sh.stub(U2, p, 7.62) for p in ("1", "10", "11", "20", "13", "14", "21")]
-    yvm = vm[0][1]
-    sh.wire(vm[0][0], yvm, vm[-1][0], yvm)
-    sh.wire(U2.x, yvm, U2.x, yvm + 3.81)
-    c.power_at(U2.x, yvm + 3.81, "GND", 0)
-    sh.text("V- (1/10/11/20), V-PWR (13/14) and the PowerPAD EP (21) are all GND:", 160.0, 186.0, 1.2)
-    sh.text("pad DOWN onto the ground pour with a via array, theta_JA 33 C/W.", 160.0, 189.2, 1.2)
+    # V- (1/10/11/20), V-PWR (13/14) and the PowerPAD EP (21): one comb, ONE GND on a tail
+    c.comb(U2, ["1", "10", "11", "20", "13", "14", "21"], "GND", 10.16, 7.62)
+    sh.text("V- (1/10/11/20), V-PWR (13/14) and the PowerPAD EP (21) are all GND:", 345.44, 240.03, 1.2)
+    sh.text("pad DOWN onto the ground pour with a via array, theta_JA 33 C/W.", 345.44, 243.23, 1.2)
 
     # ---- flags -------------------------------------------------------------------------------------
     for pin, net in (("3", "TX_TFLAG"), ("8", "TX_IFLAG")):
-        c.glabel_pin(U2, pin, net, 5.08)
+        c.glabel_pin(U2, pin, net, 7.62)
     for k, (ref, net) in enumerate((("R811", "TX_IFLAG"), ("R812", "TX_TFLAG"))):
-        r = pl(c, ref, R_10K, 314.96 + k * 12.7, 160.02, 0, dnp=True)
+        r = pl(c, ref, R_10K, 441.96 + k * 12.7, 285.75, 0, dnp=True)
         c.pwr_pin(r, 1, "+3V3")
         e = sh.stub(r, 2, 5.08)
-        sh.label(net, e[0], e[1], 90, "global")
-    sh.text("I_FLAG / T_FLAG are push-pull CMOS referenced to V- = GND, so R811 / R812 are DNP", 300.0, 178.0, 1.2)
-    sh.text("footprints only. Both flags go to TCA9535 spare inputs; poll them after every pulse.", 300.0, 181.2, 1.2)
+        sh.label(net, e[0], e[1], 270, "global")  # stub points DOWN
+    sh.text("I_FLAG / T_FLAG are push-pull CMOS referenced to V- = GND, so R811 / R812 are DNP", 430.53, 320.04, 1.2)
+    sh.text("footprints only. Both flags go to TCA9535 spare inputs; poll them after every pulse.", 430.53, 323.24, 1.2)
 
     # ---- gain network -------------------------------------------------------------------------------
-    yg = 180.34
-    sh.wire(236.22, yg, 248.92, yg)
-    sh.label("TX_FB", 236.22, yg, 180)
+    yg = 276.86
+    sh.wire(278.13, yg, 311.15, yg)
+    sh.label("TX_FB", 278.13, yg, 180)
     # R807 hangs BELOW the rail: above it the stub would land on the C811 GND pin of the bias block
-    R807 = pl(c, "R807", R_6R49K, 243.84, yg + 3.81, 0)
+    R807 = pl(c, "R807", R_6R49K, 290.83, yg + 3.81, 0)
     e = sh.stub(R807, 2, 5.08)
-    sh.label("TX_A", e[0], e[1], 90)
-    JP1 = c.place("JP801", "SolderJumper_3_Bridged12", 254.0, yg, 0)
-    sh.wire(JP1.pin_pos(1)[0], JP1.pin_pos(1)[1], 248.92, yg)
+    sh.label("TX_A", e[0], e[1], 270)            # stub points DOWN
+    JP1 = c.place("JP801", "SolderJumper_3_Bridged12", 316.23, yg, 0)
+    sh.wire(JP1.pin_pos(1)[0], JP1.pin_pos(1)[1], 311.15, yg)
+    JP1.field_pos["Value"] = (330.20, 271.78, 0, "left bottom")   # 24 chars: keep it off the R808 leg
     c.nc_pin(JP1, 3)
     pj = JP1.pin_pos(2)
-    R808 = pl(c, "R808", R_270, pj[0], pj[1] + 6.35, 0)
+    R808 = pl(c, "R808", R_270, pj[0], pj[1] + 10.16, 0)
     sh.wire(pj[0], pj[1], R808.pin_pos(1)[0], R808.pin_pos(1)[1])
-    C813 = pl(c, "C813", CP_100U, pj[0], pj[1] + 16.51, 0)
+    C813 = pl(c, "C813", CP_100U, pj[0], pj[1] + 24.13, 0)
     sh.wire(R808.pin_pos(2)[0], R808.pin_pos(2)[1], C813.pin_pos(1)[0], C813.pin_pos(1)[1])
     c.pwr_pin(C813, 2, "GND")
-    sh.text("G = 1 + R807/R808 = 1 + 6490/270 = 25.0. C813 blocks DC in the gain leg, so the DC gain is 1 and the output", 214.0, 212.0, 1.2)
-    sh.text("sits at V_mid (f_HP = 5.9 Hz). JP801 (1-2 bridged) opens the gain leg for a unity-gain bring-up; pad 3 is a", 214.0, 215.2, 1.2)
-    sh.text("spare for an external gain resistor.", 214.0, 218.4, 1.2)
+    sh.text("G = 1 + R807/R808 = 1 + 6490/270 = 25.0. C813 blocks DC in the gain leg, so the DC gain is 1 and the output", 278.13, 323.85, 1.2)
+    sh.text("sits at V_mid (f_HP = 5.9 Hz). JP801 (1-2 bridged) opens the gain leg for a unity-gain bring-up; pad 3 is a", 278.13, 327.05, 1.2)
+    sh.text("spare for an external gain resistor.", 278.13, 330.25, 1.2)
 
     # ---- output chain ----------------------------------------------------------------------------------
-    o15 = sh.stub(U2, "15", 7.62)
-    o16 = sh.stub(U2, "16", 7.62)
+    o15 = sh.stub(U2, "15", 10.16)
+    o16 = sh.stub(U2, "16", 10.16)
     sh.wire(o15[0], o15[1], o16[0], o16[1])
-    xo, yo = o16[0], o16[1]                       # 299.72, 123.19
-    sh.wire(xo, o15[1], xo, 114.3)
-    sh.label("TX_A", xo, 114.3, 270)
+    xo, yo = o16[0], o16[1]
+    sh.wire(429.26, yo, 429.26, 167.64)
+    sh.label("TX_A", 429.26, 167.64, 90)         # branch points UP
 
-    D801 = c.place("D801", "SS54", 307.34, 115.57, 270)        # A down (output node), K up (+VEXT)
+    D801 = c.place("D801", "SS54", 443.23, 163.83, 270)        # A down (output node), K up (+VEXT)
     sh.wire(D801.pin_pos(1)[0], D801.pin_pos(1)[1], D801.pin_pos(1)[0], yo)
     e = sh.stub(D801, 2, 5.08)
-    sh.label(VEXT_TX, e[0], e[1], 270)
-    D802 = c.place("D802", "SS54", 317.5, 130.81, 270)         # K up (output node), A down (GND)
+    sh.label(VEXT_TX, e[0], e[1], 90)            # stub points UP
+    D802 = c.place("D802", "SS54", 457.20, 185.42, 270)        # K up (output node), A down (GND)
     sh.wire(D802.pin_pos(2)[0], D802.pin_pos(2)[1], D802.pin_pos(2)[0], yo)
     c.pwr_pin(D802, 1, "GND")
-    sh.wire(xo, yo, 325.12, yo)
-    R814 = pl(c, "R814", R_10R_0805, 325.12, yo + 3.81, 0)
-    C817 = pl(c, "C817", C_10N, 325.12, yo + 13.97, 0)
+    R813 = pl(c, "R813", R_4R7_2512, 487.68, yo, 90)
+    R813.field_pos["Reference"] = (483.87, 169.00, 0, "left bottom")
+    sh.wire(xo, yo, R813.pin_pos(1)[0], yo)
+    R814 = pl(c, "R814", R_10R_0805, 469.90, yo + 3.81, 0)
+    C817 = pl(c, "C817", C_10N, 469.90, yo + 17.78, 0)
     sh.wire(R814.pin_pos(2)[0], R814.pin_pos(2)[1], C817.pin_pos(1)[0], C817.pin_pos(1)[1])
     c.pwr_pin(C817, 2, "GND")
-    R813 = pl(c, "R813", R_4R7_2512, 335.28, yo, 90)
-    sh.wire(325.12, yo, R813.pin_pos(1)[0], yo)
-    C818 = pl(c, "C818", C_10U_HV, 347.98, yo, 90)
+    C818 = pl(c, "C818", C_10U_HV, 504.19, yo, 90)
     sh.wire(R813.pin_pos(2)[0], yo, C818.pin_pos(1)[0], yo)
-    sh.wire(C818.pin_pos(2)[0], yo, 361.95, yo)
 
     # -20 dB pad option: JP802 pads 1-2 bridged = full output, 2-3 = divided
-    JP2 = c.place("JP802", "SolderJumper_3_Bridged12", 367.03, yo, 0)
-    sh.wire(358.14, yo, 358.14, 110.49)
-    R815 = pl(c, "R815", R_910, 361.95, 110.49, 90)
-    sh.wire(R815.pin_pos(2)[0], 110.49, 372.11, 110.49)
-    sh.wire(372.11, 110.49, 372.11, yo)
-    R816 = pl(c, "R816", R_100, 372.11, 106.68, 180)          # pin 1 at the tap, pin 2 up to GND
+    JP2 = c.place("JP802", "SolderJumper_3_Bridged12", 541.02, yo, 0)
+    JP2.field_pos["Value"] = (513.08, 186.69, 0, "left top")      # 24 chars: keep it off the TX leg
+    sh.wire(C818.pin_pos(2)[0], yo, JP2.pin_pos(1)[0], yo)
+    ypad = 154.94
+    sh.wire(514.35, yo, 514.35, ypad)
+    R815 = pl(c, "R815", R_910, 525.78, ypad, 90)
+    sh.wire(514.35, ypad, R815.pin_pos(1)[0], ypad)
+    sh.wire(R815.pin_pos(2)[0], ypad, 551.18, ypad)
+    sh.wire(551.18, ypad, 551.18, yo)
+    sh.wire(551.18, yo, JP2.pin_pos(3)[0], yo)
+    R816 = pl(c, "R816", R_100, 538.48, ypad + 3.81, 0)       # pin 1 on the pad tap, pin 2 down to GND
     c.pwr_pin(R816, 2, "GND")
-    sh.text("-20 dB pad: 100/(910+100) = 0.099 into a high-Z load.", 303.0, 96.0, 1.2)
+    sh.text("-20 dB pad: 100/(910+100) = 0.099 into a high-Z load.", 490.22, 143.51, 1.2)
 
     # TX node -> the panel link J6 (pins 19 and 21, two pins for the coil current)
     # v0.8: the board-edge screw terminal J802 is gone; the TX coil is connected on the front
     # panel, at the 2P screw terminal beside the TX SMA (Decision #49).
     pt = JP2.pin_pos(2)
-    sh.wire(pt[0], pt[1], pt[0], 146.05)
-    sh.wire(pt[0], 146.05, 372.11, 146.05)
-    sh.wire(372.11, 146.05, 372.11, 152.4)
-    sh.label("TX", 372.11, 152.4, 90, "global")
-    sh.text("TX leaves this sheet as a global label -> panel link J6 pins 19 and 21 (AGND on 20 and 22)", 300.0, 195.0, 1.2)
-    sh.text("-> the TX SMA and the 2P screw terminal on the panel. Route TX and its return as a close pair,", 300.0, 198.2, 1.2)
-    sh.text("loop area < 1 cm2; up to 1 A of coil current must never share copper with the receiver pour.", 300.0, 201.4, 1.2)
+    sh.wire(pt[0], pt[1], pt[0], 201.93)
+    sh.label("TX", pt[0], 201.93, 270, "global")  # branch points DOWN
+    sh.text("TX leaves this sheet as a global label -> panel link J6 pins 19 and 21 (AGND on 20 and 22)", 455.93, 220.98, 1.2)
+    sh.text("-> the TX SMA and the 2P screw terminal on the panel. Route TX and its return as a close pair,", 455.93, 224.18, 1.2)
+    sh.text("loop area < 1 cm2; up to 1 A of coil current must never share copper with the receiver pour.", 455.93, 227.38, 1.2)
 
-    # ---- level / bandwidth table -----------------------------------------------------------------------
+    # ---- notes and the level / bandwidth table (a band with no geometry in it) --------------------------
+    sh.text("R817 / R818: 10 k pull-downs (RESET is active HIGH on the AD9834).", 48.26, 260.35, 1.2)
+    sh.text("Both lines go to TCA9535 spare pins P1.5 / P1.6 — global labels until the expander sheet claims them.", 48.26, 263.55, 1.2)
+    sh.text("R801 6.80 k: I_OUT,FS = 18 x V_REFOUT / R_SET = 18 x 1.20 / 6800 = 3.18 mA. C805 decouples COMP to AVDD (datasheet Fig. 1).", 48.26, 273.05, 1.2)
     rows = [["JP801 / R808", "G", "V_out pp", "f_3dB = 17 MHz / G", "SR limit = 40/(pi V_pp)"],
             ["270 R (fitted)", "25.0", "15.9 V", "680 kHz", "800 kHz"],
             ["1.00 k", "7.49", "4.76 V", "2.27 MHz", "2.67 MHz"],
             ["3.32 k", "2.95", "1.88 V", "5.8 MHz", "6.8 MHz"]]
-    sh.text("Level plan from 0.636 V pp at the DDS output (re-spec 2.3). Top row = the 89.4 kHz NMR setting: +-7.95 V into 1419 R = 5.6 mA = t90 417 us.", 38.1, 198.0, 1.3)
-    sh.table(38.1, 200.0, rows, [30, 12, 18, 34, 40], 1.3)
-    sh.text("Firmware (re-spec 9.1 / 9.3): hold DDS_RESET high while writing, B28 = 1, PIN/SW set for hardware PSELECT; the carrier free-runs and is gated ONLY by TX_EN.", 38.1, 222.0, 1.3)
-    sh.text("TX_EN must be low except during a pulse — for the thermal budget as much as for receiver blanking (quiescent 39 mA x 18 V = 0.70 W, shutdown 5 mA = 0.09 W).", 38.1, 225.2, 1.3)
+    sh.text("Level plan from 0.636 V pp at the DDS output (re-spec 2.3). Top row = the 89.4 kHz NMR setting: +-7.95 V into 1419 R = 5.6 mA = t90 417 us.", 48.26, 283.21, 1.3)
+    sh.table(48.26, 285.75, rows, [30, 12, 18, 34, 40], 1.3)
+    sh.text("Firmware (re-spec 9.1 / 9.3): hold DDS_RESET high while writing, B28 = 1, PIN/SW set for hardware PSELECT; the carrier free-runs and is gated ONLY by TX_EN.", 48.26, 306.07, 1.3)
+    sh.text("TX_EN must be low except during a pulse — for the thermal budget as much as for receiver blanking (quiescent 39 mA x 18 V = 0.70 W, shutdown 5 mA = 0.09 W).", 48.26, 309.27, 1.3)
 
     if FALLBACKS:
         print("sheet_nmr_tx: %d symbols still missing from cb_symbols (Value and footprint are correct): %s"
               % (len(FALLBACKS), "; ".join("%s = %s on %s [%s]" % t for t in FALLBACKS)))
     auto_junctions(sh)
     return sh
-
 
 # ================================================================== PCB placement (ZONE_B)
 # Board outline v0.7 final: 180 x 100; everything that sat at x >= 129 moved +40 mm with the

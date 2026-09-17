@@ -167,14 +167,36 @@ def _place(c, ref, x, y, rot=0, unit=1):
     return c.place(ref, lib, x, y, rot, unit=unit, value=val, dnp=dnp)
 
 
+def _pin_label(c, inst, pin, text, kind="local", length=5.08):
+    """stub from a pin ending in a label that reads AWAY from the symbol.
+
+    cb_sch.Sheet.pin_label picks 90 for a downward stub and 270 for an upward one, which makes
+    the text run back across the symbol body (KiCad draws 90 upward from the anchor and 270
+    downward).  This sheet uses the opposite convention so a label never lands on its own part.
+    """
+    sh = c.sh
+    px, py = inst.pin_pos(pin)
+    ex, ey = sh.stub(inst, pin, length)
+    if ex > px + 1e-6:
+        rot = 0
+    elif ex < px - 1e-6:
+        rot = 180
+    elif ey < py - 1e-6:
+        rot = 90          # stub upward -> text extends upward
+    else:
+        rot = 270         # stub downward -> text extends downward
+    sh.label(text, ex, ey, rot, kind, "bidirectional")
+    return ex, ey
+
+
 def _hook(c, inst, pin, spec, length=5.08):
     kind, name = spec
     if kind == "p":
         c.pwr_pin(inst, pin, name, length)
     elif kind == "g":
-        c.glabel_pin(inst, pin, name, length)
+        _pin_label(c, inst, pin, name, "global", length)
     elif kind == "l":
-        c.label_pin(inst, pin, name, length)
+        _pin_label(c, inst, pin, name, "local", length)
     elif kind == "n":
         c.nc_pin(inst, pin)
 
@@ -184,11 +206,34 @@ def _hooks(c, inst, spec_list, length=5.08):
         _hook(c, inst, item[0], item[1], item[2] if len(item) > 2 else length)
 
 
-def _farm(c, x0, y0, dx, dy, nrow, items):
-    """grid of small parts: items = (ref, rot, [(pin, spec), ...])"""
+def _farm(c, x0, y0, dx, dy, nrow, items, length=6.35):
+    """grid of small parts: items = (ref, rot, [(pin, spec), ...]), filled column by column.
+
+    dy must leave room for KiCad's auto-placed reference/value text, which for a rot-90 passive
+    is drawn VERTICALLY beside the body and is about 6.5 mm tall: 11.43 mm row pitch keeps a
+    clear 2.5 mm between one row's text and the next row's wire.
+    """
     for k, (ref, rot, hooks) in enumerate(items):
         inst = _place(c, ref, x0 + (k // nrow) * dx, y0 + (k % nrow) * dy, rot)
-        _hooks(c, inst, hooks)
+        _hooks(c, inst, hooks, length)
+
+
+def _bank(c, x0, y_bus, refs, rail, gnd, pitch=12.7, drop=6.35, lead=6.35):
+    """a decoupling row: ONE rail bus with the rail symbol on its own stub at the left END of the
+    bus (c.tap, never mid-wire), the capacitors hanging below it on their own drop wires, and one
+    ground symbol per capacitor.  Replaces the old stacked 'rail arrow / cap / ground' columns."""
+    sh = c.sh
+    xs = [x0 + k * pitch for k in range(len(refs))]
+    y_cap = y_bus + drop + 3.81
+    sh.wire(x0 - lead, y_bus, xs[-1], y_bus)
+    c.tap(x0 - lead, y_bus, rail, 2.54)
+    caps = []
+    for ref, x in zip(refs, xs):
+        cap = _place(c, ref, x, y_cap, 0)
+        sh.wire(x, y_bus, x, y_cap - 3.81)
+        c.pwr_pin(cap, 2, gnd, 3.81)
+        caps.append(cap)
+    return caps
 
 
 def _net_at(c, sh, x, y, spec, pwr_rot=270):
@@ -197,7 +242,6 @@ def _net_at(c, sh, x, y, spec, pwr_rot=270):
         c.power_at(x, y, name, pwr_rot)
     else:
         sh.label(name, x, y, 0, "global" if kind == "g" else "local")
-
 
 # ================================================================== schematic
 def build(root_uuid):
@@ -216,47 +260,50 @@ def build(root_uuid):
     ])
 
     # ---------------------------------------------------------------- 1. CLOCKS
-    sh.text("1 — CLOCKS: Si5351A (I2C 0x60) + 74HC74 Johnson quadrature divider", 25, 56, 2.2, True)
-    U701 = _place(c, "U701", 65, 85)
+    sh.text("1 — CLOCKS: Si5351A (I2C 0x60) + 74HC74 Johnson quadrature divider", 25, 50, 2.2, True)
+    U701 = _place(c, "U701", 65, 92)
     _hooks(c, U701, [(1, ("p", "+3V3"), 7.62), (7, ("p", "+3V3"), 13.97), (8, ("p", "GND"), 7.62),
                      (4, ("g", "I2C_SCL"), 7.62), (5, ("g", "I2C_SDA"), 7.62),
                      (2, ("l", "XTAL_A"), 7.62), (3, ("l", "XTAL_B"), 7.62),
                      (10, ("l", "SI_CLK0"), 7.62), (9, ("l", "SI_CLK1"), 7.62), (6, ("l", "SI_CLK2"), 7.62)])
     Y701 = _place(c, "Y701", 65, 130)
-    _hooks(c, Y701, [(1, ("l", "XTAL_A")), (3, ("l", "XTAL_B")), (2, ("p", "GND")), (4, ("p", "GND"))])
-    sh.text("C9006 is a 12 pF crystal: XTAL_CL = 10 pF internal + 4 pF on each of XA/XB = 2 pF external", 25, 143, 1.3)
+    _hooks(c, Y701, [(1, ("l", "XTAL_A")), (3, ("l", "XTAL_B"))])
+    c.comb(Y701, [2, 4], "GND", out=5.08, tail=5.08)          # adjacent ground pins: one bus, one symbol
+    sh.text("C9006 is a 12 pF crystal: XTAL_CL = 10 pF internal + 4 pF on each of XA/XB = 2 pF external", 25, 158, 1.3)
 
-    U702 = _place(c, "U702", 175, 95)
+    U702 = _place(c, "U702", 175, 98)
     _hooks(c, U702, [(14, A3V3, 6.35), (7, ("p", "AGND"), 6.35),
                      (1, ("g", "EXP_P14"), 6.35), (13, ("g", "EXP_P14"), 6.35),
-                     (4, A3V3, 6.35), (10, A3V3, 6.35),
                      (3, ("l", "CLK1"), 6.35), (11, ("l", "CLK1"), 6.35),
                      (2, ("l", "LO_QN"), 6.35), (8, ("l", "LO_QN"), 6.35),
                      (12, ("l", "LO_I"), 6.35), (5, ("l", "LO_I"), 6.35),
                      (9, ("l", "LO_Q"), 6.35), (6, ("n", ""))])
-    sh.text("U702 = 74HC74D,653 dual D flip-flop as a 2-bit Johnson counter. Pins: 1/13 /CLR, 2/12 D, 3/11 CLK,", 140, 143, 1.3)
-    sh.text("4/10 /PRE, 5/9 Q, 6/8 /Q, 7 GND, 14 VCC. States 00 -> 10 -> 11 -> 01: LO_Q lags LO_I by exactly 90 deg.", 140, 146.5, 1.3)
+    # /PRE (pins 4 and 10) share one +3V3A leg: the rail symbol sits clear ABOVE the label column
+    # instead of squeezing a power symbol between the two EXP_P14 labels 2.54 mm away.
+    e4 = sh.stub(U702, 4, 25.4)
+    e10 = sh.stub(U702, 10, 25.4)
+    sh.wire(e4[0], e4[1], e10[0], e10[1])
+    c.tap(e4[0], e4[1], A3V3[1], 8.89)
+    sh.text("U702 = 74HC74D,653 dual D flip-flop as a 2-bit Johnson counter. Pins: 1/13 /CLR, 2/12 D, 3/11 CLK,", 140, 145, 1.3)
+    sh.text("4/10 /PRE, 5/9 Q, 6/8 /Q, 7 GND, 14 VCC. States 00 -> 10 -> 11 -> 01: LO_Q lags LO_I by exactly 90 deg.", 140, 148.5, 1.3)
 
-    # +3V3A: FB901 + 10 uF + 100 nF from +3V3
-    FB = _place(c, "FB901", 255, 75, 90)
+    # +3V3A: FB901 + 10 uF + 100 nF from +3V3.  The PWR_FLAG sits on its own stub above the bus.
+    sh.text("+3V3A — analog 3.3 V for U702 / U901 / U902 (section 4.1)", 235, 60, 1.4, True)
+    FB = _place(c, "FB901", 255, 72, 90)
     c.pwr_pin(FB, 1, "+3V3", 5.08)
     e = sh.stub(FB, 2, 7.62)
-    sh.wire(e[0], e[1], 290, e[1])
-    c.flag(272, e[1])
-    _net_at(c, sh, 290, e[1], A3V3, 270)
-    sh.text("+3V3A — analog 3.3 V for U702 / U901 / U902 (section 4.1)", 235, 63, 1.4, True)
+    sh.wire(e[0], e[1], e[0] + 27.94, e[1])
+    c.tap(e[0] + 10.16, e[1], "PWR_FLAG")
+    _net_at(c, sh, e[0] + 27.94, e[1], A3V3, 270)
 
-    TP701 = _place(c, "TP701", 300, 95, 0)
-    c.label_pin(TP701, 1, "CLK2_TP", 5.08)
-    sh.text("CLK2 = spare clock / scope trigger", 285, 110, 1.3)
+    TP701 = _place(c, "TP701", 300, 110, 0)
+    _pin_label(c, TP701, 1, "CLK2_TP", "local", 5.08)
+    sh.text("CLK2 = spare clock / scope trigger", 283, 131, 1.3)
 
-    # clock + rail passive farm
-    _farm(c, 350, 60, 66, 8.89, 8, [
+    # ---- clock / signal passives: one column, 11.43 mm row pitch -----------------------------
+    _farm(c, 350, 62, 66, 11.43, 9, [
         ("C701", 90, [(1, ("l", "XTAL_A")), (2, ("p", "GND"))]),
         ("C702", 90, [(1, ("l", "XTAL_B")), (2, ("p", "GND"))]),
-        ("C703", 90, [(1, ("p", "+3V3")), (2, ("p", "GND"))]),
-        ("C704", 90, [(1, ("p", "+3V3")), (2, ("p", "GND"))]),
-        ("C705", 90, [(1, ("p", "+3V3")), (2, ("p", "GND"))]),
         ("R701", 90, [(1, ("p", "+3V3")), (2, ("g", "I2C_SDA"))]),
         ("R702", 90, [(1, ("p", "+3V3")), (2, ("g", "I2C_SCL"))]),
         ("R703", 90, [(1, ("l", "SI_CLK0")), (2, ("g", "CLK0_MCLK"))]),
@@ -264,24 +311,15 @@ def build(root_uuid):
         ("C706", 90, [(1, ("l", "CLK1")), (2, ("p", "AGND"))]),
         ("R705", 90, [(1, ("l", "SI_CLK2")), (2, ("l", "CLK2_TP"))]),
         ("R706", 90, [(1, A3V3), (2, ("g", "EXP_P14"))]),
-        ("C707", 90, [(1, A3V3), (2, ("p", "AGND"))]),
-        ("C905", 90, [(1, A3V3), (2, ("p", "AGND"))]),
-        ("C906", 90, [(1, A3V3), (2, ("p", "AGND"))]),
-        ("C907", 90, [(1, A3V3), (2, ("p", "AGND"))]),
-        ("C908", 90, [(1, A3V3), (2, ("p", "AGND"))]),
-        ("C916", 90, [(1, ("p", "+12V")), (2, ("p", "AGND"))]),
-        ("C917", 90, [(1, ("p", "-12V")), (2, ("p", "AGND"))]),
-        ("C918", 90, [(1, ("p", "+12V")), (2, ("p", "AGND"))]),
-        ("C919", 90, [(1, ("p", "-12V")), (2, ("p", "AGND"))]),
-        ("C722", 90, [(1, ("p", "+12V")), (2, ("p", "AGND"))]),
-        ("C723", 90, [(1, ("p", "-12V")), (2, ("p", "AGND"))]),
-        ("C724", 90, [(1, ("p", "+12V")), (2, ("p", "AGND"))]),
-        ("C725", 90, [(1, ("p", "-12V")), (2, ("p", "AGND"))]),
-        ("C726", 90, [(1, ("p", "+12V")), (2, ("p", "AGND"))]),
-        ("C727", 90, [(1, ("p", "-12V")), (2, ("p", "AGND"))]),
     ])
-    sh.text("Decoupling: C703/C704 VDD, C705 VDDO (Si5351, GND); C707 U702, C906/C907/C908 +3V3A (AGND);", 350, 52, 1.3)
-    sh.text("C722-C727 U703/U704 +-12 V, C916-C919 U705/U706 +-12 V (all AGND). C905 = 10 uF on +3V3A.", 350, 55.5, 1.3)
+
+    # ---- decoupling: four rail banks, one bus each, one ground per capacitor -------------------
+    sh.text("Decoupling: C703/C704 VDD, C705 VDDO (Si5351, GND); C707 U702, C906/C907/C908 +3V3A (AGND);", 398, 45, 1.3)
+    sh.text("C722-C727 U703/U704 +-12 V, C916-C919 U705/U706 +-12 V (all AGND). C905 = 10 uF on +3V3A.", 398, 48.5, 1.3)
+    _bank(c, 400, 66, ["C703", "C704", "C705"], "+3V3", "GND")
+    _bank(c, 460, 66, ["C707", "C905", "C906", "C907", "C908"], A3V3[1], "AGND")
+    _bank(c, 400, 112, ["C916", "C918", "C722", "C724", "C726"], "+12V", "AGND")
+    _bank(c, 470, 112, ["C917", "C919", "C723", "C725", "C727"], "-12V", "AGND")
 
     # ---------------------------------------------------------------- 2. RECEIVER
     sh.text("2 — RECEIVER: crossed-diode limiter, tuned tank, OPA1656 x1000, DG419 blanking", 25, 170, 2.2, True)
@@ -294,29 +332,33 @@ def build(root_uuid):
     U703p = _place(c, "U703", 165, 195, 0, unit=3)
     _hooks(c, U703p, [(8, ("p", "+12V"), 6.35), (4, ("p", "-12V"), 6.35)])
     sh.text("Stage 1: G = 1 + R712/R713 = 1 + 10 000/100 = 101", 78, 214, 1.3)
-    sh.text("Stage 2: G = 1 + R722/R723 = 1 + 9090/1000 = 10.0", 78, 254, 1.3)
+    sh.text("Stage 2: G = 1 + R722/R723 = 1 + 9090/1000 = 10.0", 78, 256, 1.3)
 
+    # the four supply pins get staggered stubs so no two power symbols sit side by side
     U704 = _place(c, "U704", 240, 210, 0)
     _hooks(c, U704, [(8, ("l", "BLK_IN"), 6.35), (2, ("p", "AGND"), 6.35), (6, ("g", "RX_BLANK"), 6.35),
-                     (1, ("l", "ST2_IN"), 6.35), (4, ("p", "+12V"), 6.35), (5, ("p", "+5VA"), 6.35),
-                     (3, ("p", "AGND"), 6.35), (7, ("p", "-12V"), 6.35)])
-    sh.text("DG419: logic 0 -> SW1 on, so RX_BLANK = 0 ties the stage-2 input (D) to AGND = BLANKED.", 205, 232, 1.3)
-    sh.text("VL = +5VA (V_IH = 2.4 V, so a 3.3 V CMOS drive has 0.9 V of margin); V+/V- = +-12 V.", 205, 235.5, 1.3)
-    sh.text("RX_BLANK: 0 = blanked (default, 10 k pull-down), 1 = receive.", 205, 241, 1.3, True)
-    sh.text("R724 goes to AGND, not to +3V3 as the design document's netlist table says: logic 0 blanks, so only a", 205, 244.2, 1.3, True)
-    sh.text("pull-DOWN gives the blanked-by-default the same document asks for in section 3.3 (instructor, 2026-09-13).", 205, 247.4, 1.3, True)
+                     (1, ("l", "ST2_IN"), 6.35), (4, ("p", "+12V"), 6.35), (5, ("p", "+5VA"), 16.51),
+                     (3, ("p", "AGND"), 6.35), (7, ("p", "-12V"), 16.51)])
+    sh.text("DG419: logic 0 -> SW1 on, so RX_BLANK = 0 ties the stage-2 input (D) to AGND = BLANKED.", 150, 248, 1.3)
+    sh.text("VL = +5VA (V_IH = 2.4 V, so a 3.3 V CMOS drive has 0.9 V of margin); V+/V- = +-12 V.", 150, 251.2, 1.3)
+    sh.text("RX_BLANK: 0 = blanked (default, 10 k pull-down), 1 = receive.", 150, 254.4, 1.3, True)
+    sh.text("R724 goes to AGND, not to +3V3 as the design document's netlist table says: logic 0 blanks, so only a", 150, 257.6, 1.3, True)
+    sh.text("pull-DOWN gives the blanked-by-default the same document asks for in section 3.3 (instructor, 2026-09-13).", 150, 260.8, 1.3, True)
 
-    JP701 = _place(c, "JP701", 75, 275, 0)
+    JP701 = _place(c, "JP701", 75, 268, 0)
     _hooks(c, JP701, [(1, ("g", "AUX")), (2, ("l", "RX_IN")), (3, ("p", "AGND"))])
-    sh.text("JP701: AUX -> LNA input (1-2), or AUX to AGND (2-3). Open by default.", 40, 288, 1.3)
-    JP702 = _place(c, "JP702", 175, 275, 0)
+    sh.text("JP701: AUX -> LNA input (1-2), or AUX to AGND (2-3). Open by default.", 40, 290, 1.3)
+    JP702 = _place(c, "JP702", 175, 268, 0)
     _hooks(c, JP702, [(1, ("l", "JP702A")), (2, ("l", "LNA_FB1")), (3, ("l", "JP702B"))])
-    sh.text("JP702: stage-1 feedback select. 1-2 bridged (default) = R712, G = 101; cut and bridge 2-3 = R714, G = 11.", 140, 288, 1.3)
-    JP703 = _place(c, "JP703", 300, 275, 90)
-    _hooks(c, JP703, [(1, ("l", "ST2_GAIN")), (2, ("p", "AGND"))])
-    sh.text("JP703 is in series with the R723 ground leg: cut it and stage 2 becomes a unity follower (G = 1).", 265, 291.5, 1.3)
+    sh.text("JP702: stage-1 feedback select. 1-2 bridged (default) = R712, G = 101; cut and bridge 2-3 = R714, G = 11.", 140, 290, 1.3)
+    JP703 = _place(c, "JP703", 300, 268, 0)
+    _hooks(c, JP703, [(1, ("l", "ST2_GAIN"), 5.08)])
+    c.pwr_L(JP703, 2, "AGND", out=5.08, leg=5.08)      # out to the side, then down to the symbol
+    sh.text("JP703 is in series with the R723 ground leg: cut it and stage 2 becomes a unity follower (G = 1).", 140, 293.2, 1.3)
 
-    _farm(c, 340, 180, 66, 8.89, 8, [
+    sh.text("Tank: C710 1.2 nF + C711 100 pF + C712 22 pF = 1.322 nF of pads; stuff to the 1.25 nF the coil needs.", 340, 168, 1.3)
+    sh.text("Preferred practice is to tune AT THE COIL: 1 m of RG174 adds ~100 pF = 8 % detune.", 340, 171.5, 1.3)
+    _farm(c, 355, 182, 78, 11.43, 8, [
         ("D703", 0, [(1, ("p", "AGND")), (2, ("g", "RX"))]),
         ("D704", 180, [(1, ("g", "RX")), (2, ("p", "AGND"))]),
         ("C710", 90, [(1, ("g", "RX")), (2, ("p", "AGND"))]),
@@ -334,58 +376,57 @@ def build(root_uuid):
         ("R723", 90, [(1, ("l", "LNA_FB2")), (2, ("l", "ST2_GAIN"))]),
         ("R724", 90, [(1, ("g", "RX_BLANK")), (2, ("p", "AGND"))]),
     ])
-    sh.text("Tank: C710 1.2 nF + C711 100 pF + C712 22 pF = 1.322 nF of pads; stuff to the 1.25 nF the coil needs.", 340, 172, 1.3)
-    sh.text("Preferred practice is to tune AT THE COIL: 1 m of RG174 adds ~100 pF = 8 % detune.", 340, 175.5, 1.3)
 
     # ---------------------------------------------------------------- 3. MIXER + IF
     sh.text("3 — I/Q COMMUTATING MIXER AND IF (9xx): double-balanced, both switch packages used", 25, 297, 2.2, True)
-    U705a = _place(c, "U705", 60, 315, 0, unit=1)
+    U705a = _place(c, "U705", 60, 313, 0, unit=1)
     _hooks(c, U705a, [(3, ("p", "AGND"), 6.35), (2, ("l", "INV_N"), 6.35), (1, ("l", "S_MINUS"), 6.35)])
-    sh.text("U705A: unity-gain inverter, S- = -S+", 33, 330, 1.3)
-    U705b = _place(c, "U705", 145, 315, 0, unit=2)
+    sh.text("U705A: unity-gain inverter, S- = -S+", 33, 326, 1.3)
+    U705b = _place(c, "U705", 150, 313, 0, unit=2)
     _hooks(c, U705b, [(5, ("l", "VMID_DIV"), 6.35), (6, ("l", "VMID_BUF"), 6.35), (7, ("l", "VMID_BUF"), 6.35)])
-    sh.text("U705B: V_MID = 1.65 V buffer (R903/R904 from +3V3A), R905 = 100 R in series out", 108, 330, 1.3)
-    U705p = _place(c, "U705", 210, 308, 0, unit=3)
+    sh.text("U705B: V_MID = 1.65 V buffer (R903/R904 from +3V3A), R905 = 100 R in series out", 115, 326, 1.3)
+    U705p = _place(c, "U705", 215, 318, 0, unit=3)
     _hooks(c, U705p, [(8, ("p", "+12V"), 6.35), (4, ("p", "-12V"), 6.35)])
 
-    U901 = _place(c, "U901", 275, 320, 0)
+    U901 = _place(c, "U901", 290, 313)
     _hooks(c, U901, [(1, ("l", "LO_I"), 6.35), (5, ("l", "LO_Q"), 6.35),
                      (10, ("l", "IF_IP"), 6.35), (6, ("l", "IF_QP"), 6.35),
                      (9, ("l", "SN_A"), 6.35), (2, ("l", "SP_A"), 6.35),
                      (7, ("l", "SN_A"), 6.35), (4, ("l", "SP_A"), 6.35),
                      (8, A3V3, 6.35), (3, ("p", "AGND"), 6.35)])
-    sh.text("U901 = I+ / Q+  (NO = S+, NC = S-)", 248, 353, 1.3)
-    U902 = _place(c, "U902", 360, 320, 0)
+    sh.text("U901 = I+ / Q+  (NO = S+, NC = S-)", 298, 336, 1.3)
+    U902 = _place(c, "U902", 385, 313)
     _hooks(c, U902, [(1, ("l", "LO_I"), 6.35), (5, ("l", "LO_Q"), 6.35),
                      (10, ("l", "IF_IN"), 6.35), (6, ("l", "IF_QN"), 6.35),
                      (9, ("l", "SP_B"), 6.35), (2, ("l", "SN_B"), 6.35),
                      (7, ("l", "SP_B"), 6.35), (4, ("l", "SN_B"), 6.35),
                      (8, A3V3, 6.35), (3, ("p", "AGND"), 6.35)])
-    sh.text("U902 = I- / Q-  (inputs SWAPPED: NO = S-, NC = S+)", 333, 353, 1.3)
+    sh.text("U902 = I- / Q-  (inputs SWAPPED: NO = S-, NC = S+)", 393, 336, 1.3)
 
-    U706a = _place(c, "U706", 445, 315, 0, unit=1)
+    U706a = _place(c, "U706", 480, 313, 0, unit=1)
     _hooks(c, U706a, [(3, ("l", "DIF_I_P"), 6.35), (2, ("l", "DIF_I_N"), 6.35), (1, ("g", "COND_OUT1"), 6.35)])
-    sh.text("U706A: I difference amp, G = 20 -> COND_OUT1 (JP101, ADC ch 7)", 415, 330, 1.3)
-    U706b = _place(c, "U706", 445, 355, 0, unit=2)
+    sh.text("U706A: I difference amp, G = 20 -> COND_OUT1 (JP101, ADC ch 7)", 460, 302, 1.3)
+    U706b = _place(c, "U706", 480, 352, 0, unit=2)
     _hooks(c, U706b, [(5, ("l", "DIF_Q_P"), 6.35), (6, ("l", "DIF_Q_N"), 6.35), (7, ("g", "COND_OUT2"), 6.35)])
-    sh.text("U706B: Q difference amp, G = 20 -> COND_OUT2 (JP102, ADC ch 8)", 415, 370, 1.3)
-    U706p = _place(c, "U706", 530, 308, 0, unit=3)
+    sh.text("U706B: Q difference amp, G = 20 -> COND_OUT2 (JP102, ADC ch 8)", 460, 337, 1.3)
+    U706p = _place(c, "U706", 550, 313, 0, unit=3)
     _hooks(c, U706p, [(8, ("p", "+12V"), 6.35), (4, ("p", "-12V"), 6.35)])
 
-    TP702 = _place(c, "TP702", 60, 338, 0)
+    TP702 = _place(c, "TP702", 30, 340, 0)
     e = sh.stub(TP702, 1, 5.08)
     sh.wire(e[0], e[1], e[0] + 20.32, e[1])
-    c.flag(e[0] + 7.62, e[1])
+    c.tap(e[0] + 7.62, e[1], "PWR_FLAG")
     _net_at(c, sh, e[0] + 20.32, e[1], VMID, 270)
-    sh.text("V_MID = 1.65 V, made by U705B; PWR_FLAG because no power_output pin drives it", 33, 336, 1.3)
+    sh.text("V_MID = 1.65 V, made by U705B; PWR_FLAG because no power_output pin drives it", 25, 331, 1.3)
 
-    # BAV99 clamps on the four switch inputs (3 pins each)
+    # BAV99 clamps on the four switch inputs (3 pins each), between the switch row and the IF farm
     for k, (ref, node) in enumerate([("D905", "SP_A"), ("D906", "SN_A"), ("D907", "SN_B"), ("D908", "SP_B")]):
-        d = _place(c, ref, 120 + k * 60, 342, 0)
-        _hooks(c, d, [(1, ("p", "AGND")), (2, A3V3), (3, ("l", node))])
-    sh.text("D905-D908: BAV99 clamps to AGND / +3V3A — the LNA runs on +-12 V and must not push the switch inputs outside 0..3.3 V.", 105, 334, 1.3)
+        d = _place(c, ref, 126 + k * 54, 345, 0)
+        _hooks(c, d, [(1, ("p", "AGND")), (2, A3V3), (3, ("l", node), 7.62)])
+    sh.text("D905-D908: BAV99 clamps to AGND / +3V3A — the LNA runs on +-12 V", 120, 330, 1.3)
+    sh.text("and must not push the switch inputs outside 0..3.3 V.", 120, 333.2, 1.3)
 
-    _farm(c, 40, 360, 66, 8.89, 5, [
+    _farm(c, 45, 360, 54, 11.43, 4, [
         ("R901", 90, [(1, ("l", "LNA_OUT")), (2, ("l", "INV_N"))]),
         ("R902", 90, [(1, ("l", "INV_N")), (2, ("l", "S_MINUS"))]),
         ("R903", 90, [(1, A3V3), (2, ("l", "VMID_DIV"))]),

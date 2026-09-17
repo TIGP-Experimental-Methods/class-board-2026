@@ -72,6 +72,41 @@ class Ctx:
         x, y = inst.pin_pos(pin)
         self.sh.nc(x, y)
 
+    # ---- spacing-rework helpers (2026-09-17): symbols never sit mid-wire, grounds never above a wire ----
+    def tap(self, x, y, net, length=2.54, direction=None):
+        """rail / ground / PWR_FLAG symbol on its own short stub from a bus point: up for rails and flags,
+        down for GND / AGND / -12V (override with direction='up'|'down')."""
+        down = net in ("GND", "AGND", "-12V")
+        if direction:
+            down = direction == "down"
+        ey = y + length if down else y - length
+        self.sh.wire(x, y, x, ey)
+        if net == "PWR_FLAG":
+            return self.flag(x, ey, 180 if down else 0)
+        gnd_type = net in ("GND", "AGND", "-12V")
+        rot = 0 if down == gnd_type else 180
+        return self.power_at(x, ey, net, rot)
+
+    def pwr_L(self, inst, pin, net, out=2.54, leg=5.08, direction=None):
+        """stub outward from the pin by `out`, then a vertical leg to the symbol (down for grounds)."""
+        ex, ey = self.sh.stub(inst, pin, out)
+        return self.tap(ex, ey, net, leg, direction)
+
+    def comb(self, inst, pins, net, out=5.08, tail=5.08, direction=None):
+        """adjacent pins on one side of a symbol: stub each by `out`, join the stub ends with one bus wire,
+        one symbol on a `tail` stub beyond the last pin (down for grounds, up for rails)."""
+        ends = [self.sh.stub(inst, p, out) for p in pins]
+        xs = sorted({e[0] for e in ends})
+        ys = sorted({e[1] for e in ends})
+        down = net in ("GND", "AGND", "-12V")
+        if direction:
+            down = direction == "down"
+        if len(xs) == 1:            # pins in a column -> vertical bus, symbol below (or above) the column
+            self.sh.wire(xs[0], ys[0], xs[0], ys[-1])
+            return self.tap(xs[0], ys[-1] if down else ys[0], net, tail)
+        self.sh.wire(xs[0], ys[0], xs[-1], ys[0])   # pins in a row -> horizontal bus, symbol at the far end
+        return self.tap(xs[-1], ys[0], net, tail, direction)
+
     def decouple(self, ref, lib, x, y, rail, gnd, rot=0):
         """vertical capacitor: pin 1 (top) -> rail, pin 2 (bottom) -> gnd, both via power symbols"""
         c = self.place(ref, lib, x, y, rot)
@@ -150,44 +185,35 @@ def build_base(root_uuid):
     sh = Sheet("base_mcu", "Base: ESP32-S3 dev-board socket, buses, expansion, star point", "A3", 2,
                "Jinhua #40729 (ESP32-S3-DevKitC-1 pin order) in two 1x22 sockets")
     c = Ctx(sh, "BASE", 0)
-    sheet_frame(sh, "BASE", "BASE — ESP32-S3 dev-board socket, I2C, expansion header, star point", [
+
+    def wrap(s, n=185):
+        """split a long note into page-wide lines so nothing runs off the right edge"""
+        out, cur = [], ""
+        for w in s.split(" "):
+            if cur and len(cur) + 1 + len(w) > n:
+                out.append(cur)
+                cur = w
+            else:
+                cur = w if not cur else cur + " " + w
+        if cur:
+            out.append(cur)
+        return out
+
+    notes = []
+    for s in [
         "Dev board: Jinhua #40729, ESP32-S3-DevKitC-1 v1.1 pin order (Espressif user guide). 3V3 pins NOT connected (dev board LDO must not fight the carrier's AMS1117).",
         "Strapping pins IO0/IO45/IO46 left open; IO3 is unused as well (v0.7: it was DIO8 — the strapping question is closed by not using it). IO35-37 (octal PSRAM) and IO48 (on-board WS2812) unused.",
         "GPIO map v0.7 (re-spec 8.2, interface contract): IO41 DDS_FSYNC, IO42 DDS_PSEL, IO40 TX_EN, IO8 RX_BLANK, IO9/IO14 HB_IN1/HB_IN2, IO47 FET_GATE. DIO1-8 and RELAY1-4 moved to the TCA9535 I2C expander (B5), which frees IO4/6/7/15 to the expansion header.",
         "I2C addresses: TCA9535 GPIO expander 0x20 (A0 = A1 = A2 = GND, B5), Si5351A clock generator 0x60, OLED 0x3C. 400 kHz, 4.7 k pull-ups here; Qwiic J4 inside the box and a second Qwiic on the front panel (through the link).",
         "Socket row spacing 25.4 mm ASSUMED from the 28 mm-wide clone (HANDOVER 2026-09-05) — MEASURE a #40729 before ordering (docs/design-decisions.md D-12).",
         "SPI2 on IO_MUX pins: 33 R series at the source on SCLK/MOSI (here) and on SDO at the ADC (B1). All inter-sheet signals are global labels; rails are power symbols.",
-    ])
-    # ---------------- dev-board sockets -------------------------------------------------
-    J1 = c.place("J1", "DEVKIT_SOCKET_J1", 120, 120, 0, value="DevKit J1 (left row)")
-    J2 = c.place("J2", "DEVKIT_SOCKET_J3", 190, 120, 0, value="DevKit J3 (right row)")
-    sh.box(129, 88, 181, 152, None)
-    sh.text("ESP32-S3-DevKitC-1 / Jinhua #40729 (plugged in, USB-C ports face the rear/power edge)", 130, 92, 1.4)
-    sh.text("antenna u.FL -> pigtail -> rear SMA bulkhead", 130, 95.5, 1.4)
-    # GPIO map v0.7 (re-spec 8.2): the DIO/RELAY pins are freed; IO4/6/7/15 go to the expansion header, IO3 stays unused
-    j1nets = {1: None, 2: None, 3: "RST", 4: "GPIO4", 5: "CS_DAC", 6: "GPIO6", 7: "GPIO7", 8: "GPIO15", 9: "OPTO_IN1", 10: "OPTO_IN2",
-              11: "FAST_OUT1", 12: "RX_BLANK", 13: None, 14: None, 15: "HB_IN1", 16: "CS_ADC", 17: "MOSI_MCU", 18: "SCLK_MCU", 19: "SPI_MISO", 20: "HB_IN2",
-              21: "+5V_RAW", 22: "GND"}
-    j3nets = {1: "GND", 2: "GPIO43", 3: "GPIO44", 4: "I2C_SDA", 5: "I2C_SCL", 6: "DDS_PSEL", 7: "DDS_FSYNC", 8: "TX_EN", 9: "TRIG_DIR", 10: "TRIG_IO",
-              11: None, 12: None, 13: None, 14: None, 15: None, 16: None, 17: "FET_GATE", 18: "FAST_OUT2", 19: "USB_DP", 20: "USB_DN", 21: "GND", 22: "GND"}
-    for pin, net in j1nets.items():
-        if net is None:
-            c.nc_pin(J1, pin)
-        elif net in ("+5V_RAW", "GND"):
-            c.pwr_pin(J1, pin, net, 7.62 if net == "GND" else 12.7)
-        elif net in ("MOSI_MCU", "SCLK_MCU", "RST"):
-            c.label_pin(J1, pin, net, 5.08)
-        else:
-            c.glabel_pin(J1, pin, net, 5.08)
-    for pin, net in j3nets.items():
-        if net is None:
-            c.nc_pin(J2, pin)
-        elif net == "GND":
-            c.pwr_pin(J2, pin, net, 5.08 if pin == 21 else 12.7)
-        else:
-            c.glabel_pin(J2, pin, net, 5.08)
-    sh.text("IO0, IO45, IO46 = strapping (open); IO3 unused (v0.7)", 200, 156, 1.2)
-    sh.text("IO35-37 = octal PSRAM, IO48 = on-board RGB LED", 200, 159, 1.2)
+    ]:
+        notes += wrap(s)
+    sheet_frame(sh, "BASE", "BASE — ESP32-S3 dev-board socket, I2C, expansion header, star point", notes)
+    # Layout rules (2026-09-17 spacing rework): every ground symbol stands upright at the end of its own
+    # stub, adjacent ground pins share one comb, rails leave a connector sideways then turn up, and no wire
+    # crosses a label.  Checked by scripts/sch_check.py and by the SVG render.
+
     # ---------------- GPIO map v0.7 (the interface contract lives on this sheet) ----------------
     gpio07 = [["GPIO", "Net", "Function", "Block"],
               ["12 / 11 / 13", "SPI_SCLK/MOSI/MISO", "SPI2 on IO_MUX, 33 R at source", "base"],
@@ -204,48 +230,94 @@ def build_base(root_uuid):
               ["43 / 44", "GPIO43 / GPIO44", "LED_WIFI/ACT via JP1/JP2; hdr", "base"],
               ["expander", "DIO1-8, MOD OUT 1-7", "P00-P07 -> 541; P10-P13/P15-P17 -> panel", "B5"],
               ["0/45/46, 3, 48", "-", "strapping / unused / PSRAM 35-37", "-"]]
-    sh.text("GPIO map v0.7 (re-spec 8.2) — interface contract", 14, 42, 1.5, True)
-    sh.table(14, 44, gpio07, [20, 28, 48, 12], 1.2)
+    sh.text("GPIO map v0.7 (re-spec 8.2) — interface contract", 14, 48, 1.5, True)
+    sh.table(14, 50, gpio07, [20, 28, 48, 12], 1.2)
+
+    # ---------------- dev-board sockets -------------------------------------------------
+    J1 = c.place("J1", "DEVKIT_SOCKET_J1", 120, 140, 0, value="DevKit J1 (left row)")
+    J2 = c.place("J2", "DEVKIT_SOCKET_J3", 190, 140, 0, value="DevKit J3 (right row)")
+    sh.box(129, 108, 181, 172, None)
+    for k, s in enumerate(["ESP32-S3-DevKitC-1 /", "Jinhua #40729, plugged in;", "the USB-C ports face the",
+                           "rear / power edge.", "", "antenna u.FL -> pigtail ->", "rear SMA bulkhead"]):
+        if s:
+            sh.text(s, 131, 114 + k * 3.6, 1.4)
+    # GPIO map v0.7 (re-spec 8.2): the DIO/RELAY pins are freed; IO4/6/7/15 go to the expansion header, IO3 stays unused
+    j1nets = {1: None, 2: None, 3: "RST", 4: "GPIO4", 5: "CS_DAC", 6: "GPIO6", 7: "GPIO7", 8: "GPIO15", 9: "OPTO_IN1", 10: "OPTO_IN2",
+              11: "FAST_OUT1", 12: "RX_BLANK", 13: None, 14: None, 15: "HB_IN1", 16: "CS_ADC", 17: "MOSI_MCU", 18: "SCLK_MCU", 19: "SPI_MISO", 20: "HB_IN2",
+              21: "+5V_RAW", 22: "GND"}
+    j3nets = {1: "GND", 2: "GPIO43", 3: "GPIO44", 4: "I2C_SDA", 5: "I2C_SCL", 6: "DDS_PSEL", 7: "DDS_FSYNC", 8: "TX_EN", 9: "TRIG_DIR", 10: "TRIG_IO",
+              11: None, 12: None, 13: None, 14: None, 15: None, 16: None, 17: "FET_GATE", 18: "FAST_OUT2", 19: "USB_DP", 20: "USB_DN", 21: "GND", 22: "GND"}
+    for pin, net in j1nets.items():
+        if net is None:
+            c.nc_pin(J1, pin)
+        elif net in ("+5V_RAW", "GND"):
+            continue                      # the two supply pins are wired below, clear of the signal labels
+        elif net in ("MOSI_MCU", "SCLK_MCU", "RST"):
+            c.label_pin(J1, pin, net, 5.08)
+        else:
+            c.glabel_pin(J1, pin, net, 5.08)
+    # J1 pins 21/22: +5V_RAW turns up well clear of the label column, GND turns down below the socket
+    c.pwr_L(J1, 21, "+5V_RAW", 25.4, 7.62)
+    c.pwr_L(J1, 22, "GND", 12.7, 5.08)
+    for pin, net in j3nets.items():
+        if net is None:
+            c.nc_pin(J2, pin)
+        elif net == "GND":
+            continue
+        else:
+            c.glabel_pin(J2, pin, net, 5.08)
+    # J3 grounds: pin 1 on its own stub above the label column, pins 21/22 on one comb below it
+    c.pwr_L(J2, 1, "GND", 22.86, 5.08)
+    c.comb(J2, [21, 22], "GND", out=22.86, tail=5.08)
+    sh.text("IO0, IO45, IO46 = strapping (open); IO3 unused (v0.7)", 150, 180, 1.2)
+    sh.text("IO35-37 = octal PSRAM, IO48 = on-board RGB LED", 150, 183.5, 1.2)
+
     # SPI source series resistors (33 R): SCLK_MCU -> R1 -> SPI_SCLK, MOSI_MCU -> R2 -> SPI_MOSI
-    for k, (ref, net_in, net_out, y) in enumerate([("R1", "SCLK_MCU", "SPI_SCLK", 175), ("R2", "MOSI_MCU", "SPI_MOSI", 185)]):
+    for k, (ref, net_in, net_out, y) in enumerate([("R1", "SCLK_MCU", "SPI_SCLK", 192), ("R2", "MOSI_MCU", "SPI_MOSI", 204)]):
         r = c.place(ref, "R0603_33", 60, y, 90)
+        r.field_pos["Reference"] = (56.19, y - 3.3, 270, "left bottom")
+        r.field_pos["Value"] = (56.19, y + 4.3, 270, "left bottom")
         e1 = sh.stub(r, 1, 3.81)
         sh.label(net_in, e1[0], e1[1], 180)
         e2 = sh.stub(r, 2, 3.81)
         sh.label(net_out, e2[0], e2[1], 0, "global")
-    sh.text("33 R source termination for the 80 MHz-capable SPI2 lines (practices 14)", 40, 195, 1.2)
-    # RST test point
-    tp = c.place("TP1", "TestPoint", 60, 160, 90)
-    e = sh.stub(tp, 1, 3.81)
-    sh.label("RST", e[0], e[1], 180)
+    sh.text("33 R source termination for the 80 MHz-capable SPI2 lines (practices 14)", 30, 214, 1.2)
+    # RST test point (rotated so its label reads horizontally beside the symbol, not across it)
+    tp = c.place("TP1", "TestPoint", 60, 224, 90)
+    tp.field_pos["Reference"] = (55.5, 220, 270, "left bottom")
+    c.label_pin(tp, 1, "RST", 5.08)
     # ---------------- I2C pull-ups ------------------------------------------------------
     for k, (ref, net) in enumerate([("R3", "I2C_SDA"), ("R4", "I2C_SCL")]):
-        r = c.place(ref, "R0603_4R7k", 250 + k * 12.7, 60, 0)
+        r = c.place(ref, "R0603_4R7k", 250 + k * 12.7, 76, 0)
         c.pwr_pin(r, 1, "+3V3", 2.54)
         e = sh.stub(r, 2, 3.81)
         sh.label(net, e[0], e[1], 270, "global")
-    sh.text("I2C 400 kHz pull-ups (OLED 0x3C + Qwiic J4 inside + the panel Qwiic)", 240, 45, 1.2)
+    sh.text("I2C 400 kHz pull-ups (OLED 0x3C + Qwiic J4 inside + the panel Qwiic)", 240, 60, 1.2)
     # ---------------- Qwiic connector ------------------------------------------------------
     # v0.8: the second Qwiic (J3, left edge) moved to the front panel, where a sensor can be
     # plugged in from the front; J4 stays inside the box for an internal module.
-    j = c.place("J4", "QWIIC_SM04B-SRSS", 250, 120, 0)
-    c.pwr_pin(j, 1, "GND")
-    c.pwr_pin(j, 2, "+3V3")
-    c.glabel_pin(j, 3, "I2C_SDA")
-    c.glabel_pin(j, 4, "I2C_SCL")
-    c.pwr_pin(j, 5, "GND")
-    c.pwr_pin(j, 6, "GND")
+    # Drawn with its pins to the left (rot 180) so the +3V3 leg can rise clear of the ground stubs.
+    j = c.place("J4", "QWIIC_SM04B-SRSS", 270, 120, 180)
+    c.comb(j, [5, 6], "GND", out=25.4, tail=2.54)   # the two shell pins, one comb
+    c.pwr_L(j, 1, "GND", 25.4, 5.08)
+    c.pwr_L(j, 2, "+3V3", 33.02, 10.16)
+    c.glabel_pin(j, 3, "I2C_SDA", 7.62)
+    c.glabel_pin(j, 4, "I2C_SCL", 7.62)
+    sh.text("Qwiic J4 (inside the box)", 246, 140, 1.2)
     # ---------------- expansion header J5 (2x10) -------------------------------------------
     J5 = c.place("J5", "HDR_2x10_MALE", 330, 110, 0)
     # D-17 v0.7: pins 16/17 (AUX_HDR, COND_OUT2 — the OPT chain is replaced by the NMR receiver) and the two
     # spares 19/20 now carry the four GPIO freed by the expander.
     exp = {1: "+3V3", 2: "+5V_RAW", 3: "+12V", 4: "-12V", 5: "GND", 6: "GND", 7: "SPI_SCLK", 8: "SPI_MOSI", 9: "SPI_MISO", 10: "GND",
            11: "I2C_SDA", 12: "I2C_SCL", 13: "TRIG_IO", 14: "GPIO43", 15: "GPIO44", 16: "GPIO4", 17: "GPIO6", 18: "AGND", 19: "GPIO7", 20: "GPIO15"}
+    # stub out / leg: a pin further down the connector keeps its symbol clear of the pins above it
+    legs = {1: (12.7, 7.62), 3: (20.32, 12.7), 5: (27.94, 5.08),
+            2: (12.7, 7.62), 4: (35.56, 5.08), 6: (30.48, 5.08), 10: (25.4, 5.08), 18: (35.56, 5.08)}
     for pin, net in exp.items():
         if net is None:
             c.nc_pin(J5, pin)
-        elif net in ("+3V3", "+5V_RAW", "+12V", "-12V", "GND", "AGND"):
-            c.pwr_pin(J5, pin, net, {1: 12.7, 2: 12.7, 3: 7.62, 4: 7.62, 5: 17.78, 6: 17.78, 10: 12.7, 18: 12.7}[pin])
+        elif pin in legs:
+            c.pwr_L(J5, pin, net, legs[pin][0], legs[pin][1])
         else:
             c.glabel_pin(J5, pin, net, 7.62)
     exp_rows = [["Pins", "Signals (D-17, v0.7)"],
@@ -253,37 +325,43 @@ def build_base(root_uuid):
                 ["7-12", "SPI_SCLK  SPI_MOSI  SPI_MISO  GND  I2C_SDA  I2C_SCL"],
                 ["13-18", "TRIG_IO  GPIO43  GPIO44  GPIO4  GPIO6  AGND"],
                 ["19-20", "GPIO7  GPIO15"]]
-    sh.table(287, 140, exp_rows, [14, 92], 1.3)
-    sh.text("Expansion header J5 (2x10), pinout D-17 v0.7: the four GPIO freed by the expander (4/6/7/15) took pins 16/17/19/20", 287, 138, 1.2)
+    sh.text("Expansion header J5 (2x10), pinout D-17 v0.7:", 287, 137, 1.2)
+    sh.text("the four GPIO freed by the expander (4/6/7/15) took pins 16/17/19/20", 287, 140.5, 1.2)
+    sh.table(287, 143, exp_rows, [14, 92], 1.3)
     # ---------------- panel LED links ----------------------------------------------------
     for k, (ref, a, b) in enumerate([("JP1", "GPIO43", "LED_WIFI"), ("JP2", "GPIO44", "LED_ACT")]):
-        jp = c.place(ref, "SolderJumper_2_Bridged", 250, 170 + k * 12.7, 0)
+        jp = c.place(ref, "SolderJumper_2_Bridged", 270, 170 + k * 15.24, 0)
         e = sh.stub(jp, 1, 3.81)
         sh.label(a, e[0], e[1], 180, "global")
         e = sh.stub(jp, 2, 3.81)
         sh.label(b, e[0], e[1], 0, "global")
-    sh.text("Panel LED drive: bridged by default; open JP1 when the OPT chain uses GPIO43 as CS, JP2 when the TCXO option feeds GPIO44", 215, 195, 1.2)
+    sh.text("Panel LED drive: bridged by default; open JP1 when the OPT chain uses GPIO43 as CS,", 232, 200, 1.2)
+    sh.text("JP2 when the TCXO option feeds GPIO44", 232, 203.5, 1.2)
     # ---------------- star point -----------------------------------------------------------
-    nt = c.place("NT1", "NetTie_2", 330, 190, 0)
-    c.pwr_pin(nt, 1, "AGND", 7.62)
-    c.pwr_pin(nt, 2, "GND", 7.62)
-    sh.text("The ONLY AGND-GND join (net tie NT1, copper only). Placed at the B1/BASE boundary.", 300, 205, 1.3, True)
-    # power flags for the grounds (no power_out pin drives GND/AGND)
-    f1 = c.flag(370, 60)
-    c.power_at(370, 60, "GND")
-    f2 = c.flag(385, 60)
-    c.power_at(385, 60, "AGND")
-    sh.text("PWR_FLAGs: GND and AGND are references without a power_out driver", 355, 52, 1.2)
+    nt = c.place("NT1", "NetTie_2", 330, 225, 0)
+    c.pwr_L(nt, 1, "AGND", 7.62, 5.08)
+    c.pwr_L(nt, 2, "GND", 7.62, 5.08)
+    sh.text("The ONLY AGND-GND join (net tie NT1, copper only).", 300, 240, 1.3, True)
+    sh.text("Placed at the B1/BASE boundary.", 300, 243.5, 1.3, True)
+    # power flags for the grounds (no power_out pin drives GND/AGND): flag above the link, symbol below it
+    for k, net in enumerate(["GND", "AGND"]):
+        x0 = 240 + k * 35.56
+        sh.wire(x0, 225, x0 + 10.16, 225)
+        c.tap(x0, 225, "PWR_FLAG")
+        c.tap(x0 + 10.16, 225, net)
+    sh.text("PWR_FLAGs: GND and AGND are references", 240, 210, 1.2)
+    sh.text("without a power_out driver", 240, 213.5, 1.2)
     # ---------------- mechanical --------------------------------------------------------------
     for k in range(4):
-        c.place("H%d" % (k + 1), "MountingHole", 40 + k * 12.7, 230, 0)
+        c.place("H%d" % (k + 1), "MountingHole", 40 + k * 12.7, 250, 0)
     for k in range(3):
-        c.place("FID%d" % (k + 1), "Fiducial", 100 + k * 12.7, 230, 0)
-    sh.text("4 x M3 mounting holes (4 mm from the corners) and 3 assembly fiducials", 40, 240, 1.2)
-    # test points
+        c.place("FID%d" % (k + 1), "Fiducial", 100 + k * 12.7, 250, 0)
+    sh.text("4 x M3 mounting holes (4 mm from the corners) and 3 assembly fiducials", 40, 262, 1.2)
+    # test points: the rail ones point up (symbol above the pad), the ground one down
     for k, (ref, net) in enumerate([("TP2", "GND"), ("TP3", "+3V3"), ("TP4", "+5V_RAW")]):
-        tp = c.place(ref, "TestPoint", 150 + k * 15, 230, 0)
+        tp = c.place(ref, "TestPoint", 170 + k * 20, 250, 0 if net == "GND" else 180)
         c.pwr_pin(tp, 1, net, 2.54)
+    sh.text("Rail test points", 170, 262, 1.2)
     auto_junctions(sh)
     return sh
 
@@ -298,203 +376,178 @@ def build_b2(root_uuid):
         "78L05G (SOT-89, 350 mW max): +12 V -> +5VA for ADS8688/DAC8563 AVDD; ~17 mA -> 0.12 W. AMS1117-3.3: 22 uF output required for stability (datasheet 'Stability'); ceramic used, tantalum drop-in (3216) if the rail rings.",
         "All power-module outputs are referenced to AGND (-12 V module: +Vo = AGND). GND and AGND meet only at NT1 (base sheet).",
     ])
+    # Layout rules (2026-09-17 spacing rework): a rail symbol sits on its own stub ABOVE a bus, never mid-wire;
+    # a ground symbol sits on its own stub with nothing beneath; adjacent ground pins share one comb; passives on a
+    # 10.16 mm pitch; a wire never passes through a symbol.  Checked by scripts/sch_check.py.
+
+    def entry(n, dref, cref, uref):
+        """fused node n -> TVS + 10 uF -> LM66100 -> +5V_RAW (one per input)"""
+        D = c.place(dref, "SMF5.0A", 85, n[1] + 12.7, 270)      # rot 270: pin 1 (K) at the TOP -> node, pin 2 (A) at the bottom -> GND
+        Cc = c.place(cref, "C0805_10uF", 95, n[1] + 12.7, 0)
+        U = c.place(uref, "LM66100DCKR", 120, n[1] + 2.54, 0)
+        vin = U.pin_pos(1)
+        assert abs(vin[1] - n[1]) < 1e-6, (uref, vin, n)
+        sh.wire(n[0], n[1], vin[0], vin[1])
+        c.tap(105, n[1], "PWR_FLAG")     # the fused node has no power-output pin: flag it (ERC)
+        for part in (D, Cc):
+            t = part.pin_pos(1)
+            sh.wire(t[0], t[1], t[0], n[1])
+            c.pwr_pin(part, 2, "GND")
+        c.pwr_pin(U, 3, "GND", 2.54)   # CE low = enabled
+        c.pwr_pin(U, 2, "GND")
+        c.pwr_pin(U, 5, "GND", 2.54)   # ST not used -> GND per datasheet
+        c.nc_pin(U, 4)
+        out = sh.stub(U, 6, 5.08)
+        c.tap(out[0], out[1], "+5V_RAW")
+        return U
+
     # ---------------- USB-C ----------------------------------------------------------------
     J = c.place("J201", "USB-C-16P-2MD-073", 40, 80, 0)
-    # VBUS pins tied together -> F201
     vb1 = sh.stub(J, "A4B9", 5.08)
     vb2 = sh.stub(J, "B4A9", 5.08)
     sh.wire(vb1[0], vb1[1], vb2[0], vb2[1])
     F1 = c.place("F201", "FUSE_1812L150", 70, vb1[1], 90)
     sh.wire(vb1[0], vb1[1], F1.pin_pos(1)[0], F1.pin_pos(1)[1])
-    # TVS + input cap after the fuse
-    n1 = F1.pin_pos(2)
-    D1 = c.place("D201", "SMF5.0A", 85, n1[1] + 12.7, 90)     # K up (pin1 at top), A down -> GND
-    C3 = c.place("C203", "C0805_10uF", 95, n1[1] + 12.7, 0)
-    sh.wire(n1[0], n1[1], 105, n1[1])
-    sh.wire(D1.pin_pos(1)[0], D1.pin_pos(1)[1], D1.pin_pos(1)[0], n1[1])
-    sh.wire(C3.pin_pos(1)[0], C3.pin_pos(1)[1], C3.pin_pos(1)[0], n1[1])
-    c.pwr_pin(D1, 2, "GND")
-    c.pwr_pin(C3, 2, "GND")
-    U1 = c.place("U201", "LM66100DCKR", 120, n1[1] + 2.54, 0)
-    vin = U1.pin_pos(1)
-    sh.wire(105, n1[1], 105, vin[1])
-    sh.wire(105, vin[1], vin[0], vin[1])
-    c.pwr_pin(U1, 3, "GND", 2.54)   # CE low = enabled
-    c.pwr_pin(U1, 2, "GND")
-    c.pwr_pin(U1, 5, "GND", 2.54)   # ST not used -> GND per datasheet
-    c.nc_pin(U1, 4)
-    out1 = sh.stub(U1, 6, 5.08)
-    c.power_at(out1[0], out1[1], "+5V_RAW")
-    # CC pull-downs (5.1 k = UFP sink): stubs of different length, resistors hang below
-    for k, (ref, pin) in enumerate([("R201", "A5"), ("R202", "B5")]):
-        e = sh.stub(J, pin, 7.62 + k * 7.62)
-        r = c.place(ref, "R0603_5R1k", e[0], e[1] + 8.89, 0)
-        sh.wire(e[0], e[1], r.pin_pos(1)[0], r.pin_pos(1)[1])
-        c.pwr_pin(r, 2, "GND")
+    entry(F1.pin_pos(2), "D201", "C203", "U201")
     # D+/D- pairs
     for pins, net in ((("A6", "B6"), "USB_DP"), (("A7", "B7"), "USB_DN")):
         e1 = sh.stub(J, pins[0], 5.08)
         e2 = sh.stub(J, pins[1], 5.08)
         sh.wire(e1[0], e1[1], e2[0], e2[1])
-        sh.label(net, e2[0] + 0.0, e2[1], 0, "global")
+        sh.label(net, e2[0], e2[1], 0, "global")
     c.nc_pin(J, "A8")
     c.nc_pin(J, "B8")
-    for pin, ln in (("13", 5.08), ("14", 10.16), ("A1B12", 15.24), ("B1A12", 20.32)):
-        c.pwr_pin(J, pin, "GND", ln)
-    sh.text("CC1/CC2 5.1k = UFP sink, 5 V. Shield pads to GND directly (no chassis).", 30, 125, 1.2)
+    # CC pull-downs (5.1 k = UFP sink): CC1 runs past CC2's resistor, each resistor hangs from its own stub end
+    for pin, xr, ref in (("A5", 76.2, "R201"), ("B5", 63.5, "R202")):
+        p = J.pin_pos(pin)
+        sh.wire(p[0], p[1], xr, p[1])
+        r = c.place(ref, "R0603_5R1k", xr, p[1] + 3.81, 0)   # pin 1 exactly on the stub end
+        c.pwr_pin(r, 2, "GND")
+    # shield + GND pins: one comb, one GND symbol below the connector
+    c.comb(J, ["13", "14", "A1B12", "B1A12"], "GND", out=5.08, tail=5.08)
+    sh.text("CC1/CC2 5.1k = UFP sink, 5 V. Shield pads to GND directly (no chassis).", 30, 118, 1.2)
     # ---------------- DC jack ----------------------------------------------------------------
     J2 = c.place("J202", "DC005-T20", 40, 160, 0)
     tip = sh.stub(J2, 1, 5.08)
     F2 = c.place("F202", "FUSE_1812L150", 70, tip[1], 90)
     sh.wire(tip[0], tip[1], F2.pin_pos(1)[0], F2.pin_pos(1)[1])
-    n2 = F2.pin_pos(2)
-    D2 = c.place("D202", "SMF5.0A", 85, n2[1] + 12.7, 90)
-    C4 = c.place("C204", "C0805_10uF", 95, n2[1] + 12.7, 0)
-    sh.wire(n2[0], n2[1], 105, n2[1])
-    sh.wire(D2.pin_pos(1)[0], D2.pin_pos(1)[1], D2.pin_pos(1)[0], n2[1])
-    sh.wire(C4.pin_pos(1)[0], C4.pin_pos(1)[1], C4.pin_pos(1)[0], n2[1])
-    c.pwr_pin(D2, 2, "GND")
-    c.pwr_pin(C4, 2, "GND")
-    U2 = c.place("U202", "LM66100DCKR", 120, n2[1] + 2.54, 0)
-    vin2 = U2.pin_pos(1)
-    sh.wire(105, n2[1], 105, vin2[1])
-    sh.wire(105, vin2[1], vin2[0], vin2[1])
-    c.pwr_pin(U2, 3, "GND", 2.54)
-    c.pwr_pin(U2, 2, "GND")
-    c.pwr_pin(U2, 5, "GND", 2.54)
-    c.nc_pin(U2, 4)
-    out2 = sh.stub(U2, 6, 5.08)
-    c.power_at(out2[0], out2[1], "+5V_RAW")
-    c.pwr_pin(J2, 2, "GND", 5.08)
+    entry(F2.pin_pos(2), "D202", "C204", "U202")
+    c.pwr_L(J2, 2, "GND", 5.08, 5.08)
     c.nc_pin(J2, 3)
-    sh.text("Jack: 5 V DC, centre +, 5.5/2.1 mm, 1.5-3 A. Switch pin unused.", 30, 190, 1.2)
+    sh.text("Jack: 5 V DC, centre +, 5.5/2.1 mm, 1.5-3 A. Switch pin unused.", 30, 185, 1.2)
     # ---------------- ORed node -> +5V_RAW with bulk caps + LED ---------------------------------
-    x0 = 170
-    sh.wire(x0, 100, x0 + 25.4, 100)
-    c.power_at(x0 + 25.4, 100, "+5V_RAW")
-    c.flag(x0, 100)
-    C1 = c.place("C201", "C1206_22uF", x0 + 5.08, 110, 0)
-    C2 = c.place("C202", "C0603_100nF", x0 + 15.24, 110, 0)
+    x0, yb = 170, 100
+    cols = [x0 + 7.62, x0 + 17.78, x0 + 33.02]
+    sh.wire(x0, yb, cols[-1], yb)
+    c.flag(x0, yb)                       # PWR_FLAG at the bus end: the ideal diodes drive the rail
+    C1 = c.place("C201", "C1206_22uF", cols[0], yb + 8.89, 0)
+    C2 = c.place("C202", "C0603_100nF", cols[1], yb + 8.89, 0)
     for cap in (C1, C2):
         t = cap.pin_pos(1)
-        sh.wire(t[0], t[1], t[0], 100)
+        sh.wire(t[0], t[1], t[0], yb)
         c.pwr_pin(cap, 2, "GND")
-    R9 = c.place("R209", "R0603_1k", x0 + 35, 112, 0)
-    sh.wire(R9.pin_pos(1)[0], R9.pin_pos(1)[1], R9.pin_pos(1)[0], 100)
-    sh.wire(x0 + 25.4, 100, R9.pin_pos(1)[0], 100)
-    Dl = c.place("D203", "LED_GREEN_0805", x0 + 35, 125, 90)   # A at top? pin2 A at (3.81,0) -> rot 90 -> A up
+    c.tap(x0 + 25.4, yb, "+5V_RAW")
+    R9 = c.place("R209", "R0603_1k", cols[2], yb + 8.89, 0)
+    sh.wire(R9.pin_pos(1)[0], R9.pin_pos(1)[1], R9.pin_pos(1)[0], yb)
+    Dl = c.place("D203", "LED_GREEN_0805", cols[2], yb + 20.32, 90)   # rot 90: A (pin 2) at the top, K (pin 1) at the bottom
     sh.wire(R9.pin_pos(2)[0], R9.pin_pos(2)[1], Dl.pin_pos(2)[0], Dl.pin_pos(2)[1])
     c.pwr_pin(Dl, 1, "GND")
     sh.text("+5V_RAW rail (both LM66100 outputs): bulk 22 uF + 100 nF, green LED (2.9 mA); PWR_FLAG = ideal diodes drive the rail", 160, 92, 1.2)
     # ---------------- +3V3 LDO ----------------------------------------------------------------
     U4 = c.place("U204", "AMS1117-3.3", 240, 105, 0)
-    vin = c.pwr_pin(U4, 3, "+5V_RAW", 7.62)
-    C13 = c.place("C213", "C0805_10uF", vin[0] + 2.54, vin[1] + 10.16, 0)
-    sh.wire(vin[0] + 2.54, vin[1], C13.pin_pos(1)[0], C13.pin_pos(1)[1])
+    vin = U4.pin_pos(3)
+    sh.wire(vin[0] - 10.16, vin[1], vin[0], vin[1])
+    c.tap(vin[0] - 10.16, vin[1], "+5V_RAW")
+    C13 = c.place("C213", "C0805_10uF", vin[0] - 5.08, vin[1] + 8.89, 0)
+    sh.wire(C13.pin_pos(1)[0], C13.pin_pos(1)[1], C13.pin_pos(1)[0], vin[1])
     c.pwr_pin(C13, 2, "GND")
-    c.pwr_pin(U4, 1, "GND")
-    c.nc_pin(U4, 4)   # tab duplicate of VOUT: connected on the PCB by the footprint (pads 2 and 4 same net via pad numbering)
-    vo = sh.stub(U4, 2, 7.62)
-    c.power_at(vo[0], vo[1], "+3V3")
-    C14 = c.place("C214", "C1206_22uF", vo[0] - 5.08, vo[1] + 10.16, 0)
-    C15 = c.place("C215", "C0603_100nF", vo[0] + 5.08, vo[1] + 10.16, 0)
+    c.pwr_pin(U4, 1, "GND", 5.08)      # past the value text
+    c.nc_pin(U4, 4)   # tab duplicate of VOUT: joined on the PCB by the footprint
+    vo = U4.pin_pos(2)
+    ocols = [vo[0] + 5.08, vo[0] + 15.24, vo[0] + 25.4]
+    sh.wire(vo[0], vo[1], ocols[-1], vo[1])
+    C14 = c.place("C214", "C1206_22uF", ocols[0], vo[1] + 8.89, 0)
+    C15 = c.place("C215", "C0603_100nF", ocols[1], vo[1] + 8.89, 0)
     for cap in (C14, C15):
         t = cap.pin_pos(1)
         sh.wire(t[0], t[1], t[0], vo[1])
         c.pwr_pin(cap, 2, "GND")
-    sh.wire(vo[0] - 5.08, vo[1], vo[0] + 5.08, vo[1])
-    R10 = c.place("R210", "R0603_1k", vo[0] + 15.24, vo[1] + 12, 0)
+    c.tap(vo[0] + 10.16, vo[1], "+3V3")
+    R10 = c.place("R210", "R0603_1k", ocols[2], vo[1] + 8.89, 0)
     sh.wire(R10.pin_pos(1)[0], R10.pin_pos(1)[1], R10.pin_pos(1)[0], vo[1])
-    sh.wire(vo[0] + 5.08, vo[1], R10.pin_pos(1)[0], vo[1])
-    D4 = c.place("D204", "LED_GREEN_0805", R10.pin_pos(2)[0], vo[1] + 25, 90)
+    D4 = c.place("D204", "LED_GREEN_0805", ocols[2], vo[1] + 20.32, 90)
     sh.wire(R10.pin_pos(2)[0], R10.pin_pos(2)[1], D4.pin_pos(2)[0], D4.pin_pos(2)[1])
     c.pwr_pin(D4, 1, "GND")
-    sh.text("+3V3: AMS1117-3.3 (SOT-223), 22 uF ceramic out (tantalum 3216 drop-in if needed), pin 4 = tab (same VOUT net on the footprint)", 200, 145, 1.2)
+    sh.text("+3V3: AMS1117-3.3 (SOT-223), 22 uF ceramic out (tantalum 3216 drop-in if needed), pin 4 = tab (same VOUT net on the footprint)", 200, 138, 1.2)
     # ---------------- isolated modules ---------------------------------------------------------
-    for k, (ref, sign) in enumerate([("PS201", "+"), ("PS202", "-")]):
-        yb = 165 + k * 78
-        ps = c.place(ref, "B0512S-2WR3", 240, yb, 0)
-        fb = c.place("FB20%d" % (1 + k), "FB0603_600R", 210, ps.pin_pos(1)[1], 90)
-        c.pwr_pin(fb, 1, "+5V_RAW", 5.08)
-        sh.wire(fb.pin_pos(2)[0], fb.pin_pos(2)[1], ps.pin_pos(1)[0], ps.pin_pos(1)[1])
-        cin = c.place("C21%d" % (6 + k), "C0805_10uF", 226, yb + 8, 0)
-        sh.wire(cin.pin_pos(1)[0], cin.pin_pos(1)[1], cin.pin_pos(1)[0], ps.pin_pos(1)[1])
-        c.flag(217.17, ps.pin_pos(1)[1], 180)   # filtered input node: flag as driven (drawn below the line)
+    for k, (ref, sign, ymod) in enumerate([("PS201", "+", 152), ("PS202", "-", 207)]):
+        ps = c.place(ref, "B0512S-2WR3", 240, ymod, 0)
+        pin1 = ps.pin_pos(1)
+        fb = c.place("FB20%d" % (1 + k), "FB0603_600R", 210, pin1[1], 90)
+        e = sh.stub(fb, 1, 7.62)
+        c.tap(e[0], e[1], "+5V_RAW")
+        sh.wire(fb.pin_pos(2)[0], fb.pin_pos(2)[1], pin1[0], pin1[1])
+        cin = c.place("C21%d" % (6 + k), "C0805_10uF", 220.98, pin1[1] + 8.89, 0)
+        sh.wire(cin.pin_pos(1)[0], cin.pin_pos(1)[1], cin.pin_pos(1)[0], pin1[1])
         c.pwr_pin(cin, 2, "GND")
-        c.pwr_pin(ps, 2, "GND", 5.08)
+        c.tap(220.98, pin1[1], "PWR_FLAG")         # filtered input node is driven (flag above the input cap column)
+        c.pwr_L(ps, 2, "GND", 2.54, 5.08)           # -Vin: out, then down to GND
         if sign == "+":
-            fbo = c.place("FB203", "FB0603_600R", 275, ps.pin_pos(6)[1], 0)   # horizontal: pin1 left? rot 0 -> pin1 at top; use rot 90
-            fbo.rot = 90
+            fbo = c.place("FB203", "FB0603_600R", 275, ps.pin_pos(6)[1], 90)
             sh.wire(ps.pin_pos(6)[0], ps.pin_pos(6)[1], fbo.pin_pos(1)[0], fbo.pin_pos(1)[1])
+            c.pwr_L(ps, 4, "AGND", 2.54, 5.08)      # -Vo -> AGND below the line
             node = fbo.pin_pos(2)
-            sh.wire(node[0], node[1], node[0] + 30.48, node[1])
-            c.power_at(node[0] + 30.48, node[1], "+12V")
-            c.flag(node[0] + 2.54, node[1])
-            co1 = c.place("C207", "C1206_22uF", node[0] + 5.08, node[1] + 8.89, 0)
-            co2 = c.place("C209", "C0603_100nF", node[0] + 12.7, node[1] + 8.89, 0)
-            for cap in (co1, co2):
-                t = cap.pin_pos(1)
-                sh.wire(t[0], t[1], t[0], node[1])
-                c.pwr_pin(cap, 2, "AGND")
-            # -Vo -> AGND
-            c.pwr_pin(ps, 4, "AGND", 5.08)
-            # bleeder 3x 2.2k
-            for i in range(3):
-                r = c.place("R20%d" % (3 + i), "R0603_2R2k", node[0] + 20.32 + i * 5.08, node[1] + 8.89, 0)
-                sh.wire(r.pin_pos(1)[0], r.pin_pos(1)[1], r.pin_pos(1)[0], node[1])
-                c.pwr_pin(r, 2, "AGND")
-            # LED +12 via 4.7k
-            rl = c.place("R211", "R0603_4R7k", node[0] + 40.64, node[1] + 8.89, 0)
-            sh.wire(rl.pin_pos(1)[0], rl.pin_pos(1)[1], rl.pin_pos(1)[0], node[1])
-            sh.wire(node[0] + 30.48, node[1], rl.pin_pos(1)[0], node[1])
-            dl = c.place("D205", "LED_GREEN_0805", rl.pin_pos(2)[0], node[1] + 21, 90)
-            sh.wire(rl.pin_pos(2)[0], rl.pin_pos(2)[1], dl.pin_pos(2)[0], dl.pin_pos(2)[1])
-            c.pwr_pin(dl, 1, "AGND")
-            sh.text("+12V: FB + 22 uF + 100 nF at the module; 3 x 2.2k = 16 mA bleeder guarantees the 10 % minimum load with 78L05 load included", node[0] - 40, yb + 34, 1.2)
+            parts = [("C207", "C1206_22uF"), ("C209", "C0603_100nF"), ("R203", "R0603_2R2k"), ("R204", "R0603_2R2k"), ("R205", "R0603_2R2k"), ("R211", "R0603_4R7k")]
+            rail, led_ref, led_rot, led_top_pin, led_gnd_pin = "+12V", "D205", 90, 2, 1     # LED: A (pin 2) at the top toward the resistor, K down to AGND
+            note = "+12V: FB + 22 uF + 100 nF at the module; 3 x 2.2k = 16 mA bleeder guarantees the 10 % minimum load with 78L05 load included"
         else:
-            # +Vo -> AGND ; -Vo -> FB -> -12V
-            c.pwr_pin(ps, 6, "AGND", 5.08)
+            e6 = sh.stub(ps, 6, 2.54)               # +Vo -> AGND drawn above the line
+            c.tap(e6[0], e6[1], "AGND", 5.08, "up")
             fbo = c.place("FB204", "FB0603_600R", 275, ps.pin_pos(4)[1], 90)
             sh.wire(ps.pin_pos(4)[0], ps.pin_pos(4)[1], fbo.pin_pos(1)[0], fbo.pin_pos(1)[1])
             node = fbo.pin_pos(2)
-            sh.wire(node[0], node[1], node[0] + 30.48, node[1])
-            c.power_at(node[0] + 30.48, node[1], "-12V")
-            c.flag(node[0] + 2.54, node[1])
-            co1 = c.place("C206", "C1206_22uF", node[0] + 5.08, node[1] - 8.89, 180)   # pin2 up to AGND? rot180: pin1 at bottom
-            co2 = c.place("C208", "C0603_100nF", node[0] + 12.7, node[1] - 8.89, 180)
-            for cap in (co1, co2):
-                t = cap.pin_pos(1)     # pin 1 now at the bottom -> -12V node
-                sh.wire(t[0], t[1], t[0], node[1])
-                c.pwr_pin(cap, 2, "AGND")
-            for i in range(3):
-                r = c.place("R20%d" % (6 + i), "R0603_2R2k", node[0] + 20.32 + i * 5.08, node[1] - 8.89, 180)
-                sh.wire(r.pin_pos(1)[0], r.pin_pos(1)[1], r.pin_pos(1)[0], node[1])
-                c.pwr_pin(r, 2, "AGND")
-            rl = c.place("R212", "R0603_4R7k", node[0] + 40.64, node[1] - 8.89, 180)
-            sh.wire(rl.pin_pos(1)[0], rl.pin_pos(1)[1], rl.pin_pos(1)[0], node[1])
-            sh.wire(node[0] + 30.48, node[1], rl.pin_pos(1)[0], node[1])
-            dl = c.place("D206", "LED_GREEN_0805", rl.pin_pos(2)[0], node[1] - 21, 90)   # K down toward -12V side, A up to AGND
-            sh.wire(rl.pin_pos(2)[0], rl.pin_pos(2)[1], dl.pin_pos(1)[0], dl.pin_pos(1)[1])
-            c.pwr_pin(dl, 2, "AGND")
-            sh.text("-12V: module #2 with +Vo on AGND; FB in the -Vo line; 3 x 2.2k bleeder (16 mA) + LED keep the 10 % minimum load without the OPT chain", node[0] - 40, yb + 22, 1.2)
-    sh.text("Isolated 2 W modules: input 4.5-5.5 V, 454 mA full load, ripple 80 mVp-p max, Cout <= 560 uF, 1.5 kVDC isolation (YLPTEC datasheet)", 200, 152, 1.2)
+            parts = [("C206", "C1206_22uF"), ("C208", "C0603_100nF"), ("R206", "R0603_2R2k"), ("R207", "R0603_2R2k"), ("R208", "R0603_2R2k"), ("R212", "R0603_4R7k")]
+            rail, led_ref, led_rot, led_top_pin, led_gnd_pin = "-12V", "D206", 270, 1, 2    # LED: K (pin 1) at the top toward -12V, A down to AGND
+            note = "-12V: module #2 with +Vo on AGND; FB in the -Vo line; 3 x 2.2k bleeder (16 mA) + LED keep the 10 % minimum load"
+        mcols = [node[0] + 7.62 + i * 10.16 for i in range(len(parts))]
+        bus_end = mcols[-1] + 7.62
+        sh.wire(node[0], node[1], bus_end, node[1])
+        c.tap(mcols[0], node[1], "PWR_FLAG")       # above the first passive column, clear of the FB text
+        last = None
+        for (pref, plib), xc in zip(parts, mcols):
+            part = c.place(pref, plib, xc, node[1] + 8.89, 0)
+            t = part.pin_pos(1)
+            sh.wire(t[0], t[1], t[0], node[1])
+            if pref in ("R211", "R212"):
+                last = part
+            else:
+                c.pwr_pin(part, 2, "AGND")
+        c.tap(bus_end, node[1], rail)
+        dl = c.place(led_ref, "LED_GREEN_0805", mcols[-1], node[1] + 20.32, led_rot)
+        sh.wire(last.pin_pos(2)[0], last.pin_pos(2)[1], dl.pin_pos(led_top_pin)[0], dl.pin_pos(led_top_pin)[1])
+        c.pwr_pin(dl, led_gnd_pin, "AGND")
+        sh.text(note, 200, ymod + 35, 1.2)
+        if sign == "+":
+            sh.text("Isolated 2 W modules: input 4.5-5.5 V, 454 mA full load, ripple 80 mVp-p max, Cout <= 560 uF, 1.5 kVDC isolation (YLPTEC datasheet)", 200, ymod + 40, 1.2)
     # ---------------- +5VA LDO ------------------------------------------------------------------
     U3 = c.place("U203", "78L05G-AB3-R", 350, 105, 0)
-    vin = c.pwr_pin(U3, 3, "+12V", 7.62)
-    C10 = c.place("C210", "C0603_1uF", vin[0] + 2.54, vin[1] + 10.16, 0)
-    sh.wire(vin[0] + 2.54, vin[1], C10.pin_pos(1)[0], C10.pin_pos(1)[1])
+    vin = U3.pin_pos(3)
+    sh.wire(vin[0] - 10.16, vin[1], vin[0], vin[1])
+    c.tap(vin[0] - 10.16, vin[1], "+12V")
+    C10 = c.place("C210", "C0603_1uF", vin[0] - 5.08, vin[1] + 8.89, 0)
+    sh.wire(C10.pin_pos(1)[0], C10.pin_pos(1)[1], C10.pin_pos(1)[0], vin[1])
     c.pwr_pin(C10, 2, "AGND")
-    c.pwr_pin(U3, 2, "AGND")
-    vo = sh.stub(U3, 1, 7.62)
-    c.power_at(vo[0], vo[1], "+5VA")
-    C11 = c.place("C211", "C0805_10uF", vo[0] - 5.08, vo[1] + 10.16, 0)
-    C12 = c.place("C212", "C0603_100nF", vo[0] + 5.08, vo[1] + 10.16, 0)
+    c.pwr_pin(U3, 2, "AGND", 5.08)     # past the value text
+    vo = U3.pin_pos(1)
+    sh.wire(vo[0], vo[1], vo[0] + 20.32, vo[1])
+    C11 = c.place("C211", "C0805_10uF", vo[0] + 5.08, vo[1] + 8.89, 0)
+    C12 = c.place("C212", "C0603_100nF", vo[0] + 15.24, vo[1] + 8.89, 0)
     for cap in (C11, C12):
         t = cap.pin_pos(1)
         sh.wire(t[0], t[1], t[0], vo[1])
         c.pwr_pin(cap, 2, "AGND")
-    sh.wire(vo[0] - 5.08, vo[1], vo[0] + 5.08, vo[1])
-    sh.text("+5VA: 78L05G from +12V (dropout 1.7 V), ADC/DAC analog supply, AGND-referenced; 0.12 W at 17 mA", 300, 138, 1.2)
+    c.tap(vo[0] + 10.16, vo[1], "+5VA")
+    sh.text("+5VA: 78L05G from +12V (dropout 1.7 V), ADC/DAC analog supply, AGND-referenced; 0.12 W at 17 mA", 296, 128, 1.2)
     # ---------------- test points ---------------------------------------------------------------
     for k, (ref, net) in enumerate([("TP201", "+5V_RAW"), ("TP202", "+3V3"), ("TP203", "+12V"), ("TP204", "-12V"), ("TP205", "+5VA"), ("TP206", "AGND")]):
         tp = c.place(ref, "TestPoint", 40 + k * 15, 240, 0)
@@ -514,109 +567,129 @@ def build_b1(root_uuid):
         "Channel mapping (firmware table, D-19): AI1->AIN_6, AI2->AIN_7, AI3->AIN_0, AI4->AIN_1, AI5->AIN_2, AI6->AIN_3, AI7->AIN_4, AI8->AIN_5 (package order = planar fan-in from the link, no crossings). AI7/AI8 switch to the OPT chain with JP101/JP102 (default: SMA path).",
         "AGND = analog reference copper (L1/L4 pours), joined to GND only at NT1 (base). SDO has a 33 R source resistor.",
     ])
-    U = c.place("U101", "ADS8688IDBTR", 260, 130, 0)
-    # AI1..AI8 -> ADC channels 6,7,0,1,2,3,4,5 (package order: planar fan-in from the link, design-decisions D-19)
+    # Layout rules (2026-09-17 spacing rework): channels on a 21.59 mm pitch so a clamp never reaches the next
+    # channel; the eight AIN_nGND pins share ONE comb whose bus runs well to the left of the AIN labels; the
+    # reference network breaks out downward-left (upper pin = further left, so no wire crosses another); rails
+    # go up, grounds go down, every power symbol sits on its own stub.  Checked by scripts/sch_check.py.
     chan_pins = ["12", "14", "16", "18", "21", "23", "25", "27"]
     gnd_pins = ["13", "15", "17", "19", "20", "22", "24", "26"]
-    # 8 input networks, one row each (17.78 mm pitch), connected to the ADC by local labels AIN1..AIN8
+    X_IN, X_JP, X_R, X_C, X_D, X_LBL = 29.21, 45.72, 85.09, 96.52, 121.92, 149.86
+    def flat_text(inst, cx, cy, where="split"):
+        """reference / value of a rot-90 passive drawn horizontally (KiCad adds the symbol rotation to the
+        stored angle, so 270 + 90 = upright): both above, both below, or reference above and value below."""
+        if where == "above":
+            ref, val = (cx - 3.81, cy - 3.3, "left bottom"), (cx - 11.43, cy - 3.3, "left bottom")
+        elif where == "below":
+            ref, val = (cx - 3.81, cy + 3.3, "left top"), (cx - 11.43, cy + 3.3, "left top")
+        else:
+            ref, val = (cx - 3.81, cy - 3.3, "left bottom"), (cx - 3.81, cy + 3.3, "left top")
+        inst.field_pos["Reference"] = (ref[0], ref[1], 270, ref[2])
+        inst.field_pos["Value"] = (val[0], val[1], 270, val[2])
+
+    # ---------------- 8 input networks, one row each ----------------------------------------
     for i in range(8):
-        y = 55 + i * 17.78
-        x_lab = 40
-        if i >= 6:
-            jp = c.place("JP10%d" % (i - 5), "SolderJumper_3_Bridged12", x_lab + 15.24, y - 3.81, 0)
+        y = 54.61 + i * 21.59
+        if i >= 6:                      # AI7/AI8: solder jumper to the OPT chain, common pin on the row line
+            jp = c.place("JP10%d" % (i - 5), "SolderJumper_3_Bridged12", X_JP, y - 3.81, 0)
             e = sh.stub(jp, 1, 5.08)
             sh.label("AI%d" % (i + 1), e[0], e[1], 180, "global")
             e = sh.stub(jp, 3, 3.81)
             sh.label("COND_OUT%d" % (i - 5), e[0], e[1], 0, "global")
-            cpin = jp.pin_pos(2)
-            xr = cpin[0] + 12.7
-            sh.wire(cpin[0], cpin[1], cpin[0], y)
-            sh.wire(cpin[0], y, xr - 3.81, y)
+            x_in = jp.pin_pos(2)[0]
         else:
-            sh.label("AI%d" % (i + 1), x_lab, y, 180, "global")
-            xr = x_lab + 30.48
-            sh.wire(x_lab, y, xr - 3.81, y)
-        r = c.place("R1%02d" % (11 + i), "R0603_1k", xr, y, 90)
+            x_in = X_IN
+            sh.label("AI%d" % (i + 1), x_in, y, 180, "global")
+        sh.wire(x_in, y, X_R - 3.81, y)
+        r = c.place("R1%02d" % (11 + i), "R0603_1k", X_R, y, 90)
+        flat_text(r, X_R, y)
         node = r.pin_pos(2)
-        xend = node[0] + 50.8
-        sh.wire(node[0], node[1], xend, y)
-        sh.label("AIN%d" % (i + 1), xend, y, 0)
-        cap = c.place("C1%02d" % (11 + i), "C0603_1nF", node[0] + 7.62, y + 6.35, 0)
-        sh.wire(cap.pin_pos(1)[0], cap.pin_pos(1)[1], cap.pin_pos(1)[0], y)
+        sh.wire(node[0], node[1], X_LBL, y)
+        sh.label("AIN%d" % (i + 1), X_LBL, y, 0)
+        cap = c.place("C1%02d" % (11 + i), "C0603_1nF", X_C, y + 7.62, 0)   # reference text clear of the row wire
+        sh.wire(X_C, cap.pin_pos(1)[1], X_C, y)
         c.pwr_pin(cap, 2, "AGND")
-        d = c.place("D1%02d" % (11 + i), "BAV99", node[0] + 30.48, y + 8.89, 180)   # COM up, A1 right (-12V), K2 left (+12V)
-        sh.wire(d.pin_pos(3)[0], d.pin_pos(3)[1], d.pin_pos(3)[0], y)
-        e = sh.stub(d, 1, 2.54)
+        d = c.place("D1%02d" % (11 + i), "BAV99", X_D, y + 8.89, 180)   # COM up, A1 right (-12V), K2 left (+12V)
+        sh.wire(X_D, d.pin_pos(3)[1], X_D, y)
+        e = sh.stub(d, 1, 2.54)        # rail symbols upright (horizontal ones rotate their text onto BAV99)
         c.power_at(e[0], e[1], "-12V")
         e = sh.stub(d, 2, 2.54)
         c.power_at(e[0], e[1], "+12V")
-    sh.text("8 identical input networks: 1 k -> node (1 nF to AGND, BAV99 clamps to the rails) -> AINn -> ADC channel per the D-19 table", 40, 200, 1.3)
-    # ADC side: AINn labels on the channel pins, AGND on the channel ground pins
-    for i in range(8):
-        e = sh.stub(U, chan_pins[i], 10.16)
+    sh.text("8 identical input networks: 1 k -> node (1 nF to AGND, BAV99 clamps to the rails) -> AINn -> ADC channel per the D-19 table", 25.4, 236.22, 1.3)
+    # ---------------- ADS8688 -----------------------------------------------------------------
+    U = c.place("U101", "ADS8688IDBTR", 274.32, 119.38, 0)
+    U.field_pos["Value"] = (288.29, 158.75, 0, "left top")   # off the bottom pin numbers
+    for i in range(8):                  # AINn labels on the channel pins
+        e = sh.stub(U, chan_pins[i], 12.7)
         sh.label("AIN%d" % (i + 1), e[0], e[1], 180)
-        c.pwr_pin(U, gnd_pins[i], "AGND", 5.08)
-    # AUX unused
-    c.pwr_pin(U, "10", "AGND", 3.81)
-    c.pwr_pin(U, "11", "AGND", 3.81)
-    # reference pins
-    refio = sh.stub(U, "5", 12.7)
-    C6 = c.place("C106", "C0805_10uF", refio[0], refio[1] + 7.62, 0)
-    sh.wire(refio[0], refio[1], C6.pin_pos(1)[0], C6.pin_pos(1)[1])
+    c.comb(U, gnd_pins, "AGND", out=30.48, tail=2.54)   # one AGND bus left of the labels, one symbol below it
+    # AUX unused: both pins on one short bus, the symbol parked left of the reference wiring
+    e10 = sh.stub(U, "10", 5.08)
+    e11 = sh.stub(U, "11", 5.08)
+    sh.wire(e10[0], e10[1], e11[0], e11[1])
+    sh.wire(e10[0], e10[1], 243.84, e10[1])
+    c.power_at(243.84, e10[1], "AGND", 270)
+    # reference network below-left: REFIO breaks out further left than REFCAP so the two never cross
+    refio = sh.stub(U, "5", 40.64)
+    sh.wire(refio[0], refio[1], refio[0], 165.1)
+    C6 = c.place("C106", "C0805_10uF", refio[0], 168.91, 0)
     c.pwr_pin(C6, 2, "AGND")
-    refcap = sh.stub(U, "7", 25.4)
-    C4 = c.place("C104", "C0603_1uF", refcap[0], refcap[1] + 7.62, 0)
-    C5 = c.place("C105", "C1206_22uF", refcap[0] - 7.62, refcap[1] + 7.62, 0)
-    sh.wire(refcap[0], refcap[1], C5.pin_pos(1)[0], refcap[1])
+    refcap = sh.stub(U, "7", 27.94)
+    sh.wire(refcap[0], refcap[1], refcap[0], 165.1)
+    C4 = c.place("C104", "C0603_1uF", refcap[0], 168.91, 0)
+    C5 = c.place("C105", "C1206_22uF", refcap[0] + 15.24, 168.91, 0)
+    sh.wire(C4.pin_pos(1)[0], 165.1, C5.pin_pos(1)[0], 165.1)
     for cap in (C4, C5):
-        sh.wire(cap.pin_pos(1)[0], cap.pin_pos(1)[1], cap.pin_pos(1)[0], refcap[1])
         c.pwr_pin(cap, 2, "AGND")
     c.pwr_pin(U, "6", "AGND", 5.08)
-    c.pwr_pin(U, "4", "AGND", 7.62)   # REFSEL low = internal reference
-    sh.text("REFSEL low = internal 4.096 V reference; REFCAP 1 uF + 22 uF, REFIO 10 uF (ADS8688 datasheet 8.3.3 / 11.1)", 195, 215, 1.2)
-    # supplies: 1 uF at each AVDD pin (drawn beside the pin), 10 uF bulk, DVDD 10 uF + 100 nF
-    for pin, cref, dx in (("9", "C101", -20.32), ("30", "C103", -35.56)):
-        e = U.pin_pos(pin)
-        cap = c.place(cref, "C0603_1uF", e[0] + dx, e[1] - 12.7, 0)
-        c.pwr_pin(cap, 1, "+5VA")
+    c.pwr_pin(U, "4", "AGND", 10.16)    # REFSEL low = internal reference
+    sh.text("REFSEL low = internal 4.096 V reference; REFCAP 1 uF + 22 uF, REFIO 10 uF (ADS8688 datasheet 8.3.3 / 11.1)", 196.85, 190.5, 1.2)
+    # supplies: AVDD bus above the chip, 1 uF at each pin + 10 uF bulk hanging off it
+    e9 = sh.stub(U, "9", 10.16)
+    e30 = sh.stub(U, "30", 10.16)
+    y_av = e9[1]
+    sh.wire(228.6, y_av, e30[0], y_av)
+    for ref, lib, xc in (("C101", "C0603_1uF", 259.08), ("C103", "C0603_1uF", 246.38), ("C102", "C0805_10uF", 233.68)):
+        cap = c.place(ref, lib, xc, 76.2, 0)
+        sh.wire(xc, cap.pin_pos(1)[1], xc, y_av)
         c.pwr_pin(cap, 2, "AGND")
-    e9 = U.pin_pos("9")
-    c.pwr_pin(U, "9", "+5VA", 5.08)
-    c.pwr_pin(U, "30", "+5VA", 12.7)
-    C2 = c.place("C102", "C0805_10uF", e9[0] - 48.26, e9[1] - 12.7, 0)
-    c.pwr_pin(C2, 1, "+5VA")
-    c.pwr_pin(C2, 2, "AGND")
-    e34 = sh.stub(U, "34", 20.32)
-    c.power_at(e34[0], e34[1], "+3V3")
-    C7 = c.place("C107", "C0805_10uF", e34[0] + 20.32, e34[1] - 7.62, 0)
-    C8 = c.place("C108", "C0603_100nF", e34[0] + 33.02, e34[1] - 7.62, 0)
-    for cap in (C7, C8):
-        c.pwr_pin(cap, 1, "+3V3")
+    c.tap(228.6, y_av, "+5VA", 5.08)
+    # DVDD bus to the right of the chip: +3V3 tap, 10 uF + 100 nF to GND
+    e34 = sh.stub(U, "34", 15.24)
+    sh.wire(e34[0], e34[1], 314.96, e34[1])
+    c.tap(289.56, e34[1], "+3V3", 5.08)
+    for ref, lib, xc in (("C107", "C0805_10uF", 302.26), ("C108", "C0603_100nF", 314.96)):
+        cap = c.place(ref, lib, xc, 71.12, 0)
+        sh.wire(xc, cap.pin_pos(1)[1], xc, e34[1])
         c.pwr_pin(cap, 2, "GND")
-    sh.text("AVDD 1 uF at pins 9 and 30 + 10 uF bulk; DVDD 10 uF + 100 nF", 200, 60, 1.2)
-    # grounds
-    for k, pin in enumerate(("8", "28", "29", "31", "32")):
-        c.pwr_pin(U, pin, "AGND", 5.08 + (k % 3) * 6.35)
-    c.pwr_pin(U, "33", "GND", 5.08 + 5 * 6.35 % 19.05)
-    # digital side
+    sh.text("AVDD 1 uF at pins 9 and 30 + 10 uF bulk; DVDD 10 uF + 100 nF", 228.6, 50.8, 1.2)
+    # ---------------- digital side ------------------------------------------------------------
     c.glabel_pin(U, "38", "CS_ADC", 7.62)
     c.glabel_pin(U, "37", "SPI_SCLK", 7.62)
     c.glabel_pin(U, "1", "SPI_MOSI", 7.62)
-    e = sh.stub(U, "36", 3.81)
-    R1 = c.place("R101", "R0603_33", e[0] + 3.81, e[1], 90)
-    sh.wire(e[0], e[1], R1.pin_pos(1)[0], R1.pin_pos(1)[1])
+    e = sh.stub(U, "36", 7.62)          # SDO -> 33 R source resistor, well clear of the label column
+    R1 = c.place("R101", "R0603_33", 332.74, e[1], 90)
+    flat_text(R1, 332.74, e[1])
+    sh.wire(e[0], e[1], R1.pin_pos(1)[0], e[1])
     e2 = sh.stub(R1, 2, 2.54)
     sh.label("SPI_MISO", e2[0], e2[1], 0, "global")
-    c.pwr_pin(U, "3", "GND", 20.32)   # DAISY
-    e = sh.stub(U, "2", 12.7)
-    sh.label("ADC_RST", e[0] - 5.08, e[1], 0)
-    R2 = c.place("R102", "R0603_10k", e[0] + 5.08, e[1] - 7.62, 0)
-    sh.wire(e[0], e[1], R2.pin_pos(2)[0], e[1])
-    sh.wire(R2.pin_pos(2)[0], R2.pin_pos(2)[1], R2.pin_pos(2)[0], e[1])
+    c.pwr_L(U, "3", "GND", 12.7, 5.08)  # DAISY = GND, symbol on its own leg below the stub
+    e = sh.stub(U, "2", 7.62)           # RST/PD: down and out, pull-up on the run, label at the far end
+    sh.wire(e[0], e[1], e[0], 119.38)
+    sh.wire(e[0], 119.38, 307.34, 119.38)
+    sh.wire(307.34, 119.38, 320.04, 119.38)
+    sh.label("ADC_RST", 320.04, 119.38, 0)
+    R2 = c.place("R102", "R0603_10k", 307.34, 115.57, 0)
+    R2.field_pos["Value"] = (310.9, 116.2, 0, "left")
     c.pwr_pin(R2, 1, "+3V3")
     c.nc_pin(U, "35")
-    sh.text("RST/PD pulled up to DVDD (10k); firmware may pull it low for reset/power-down", 290, 150, 1.2)
-    tp = c.place("TP101", "TestPoint", 360, 200, 0)
+    sh.text("RST/PD pulled up to DVDD (10k); firmware may pull it low for reset/power-down", 294.64, 132.08, 1.2)
+    # ---------------- bottom grounds ----------------------------------------------------------
+    ends = [sh.stub(U, p, 10.16) for p in ("8", "28", "29", "31", "32")]
+    y_gb = ends[0][1]
+    sh.wire(257.81, y_gb, ends[-1][0], y_gb)
+    c.tap(257.81, y_gb, "AGND", 7.62)
+    c.pwr_pin(U, "33", "GND", 15.24)
+    tp = c.place("TP101", "TestPoint", 330.2, 190.5, 0)
     c.pwr_pin(tp, 1, "AGND", 2.54)
     auto_junctions(sh)
     return sh
@@ -632,97 +705,113 @@ def build_b3(root_uuid):
         "Output: 49.9 R back-termination, BAV99 clamps to +-12 V. OPA2192 short-circuit current +-65 mA: into a 50 R termination the swing is limited to ~+-6 V; full +-10 V into >= 1 k loads.",
         "Gain = 2 is the DAC default once the internal reference is enabled by firmware (reset default: reference off, gain 1). /LDAC = AGND (synchronous), /CLR pulled up to +5VA.",
     ])
-    # level shifter
-    U2 = c.place("U302", "74HCT125PW", 70, 110, 0)
+    # Layout rules (2026-09-17 spacing rework): the /OE pins alternate with the signal pins, so their comb bus
+    # runs left of the input labels; /LDAC and /CLR break out at different depths and both leave downward (one
+    # up + one down would have to cross); decoupling columns on a 12.7 mm pitch; every free text clear of the
+    # title block and of the right edge.  Checked by scripts/sch_check.py.
+    def rail_up(inst, pin, net, length=2.54):
+        """rail or ground symbol on an UPWARD stub: the graphic points up, so its value text is pushed
+        clear of the bars (the default position puts the text inside them)."""
+        e = sh.stub(inst, pin, length)
+        down_type = net in ("GND", "AGND", "-12V")
+        sym = c.power_at(e[0], e[1], net, 180 if down_type else 0)
+        if down_type:
+            sym.field_pos["Value"] = (e[0], e[1] - 4.83, 0, None)
+        return e
+
+    def flat_text(inst, cx, cy, where="split"):
+        """reference / value of a rot-90 passive drawn horizontally (KiCad adds the symbol rotation to the
+        stored angle, so 270 + 90 = upright): both above, both below, or reference above and value below."""
+        if where == "above":
+            ref, val = (cx - 3.81, cy - 3.3, "left bottom"), (cx - 11.43, cy - 3.3, "left bottom")
+        elif where == "below":
+            ref, val = (cx - 3.81, cy + 3.3, "left top"), (cx - 11.43, cy + 3.3, "left top")
+        else:
+            ref, val = (cx - 3.81, cy - 3.3, "left bottom"), (cx - 3.81, cy + 3.3, "left top")
+        inst.field_pos["Reference"] = (ref[0], ref[1], 270, ref[2])
+        inst.field_pos["Value"] = (val[0], val[1], 270, val[2])
+
+    # ---------------- 74HCT125 level shifter ---------------------------------------------------
+    X2, Y2 = 78.74, 106.68
+    U2 = c.place("U302", "74HCT125PW", X2, Y2, 0)
+    U2.field_pos["Value"] = (62.23, 127.0, 0, "left top")      # off the GND stub below the body
+    U2.field_pos["Reference"] = (62.23, 89.41, 0, "left bottom")   # off the VCC pin number
     for pin, net in (("2", "SPI_SCLK"), ("5", "SPI_MOSI"), ("9", "CS_DAC")):
         c.glabel_pin(U2, pin, net, 7.62)
-    for pin in ("1", "4", "10", "13", "12"):
-        c.pwr_pin(U2, pin, "GND", 3.81)
-    c.nc_pin(U2, "11")
     for pin, net in (("3", "DAC_SCLK"), ("6", "DAC_DIN"), ("8", "DAC_SYNC")):
         c.label_pin(U2, pin, net, 7.62)
-    c.pwr_pin(U2, "14", "+5V_RAW", 3.81)
-    c.pwr_pin(U2, "7", "GND", 3.81)
-    C8 = c.place("C308", "C0603_100nF", 100, 70, 0)
+    c.nc_pin(U2, "11")
+    c.comb(U2, ["1", "4", "10", "12", "13"], "GND", out=25.4, tail=7.62)   # 4 x /OE + the unused 4A input
+    c.pwr_pin(U2, "14", "+5V_RAW", 5.08)
+    c.pwr_pin(U2, "7", "GND", 5.08)
+    C8 = c.place("C308", "C0603_100nF", 101.6, 76.2, 0)
     c.pwr_pin(C8, 1, "+5V_RAW")
     c.pwr_pin(C8, 2, "GND")
-    sh.text("SPI -> 5 V level shift for the DAC (three channels, 4th input grounded)", 40, 150, 1.2)
-    # DAC
-    U1 = c.place("U301", "DAC8563SDGSR", 170, 110, 0)
+    sh.text("SPI -> 5 V level shift for the DAC (three channels, 4th input grounded)", 44.45, 146.05, 1.2)
+    # ---------------- DAC8563 -------------------------------------------------------------------
+    X1, Y1 = 165.1, 105.41
+    U1 = c.place("U301", "DAC8563SDGSR", X1, Y1, 0)
+    U1.field_pos["Value"] = (168.91, 121.92, 0, "left top")        # off the bottom pin number
     for pin, net in (("6", "DAC_SYNC"), ("7", "DAC_SCLK"), ("8", "DAC_DIN")):
-        c.label_pin(U1, pin, net, 7.62)
-    c.pwr_pin(U1, "4", "AGND", 5.08)
-    e = sh.stub(U1, "5", 5.08)
-    Rc = c.place("R311", "R0603_10k", e[0] - 5.08, e[1] + 7.62, 0)
-    sh.wire(e[0], e[1], Rc.pin_pos(1)[0], e[1])
-    sh.wire(Rc.pin_pos(1)[0], Rc.pin_pos(1)[1], Rc.pin_pos(1)[0], e[1])
-    c.pwr_pin(Rc, 2, "+5VA")
-    e = sh.stub(U1, "9", 5.08)
-    c.power_at(e[0], e[1], "+5VA")
-    C2 = c.place("C302", "C0603_100nF", 150, 75, 0)
-    C3 = c.place("C303", "C0805_10uF", 160, 75, 0)
+        c.label_pin(U1, pin, net, 5.08)
+    c.pwr_L(U1, "4", "AGND", 20.32, 7.62)       # /LDAC = AGND: out past the labels, then down
+    e = sh.stub(U1, "5", 12.7)                  # /CLR: down and out to its pull-up, clear of /LDAC
+    sh.wire(e[0], e[1], e[0], 130.81)
+    sh.wire(e[0], 130.81, 143.51, 130.81)
+    Rc = c.place("R311", "R0603_10k", 147.32, 130.81, 90)   # rot 90: pin 1 (left) = /CLR, pin 2 (right) -> +5VA
+    flat_text(Rc, 147.32, 130.81)
+    c.pwr_L(Rc, 2, "+5VA", 2.54, 5.08)
+    c.pwr_pin(U1, "9", "+5VA", 5.08)
+    c.pwr_pin(U1, "3", "AGND", 5.08)
+    C2 = c.place("C302", "C0603_100nF", 139.7, 80.01, 0)
+    C3 = c.place("C303", "C0805_10uF", 152.4, 80.01, 0)
     for cap in (C2, C3):
         c.pwr_pin(cap, 1, "+5VA")
         c.pwr_pin(cap, 2, "AGND")
-    c.pwr_pin(U1, "3", "AGND", 5.08)
-    # VREF
-    e = sh.stub(U1, "10", 7.62)
-    sh.label("VREF_DAC", e[0], e[1], 0, "global")
-    C1 = c.place("C301", "C0603_1uF", e[0] - 2.54, e[1] + 8.89, 0)
-    sh.wire(C1.pin_pos(1)[0], C1.pin_pos(1)[1], C1.pin_pos(1)[0], e[1])
+    # VREF: 1 uF close to the pin, test point on the line, global label at the far end
+    e = sh.stub(U1, "10", 5.08)
+    sh.wire(e[0], e[1], 187.96, e[1])
+    sh.wire(187.96, e[1], 217.17, e[1])
+    sh.label("VREF_DAC", 217.17, e[1], 0, "global")
+    C1 = c.place("C301", "C0603_1uF", 187.96, 115.57, 0)
+    sh.wire(187.96, C1.pin_pos(1)[1], 187.96, e[1])
     c.pwr_pin(C1, 2, "AGND")
-    sh.text("VREF 2.5 V out, 1 uF (>= 150 nF required by the datasheet)", 175, 135, 1.2)
-    tp = c.place("TP301", "TestPoint", 215, 140, 0)
-    e = sh.stub(tp, 1, 2.54)
-    sh.label("VREF_DAC", e[0], e[1], 270, "global")
-    # DAC outputs -> labels
+    c.place("TP301", "TestPoint", 204.47, e[1], 180)        # probe hangs below the VREF line
     c.label_pin(U1, "1", "DAC_A", 7.62)
     c.label_pin(U1, "2", "DAC_B", 7.62)
-    # op-amp stages
-    U3a = c.place("U303", "OPA2192IDR", 300, 90, 0, unit=1)
-    U3b = c.place("U303", "OPA2192IDR", 300, 160, 0, unit=2)
-    U3p = c.place("U303", "OPA2192IDR", 370, 120, 0, unit=3)
-    c.pwr_pin(U3p, "8", "+12V", 2.54)
-    c.pwr_pin(U3p, "4", "-12V", 2.54)
-    C4 = c.place("C304", "C0603_100nF", 392, 105, 0)
-    C6 = c.place("C306", "C0805_10uF", 407, 105, 0)
-    for cap in (C4, C6):
-        c.pwr_pin(cap, 1, "+12V")
-        c.pwr_pin(cap, 2, "AGND")
-    C5 = c.place("C305", "C0603_100nF", 392, 140, 180)
-    C7 = c.place("C307", "C0805_10uF", 407, 140, 180)
-    for cap in (C5, C7):
-        c.pwr_pin(cap, 1, "-12V")
-        c.pwr_pin(cap, 2, "AGND")
-    sh.text("OPA2192 supplies +-12 V, 100 nF + 10 uF each to AGND", 355, 160, 1.2)
-    for ch, (u, dac, out_net, base) in enumerate([(U3a, "DAC_A", "AO1", 300), (U3b, "DAC_B", "AO2", 310)]):
-        plus = u.pin_pos("3" if ch == 0 else "5")
-        minus = u.pin_pos("2" if ch == 0 else "6")
-        out = u.pin_pos("1" if ch == 0 else "7")
-        # non-inverting: DAC -> R3 10k -> +IN ; R4 40.2k +IN -> AGND
+    sh.text("VREF 2.5 V out, 1 uF (>= 150 nF required by the datasheet)", 175.26, 133.35, 1.2)
+    # ---------------- two difference amplifiers -------------------------------------------------
+    for ch, (unit, dac, out_net, Ya) in enumerate([(1, "DAC_A", "AO1", 90.17), (2, "DAC_B", "AO2", 152.4)]):
+        u = c.place("U303", "OPA2192IDR", 299.72, Ya, 0, unit=unit)
+        pp, pm, po = ("3", "2", "1") if ch == 0 else ("5", "6", "7")
+        plus, minus, out = u.pin_pos(pp), u.pin_pos(pm), u.pin_pos(po)
+        # non-inverting: DAC -> R3 10k -> +IN ; R4 40.2k from +IN to AGND
         r3 = c.place("R30%d" % (1 + 4 * ch), "R0603_10k", plus[0] - 12.7, plus[1], 90)
-        sh.wire(r3.pin_pos(2)[0], r3.pin_pos(2)[1], plus[0], plus[1])
-        e = sh.stub(r3, 1, 10.16)
+        flat_text(r3, plus[0] - 12.7, plus[1], "above")
+        sh.wire(r3.pin_pos(2)[0], plus[1], plus[0], plus[1])
+        e = sh.stub(r3, 1, 15.24)
         sh.label(dac, e[0], e[1], 180)
         r4 = c.place("R30%d" % (2 + 4 * ch), "R0603_40R2k", plus[0] - 5.08, plus[1] - 7.62, 0)
         sh.wire(r4.pin_pos(2)[0], r4.pin_pos(2)[1], r4.pin_pos(2)[0], plus[1])
-        c.pwr_pin(r4, 1, "AGND")
+        rail_up(r4, 1, "AGND")
         # inverting: VREF -> R1 10k -> -IN ; R2 40.2k from -IN to OUT, routed below the amplifier
         r1 = c.place("R30%d" % (3 + 4 * ch), "R0603_10k", minus[0] - 25.4, minus[1], 90)
-        sh.wire(r1.pin_pos(2)[0], r1.pin_pos(2)[1], minus[0], minus[1])
+        flat_text(r1, minus[0] - 25.4, minus[1], "below")
+        sh.wire(r1.pin_pos(2)[0], minus[1], minus[0], minus[1])
         e = sh.stub(r1, 1, 5.08)
         sh.label("VREF_DAC", e[0], e[1], 180, "global")
-        yfb = minus[1] + 7.62
-        r2 = c.place("R30%d" % (4 + 4 * ch), "R0603_40R2k", out[0] - 2.54, yfb, 90)
-        sh.wire(minus[0], minus[1], minus[0] - 2.54, minus[1])
-        sh.wire(minus[0] - 2.54, minus[1], minus[0] - 2.54, yfb)
+        yfb = minus[1] + 12.7                                        # clear of the amplifier's value text
+        r2 = c.place("R30%d" % (4 + 4 * ch), "R0603_40R2k", out[0] + 2.54, yfb, 90)
+        flat_text(r2, out[0] + 2.54, yfb)
+        sh.wire(minus[0] - 2.54, minus[1], minus[0] - 2.54, yfb)     # branch off the R1 wire, no doubled segment
         sh.wire(minus[0] - 2.54, yfb, r2.pin_pos(1)[0], yfb)
-        sh.wire(r2.pin_pos(2)[0], yfb, out[0] + 5.08, yfb)
-        sh.wire(out[0] + 5.08, yfb, out[0] + 5.08, out[1])
-        sh.wire(out[0], out[1], out[0] + 5.08, out[1])
-        # 49.9 R -> AO node -> clamp -> label
-        rs = c.place("R3%02d" % (9 + ch), "R0603_49R9", out[0] + 12.7, out[1], 90)
-        sh.wire(out[0] + 5.08, out[1], rs.pin_pos(1)[0], rs.pin_pos(1)[1])
+        sh.wire(r2.pin_pos(2)[0], yfb, out[0] + 10.16, yfb)
+        sh.wire(out[0] + 10.16, yfb, out[0] + 10.16, out[1])
+        sh.wire(out[0], out[1], out[0] + 10.16, out[1])
+        # 49.9 R back-termination -> AO node -> BAV99 clamp -> label
+        rs = c.place("R3%02d" % (9 + ch), "R0603_49R9", out[0] + 20.32, out[1], 90)
+        flat_text(rs, out[0] + 20.32, out[1])
+        sh.wire(out[0] + 10.16, out[1], rs.pin_pos(1)[0], out[1])
         node = rs.pin_pos(2)
         sh.wire(node[0], node[1], node[0] + 20.32, node[1])
         sh.label(out_net, node[0] + 20.32, node[1], 0, "global")
@@ -732,132 +821,147 @@ def build_b3(root_uuid):
         c.power_at(e[0], e[1], "-12V")
         e = sh.stub(d, 2, 2.54)
         c.power_at(e[0], e[1], "+12V")
-    sh.text("AO_n = (1+R2/R1) x R4/(R3+R4) x DAC_n - (R2/R1) x VREF = 4.02 x DAC_n - 4.02 x 2.5 V", 250, 215, 1.3)
+    # ---------------- OPA2192 power unit and its decoupling --------------------------------------
+    U3p = c.place("U303", "OPA2192IDR", 375.92, 121.92, 0, unit=3)
+    c.pwr_pin(U3p, "8", "+12V", 5.08)
+    c.pwr_pin(U3p, "4", "-12V", 5.08)
+    for ref, lib, xc, yc, rail in (("C304", "C0603_100nF", 389.89, 105.41, "+12V"), ("C306", "C0805_10uF", 402.59, 105.41, "+12V"),
+                                   ("C305", "C0603_100nF", 389.89, 140.97, "-12V"), ("C307", "C0805_10uF", 402.59, 140.97, "-12V")):
+        cap = c.place(ref, lib, xc, yc, 0)
+        rail_up(cap, 1, rail)
+        c.pwr_pin(cap, 2, "AGND")
+    sh.text("OPA2192 supplies +-12 V: 100 nF + 10 uF per rail to AGND", 335.28, 182.88, 1.2)
+    sh.text("AO_n = (1+R2/R1) x R4/(R3+R4) x DAC_n - (R2/R1) x VREF = 4.02 x DAC_n - 4.02 x 2.5 V", 245.11, 196.85, 1.3)
     auto_junctions(sh)
     return sh
 
 
 # ================================================================== B5 DIO/TRIG
 def build_b5(root_uuid):
-    sh = Sheet("b5_dio_trig", "B5: 8 TTL DIO, 2 fast TTL outs, bidirectional TRIG, TCXO option", "A3", 7, "74AHCT541 x8 with 1 k series; 74HCT125 fast outs with 49.9 R; 74LVC1T45 TRIG with 33 R + BAV99 clamp; DNP TCXO + Schmitt buffer")
+    # A2 (2026-09-17): the eight buffered outputs, the fast outputs, the TRIG chain, the expander and the
+    # TCXO option do not fit on A3 with the spacing the rework asks for.
+    sh = Sheet("b5_dio_trig", "B5: 8 TTL DIO, 2 fast TTL outs, bidirectional TRIG, TCXO option", "A2", 7, "74AHCT541 x8 with 1 k series; 74HCT125 fast outs with 49.9 R; 74LVC1T45 TRIG with 33 R + BAV99 clamp; DNP TCXO + Schmitt buffer")
     c = Ctx(sh, "B5", 5000)
-    sheet_frame(sh, "B5", "B5 — DIGITAL I/O AND TIMING: 8 x 5 V TTL outputs, 2 fast outputs, bidirectional TRIG (panel SMA), 10 MHz TCXO option", [
+
+    def wrap(s, n=260):
+        """split a long note into page-wide lines so nothing runs off the right edge"""
+        out, cur = [], ""
+        for w in s.split(" "):
+            if cur and len(cur) + 1 + len(w) > n:
+                out.append(cur)
+                cur = w
+            else:
+                cur = w if not cur else cur + " " + w
+        if cur:
+            out.append(cur)
+        return out
+
+    def flat_fields(inst, x, y):
+        """ref above / value below a symbol placed at rot 90, drawn horizontally"""
+        inst.field_pos["Reference"] = (x - 3.81, y - 3.3, 270, "left bottom")
+        inst.field_pos["Value"] = (x - 3.81, y + 4.3, 270, "left bottom")
+
+    notes = []
+    for s in [
         "74AHCT541 (TTL-compatible inputs accept 3.3 V) buffers DIO1..8 to 5 V; 1 k series per output limits a shorted output to 5 mA (students!). Outputs are static/slow (kHz): 1 k x 100 pF cable = 100 ns. v0.8: TTL1..8 and FASTTTL1/2 leave on the panel link, not on board-edge terminals.",
         "v0.7: DIO1..8 keep their names but are no longer MCU pins — they come from the TCA9535 I2C expander U505 (address 0x20, A0 = A1 = A2 = GND), P00..P07. The 541 runs at +5V_RAW while the expander drives 3.3 V: the AHCT TTL thresholds (VIH 2.0 V) accept that. v0.7d: P10..P13 and P15..P17 = MODULE OUT 1..7 to the panel link J8 (P10..P13 are the ports the four relay gates used); P14 stays EXP_P14, the Johnson-counter /CLR of the NMR receiver; MODULE OUT 8 is reserved (J8 pin 33 not connected).",
         "74HCT125: FAST_OUT1/2 (MCPWM/RMT) -> 49.9 R series -> the panel link -> the two fast SMAs on the panel; drive +-6 mA rated, so a 50 R termination gives ~1 V: fast outs are for high-impedance TTL loads.",
         "TRIG: 74LVC1T45 A = TRIG_IO (3.3 V), B = 5 V side -> 33 R -> TRIG_5V -> panel SMA; DIR (GPIO39) 1 = output. Into a 50 R termination ~2.4 V typ (beyond the rated 32 mA), 5 V into high-Z. BAV99 clamps B to GND/+5V_RAW.",
         "TCXO option (all DNP): clipped-sine 10 MHz -> 1 nF -> Schmitt buffer biased at VCC/2 -> 74LVC1G17 -> JP501 -> GPIO44 (open JP2 on the base sheet when used). VCONT at 1.65 V from a divider.",
-    ])
-    U1 = c.place("U501", "SN74AHCT541PWR", 70, 110, 0)
+    ]:
+        notes += wrap(s)
+    sheet_frame(sh, "B5", "B5 — DIGITAL I/O AND TIMING: 8 x 5 V TTL outputs, 2 fast outputs, bidirectional TRIG (panel SMA), 10 MHz TCXO option", notes)
+    # Layout rules (2026-09-17 spacing rework): a ground symbol stands upright on its own stub, adjacent
+    # ground pins share one comb, the eight series resistors are fanned out to a 10.16 mm column, and no wire
+    # crosses another wire or a label.  Checked by scripts/sch_check.py and by the SVG render.
+
+    # ---------------- 74AHCT541: DIO1..8 -> 1 k -> TTL1..8 --------------------------------
+    U1 = c.place("U501", "SN74AHCT541PWR", 95, 130, 0)
     for i in range(8):
         c.glabel_pin(U1, str(2 + i), "DIO%d" % (i + 1), 7.62)
-        ypin = U1.pin_pos(str(18 - i))
-        r = c.place("R50%d" % (i + 1), "R0603_1k", ypin[0] + 10.16 + (i % 2) * 12.7, ypin[1], 90)
-        sh.wire(ypin[0], ypin[1], r.pin_pos(1)[0], r.pin_pos(1)[1])
-        e = sh.stub(r, 2, 5.08 + (1 - i % 2) * 12.7)
+    c.comb(U1, ["1", "19"], "GND", out=7.62, tail=5.08)      # OE1 + OE2 tied low on one comb
+    c.pwr_pin(U1, "20", "+5V_RAW", 5.08)
+    c.pwr_pin(U1, "10", "GND", 5.08)
+    xres = 133.35
+    for i in range(8):
+        px, py = U1.pin_pos(str(18 - i))
+        ty = 88.9 + i * 10.16                                 # output rows on a 10.16 mm pitch
+        jog = 107.95 + (i if i < 4 else 7 - i) * 2.54         # fan: no two wires cross
+        sh.wire(px, py, jog, py)
+        sh.wire(jog, py, jog, ty)
+        r = c.place("R50%d" % (i + 1), "R0603_1k", xres, ty, 90)
+        flat_fields(r, xres, ty)
+        sh.wire(jog, ty, r.pin_pos(1)[0], r.pin_pos(1)[1])
         # v0.8: TTL1..8 leave the sheet as GLOBAL labels (they used to end on the J501-J504
         # terminals at the board edge; the terminal strip is on the front panel now).
+        e = sh.stub(r, 2, 7.62)
         sh.label("TTL%d" % (i + 1), e[0], e[1], 0, "global")
-    c.pwr_pin(U1, "1", "GND", 3.81)
-    c.pwr_pin(U1, "19", "GND", 3.81)
-    c.pwr_pin(U1, "20", "+5V_RAW", 3.81)
-    c.pwr_pin(U1, "10", "GND", 3.81)
-    cb = c.place("C501", "C0603_100nF", 100, 70, 0)
-    c.pwr_pin(cb, 1, "+5V_RAW")
-    c.pwr_pin(cb, 2, "GND")
+    c.decouple("C501", "C0603_100nF", 70, 85, "+5V_RAW", "GND")
     # v0.8 (panel rework): the edge terminals J501-J505 are gone. TTL1..TTL8 travel on the
     # panel link (J7) to a 10-way screw-terminal strip on the front panel, which also carries
     # the two GND wires that J505 used to provide.
-    sh.text("TTL1..TTL8 leave this sheet as global labels -> panel link J7 -> the 10-way screw-terminal", 130, 172, 1.2)
-    sh.text("strip on the front panel (TTL1..8 + 2 x GND). The board-edge terminals J501-J505 are gone (v0.8).", 130, 175.2, 1.2)
-    # fast outs
-    U2 = c.place("U502", "74HCT125PW", 260, 90, 0)
+    sh.text("TTL1..TTL8 leave this sheet as global labels -> panel link J7 -> the 10-way screw-terminal strip", 60, 180, 1.3)
+    sh.text("on the front panel (TTL1..8 + 2 x GND). The board-edge terminals J501-J505 are gone (v0.8).", 60, 183.5, 1.3)
+
+    # ---------------- 74HCT125: the two fast outputs --------------------------------------
+    U2 = c.place("U502", "74HCT125PW", 270, 105, 0)
     for pin, net in (("2", "FAST_OUT1"), ("5", "FAST_OUT2")):
         c.glabel_pin(U2, pin, net, 7.62)
-    for pin in ("1", "4", "10", "13", "9", "12"):
-        c.pwr_pin(U2, pin, "GND", 3.81)
+    # every grounded input and enable on one comb, its bus clear of the two global labels
+    c.comb(U2, ["1", "4", "9", "10", "12", "13"], "GND", out=25.4, tail=5.08)
     c.nc_pin(U2, "8")
     c.nc_pin(U2, "11")
-    c.pwr_pin(U2, "14", "+5V_RAW", 3.81)
-    c.pwr_pin(U2, "7", "GND", 3.81)
-    cb2 = c.place("C502", "C0603_100nF", 290, 60, 0)
-    c.pwr_pin(cb2, 1, "+5V_RAW")
-    c.pwr_pin(cb2, 2, "GND")
-    for k, pin in enumerate(("3", "6")):
-        y = U2.pin_pos(pin)
-        r = c.place("R5%02d" % (9 + k), "R0603_49R9", y[0] + 10.16, y[1], 90)
-        sh.wire(y[0], y[1], r.pin_pos(1)[0], r.pin_pos(1)[1])
-        e = sh.stub(r, 2, 5.08)
+    c.pwr_pin(U2, "14", "+5V_RAW", 5.08)
+    c.pwr_pin(U2, "7", "GND", 5.08)
+    c.decouple("C502", "C0603_100nF", 325, 72, "+5V_RAW", "GND")
+    for k, (pin, ty) in enumerate((("3", 88.9), ("6", 109.22))):
+        px, py = U2.pin_pos(pin)
+        jog = px + 6.35
+        sh.wire(px, py, jog, py)
+        sh.wire(jog, py, jog, ty)
+        r = c.place("R5%02d" % (9 + k), "R0603_49R9", jog + 7.62, ty, 90)
+        flat_fields(r, jog + 7.62, ty)
+        sh.wire(jog, ty, r.pin_pos(1)[0], r.pin_pos(1)[1])
         # v0.8: global labels instead of the J506/J507 edge terminals - the fast outputs go to
         # two SMA connectors on the front panel, where the coax already is.
+        e = sh.stub(r, 2, 7.62)
         sh.label("FASTTTL%d" % (k + 1), e[0], e[1], 0, "global")
-    sh.text("FASTTTL1/2 leave this sheet as global labels -> panel link J7 -> the two fast SMAs", 250, 122, 1.2)
-    sh.text("on the front panel (49.9 R series). The edge terminals J506/J507 are gone (v0.8).", 250, 125.2, 1.2)
-    # TRIG
-    U3 = c.place("U503", "SN74LVC1T45DBVR", 260, 175, 0)
+    sh.text("FASTTTL1/2 leave this sheet as global labels -> panel link J7 ->", 235, 140, 1.3)
+    sh.text("the two fast SMAs on the front panel (49.9 R series).", 235, 143.5, 1.3)
+    sh.text("The edge terminals J506/J507 are gone (v0.8).", 235, 147, 1.3)
+
+    # ---------------- 74LVC1T45: bidirectional TRIG ---------------------------------------
+    U3 = c.place("U503", "SN74LVC1T45DBVR", 430, 105, 0)
     c.glabel_pin(U3, "3", "TRIG_IO", 7.62)
     c.glabel_pin(U3, "5", "TRIG_DIR", 7.62)
-    c.pwr_pin(U3, "1", "+3V3", 3.81)
-    c.pwr_pin(U3, "6", "+5V_RAW", 3.81)
-    c.pwr_pin(U3, "2", "GND", 3.81)
+    # VCCA and VCCB are 2.54 mm apart: each stub steps aside before its rail symbol
+    a1 = sh.stub(U3, "1", 5.08)
+    sh.wire(a1[0], a1[1], a1[0] - 10.16, a1[1])
+    c.tap(a1[0] - 10.16, a1[1], "+3V3")
+    b1 = sh.stub(U3, "6", 10.16)
+    sh.wire(b1[0], b1[1], b1[0] + 10.16, b1[1])
+    c.tap(b1[0] + 10.16, b1[1], "+5V_RAW")
+    c.pwr_pin(U3, "2", "GND", 5.08)
     b = sh.stub(U3, "4", 5.08)
     r = c.place("R511", "R0603_33", b[0] + 3.81, b[1], 90)
+    flat_fields(r, b[0] + 3.81, b[1])
     sh.wire(b[0], b[1], r.pin_pos(1)[0], r.pin_pos(1)[1])
     node = r.pin_pos(2)
     sh.wire(node[0], node[1], node[0] + 17.78, node[1])
     sh.label("TRIG_5V", node[0] + 17.78, node[1], 0, "global")
-    d = c.place("D501", "BAV99", node[0] + 8.89, node[1] + 8.89, 180)
+    d = c.place("D501", "BAV99", node[0] + 8.89, node[1] + 15.24, 180)
     sh.wire(d.pin_pos(3)[0], d.pin_pos(3)[1], d.pin_pos(3)[0], node[1])
-    e = sh.stub(d, 1, 2.54)
-    c.power_at(e[0], e[1], "GND")
-    e = sh.stub(d, 2, 2.54)
-    c.power_at(e[0], e[1], "+5V_RAW")
+    c.pwr_L(d, 1, "GND", 2.54, 5.08)            # clamp to GND, symbol below the diode
+    c.pwr_L(d, 2, "+5V_RAW", 7.62, 5.08)        # clamp to +5V_RAW, symbol above its own stub
     for k, (ref, rail) in enumerate([("C503", "+3V3"), ("C504", "+5V_RAW")]):
-        cc = c.place(ref, "C0603_100nF", 300 + k * 10.16, 150, 0)
-        c.pwr_pin(cc, 1, rail)
-        c.pwr_pin(cc, 2, "GND")
-    sh.text("TRIG_DIR = 1: TRIG_IO drives the SMA (output); 0: SMA -> TRIG_IO (input, 5 V tolerant)", 240, 205, 1.2)
-    # TCXO option (DNP)
-    X = c.place("X501", "1XTV10000MDA", 70, 235, 0, dnp=True)
-    c.pwr_pin(X, "4", "+3V3", 3.81)
-    c.pwr_pin(X, "2", "GND", 3.81)
-    vc = sh.stub(X, "1", 5.08)
-    rv1 = c.place("R512", "R0603_100k", vc[0] - 2.54, vc[1] - 8.89, 0, dnp=True)
-    rv2 = c.place("R513", "R0603_100k", vc[0] - 2.54, vc[1] + 8.89, 0, dnp=True)
-    sh.wire(vc[0], vc[1], rv1.pin_pos(2)[0], vc[1])
-    sh.wire(rv1.pin_pos(2)[0], rv1.pin_pos(2)[1], rv1.pin_pos(2)[0], rv2.pin_pos(1)[1])
-    c.pwr_pin(rv1, 1, "+3V3")
-    c.pwr_pin(rv2, 2, "GND")
-    o = sh.stub(X, "3", 5.08)
-    cc = c.place("C505", "C0603_1nF", o[0] + 5.08, o[1], 90, dnp=True)
-    sh.wire(o[0], o[1], cc.pin_pos(1)[0], cc.pin_pos(1)[1])
-    n2 = cc.pin_pos(2)
-    U4 = c.place("U504", "SN74LVC1G17DBVR", n2[0] + 17.78, n2[1] + 2.54, 0, dnp=True)
-    a = U4.pin_pos("2")
-    sh.wire(n2[0], n2[1], a[0], a[1])
-    rb1 = c.place("R514", "R0603_100k", n2[0] + 5.08, n2[1] - 8.89, 0, dnp=True)
-    rb2 = c.place("R515", "R0603_100k", n2[0] + 5.08, n2[1] + 8.89, 0, dnp=True)
-    sh.wire(rb1.pin_pos(2)[0], rb1.pin_pos(2)[1], rb1.pin_pos(2)[0], rb2.pin_pos(1)[1])
-    c.pwr_pin(rb1, 1, "+3V3")
-    c.pwr_pin(rb2, 2, "GND")
-    c.pwr_pin(U4, "5", "+3V3", 3.81)
-    c.pwr_pin(U4, "3", "GND", 3.81)
-    c.nc_pin(U4, "1")
-    yv = sh.stub(U4, "4", 5.08)
-    jp = c.place("JP501", "SolderJumper_2_Open", yv[0] + 6.35, yv[1], 0)
-    sh.wire(yv[0], yv[1], jp.pin_pos(1)[0], jp.pin_pos(1)[1])
-    e = sh.stub(jp, 2, 3.81)
-    sh.label("GPIO44", e[0], e[1], 0, "global")
-    cd = c.place("C506", "C0603_100nF", U4.x + 15.24, U4.y - 12.7, 0, dnp=True)
-    c.pwr_pin(cd, 1, "+3V3")
-    c.pwr_pin(cd, 2, "GND")
-    sh.text("10 MHz timebase option — all parts DNP by default (zero cost); JP501 open until a firmware use exists", 40, 268, 1.2)
+        c.decouple(ref, "C0603_100nF", 490 + k * 15.24, 105, rail, "GND")
+    sh.text("TRIG_DIR = 1: TRIG_IO drives the SMA (output); 0: SMA -> TRIG_IO (input, 5 V tolerant)", 400, 145, 1.3)
+
     # ---------------- U505: TCA9535 I2C GPIO expander (v0.7, re-spec 8.2) ----------------------
-    U5 = c.place("U505", "TCA9535PWR", 200, 250, 0, block="BASE")   # expander serves B and C: owned by the base (sits under the dev board)
-    c.pwr_pin(U5, "24", "+3V3", 3.81)
-    c.pwr_pin(U5, "12", "GND", 3.81)
-    for pin in ("21", "2", "3"):                     # A0, A1, A2 -> GND: address 0x20
-        c.pwr_pin(U5, pin, "GND", 5.08)
+    U5 = c.place("U505", "TCA9535PWR", 140, 270, 0, block="BASE")   # expander serves B and C: owned by the base (sits under the dev board)
+    c.pwr_pin(U5, "24", "+3V3", 5.08)
+    c.pwr_pin(U5, "12", "GND", 5.08)
+    c.comb(U5, ["21", "2", "3"], "GND", out=15.24, tail=5.08)       # A0, A1, A2 -> GND: address 0x20
     c.glabel_pin(U5, "23", "I2C_SDA", 7.62)
     c.glabel_pin(U5, "22", "I2C_SCL", 7.62)
     c.nc_pin(U5, "1")                                # INT (open drain) unused: the firmware polls the outputs
@@ -868,14 +972,55 @@ def build_b5(root_uuid):
     c.glabel_pin(U5, "17", "EXP_P14", 7.62)          # P14 is taken: /CLR of the 74HC74 Johnson counter (nmr_rx)
     for i in range(3):                               # P15..P17 (pins 18..20) -> MOD5..MOD7
         c.glabel_pin(U5, str(18 + i), "MOD%d" % (i + 5), 7.62)
-    c.decouple("C507", "C0603_100nF", 270, 235, "+3V3", "GND").fields["Block"] = "BASE"
-    tp = c.place("TP501", "TestPoint", 300, 230, 0, block="BASE")     # /CLR of the Johnson counter, for bring-up
-    c.glabel_pin(tp, 1, "EXP_P14", 3.81)
-    sh.text("U505 TCA9535 (TSSOP-24, address 0x20, A0 = A1 = A2 = GND): the I2C port expander that replaced 12 direct GPIO in v0.7 —", 40, 197, 1.3)
-    sh.text("P00..P07 = DIO1..8 into the 74AHCT541 above; P10..P13 and P15..P17 = MODULE OUT 1..7, the 3.3 V module outputs, to the panel link J8 (v0.7d).", 40, 200.5, 1.3)
-    sh.text("P14 is NOT free: it is EXP_P14, the /CLR of the 74HC74 Johnson counter on the NMR receiver sheet (TP501 is its test point). MODULE OUT 8 is", 40, 204, 1.3)
-    sh.text("reserved: J8 pin 33 is not connected on this board and the panel pulls it down. MOD1..MOD4 keep the ports the relay gates used, so the firmware", 40, 207.5, 1.3)
-    sh.text("mapping is unchanged. Every port is an input after power-up and after a reset: the pull-down on the panel buffer decides the state of a module.", 40, 211, 1.3)
+    c.decouple("C507", "C0603_100nF", 195, 245, "+3V3", "GND").fields["Block"] = "BASE"
+    tp = c.place("TP501", "TestPoint", 215, 282.54, 90, block="BASE")   # /CLR of the Johnson counter, for bring-up
+    tp.field_pos["Reference"] = (210.5, 278.5, 270, "left bottom")
+    c.glabel_pin(tp, 1, "EXP_P14", 5.08)
+    for k, s in enumerate([
+            "U505 TCA9535 (TSSOP-24, address 0x20, A0 = A1 = A2 = GND): the I2C port expander that replaced 12 direct GPIO in v0.7 — P00..P07 = DIO1..8 into the",
+            "74AHCT541 above; P10..P13 and P15..P17 = MODULE OUT 1..7, the 3.3 V module outputs, to the panel link J8 (v0.7d). P14 is NOT free: it is EXP_P14, the",
+            "/CLR of the 74HC74 Johnson counter on the NMR receiver sheet (TP501 is its test point). MODULE OUT 8 is reserved: J8 pin 33 is not connected on this",
+            "board and the panel pulls it down. MOD1..MOD4 keep the ports the relay gates used, so the firmware mapping is unchanged. Every port is an input",
+            "after power-up and after a reset: the pull-down on the panel buffer decides the state of a module."]):
+        sh.text(s, 70, 335 + k * 3.6, 1.3)
+
+    # ---------------- 10 MHz TCXO option (every part DNP) ----------------------------------
+    X = c.place("X501", "1XTV10000MDA", 350, 270, 0, dnp=True)
+    c.pwr_pin(X, "4", "+3V3", 3.81)
+    c.pwr_pin(X, "2", "GND", 3.81)
+    vc = sh.stub(X, "1", 7.62)                       # VCONT node: the divider column sits on the stub end
+    rv1 = c.place("R512", "R0603_100k", vc[0], vc[1] - 10.16, 0, dnp=True)
+    rv2 = c.place("R513", "R0603_100k", vc[0], vc[1] + 10.16, 0, dnp=True)
+    sh.wire(vc[0], rv1.pin_pos(2)[1], vc[0], rv2.pin_pos(1)[1])
+    c.pwr_pin(rv1, 1, "+3V3")
+    c.pwr_pin(rv2, 2, "GND")
+    o = sh.stub(X, "3", 5.08)
+    cc = c.place("C505", "C0603_1nF", o[0] + 3.81, o[1], 90, dnp=True)
+    flat_fields(cc, o[0] + 3.81, o[1])
+    n2 = cc.pin_pos(2)
+    U4 = c.place("U504", "SN74LVC1G17DBVR", n2[0] + 33.02, n2[1] + 2.54, 0, dnp=True)
+    a = U4.pin_pos("2")
+    # R514/R515 bias the Schmitt input at VCC/2: the divider midpoint sits ON the A line as a four-way
+    # junction (v0.7 drew the column across the line without a wire end, so KiCad never joined it — fixed 2026-09-17).
+    mid = (n2[0] + 15.24, n2[1])
+    sh.wire(n2[0], n2[1], mid[0], mid[1])
+    sh.wire(mid[0], mid[1], a[0], a[1])
+    rb1 = c.place("R514", "R0603_100k", mid[0], mid[1] - 10.16, 0, dnp=True)   # pin 2 (bottom) toward the line
+    rb2 = c.place("R515", "R0603_100k", mid[0], mid[1] + 10.16, 0, dnp=True)   # pin 1 (top) toward the line
+    sh.wire(mid[0], rb1.pin_pos(2)[1], mid[0], mid[1])
+    sh.wire(mid[0], mid[1], mid[0], rb2.pin_pos(1)[1])
+    c.pwr_pin(rb1, 1, "+3V3")
+    c.pwr_pin(rb2, 2, "GND")
+    c.pwr_pin(U4, "5", "+3V3", 3.81)
+    c.pwr_pin(U4, "3", "GND", 3.81)
+    c.nc_pin(U4, "1")
+    yv = sh.stub(U4, "4", 6.35)
+    jp = c.place("JP501", "SolderJumper_2_Open", yv[0] + 3.81, yv[1], 0)
+    e = sh.stub(jp, 2, 10.16)
+    sh.label("GPIO44", e[0], e[1], 0, "global")
+    c.decouple("C506", "C0603_100nF", 455, 295, "+3V3", "GND").dnp = True
+    sh.text("10 MHz timebase option — all parts DNP by default (zero cost);", 320, 320, 1.3)
+    sh.text("JP501 open until a firmware use exists", 320, 323.5, 1.3)
     auto_junctions(sh)
     return sh
 
@@ -1103,31 +1248,55 @@ def build_link(root_uuid):
     # receiver sheet already uses 7xxx - sharing the range gave duplicate #PWR references
     # (kicad-cli then warns "schematic has annotation errors").
     c = Ctx(sh, "BASE", 6000)
-    sheet_frame(sh, "LINK", "FRONT-PANEL LINK - three 2x20 straight male headers on the BOTTOM side of the main board (v0.8)", [
+
+    def wrap(s, n=260):
+        """split a long note into page-wide lines so nothing runs off the right edge"""
+        out, cur = [], ""
+        for w in s.split(" "):
+            if cur and len(cur) + 1 + len(w) > n:
+                out.append(cur)
+                cur = w
+            else:
+                cur = w if not cur else cur + " " + w
+        if cur:
+            out.append(cur)
+        return out
+
+    notes = []
+    for s in [
         "The panel stacks flat on the BACK of the main board (Decision #45). J6/J7/J8 are mounted on the BOTTOM side of the main board and hand-soldered from the top; they mate the panel's three female headers. Positions along the 180 mm edge: x ~ 12 (J6), x ~ 90 (J7), x ~ 168 (J8) mm.",
-        "Odd pins = row 1 (signal), even pins = row 2 (return): every signal pin has its return, AGND or GND, on the adjacent even pin. J6 carries the analog signals (nearest the panel SMAs), J7 the digital ones, J8 the rails, the free GPIO, the seven module outputs MODULE OUT 1..7 and the two isolated-input returns OPTO_IN1/2.",
+        "Odd pins = row 1 (signal), even pins = row 2 (return): every signal pin has its return, AGND or GND, on the adjacent even pin. The whole even row of a header is one net, so it is drawn as one comb with a single symbol. J6 carries the analog signals (nearest the panel SMAs), J7 the digital ones, J8 the rails, the free GPIO, the seven module outputs MODULE OUT 1..7 and the two isolated-input returns OPTO_IN1/2.",
         "LED_PWR is +3V3 (always on; the LED series resistor sits on the panel). LED_WIFI / LED_ACT come from GPIO43 / GPIO44 through JP1 / JP2 (base sheet). GPIO4/6/7/15/43/44 on J8 are the same nets as on the expansion header J5. TX is on two pins (19 and 21) so the coil current has two paths.",
         "Pins marked spare are not connected on the main board; on the panel they reach labelled test pads, so a later panel part needs no new main-board revision. Panel copper is AGND and meets GND only at the star point NT1 on the main board.",
         "The three headers (and the panel's three female headers) are bought separately and soldered by the instructor: they carry the field Assembly = hand and are excluded from the JLC BOM and CPL.",
-    ])
+    ]:
+        notes += wrap(s)
+    sheet_frame(sh, "LINK", "FRONT-PANEL LINK - three 2x20 straight male headers on the BOTTOM side of the main board (v0.8)", notes)
+    # Layout rules (2026-09-17 spacing rework): the twenty returns of a header share one comb with one
+    # ground symbol, a rail leaves the header sideways and turns up on its own stub, and no wire crosses a
+    # label.  Checked by scripts/sch_check.py and by the SVG render.
     for k, (ref, pins, what, xmm) in enumerate(LINKS):
         J = c.place(ref, "HDR_2x20_FEMALE", 60 + k * 130, 150, 0)   # FEMALE on the main board: its pins are live (user, 2026-09-17)
-        for pin, net in pins.items():
-            # four stub lengths in turn, so the ground and rail symbols stand in four columns:
-            # KiCad draws the label of a sideways power symbol vertically, and two labels in the
-            # same column then need 4 pin pitches (10.16 mm) between them to stay apart
-            stub = (7.62, 12.7, 17.78, 22.86)[(pin // 2) % 4]
-            if pin % 2:
-                stub += 20.32      # a rail on an odd pin shares the side with the signal labels
+        # every even pin is the return of the odd pin beside it and they are all one net:
+        # one comb down the right-hand row, one symbol below the last pin
+        c.comb(J, list(range(2, 41, 2)), "AGND" if ref == "J6" else "GND", out=10.16, tail=7.62)
+        skip = set()
+        if ref == "J7":                      # pin 27 = +3V3, pin 29 = LED_PWR (+3V3 as well): one comb
+            c.comb(J, [27, 29], "+3V3", out=30.48, tail=7.62)
+            skip = {27, 29}
+        elif ref == "J8":
+            c.comb(J, [1, 3], "+5V_RAW", out=30.48, tail=7.62)
+            c.pwr_L(J, 5, "+3V3", 38.1, 17.78)
+            skip = {1, 3, 5}
+        for pin in range(1, 41, 2):
+            if pin in skip:
+                continue
+            net = pins[pin]
             if net is None:
                 c.nc_pin(J, pin)
-            elif net in ("GND", "AGND", "+3V3", "+5V_RAW"):
-                c.pwr_pin(J, pin, net, stub)
-            elif net == "LED_PWR":
-                c.pwr_pin(J, pin, "+3V3", stub)
             else:
                 c.glabel_pin(J, pin, net, 7.62)
-        sh.text("%s - %s, at x = %d mm on the bottom side" % (ref, what, xmm), 42 + k * 130, 115, 1.6, True)
+        sh.text("%s - %s, at x = %d mm on the bottom side" % (ref, what, xmm), 34 + k * 130, 112, 1.6, True)
         sh.table(20 + k * 132, 200, link_rows(pins), [14, 110], 1.25)
         sh.text("%s pin table" % ref, 20 + k * 132, 198, 1.3, True)
     sh.text("Pin 29 of J7 (LED_PWR) is +3V3 directly; the panel LED series resistor sits on the panel PCB.", 20, 265, 1.3)
