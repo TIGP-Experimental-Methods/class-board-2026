@@ -3,10 +3,10 @@ as it sits on the panel's vertical 1x4 socket (PZ254-1-04-Z-8.5, 8.5 mm tall).
 
 Footprint frame (class_board:OLED-0.96in-4P-module-socket): origin = centre of the 1x4 pad row,
 x along the pins (pin 1 at x = -3.81), +y = towards the bottom of the module (KiCad y down).
-The module's PCB (27.3 x 27.8 x 1.2 mm) hangs 11.0 mm above the panel: 8.5 mm socket + 2.5 mm
+The module's PCB (27 x 29 x 1.2 mm, GM009605v4; holes 24 x 26 mm per the instructor) hangs 11.0 mm above the panel: 8.5 mm socket + 2.5 mm
 header body on the module's back.  The glass (26.7 x 19.3 x 1.6) sits on the module's front,
 below the header.  Dimensions are the usual Chinese 4-pin module; MEASURE THE REAL MODULE
-(Jinhua #32751) before the order - hole spacing 23.5 x 23.8 is the number to check.
+(Jinhua #32751) before the order - hole spacing 24 x 26 (instructor, 2026-09-17) is the number to confirm.
 
 VRML: 1 unit = 0.1 inch = 2.54 mm; x right, y = footprint -y, z up.
 """
@@ -22,12 +22,12 @@ T_PCB = 1.2
 BOXES = [
     # header body on the module's back (between socket and PCB), 10.2 x 2.5 mm, straddling the pin row
     (-5.1, -1.27, 5.1, 1.27, Z_SOCKET, Z_PCB, (0.15, 0.15, 0.15)),
-    # the module PCB: top edge 2.2 mm above the pin row, 27.3 x 27.8
-    (-13.65, -2.2, 13.65, 25.6, Z_PCB, Z_PCB + T_PCB, (0.05, 0.15, 0.45)),
+    # the module PCB: header body 1 mm below the top edge -> pin row 2.27 mm below it; top holes 1.5 mm from the edge, 27 x 29
+    (-13.5, -2.27, 13.5, 26.73, Z_PCB, Z_PCB + T_PCB, (0.05, 0.15, 0.45)),
     # the glass: 26.7 x 19.3, from 5.5 mm below the module's top edge
-    (-13.35, 3.3, 13.35, 22.6, Z_PCB + T_PCB, Z_PCB + T_PCB + 1.6, (0.02, 0.02, 0.02)),
+    (-13.35, 3.23, 13.35, 22.53, Z_PCB + T_PCB, Z_PCB + T_PCB + 1.6, (0.02, 0.02, 0.02)),
     # active display area (visible face, lighter) 21.7 x 11.2, centred on the glass
-    (-10.85, 7.35, 10.85, 18.55, Z_PCB + T_PCB + 1.6, Z_PCB + T_PCB + 1.62, (0.25, 0.28, 0.32)),
+    (-10.85, 7.28, 10.85, 18.48, Z_PCB + T_PCB + 1.6, Z_PCB + T_PCB + 1.62, (0.25, 0.28, 0.32)),
 ]
 
 

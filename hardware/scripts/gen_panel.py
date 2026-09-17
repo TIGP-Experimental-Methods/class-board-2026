@@ -146,7 +146,7 @@ OLED_REF = "J30"
 # the module must be fixed, and nothing may foul the header solder tails): the vertical 8.5 mm 1x4 socket
 # that JLC places (anchor = centre of its pad row) plus the module's outline and its four M2 holes, so the
 # module sits on four 11 mm M2 stand-offs and cannot drift from its socket.  The module PCB
-# (27.3 x 27.8, panel x 148.8..176.1, y 9.0..36.8) overhangs the solder tails of J1 (x 165..171) with 8 mm
+# (27 x 29, holes 24 x 26 - instructor 2026-09-17) used to overhang the solder tails of J1 (x 165..171) with 8 mm
 # of air: the PCB hangs 11 mm above the panel, the tails stand 3 mm.  No pad or hole of the footprint lies
 # in J1's keep-out band (check_keepouts proves it); the right-hand M2 holes (x 174.2) clear J1's pads by
 # 3 mm.  There is no 27 x 28 mm patch on the 180 x 100 panel that is free of BOTH the SMA field and a
@@ -154,7 +154,7 @@ OLED_REF = "J30"
 # Pin row 2.2 mm below the module's top edge; pin 1 = GND on the LEFT as seen from the front (the common
 # GND-VCC-SCL-SDA module; a VCC-GND-SCL-SDA module must not be plugged in).
 # 2026-09-17: the module must lie ENTIRELY clear of every header's solder tails.  Anchor (150.85,
-# 11.2) puts the module body at x 137.2..164.5, y 9.0..36.8 - right of the 133 SMA column
+# 11.2) puts the module body at x 137.35..164.35, y 9.7..38.7 - right of the 133 SMA column
 # (courtyard ends 136.9) and left of J1 (pads 166.73..169.27, pad edge 165.88): 1.4 mm of copper
 # clearance on the right, 0.8 mm of courtyard on the left, and nothing of the module over a tail.
 OLED_AT = (150.85, 11.2, 0)
@@ -415,7 +415,7 @@ def build_sheet():
     sh.text("With that mirror, panel pad k mates main-board pin k on all three headers (the KiCad PinSocket footprint already carries the mating mirror). gen_panel.py proves it from the pad coordinates before the board is written.", 14, 25, 1.4)
     sh.text("So the analog header J6 (main x = 12) is panel J1 at panel x = 168, the digital header J7 stays at x = 90, and the power header J8 (main x = 168) is panel J3 at panel x = 12.", 14, 29, 1.4)
     sh.text("Pins marked spare are not connected on the main board and are left unconnected here. SPARE (the 18th SMA position is empty; the fitted SPARE SMA) has its shield on AGND and its centre pin on TP1 only.", 14, 33, 1.4)
-    sh.text("J30 is one footprint: the vertical 8.5 mm 1x4 socket (JLC C2894927) plus the OLED module's outline and its four M2 (2.2 mm) holes. The module lies flat on four 11 mm M2 stand-offs; measure the real module's hole spacing (23.5 x 23.8 assumed) before the order.", 14, 37, 1.4)
+    sh.text("J30 is one footprint: the vertical 8.5 mm 1x4 socket (JLC C2894927) plus the OLED module's outline and its four M2 (2.2 mm) holes. The module lies flat on four 11 mm M2 stand-offs; hole spacing 24 x 26 mm (instructor, 2026-09-17), 2.4 mm holes; confirm on the delivered modules.", 14, 37, 1.4)
     sh.text("AO1/AO2: +-10 V, 49.9 ohm back-terminated. AI1..AI8: +-10 V, 1 kohm series on the main board. TRIG: 5 V into open circuit, about 2.4 V into 50 ohm. FAST1/FAST2 = the main-board nets FASTTTL1 / FASTTTL2.", 14, 41, 1.4)
 
     # ---- the three link headers ----------------------------------------------------------
