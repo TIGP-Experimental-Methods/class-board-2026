@@ -29,101 +29,11 @@
 (rule "copper_to_edge"
 	(constraint edge_clearance (min 0.3mm)))
 
-# ---- the MAINS rules come LAST on purpose: KiCad applies the last rule that matches, so they must
-#      stand after the general clearance and edge rules above or those would override them.
-# ---- MAINS relay channels (D-51, 2026-09-16): the four relay contact circuits are built so that a 110 V or
-#      220 V wall socket wired into a terminal is safe.  Reinforced spacing for a 250 V working voltage
-#      (IEC 62368-1, pollution degree 2, FR4 material group IIIb): basic 1.5 mm, reinforced = 2 x = 5.0 mm.
-#      Every relay contact net is in the MAINS class and also in its own channel class MAINS1..MAINS4.
-#      Pad pairs inside one footprint are excluded: the coil-to-contact distance of the relay itself is the
-#      manufacturer's isolation (1.5 kV test), not a spacing the board layout may change.
-(rule "mains_to_other"
-	(condition "A.NetClass == 'MAINS' && !(B.NetClass == 'MAINS') && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
-	(constraint clearance (min 5.0mm)))
-
-# ---- one channel to another: two channels can sit on different 110 V legs (220 V between them)
-(rule "mains_between_channels1"
-	(condition "A.NetClass == 'MAINS1' && B.NetClass == 'MAINS' && !(B.NetClass == 'MAINS1')")
-	(constraint clearance (min 5.0mm)))
-(rule "mains_between_channels2"
-	(condition "A.NetClass == 'MAINS2' && B.NetClass == 'MAINS' && !(B.NetClass == 'MAINS2')")
-	(constraint clearance (min 5.0mm)))
-(rule "mains_between_channels3"
-	(condition "A.NetClass == 'MAINS3' && B.NetClass == 'MAINS' && !(B.NetClass == 'MAINS3')")
-	(constraint clearance (min 5.0mm)))
-(rule "mains_between_channels4"
-	(condition "A.NetClass == 'MAINS4' && B.NetClass == 'MAINS' && !(B.NetClass == 'MAINS4')")
-	(constraint clearance (min 5.0mm)))
-
-# ---- inside one channel (COM / NO / NC of the same relay and terminal): basic spacing at the switched
-#      voltage.  A custom rule wins over the 5.0 mm clearance of the MAINS net class, and no other rule here
-#      matches a pair of nets of the same channel, so 2.0 mm is what the DRC asks for inside a channel.
-(rule "mains_within_channel1"
-	(condition "A.NetClass == 'MAINS1' && B.NetClass == 'MAINS1' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
-	(constraint clearance (min 2.0mm)))
-(rule "mains_within_channel2"
-	(condition "A.NetClass == 'MAINS2' && B.NetClass == 'MAINS2' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
-	(constraint clearance (min 2.0mm)))
-(rule "mains_within_channel3"
-	(condition "A.NetClass == 'MAINS3' && B.NetClass == 'MAINS3' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
-	(constraint clearance (min 2.0mm)))
-(rule "mains_within_channel4"
-	(condition "A.NetClass == 'MAINS4' && B.NetClass == 'MAINS4' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
-	(constraint clearance (min 2.0mm)))
-
-# ---- a metal lid or a hand at the board edge
-(rule "mains_edge"
-	(condition "A.NetClass == 'MAINS'")
-	(constraint edge_clearance (min 2.0mm)))
-
-# ---- mains stays on the top layer and never goes through the board: no inner or bottom copper, no vias
-(rule "mains_layers_inner"
-	(layer inner)
-	(condition "A.NetClass == 'MAINS'")
-	(constraint disallow track zone))
-(rule "mains_layers_back"
-	(layer "B.Cu")
-	(condition "A.NetClass == 'MAINS'")
-	(constraint disallow track zone))
-(rule "mains_no_via"
-	(condition "A.NetClass == 'MAINS'")
-	(constraint disallow via))
-
-# ---- 3 mm of 1 oz outer copper carries the 5 A the channel is rated for with a small temperature rise
-(rule "mains_width"
-	(condition "A.NetClass == 'MAINS'")
-	(constraint track_width (min 3.0mm)))
-
-# ---- section ownership (v0.7, 2026-09-13): Block field -> owner area. A = B1/OPT/NMR_RX, B = B3/B5/NMR_TX, C = B2/B4/C_SW
+# ---- section ownership (v0.7d, 2026-09-17): Block field -> owner area.
+#      A = B1/OPT/NMR_RX, B = B3/B5/NMR_TX.  Section C is the front-panel board now (its own
+#      project), so what was ZONE_C on the main board is the instructor's area ZONE_INSTR:
+#      the power entry (B2) and the coil switches (C_SW).  The B4 block (relays and isolated
+#      inputs) was deleted in v0.7d, together with the MAINS net classes and their rules.
 (rule "owner_A" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B1' || A.getField('Block') == 'OPT' || A.getField('Block') == 'NMR_RX' || A.getField('Block') == 'A')") (constraint assertion "A.enclosedByArea('ZONE_A')"))
 (rule "owner_B" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B3' || A.getField('Block') == 'B5' || A.getField('Block') == 'NMR_TX' || A.getField('Block') == 'B')") (constraint assertion "A.enclosedByArea('ZONE_B')"))
-(rule "owner_C" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B2' || A.getField('Block') == 'B4' || A.getField('Block') == 'C_SW' || A.getField('Block') == 'C')") (constraint assertion "A.enclosedByArea('ZONE_C')"))
-
-# ---- inside one part: the distance between a relay's own coil and contact pins, and between the
-#      three poles of one screw terminal, is set by the part, not by the layout.  These rules come
-#      last on purpose: KiCad applies the last rule that matches, so they lift the 5 mm / 2 mm MAINS
-#      clearances for pad pairs that belong to the same footprint (and only for those).
-(rule "inside_K401"
-	(condition "A.memberOfFootprint('K401') && B.memberOfFootprint('K401')")
-	(constraint clearance (min 0.2mm)))
-(rule "inside_K402"
-	(condition "A.memberOfFootprint('K402') && B.memberOfFootprint('K402')")
-	(constraint clearance (min 0.2mm)))
-(rule "inside_K403"
-	(condition "A.memberOfFootprint('K403') && B.memberOfFootprint('K403')")
-	(constraint clearance (min 0.2mm)))
-(rule "inside_K404"
-	(condition "A.memberOfFootprint('K404') && B.memberOfFootprint('K404')")
-	(constraint clearance (min 0.2mm)))
-(rule "inside_J401"
-	(condition "A.memberOfFootprint('J401') && B.memberOfFootprint('J401')")
-	(constraint clearance (min 0.2mm)))
-(rule "inside_J402"
-	(condition "A.memberOfFootprint('J402') && B.memberOfFootprint('J402')")
-	(constraint clearance (min 0.2mm)))
-(rule "inside_J403"
-	(condition "A.memberOfFootprint('J403') && B.memberOfFootprint('J403')")
-	(constraint clearance (min 0.2mm)))
-(rule "inside_J404"
-	(condition "A.memberOfFootprint('J404') && B.memberOfFootprint('J404')")
-	(constraint clearance (min 0.2mm)))
+(rule "owner_INSTR" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B2' || A.getField('Block') == 'C_SW' || A.getField('Block') == 'C')") (constraint assertion "A.enclosedByArea('ZONE_INSTR')"))

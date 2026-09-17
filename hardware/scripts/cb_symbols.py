@@ -42,6 +42,7 @@ DS = {
     "HDR2x20RA": "https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Ckmtw-Shenzhen-Cankemeng-B-2100R40P-B110_C124369.pdf",
     "HDR2x20F": "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2203281730_ZHOURI-2-54-2-20_C2977589.pdf",
     "HDR2x10": "https://www.lcsc.com/datasheet/lcsc_datasheet_2003191007_XFCN-PZ254V-12-20P_C492427.pdf",
+    "BOXHDR2x6": "https://www.lcsc.com/product-detail/C48687626.html",
     "QWIIC": "https://jlcpcb.com/partdetail/XYECONN-XY_SM04B_SRSSTB/C51940130",
     "QWIIC_V": "https://jlcpcb.com/partdetail/XYECONN-XY_BM04B_SRSSTB/C51940129",
     "KF128-10P": "https://www.lcsc.com/product-detail/C474928.html",
@@ -501,6 +502,8 @@ def build_library():
          ("270", "0603WAF2700T5E", "C22966", "Basic"), ("910", "0603WAF9100T5E", "C23264", "Extended"),
          ("6.8k", "0603WAF6801T5E", "C23212", "Basic"), ("6.49k", "0603WAF6491T5E", "C23088", "Extended"),
          ("11k", "0603WAF1102T5E", "C25950", "Basic"), ("47k", "0603WAF4702T5E", "C25819", "Basic"),
+         # front-panel module-output buffer (2026-09-17): 47 R series on each 74AHCT541 output
+         ("47", "0603WAF470JT5E", "C23182", "Basic"),
          ("1M", "0603WAF1004T5E", "C22935", "Basic")]
     for val, mpn, lcsc, cls in R:
         add(two_pin("R0603_" + val.replace(".", "R"), "R", val, chip_fp("R0603"),
@@ -858,17 +861,26 @@ def build_library():
     add(box_symbol("HDR_2x20_MALE", "J", "Panel link 2x20 male", "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical",
         "2x20 straight male pin header, 2.54 mm, KiCad standard footprint. Bottom side of the main board, hand-soldered from the top; mates the panel's female headers.",
         left=[(str(i), str(i), "passive") for i in range(1, 41, 2)], right=[(str(i), str(i), "passive") for i in range(2, 41, 2)],
-        fields={"Assembly": "hand", "MPN": "2x20 straight pin header 2.54 mm", "Manufacturer": "any", "Purchase": "C5224014",
+        fields={"Assembly": "hand", "MPN": "PZ2.54-2*20", "Manufacturer": "ZHOURI", "Purchase": "C5224014", "LCSC": "C5224014",
                 "Datasheet": "https://www.lcsc.com/product-detail/C5224014.html"}, width=7.62, in_bom=False))
     # Panel link, panel side: three of these on the panel's inner face, also hand-soldered.
     add(box_symbol("HDR_2x20_FEMALE", "J", "Panel link 2x20 female", "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical",
         "2x20 straight female header 8.5 mm, 2.54 mm, KiCad standard footprint. Panel inner face, hand-soldered; mates the main board's male headers.",
         left=[(str(i), str(i), "passive") for i in range(1, 41, 2)], right=[(str(i), str(i), "passive") for i in range(2, 41, 2)],
-        fields={"Assembly": "hand", "MPN": "2x20 female header 8.5 mm", "Manufacturer": "any", "Purchase": "C5124634",
+        fields={"Assembly": "hand", "MPN": "2.54-2*20P (8.5 mm)", "Manufacturer": "BOOMELE", "Purchase": "C5124634", "LCSC": "C5124634",
                 "Datasheet": "https://www.lcsc.com/product-detail/C5124634.html"}, width=7.62, in_bom=False))
-    add(box_symbol("HDR_2x10_MALE", "J", "Expansion 2x10", FP + "HDR-TH_20P-P2.54-V-M-R2-C10-S2.54", "2x10 straight male header (XFCN PZ254V-12-20P), expansion",
+    add(box_symbol("HDR_2x10_MALE", "J", "Expansion 2x10", "Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical",
+        "2x10 straight male header (XFCN PZ254V-12-20P), expansion. KiCad standard footprint (user 2026-09-17: generic 2.54 mm headers with good 3D models, real MPN and C-number in the fields).",
         left=[(str(i), str(i), "passive") for i in range(1, 21, 2)], right=[(str(i), str(i), "passive") for i in range(2, 21, 2)],
         fields=f("C492427", "Extended", "PZ254V-12-20P", "XFCN", DS["HDR2x10"]), width=7.62))
+    # Front-panel MODULE HEADER (user, 2026-09-17): a shrouded 2x6 IDC box header carries the eight
+    # buffered 5 V TTL module outputs to an off-board relay / H-bridge module on a ribbon cable.
+    # 1,2 = +5V_RAW   3..10 = MODOUT1..8   11,12 = GND.
+    add(box_symbol("IDC_2x6_BOX_HEADER", "J", "Module header 2x6 (shrouded)", "Connector_IDC:IDC-Header_2x06_P2.54mm_Vertical",
+        "Shrouded 2x6 IDC box header, 2.54 mm, vertical, 3 A/pin, polarised (XFCN BH254V-12P). Front-panel module outputs: 1,2 = +5V_RAW, 3-10 = MODOUT1..8 (5 V TTL), 11,12 = GND.",
+        left=[(str(i), str(i), "passive") for i in range(1, 13, 2)],
+        right=[(str(i), str(i), "passive") for i in range(2, 13, 2)],
+        fields=f("C48687626", "Extended", "BH254V-12P", "XFCN", DS["BOXHDR2x6"]), width=7.62))
     # Panel screw terminals (v0.8): the TTL strip and the TX coil pair move to the panel.
     add(box_symbol("KF128-2.54-10P", "J", "KF128-2.54-10P", FP + "CONN-TH_10P-P2.54_KF128-2.54-10P",
         "Screw terminal 2.54 mm 10P, wire entry from the top (vertical), 130 V 8 A",

@@ -9,9 +9,9 @@ The teaching instrument for **Basic Skills for Experimentalists** (TIGP, 2026): 
 | `host/pwa/` | the phone app (plain HTML/JS, no build step) | students in their section's panel files, under `panels/` |
 | `host/instrument.py` | Python command-line client (CLI) speaking the same protocol as the phone | instructor |
 
-**The three sections of the board** (one student each, assigned at the start of Workshop 2): **A — inputs and the NMR receiver** (the 8-channel 16-bit converter; the tuned coil, low-noise amplifier, blanking switch, I/Q mixer, IF filters and clock generator) · **B — signal generation, timing and the NMR transmitter** (±10 V outputs; the DDS synthesizer, reconstruction filter and power stage; TTL buffers, TRIG, the I²C expander) · **C — power and switching** (rails and the external power input; four relay channels built to switch mains — 250 V AC, 5 A maximum per channel, the load fused — and two isolated inputs; the H-bridge and the polarizer switch). The instructor owns the base, the front panel and the power-entry sheet.
+**The three sections of the board** (one student each, assigned at the start of Workshop 2): **A — inputs and the NMR receiver** (the 8-channel 16-bit converter; the tuned coil, low-noise amplifier, blanking switch, I/Q mixer, IF filters and clock generator) · **B — signal generation, timing and the NMR transmitter** (±10 V outputs; the DDS synthesizer, reconstruction filter and power stage; TTL buffers, TRIG, the I²C expander) · **C — the front panel board** (the whole second board: the SMA field, the OLED, the LEDs, the TTL strip, the TX coil terminal and the Qwiic; the two isolated inputs; the module header with its 5 V buffer — seven outputs, MODULE OUT 1–7 plus a reserved spare pin, for driving opto-isolated modules outside the box). The instructor owns the base: the dev-board socket and the buses, the power entry and the rails, the external power input, the H-bridge and the polarizer switch.
 
-**Firmware drivers** (the firmware calls each driver a *block*): `base` (dev board itself) · `b1_inputs` (ADS8688 8-ch ADC, analog-to-digital converter) · `b2_power` (rails) · `b3_outputs` (DAC8563 digital-to-analog converter + ±10 V) · `b4_switching` (4 relays, 2 optos) · `b5_dio_trig` (8 TTL out, 2 fast out, TRIG) · `nmr` (the console: pulse → free induction decay → spectrum). Section A owns `b1_inputs` and the receiver capture; Section B owns `b3_outputs` and `b5_dio_trig`; Section C owns `b2_power` and `b4_switching`. Protocol: [firmware/PROTOCOL.md](firmware/PROTOCOL.md).
+**Firmware drivers** (the firmware calls each driver a *block*): `base` (dev board itself) · `b1_inputs` (ADS8688 8-ch ADC, analog-to-digital converter) · `b2_power` (rails) · `b3_outputs` (DAC8563 digital-to-analog converter + ±10 V) · `b4_switching` (7 module outputs, 2 isolated inputs) · `b5_dio_trig` (8 TTL out, 2 fast out, TRIG) · `nmr` (the console: pulse → free induction decay → spectrum). Section A owns `b1_inputs` and the receiver capture; Section B owns `b3_outputs` and `b5_dio_trig`; Section C owns `b4_switching`; `b2_power` is the instructor's. Protocol: [firmware/PROTOCOL.md](firmware/PROTOCOL.md).
 
 Until the class board arrives everything runs in **SIM mode** on a bare Jinhua ESP32-S3 N16R8 dev board (the development board: the microcontroller on a small board with a USB connector and pins): each driver fakes its hardware, so the app, the chart and the alarms all work from Workshop 1.
 
@@ -23,7 +23,7 @@ Until the class board arrives everything runs in **SIM mode** on a bare Jinhua E
 |---|---|
 | **Setup (before Workshop 1)** | [SETUP.md](SETUP.md) — paste the prompt from workbook ch. 0 into Claude Code and it installs the toolchain (the compiler and helper programs that turn source code into firmware) |
 | **Workbook** — one chapter per workshop, each with a *between workshops* part ("Before the next workshop: complete the preparation, improve your apps, build and have fun."), the same text the tutor runs | [`workbook/`](workbook/README.md): [ch. 0](workbook/ch0-before-day-1.md) · [ch. 1](workbook/ch1-day-1-week-1.md) · [ch. 2](workbook/ch2-day-2-week-2.md) · [ch. 3](workbook/ch3-day-3-week-3.md) · [ch. 4](workbook/ch4-wrap-up-demo.md) · [A](workbook/chA-electronics-from-zero.md) · [B](workbook/chB-how-the-software-works.md) · [C cheat-sheets](workbook/chC-cheat-sheets.md) |
-| **Your section page** (assigned at the start of Workshop 2) | [`workbook/blocks/`](workbook/blocks/): [A — inputs and the NMR receiver](workbook/blocks/a.md) · [B — signal generation, timing and the NMR transmitter](workbook/blocks/b.md) · [C — power and switching](workbook/blocks/c.md) |
+| **Your section page** (assigned at the start of Workshop 2) | [`workbook/blocks/`](workbook/blocks/): [A — inputs and the NMR receiver](workbook/blocks/a.md) · [B — signal generation, timing and the NMR transmitter](workbook/blocks/b.md) · [C — the front panel board](workbook/blocks/c.md) |
 | **The tutor** (self-updating: fetches the latest guide and workbook from GitHub at the start of every session) | `/tutor L1` (etc.) in Claude Code — [`.claude/skills/tutor/`](.claude/skills/tutor/SKILL.md), rules in [`tutor/COURSE-GUIDE.md`](tutor/COURSE-GUIDE.md) |
 | **Slides** | Workshop 1 as a PDF on the course site: https://tigp-experimental-methods.github.io/slides/W1-AI-for-experimentalists.pdf (Workshop 2 and 3 slides follow the same way; see [`slides/README.md`](slides/README.md)) |
 | **Firmware + app** (Step 1 of Project 2 — the hardware baseline — and its fallback; base for Project 3) | `firmware/`, `host/` — flash it (write it onto the board over USB) in 5 commands below |
@@ -84,11 +84,11 @@ The rules: a driver talks only to its own hardware; all driver code runs from `l
 
 Rules are data: `{block, key, op, threshold, action}`, evaluated 20× per second on the same status the app sees; they fire once when the condition becomes true.
 
-- On the phone: **Alarms** tab → pick `b1.ai1`, `gt`, `9`, action `relay 1 off` → *Add rule*.
+- On the phone: **Alarms** tab → pick `b1.ai1`, `gt`, `9`, action `module 1 off` → *Add rule*.
 - From a panel: `api.addAlarm({ block: 'b2', key: 'v5_raw', op: 'lt', threshold: 4.9, action: 'notify' })` (see `panels/template.js`).
-- From Python: `instrument alarms add --block b1 --key ai1 --op gt --threshold 9 --action relay:1:off`.
+- From Python: `instrument alarms add --block b1 --key ai1 --op gt --threshold 9 --action module:1:off`.
 
-`action` is `notify` (toast on every phone, browser notification if allowed) or `relay:<n>:on|off` (the switching driver, Section C). Rules persist on the board in `/alarms.json`.
+`action` is `notify` (toast on every phone, browser notification if allowed) or `module:<n>:on|off` (a module output on the front panel, Section C). Rules persist on the board in `/alarms.json`.
 
 ## Layout
 

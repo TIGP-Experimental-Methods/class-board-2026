@@ -18,7 +18,7 @@ and 8 (Q). Earth's-field NMR (≈ 2 kHz, with the polarizer coil) is the stretch
 | 10 | `PIN_CS_ADC` | CS_ADC | ADS8688 /CS | A |
 | 5 | `PIN_CS_DAC` | CS_DAC | DAC8563 /SYNC (via 74HCT125) | B |
 | 1 / 2 | `PIN_I2C_SDA/SCL` | I2C_* | 400 kHz; OLED 0x3C, TCA9535 0x20, Si5351A 0x60 | base |
-| 16 / 17 | `PIN_OPTO_IN[0..1]` | OPTO_IN1/2 | 6N137 outputs, active LOW | C |
+| 16 / 17 | `PIN_OPTO_IN[0..1]` | OPTO_IN1/2 | 6N137 outputs, active LOW (front panel) | C |
 | 18 / 21 | `PIN_FAST_OUT[0..1]` | FAST_OUT1/2 | 74HCT125 → terminals | B |
 | 38 / 39 | `PIN_TRIG_IO`, `PIN_TRIG_DIR` | TRIG_IO/DIR | 74LVC1T45; DIR 1 = output to the SMA | B |
 | 41 | `PIN_DDS_FSYNC` | DDS_FSYNC | AD9834 frame sync (its SPI chip select, active low) | B |
@@ -34,9 +34,11 @@ and 8 (Q). Earth's-field NMR (≈ 2 kHz, with the polarizer coil) is the stretch
 | 0/45/46, 3, 35–37 | — | — | never used (strapping, unused, PSRAM) | — |
 
 TCA9535 I²C expander (address 0x20, A0 = A1 = A2 = GND): **P0.0–P0.7 = DIO1–8** (→ 74AHCT541 → terminals),
-**P1.0–P1.3 = RLY_IN1–4** (relay gates, active high, 10 k pull-downs keep them off at boot), **P1.4 = /CLR of
-the 74HC74 Johnson counter** (10 k pull-up; pulse low to reset the quadrature LO to state 00), P1.5–P1.7 spare
-on test points. All 16 lines are outputs; the expander powers up with every port as an input, so `begin()` writes
+**P1.0–P1.3 = MODULE_OUT1–4** (2026-09-17: the former RLY_IN1–4, same ports — the first four of the seven
+MODULE OUT lines that reach the front panel's module header through a second 74AHCT541 at 5 V; active high,
+10 k pull-downs keep them off at boot), **P1.4 = /CLR of
+the 74HC74 Johnson counter** (10 k pull-up; pulse low to reset the quadrature LO to state 00), **P1.5–P1.7 = MODULE_OUT5–7** (2026-09-17: P1.4 is the counter clear, so the expander has seven ports for the module
+header; the header's eighth signal pin is a **reserved spare**, tied low — it always reads low). All 16 lines are outputs; the expander powers up with every port as an input, so `begin()` writes
 the output registers first (all zero except P1.4 = 1), then the configuration registers.
 
 I²C addresses: TCA9535 0x20 · Si5351A 0x60 · SSD1306 OLED 0x3C.
@@ -233,7 +235,8 @@ disagreements, and the code is the authority for them.
 ## 4. Changes to existing blocks (drivers agent)
 - `b5`: DIO1–8 through `expander.writePort(0, mask)`; `PIN_DIO[]` removed from `pins.h`. Fast outputs and TRIG
   unchanged. If the expander is absent, `dio` commands return `error:"expander not present"`.
-- `b4`: relays through `expander.writeBit(1, n-1, on)`; new commands `hbridge {mode: off|fwd|rev|brake}` (HB_IN1/2
+- `b4`: module outputs through `expander.writeBit(1, n-1, on)` (`module {n, on}`, `module_all {on}` — the former
+  `relay` commands, renamed with the hardware); new commands `hbridge {mode: off|fwd|rev|brake}` (HB_IN1/2
   = 0/0, 1/0, 0/1, 1/1) and `polarizer {on}` (FET_GATE); status adds `hbridge`, `polarizer`. Both refuse with
   `error:"nmr scan running"` while `nmr` is running (a global `nmr_busy()` in `blocks/nmr/NmrBlock.h` — the
   drivers agent adds a small header `blocks/Busy.h` with `extern volatile bool g_nmrBusy;` so it compiles before

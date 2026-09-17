@@ -43,14 +43,17 @@ LINK_BAND_Y = (24.6, 75.4)
 # ------------------------------------------------------------------ zone polygons (owner rule areas)
 ZONES = {
     # v0.7 (2026-09-13): three student sections + base. A = inputs + NMR receiver (old B1 + OPT),
-    # B = outputs + timing + NMR transmitter (old B3 + B5), C = power + switching + coil switches.
-    # v0.7b (2026-09-16): the whole rear strip is section C's.  The 10 mm rear-right corner used to
-    # belong to B, but the mains-rated relays need 60 mm of rear edge and the coil terminals have to
-    # go somewhere; B keeps everything below y = 36, where all of its parts already are.
-    "ZONE_C": [(0.5, 0.5), (179.5, 0.5), (179.5, 36.0), (37.5, 36.0), (37.5, 57.5), (0.5, 57.5)],
+    # B = outputs + timing + NMR transmitter (old B3 + B5).
+    # v0.7d (2026-09-17): section C is the FRONT-PANEL board now, so the old ZONE_C of the main
+    # board belongs to the instructor and is renamed ZONE_INSTR (power entry B2 + the coil
+    # switches of sheet c_switch).  The four relays and the two isolated inputs left the design,
+    # which frees the rear strip from x 38 to x 180: the instructor's block is re-laid out in one
+    # piece at x 45-86 (it used to be split between a 12 mm pocket and the right-hand edge) and
+    # the rear-right, x 96-180, goes to section B, which was the most crowded of the three.
+    "ZONE_INSTR": [(0.5, 0.5), (96.0, 0.5), (96.0, 36.0), (37.5, 36.0), (37.5, 57.5), (0.5, 57.5)],
     "ZONE_BASE": [(37.5, 36.0), (100.0, 36.0), (100.0, 57.0), (37.5, 57.0)],
     "ZONE_A": [(0.5, 57.5), (45.0, 57.5), (45.0, 57.0), (100.0, 57.0), (100.0, 99.5), (0.5, 99.5)],
-    "ZONE_B": [(100.0, 36.0), (179.5, 36.0), (179.5, 99.5), (100.0, 99.5)],
+    "ZONE_B": [(96.0, 0.5), (179.5, 0.5), (179.5, 99.5), (100.0, 99.5), (100.0, 36.0), (96.0, 36.0)],
 }
 
 # ---- the rear edge (Decision #46, #50) -----------------------------------------------------
@@ -58,69 +61,51 @@ ZONES = {
 # their wire openings (the two arrow marks and the open-sided body outline) on the +y side of the
 # footprint, so at rotation 0 the wire enters from the board interior and at 180 from the edge.
 TERM_Y = 4.0                 # screw-terminal pad row: 4 mm in, body face flush with the board edge
-RELAY_ROT = 90               # long axis along y; NO/NC contact pins toward the rear edge
-# The relay stack from the rear edge: terminal pads at y 4, the coil-side parts in the band at
-# y 10.5-13.5, the relay itself from y 15.7 to 35.5.  RELAY_Y cannot be smaller (the coil-side band
-# would fall below 5 mm from the contact pins) nor larger (the relay would leave section C), so the
-# COM pin lands at y 33.7 and its 5 mm MAINS envelope reaches y 40 -- which is why the dev board
-# and a handful of section-B parts had to move out of the way.
-RELAY_Y = 31.7               # relay anchor y: contacts at y 19.5, coil at 31.7, COM at 33.7
-RELAY_X = [73.35, 95.2, 114.8, 134.4]      # the wide gap 1->2 is where link header J7 passes
 
-# ---- section C is re-laid out around the relay row (v0.7b) ---------------------------------
-# sheet_c_switch.PLACEMENT draws its three columns side by side at x 128-169, which the relay row
-# and link header J8 now occupy, so gen_pcb re-flows them: the +VEXT input chain (column A) into
-# the pocket between the isolated inputs and relay 1, the H-bridge and the polarizer (columns B
-# and C) into the strip the TTL terminals left free.  The module's PLACEMENT is still the source
-# of truth for WHICH parts belong to which column -- only the positions are overridden here.
-# The pocket is 12 mm wide, which the TO-252 P-FET and the 8 mm electrolytic only just fit; the
-# LED D933 and the small-signal D932 go with columns B/C instead (they are still section C's).
-# The pocket between the isolated inputs and relay 1 is 12 mm wide and the 5 mm MAINS envelope
-# around the relay contact pins plus the 2.5 mm ISO_IN band eat most of it, so the P-FET stands
-# on end and the fuse and the TVS sit with columns B/C instead.
-C_COL_A_ROWS = [(15.6, 58.3, 70.9, [("Q901", 90)]),
-                (29.2, 57.3, 70.9, [("C940", 90)])]
-# The strip between the bulk capacitor and relay 1: the +VEXT TVS D931 sits in the middle of it --
-# y 29 is the only place a 4.4 mm wide part clears the 5 mm envelope around relay 1's contact pins
-# (see FIXUP) -- and the three small parts of the input chain take the ends of the strip.
-C_COL_A_STRIP = [("R940", 68.85, 11.0, 0), ("R941", 68.85, 13.4, 0), ("C941", 68.85, 34.4, 0)]
-C_COL_BC = ["C921", "R920", "U903", "Q904", "D920", "D930", "R933", "D932", "C920",
-            "D934", "U904", "R931", "JP904", "D933", "R932", "C930", "C931", "R921",
-            "R922", "R930"]
-C_COL_BC_ROWS = [(13.0, 151.9, 169.9), (21.6, 152.5, 170.1), (28.0, 148.8, 165.0),
-                 (32.5, 148.8, 164.3), (10.0, 170.6, 179.0), (26.3, 171.2, 179.2),
-                 (29.8, 171.2, 179.2), (33.0, 171.2, 179.2), (35.2, 171.2, 179.2),
-                 (35.2, 148.8, 164.3)]
-# the rear-edge terminals of section C: J901 in the pocket, J905 on the rear edge right of the
-# relays; J903 (the H-bridge coil) would collide with the M3 hole H2 at (176, 4), so it goes on
-# the RIGHT edge instead, rotated so the wire still enters from outside the board (Decision #46).
-C_TERMINALS = {"J901": (64.2, TERM_Y, 180), "J905": (159.0, TERM_Y, 180), "J903": (174.5, 18.5, 90)}
-
+# ---- the instructor's block (sheet_c_switch, 9xx), v0.7d -------------------------------------
+# sheet_c_switch.PLACEMENT draws the three columns of the block (+VEXT input chain, H-bridge,
+# polarizer switch) side by side at x 128.5-169 -- where link header J8 and, until v0.7c, the
+# relay row stood.  With the relays gone the whole block moves left in one piece, into the strip
+# the relays and the isolated inputs left free, and keeps its designed internal geometry.
+# C_SHIFT is chosen so that the right-hand column ends before the band link header J7 sweeps
+# (x 87.2-92.8) and the left-hand column starts after the B2 power block (x <= 37.5).
+C_SHIFT = (-83.0, 0.0)
+# the three rear-edge terminals: on the edge (y = TERM_Y) and rotated 180, so the wire enters
+# from outside the board (Decision #46).  J903 no longer has to hide on the right edge: the M3
+# hole H2 that pushed it there is 90 mm away now.
+C_TERMINALS = {"J901": (51.0, TERM_Y, 180), "J903": (62.7, TERM_Y, 180), "J905": (76.9, TERM_Y, 180)}
 # ---- individual parts that had to move out of a link-header band or a re-laid-out block -------
 # (filled in from scripts/place_check.py; every entry is a part the 2026-09-16 rework displaced)
 FIXUP = {
-    # the NMR transmitter's right-hand column sat on link header J8
-    "FB802": (174.5, 54.00, 0), "C816": (174.5, 57.21, 0), "C814": (174.5, 59.63, 0),
-    "R809": (174.5, 62.00, 0), "R810": (174.5, 64.32, 0), "R811": (174.5, 66.64, 0),
-    "R812": (174.5, 68.96, 0), "R813": (175.0, 72.58, 0),
+    # v0.7d: section B gets the rear-right strip (x 96-180, y 0.5-36) that the relays used to
+    # occupy, so the OPA564 power stage and its output chain move out of the cramped right-hand
+    # edge into it -- as one block, translated by (-20, -50) from sheet_nmr_tx.PLACEMENT, which
+    # keeps the geometry the circuit was drawn with.  Gains: the +VEXT branch is no longer a
+    # column of eight 0603 parts at 2.3 mm pitch squeezed between link header J8 and the board
+    # edge, the power stage (the hottest part on the board) sits at the rear edge with air around
+    # it, and the TX pair reaches link header J6 (x 12) over a shorter path.
+    "U802": (138.00, 12.20, 0),
+    "FB802": (146.89, 4.00, 0), "C816": (146.89, 7.21, 0), "C814": (146.89, 9.63, 0),
+    "C815": (135.52, 22.28, 0),
+    "R809": (146.89, 12.00, 0), "R810": (146.89, 14.32, 0),
+    "R811": (146.89, 16.64, 0), "R812": (146.89, 18.96, 0),
+    "R813": (144.88, 22.58, 0), "C818": (141.72, 30.49, 0),
+    "D801": (144.47, 26.97, 0), "D802": (134.63, 28.09, 0),
+    "R814": (147.04, 30.32, 0), "C817": (132.49, 31.23, 0),
+    "JP802": (147.33, 33.24, 0), "R815": (136.27, 31.18, 0), "R816": (140.05, 33.24, 0),
+    # the 10 MHz TCXO option (eight DNP parts) leaves the TRIG cluster and takes the room the
+    # OPA564 block gave up, which is what un-crowds the middle of section B
+    "X501": (156.00, 42.00, 0), "R512": (151.00, 40.00, 90), "R513": (161.00, 42.00, 90),
+    "C505": (156.00, 46.50, 0), "U504": (156.20, 51.00, 180),
+    "R514": (151.00, 50.50, 90), "R515": (161.00, 50.50, 90), "C506": (151.00, 46.00, 90),
     # the I2C expander was under the dev board, on link header J7 and outside ZONE_B
     "U505": (136.0, 68.0, 0), "C507": (143.0, 68.0, 0),
-    "TP501": (131.5, 74.0, 0), "TP502": (134.5, 74.0, 0), "TP503": (137.5, 74.0, 0), "TP504": (140.5, 74.0, 0),
-        # the transmitter's top row clears the relay COM pins by a few tenths of a millimetre
-    "C801": (151.0, 39.0, 0), "C802": (154.5, 39.0, 0), "C806": (158.0, 39.0, 0),
-    "U801": (130.0, 41.24, 0),
-    # the +VEXT TVS, squeezed between the P-FET and the relay (see C_COL_A_ROWS)
-    "D931": (68.85, 29.0, 90),
-    # the +VEXT fuse: the pocket beside relay 1 is only 12 mm wide and the 5 mm MAINS envelope
-    # around the relay contact pins eats most of it, so the fuse sits with columns B/C
-    "F901": (168.4, 8.0, 90),
     # the I2C pull-ups followed the dev board
     "R3": (40.0, 44.5, 0), "R4": (40.0, 47.5, 0),
 }
 # AGND pour (F.Cu + B.Cu): analog band across the front + the +-12 V / +5VA output area of B2
 AGND_POLY = [(22.0, 30.0), (37.5, 30.0), (37.5, 57.0), (100.0, 57.0), (100.0, 68.0), (129.0, 68.0), (129.0, 87.5),
              (179.5, 87.5), (179.5, 99.5), (0.5, 99.5), (0.5, 57.0), (22.0, 57.0)]
-ISO_KEEPOUT = ((37.5, 0.0), (60.0, 26.5))
 # AI channel networks in a row between the link (AI pins 9..23 at x 56.0..73.8) and the ADC: left -> right = AI1 .. AI8
 # (planar fan-in, see docs/design-decisions.md D-19)
 NET_ROW_X = {1: 48.2, 2: 53.0, 3: 57.8, 4: 62.6, 5: 67.4, 6: 72.2, 7: 77.0, 8: 81.8}   # 4.8 mm pitch: 1.26 mm between clamp bodies for the AIN trace
@@ -189,6 +174,11 @@ def placement(lib=None, comps=None):
         """board-space extent of ref's footprint placed at (0, 0) with this rotation"""
         return rotated_extent(lib[comps[ref].footprint], rot)
 
+    def centre(ref, cx, cy, rot=0):
+        """put ref so that the CENTRE of its footprint lands on (cx, cy)"""
+        e = extent(ref, rot)
+        put(ref, cx - (e[0] + e[2]) / 2.0, cy - (e[1] + e[3]) / 2.0, rot)
+
     def row(y, x0, items, gap=0.5):
         """pack footprints left to right along y starting at x0 (bbox edge); returns the end x"""
         x = x0
@@ -226,7 +216,11 @@ def placement(lib=None, comps=None):
     put("J1", SOCK_X, J1_Y, 0)
     put("J2", SOCK_X, J3_Y, 0)
     put("J4", 3.4, 69.0, 90)             # Qwiic, cable exits to the left edge (J3 left the board with the panel rework)
-    put("J5", 114.0, 52.0, 0)            # 2x10 expansion header (B5 block area, BASE part)
+    # 2x10 expansion header (B5 block area, BASE part).  The other agent moved J5 to the standard
+    # KiCad PinHeader_2x10 on 2026-09-17; that footprint runs its ten rows along y, where the old
+    # class_board footprint ran them along x, so the header is placed rotated and centred on the
+    # spot it has always had rather than anchored on pin 1.
+    centre("J5", 114.0, 52.0, 90)
     put("NT1", 99.2, 67.5, 90)           # AGND-GND star at the B1/B3 boundary, next to the ADC digital side
     put("R1", 86.4, 62.5, 90)            # 33 R SCLK
     put("R2", 83.8, 62.5, 90)            # 33 R MOSI
@@ -282,46 +276,6 @@ def placement(lib=None, comps=None):
     flow([(52.6, 0.7, 8.4)], [("R210", 0), ("D204", 90)], gap=0.4, label="+3V3 LED")
     flow([(56.2, 0.7, 8.4)], [("C212", 0)], label="78L05 output cap")
 
-    # ---- section C external-power input chain (was x 128.5-141.3 at the right edge) -------------
-    # The relay row needs 60 mm of the rear strip, so the +VEXT input column of sheet_c_switch moves
-    # into the pocket between the isolated inputs and the first relay.  C_SHIFT_A is applied to the
-    # module's own PLACEMENT entries below, which keeps the chain's internal geometry.
-    # ---- B4 switching: isolated inputs, then the four mains-rated relays -----------------------
-    for n in range(2):
-        x0 = (40.7, 52.0)[n]
-        put("J41%d" % (n + 1), x0, TERM_Y, 180)                   # 2P terminal, wire entry at the rear edge
-        # isolated side (x0-4 .. x0+4, y 9.5-21): diode, 220 R, 10 k, two transistors, 100 R || 1 k
-        put("D42%d" % (n + 1), x0 - 2.7, 10.3, 0)
-        put("R43%d" % (n + 1), x0 + 1.9, 10.3, 0)
-        put("R44%d" % (n + 1), x0 - 2.5, 12.7, 0)
-        put("Q41%d" % (n + 1), x0 + 2.0, 13.7, 0)
-        put("Q42%d" % (n + 1), x0 - 2.5, 16.2, 0)
-        put("R45%d" % (n + 1), x0 + 2.0, 17.7, 0)
-        put("R46%d" % (n + 1), x0 + 2.0, 20.2, 0)
-        put("U40%d" % (n + 1), x0 - 0.4, 27.0, 180)               # 6N137: pins 1-4 (isolated) at the top
-        put("R47%d" % (n + 1), x0 - 2.5, 34.0, 0)
-        put("C40%d" % (n + 1), x0 + 2.0, 34.0, 0)
-    # The relay is the 19 x 15.5 mm Hongfa JQC-3FF (Decision #50).  Rotation 90 lays its long axis
-    # along y and turns the NO/NC contact pins toward the rear edge (y 19.5); the coil pins sit at
-    # y 31.7, deep inside the board.  The part's own COM pin is at the coil end -- that is the
-    # pinout, not a choice -- so one of the three contacts unavoidably faces inward.
-    #   pads, with the anchor at (fx, RELAY_Y):  NC (fx, 19.5)  NO (fx+12, 19.5)  COM (fx+6, 33.7)
-    #                                            coil A1 (fx, 31.7)  A2 (fx+12, 31.7)
-    # The 19.6 mm pitch is the smallest that keeps 5 mm between the contact pads of two channels
-    # (MAINS rules); the gap between relay 1 and relay 2 is where link header J7 passes through.
-    for k in range(4):
-        xk = RELAY_X[k]
-        put("J40%d" % (k + 1), xk + 6.0, TERM_Y, 180)   # 3P terminal directly behind the relay, wire entry at the edge
-        put("K40%d" % (k + 1), xk, RELAY_Y, RELAY_ROT)
-        # coil-side parts, in the band between the terminal and the relay: every one of them is more
-        # than 5 mm from any contact pad, which is what the MAINS rules ask for
-        put("Q40%d" % (k + 1), xk + 1.9, 11.7, 0)       # AO3400A coil driver
-        put("D40%d" % (k + 1), xk + 6.5, 11.7, 0)       # 1N4148W flyback
-        put("R40%d" % (k + 1), xk + 11.2, 10.8, 0)      # gate series 1 k
-        put("R41%d" % (k + 1), xk + 14.7, 10.8, 0)      # gate pull-down 10 k
-        put("R42%d" % (k + 1), xk + 11.2, 12.65, 0)     # LED resistor
-        put("D41%d" % (k + 1), xk + 14.8, 12.65, 0)     # LED
-
     # ---- B5 digital I/O (x 100-129, y 36-68); the TTL/FAST terminals left with the panel rework ---
     put("U501", 110.5, 41.2, 270)         # 74AHCT541: inputs on the left column, outputs facing R501-R508
     for i in range(8):
@@ -338,10 +292,9 @@ def placement(lib=None, comps=None):
     # v0.7b: the TCA9535 expander used to sit under the dev board at x 94.5, which is (a) outside
     # ZONE_B (the owner_B assertion failed) and (b) on top of link header J7.  It moves to the free
     # pocket between the B5 column and the NMR transmitter, inside ZONE_B.
-    put("U505", 127.3, 41.3, 0)           # TSSOP-24
+    put("U505", 127.3, 41.3, 0)           # TSSOP-24 (moved by FIXUP)
     put("C507", 127.3, 46.6, 0)           # +3V3 decoupling beside the expander
-    put("TP501", 122.5, 47.0); put("TP502", 125.0, 49.6)          # EXP_P14 / P15 (spare expander ports)
-    put("TP503", 129.6, 49.6); put("TP504", 132.1, 47.0)          # EXP_P16 / P17
+    put("TP501", 131.5, 74.0)             # EXP_P14 = Johnson-counter /CLR, the only expander test point left
 
     # ---- B3 signal generation (right-front: x 100-129) -------------------------------------
     put("U302", 105.6, 72.5, 0)           # 74HCT125 level shifter
@@ -375,14 +328,12 @@ def placement(lib=None, comps=None):
         for ref, pos in getattr(mod, "PLACEMENT", {}).items():
             P[ref] = (round(pos[0], 3), round(pos[1], 3), pos[2] if len(pos) > 2 else 0)
 
-    # ---- section C (sheet_c_switch): re-flowed around the relay row ---------------------------
+    # ---- the instructor's block (sheet_c_switch): translated into the freed rear strip ---------
+    import sheet_c_switch
+    for ref, pos in sheet_c_switch.PLACEMENT.items():
+        put(ref, pos[0] + C_SHIFT[0], pos[1] + C_SHIFT[1], pos[2] if len(pos) > 2 else 0)
     for ref, pos in C_TERMINALS.items():
         put(ref, pos[0], pos[1], pos[2])
-    for (y, x0, x1, items) in C_COL_A_ROWS:
-        flow([(y, x0, x1)], items, label="C column A row %.1f" % y)
-    for ref, sx, sy, srot in C_COL_A_STRIP:
-        put(ref, sx, sy, srot)            # small parts of the input chain, beside the bulk capacitor
-    flow(C_COL_BC_ROWS, [(r, 0) for r in C_COL_BC], gap=0.3, label="C columns B/C (H-bridge, polarizer)")
     # ---- parts of the two NMR sheets that would stand on a link header -----------------------
     for ref, pos in FIXUP.items():
         put(ref, pos[0], pos[1], pos[2])
@@ -449,44 +400,30 @@ def build(route=True):
     apoly = AGND_POLY
     board.zone("AGND", ["F.Cu"], apoly, priority=2, name="AGND_F", clearance=0.3, pad_connect="solid")
     board.zone("AGND", ["B.Cu"], apoly, priority=2, name="AGND_B", clearance=0.3, pad_connect="solid")
-    # isolation keep-out around the isolated input group: no pours/vias of any net on any layer
-    (kx0, ky0), (kx1, ky1) = ISO_KEEPOUT
-    iso = [(kx0, ky0), (kx1, ky0), (kx1, ky1), (kx0, ky1)]
-    board.zone(None, ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"], iso, name="ISO_KEEPOUT",
-               keepout=dict(tracks="allowed", vias="not_allowed", pads="allowed", copperpour="not_allowed", footprints="allowed"))
     # silkscreen
-    board.gr_text("TIGP CLASS BOARD 2026 rev B (v0.7b)", 60.0, 45.0, size=1.5, thickness=0.2)
+    board.gr_text("TIGP CLASS BOARD 2026 rev B (v0.7d)", 60.0, 45.0, size=1.5, thickness=0.2)
     board.gr_text("ESP32-S3-DevKitC-1 (Jinhua #40729)   antenna <-   -> USB", 60.0, 50.0, size=1.0, thickness=0.15)
     board.gr_text("5V IN", 29.5, 17.0, size=1.0, thickness=0.15)
     board.gr_text("USB-C 5V", 13.0, 9.2, size=1.0, thickness=0.15)
-    board.gr_text("ISO1 5-24V", 40.7, 8.7, size=1.0, thickness=0.15)
-    board.gr_text("ISO2 5-24V", 52.0, 8.7, size=1.0, thickness=0.15)
-    # relay channels: the rating belongs to the track, not to the relay (notes/2026-09-16-mains-safe-relays.md)
-    for k in range(4):
-        xk = RELAY_X[k] + 6.0
-        board.gr_text("K%d" % (k + 1), xk, 8.9, size=1.0, thickness=0.15)
-        for label, dx in (("NO", -5.0), ("COM", 0.0), ("NC", 5.0)):
-            board.gr_text(label, xk + dx, 1.6, size=0.8, thickness=0.12)
-        board.gr_text("250V AC 5A MAX", xk, 17.0, size=0.8, thickness=0.12)
-        board.gr_text("LOAD FUSED <= 5A", xk, 18.3, size=0.8, thickness=0.12)
-    board.gr_text("MAINS ONLY WITH THE INSTRUCTOR PRESENT", 103.0, 35.0, size=1.0, thickness=0.15)
     board.gr_text("J5 EXPANSION", 114.0, 48.5, size=1.0, thickness=0.15)
     board.gr_text("star", 99.5, 70.3, size=1.0, thickness=0.15)
     board.gr_text("AI1 .. AI8", 86.0, 87.6, size=1.0, thickness=0.15, rot=90)
     board.gr_text("A: NMR RECEIVER", 22.0, 62.0, size=1.0, thickness=0.15)
     board.gr_text("B: NMR TX", 175.0, 60.0, size=1.0, thickness=0.15, rot=90)
-    board.gr_text("C: POWER / SWITCHING", 24.0, 20.0, size=1.0, thickness=0.15)
-    board.gr_text("+VEXT 7-18V DC  FUSE 5A", 64.2, 8.7, size=1.0, thickness=0.15)
+    board.gr_text("INSTRUCTOR: POWER + COIL SWITCHES", 60.0, 38.5, size=1.0, thickness=0.15)
+    board.gr_text("NO MAINS ON THIS BOARD", 112.0, 19.5, size=1.0, thickness=0.15)
+    board.gr_text("MOD1-7 -> 5V TTL ON THE PANEL", 112.0, 22.5, size=1.0, thickness=0.15)
+    board.gr_text("+VEXT 7-18V DC  FUSE 5A", 51.0, 8.7, size=1.0, thickness=0.15)
     board.gr_text("POWER UP: USB FIRST, THEN BENCH SUPPLY", 60.0, 55.0, size=1.0, thickness=0.15)
-    board.gr_text("H-BRIDGE COIL", 174.5, 28.0, size=1.0, thickness=0.15)
-    board.gr_text("+VCOIL COIL GND  <=24V", 159.0, 8.7, size=1.0, thickness=0.15)
+    board.gr_text("H-BRIDGE COIL", 62.7, 8.7, size=1.0, thickness=0.15)
+    board.gr_text("+VCOIL COIL GND  <=24V", 76.9, 8.7, size=1.0, thickness=0.15)
     # the three panel-link headers are on the bottom; label them on the back silkscreen
     for ref, (cx, cy) in LINK_HEADERS.items():
         board.gr_text("%s  PANEL LINK  pin 1 ->" % ref, cx, cy - 27.5, layer="B.SilkS", size=1.0, thickness=0.15, mirror=True)
     place_reference_texts(board)
     if route:
         import router
-        router.route_board(board, comps, nets, pad_net, W, H, AGND_POLY, ISO_KEEPOUT,
+        router.route_board(board, comps, nets, pad_net, W, H, AGND_POLY, ((0.0, 0.0), (0.0, 0.0)),
                            stub_hint={"J1": (0, 1), "J2": (0, -1), "J6": (0, -1)}, layer_hint={"J6": 1},
                            priority_file=os.path.join(HW, ".route_priority.json"))
     return board, comps, nets

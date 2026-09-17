@@ -4,6 +4,43 @@ D-01 … D-29 are the rev A (v0.6) record and still hold except where a v0.7 ent
 D-30 … D-49 are the v0.7 re-spec of 2026-09-13: three student sections instead of five zones, a 180 × 100 mm board,
 and an NMR console in place of the OPT conditioning chain.
 
+---
+
+# 2026-09-17 update (v0.7d) — what the entries below no longer describe
+
+**Nothing in D-01 … D-52 is rewritten.**  This section says which of those entries the instructor's decision of
+2026-09-17 (course repo `DECISIONS.md` **#58**, settling #57; facts in
+`notes/2026-09-17-relays-optos-hbridge-facts.md`) has overtaken.  The new entries are **D-53 … D-57** at the end of
+this file.
+
+The change in one paragraph: the four mains-capable relays **K401–K404** with their terminals **J401–J404**, AO3400A
+drivers, flyback diodes and coil LEDs, and **all mains switching**, are removed; the sheet **`b4_switching` is
+deleted**; the `MAINS` / `MAINS1…MAINS4` net classes and every `mains_*` DRC rule are deleted.  The free TCA9535
+ports become **MODULE OUT 1…7**, buffered to 5 V TTL on the panel for a bought relay / H-bridge module.  The two
+isolated inputs **move to the front-panel board**, circuit unchanged.  **Student section C is the front-panel
+board**, and the main board's former **ZONE_C** (power entry + coil switches) is the instructor's **ZONE_INSTR**.
+
+| Entry | Status after 2026-09-17 |
+|---|---|
+| **D-03** relay drive (AO3400A + 1N4148W + coil LED) | **Void.**  No relay is fitted; Q401–Q404, D401–D404, D411–D414, R401–R424 are deleted with the sheet.  Its verification step (T-08/T-10 relay pull-in) is gone from `bring-up.md`. |
+| **D-08** isolated-input 5–24 V current limiter | **Valid, relocated.**  The circuit is unchanged and now lives on the **front-panel** project (D-54); its ISO_IN clearance rule and keep-outs moved with it. |
+| **D-11** component library — relay land pattern | The relay footprint check no longer applies to any fitted part. |
+| **D-23** `relay_contact_clearance` 0.6 mm | **Void** (it had already been replaced by D-51's `mains_*` rules, which are themselves void). |
+| **D-30** three sections A/B/C, `owner_C` accepts `B2 \| B4 \| C_SW \| C` | **Amended** by D-55/D-56: **C is the panel board**; the rule is now `owner_INSTR` over `B2 \| C_SW \| C`, and `B4` no longer exists. |
+| **D-31** 180 × 100 mm, "4 relays kept" | The board size stands; the relay-count rationale is void. |
+| **D-40** DIO and relays on the TCA9535 | **Amended** by D-53: `P1.0–P1.3` are no longer `RLY_IN1–4` but **MOD1–MOD4**, and `P1.5–P1.7` are **MOD5–MOD7**; **P1.4** is the NMR receiver's 74HC74 `/CLR`.  The safety property that the *board* held the relays off during boot is **not inherited** — see **D-57**. |
+| **D-46 / D-50 / D-50a** panel geometry | **Amended:** the panel is **4-layer**, 180 × 100 mm, SMA pitch **18 mm** (Decision #57/#58 b), and it now also carries the isolated inputs and the module-header block. |
+| **D-48** rules at the project root, `owner_A/B/C` | Valid; the third rule is now **`owner_INSTR`**. |
+| **D-51** mains-capable relay channels (JQC-3FF, MAINS classes, 5 mm reinforced spacing, silkscreen ratings) | **Void in full** — the user's words: *"the mains and relays are a pain in the neck, let's get rid of them, students can buy mains rated arrays of relays for nothing from Jinhua"* (#58 e).  The note `notes/2026-09-16-mains-safe-relays.md` is superseded with it. |
+| **D-52** PCB regenerated 2026-09-16: relay row at x 73.35/95.2/114.8/134.4, section C split around it, `ZONE_C` extended to x 179.5, the eight `inside_K40x/J40x` rules, the D-931 pocket work | **Superseded by the v0.7d re-placement (D-56).**  The placement facts in that entry are history; the current board is 341 footprints with the instructor block as one piece at x 45–86. |
+
+Requirements affected: **R-14** (void), **R-15** (relocated), **R-03 / R-44** (expander port map), **R-22 / R-23**
+(panel and zones), **R-25** (mains clearances) — see the same-dated section at the top of `requirements.md`.
+Review sections affected: §2 floorplan table (ZONE_C row), §5.3, §5.4, §6 item 7, §7 through-hole count, F-21, F-22 —
+see the same-dated section at the top of `design-review.md`.
+
+---
+
 Each entry: what the brief (v0.6) said, what the source says, what was done, and how it is verified.
 Datasheets were downloaded on 2026-09-07 (TI direct or LCSC `wmsc` host) into `.local/datasheets/` (not committed;
 URLs are in the symbol `Datasheet` fields).  "JLC DB" = the local JLCPCB parts database snapshot used through Konnect
@@ -866,3 +903,112 @@ moved; the relay row, the link headers and the terminals are untouched.
 **Result.**  `kicad-cli pcb drc --severity-all --refill-zones`: **0 errors**, 499 unconnected items (nothing is
 routed), warnings 199 silk-over-copper + 147 silk-overlap + 126 isolated-copper + 20 text-height + 1 silk-edge.
 `place_check.py` reports 0 collisions, and the generator run twice gives a byte-identical file.
+
+
+---
+
+## D-53 The four relays and all mains switching are removed; a 5 V TTL module header replaces them (user, 2026-09-17)
+
+- **Decision** (course repo #58 e/f): *"the mains and relays are a pain in the neck, let's get rid of them, students
+  can buy mains rated arrays of relays for nothing from Jinhua."*  Supersedes **D-51** and the note
+  `notes/2026-09-16-mains-safe-relays.md`, and with them the whole idea of mains copper on a student board.
+- **Deleted:** K401–K404 (JQC-3FF/005-1ZS, C9221), terminals J401–J404 (KF301-5.0-3P), the AO3400A gate drivers
+  Q401–Q404 with R401–R404 / R411–R414, the 1N4148W flyback diodes D401–D404, the coil LEDs D411–D414 with
+  R421–R424 — and the sheet **`b4_switching`** itself, together with the `MAINS` and `MAINS1…MAINS4` net classes,
+  every `mains_*` rule and the eight `inside_K40x` / `inside_J40x` exception rules.  Rail relief: 4 × 71.4 mA =
+  **286 mA off the +5V_RAW budget** (the coil figure is 70 Ω / 0.357 W per relay, Hongfa EN02-20040601).
+- **Replacement:** the seven free TCA9535 (U505, 0x20) ports become **MODULE OUT 1…7** — `MOD1…MOD4` on
+  **P1.0–P1.3** (the ports the relay gates used, so the firmware register map does not move) and `MOD5…MOD7` on
+  **P1.5–P1.7**.  **P1.4 is not free:** it is `EXP_P14`, the `/CLR` of the NMR receiver's 74HC74 Johnson counter.
+  The seven lines cross to the panel on **link J8 pins 19, 21, 23, 25, 27, 29, 31** (odd = signal, GND on every
+  adjacent even pin); **J8 pin 33 = MODULE OUT 8 is a reserved spare and is not connected on the main board**.
+- **On the panel** (D-54's board): one **SN74AHCT541PWR** (C50989) on +5V_RAW lifts the 3.3 V lines to 5 V TTL —
+  AHCT thresholds (V_IH 2.0 V) accept 3.3 V — with **47 Ω** in series per output (R481–R488) into a **2×6 shrouded
+  IDC box header J40**: pins 1, 2 = +5V_RAW · 3…10 = MODULE OUT 1…8 · 11, 12 = GND.  Both `/OE` pins are tied to
+  GND, so the buffer is always enabled.  Silkscreen: `MODULE OUT 1..7  5 V TTL  (8 = spare)`.
+- **Module current comes from +5V_RAW across the link** and is not budgeted here: the rail is fused at 1.5 A on the
+  main board, and a bought relay module with its own coil supply (e.g. the Jinhua 4-channel opto-isolated module,
+  #41604, 12 V coils) is the intended load — the header drives its opto inputs (≈ 5 mA each), not coils.
+- **Consequence for the student text:** switching mains is no longer a board capability.  A relay module is listed
+  as an **optional expansion** (Decision #58 f), the one exception to "the class hardware is fixed".
+- Verify: netlist audit of J8 pins 19…33; **T-10** (module header levels) in `bring-up.md`; DRC — no `MAINS*` class
+  and no `mains_*` rule may reappear in `class-board.kicad_dru`.
+
+## D-54 The two isolated inputs move to the front-panel board (user, 2026-09-17)
+
+- **Decision** (#58 g): the two isolated 5–24 V inputs go to the panel with their terminals; **the 6N137 stays**
+  (the LTV-217 / C115450 substitution examined in `notes/2026-09-17-relays-optos-hbridge-facts.md` §2c is dropped —
+  it costs a factor of ~30 in speed, and the input's stated role is trigger / gate / event counter).
+- **The circuit is unchanged** and moves as one block per channel: terminal J411/J412 (KF301-5.0-2P), the series
+  1N4148W, 220 Ω, the two MMBT5551 forming the constant-current source (Rs = 100 Ω ∥ 1 kΩ = 91 Ω → I_LED ≈ 6.8 mA
+  over the whole 5–24 V range, D-08), the **6N137S** (C92651) with VCC = VE = +3V3, the 1 kΩ pull-up and the 100 nF
+  bypass.
+- **Interface:** `OPTO_IN1` / `OPTO_IN2` return to the main board on **J8 pins 35 / 37** (GND on 36 / 38) and land on
+  **GPIO16 / GPIO17** exactly as before, active LOW; `firmware/include/pins.h` (`PIN_OPTO_IN[2] = {16,17}`) is
+  unaffected.  +3V3 for the optos comes over the link (J8 pin 5 / J7 pin 27).
+- **The rules travel with the circuit:** the `ISO_IN` net class, the 2.5 mm clearance to every other net on every
+  layer and "no copper of any other net under the isolated group" are now the **panel's** rules
+  (`front-panel/front-panel.kicad_dru` plus the two `ISO*_KEEPOUT` areas).  On the main board the `ISO_IN` class is
+  left declared but has no matching net pattern.
+- Note carried over: the old B4 sheet text called these "1.5 kV optos"; the 6N137S is **5 kVrms** — the sheet text
+  understated it.
+- Verify: `gen_panel.py` link-mating audit on J8/J3 pins 35/37; panel DRC (`iso_in_clearance`); **T-12** in
+  `bring-up.md`, now performed on the panel.
+
+## D-55 Student section C is the front-panel board (user, 2026-09-17)
+
+- **Decision** (#58 c): section C = the front-panel board; the power entry — and the +VEXT input, the H-bridge and
+  the polarizer on the main board — are the instructor's.  This answers the open question left by #57 ("what
+  replaces the relay/opto blocks in student section C so Project 3a stays roughly even").
+- **Section C is therefore a project, not a gapped sheet:** the third student works in `front-panel/`, a **4-layer**
+  180 × 100 mm board, placed but **unrouted**.  What it holds: the 17-position SMA field on an 18 mm grid, the OLED
+  module socket with its four M2 stand-off holes, the three panel LEDs, the TTL screw strip, the TX coil terminal,
+  the Qwiic connector, **the two isolated inputs** (D-54), **the module-output buffer and box header** (D-53) and
+  the three 2×20 female link headers — the only parts on the inner face.
+- Sections A and B are unchanged (A = `b1_inputs` + NMR receiver; B = `b3_outputs` + `b5_dio_trig` + NMR
+  transmitter).  `docs/student-deletions.md` is updated accordingly.
+- Verify: `docs/student-deletions.md`; the panel project opens and its DRC runs stand-alone.
+
+## D-56 ZONE_C becomes ZONE_INSTR, and the main board is re-placed (v0.7d, 2026-09-17)
+
+- With section C on the panel, the main board's third owner area is no longer a student's.  `ZONE_C` is renamed
+  **`ZONE_INSTR`** and the DRC rule `owner_C` becomes **`owner_INSTR`**, accepting `Block ∈ {B2, C_SW, C}`
+  (`B4` is retired).  `owner_A` and `owner_B` are unchanged.
+- **Areas now** (`scripts/gen_pcb.ZONES`): `ZONE_INSTR` (0.5, 0.5) (96, 0.5) (96, 36) (37.5, 36) (37.5, 57.5)
+  (0.5, 57.5) · `ZONE_BASE` (37.5, 36) (100, 36) (100, 57) (37.5, 57) · `ZONE_A` the front-left block ·
+  **`ZONE_B`** (96, 0.5) (179.5, 0.5) (179.5, 99.5) (100, 99.5) (100, 36) (96, 36) — B now also owns the
+  **rear-right strip x 96–179.5, y 0.5–36** that the relay row used to occupy.
+- **Placement (v0.7d):** **341 footprints** (v0.7b: 404), **0 tracks and 0 vias**, so the regeneration was again
+  free of hand work (rule 1 of `AGENTS.md`; the same exception as D-52).  The instructor's block is placed as
+  **one piece at x 45–86 on the rear edge**, with the three high-current terminals **J901 at x 51.0, J903 at 62.7,
+  J905 at 76.9**, all **rotation 180** so the wires enter from off the board edge (Decision #46).  The three link
+  headers stay on B.Cu at (12, 50), (90, 50), (168, 50).
+- Verify: `kicad-cli pcb drc --severity-all --schematic-parity --refill-zones` — the three owner assertions must
+  pass and no `mains_*` rule may be named; `place_check.py` 0 collisions.
+
+## D-57 MODULE OUT 1…7 must be held low at power-up — pull-downs on the panel-side buffer inputs (requirement, 2026-09-17)
+
+- **The problem.**  Every TCA9535 port powers up as an **input** (high impedance, and the part has no internal
+  pull-up or pull-down on the P ports), and it stays that way through the ESP32's boot, through every reset and
+  whenever the I²C bus is not yet configured.  Until v0.7d that did not matter: the board's own **10 kΩ gate
+  pull-downs on the relay MOSFETs** defined the level and held the relays off (D-40, D-03).  Those resistors were
+  deleted with the relays.  The `MOD1…MOD7` lines now run straight from the expander, across link J8, to the inputs
+  of the panel's 74AHCT541 — an unterminated CMOS input on an unpowered driver: the buffer output is
+  indeterminate, may oscillate, and can switch a connected relay module at power-up.  The same applies whenever the
+  panel is powered with the main board absent or the link unmated.
+- **Checked on the panel today (2026-09-17, `scripts/gen_panel.py`):** only **MOD8** carries a pull-down —
+  `R489`, 10 kΩ to GND — because pin 33 has no main-board driver.  **MOD1…MOD7 have no pull-down anywhere**: not on
+  the main board (the gate pull-downs are gone), not on the panel.  This is therefore stated as a **requirement, not
+  as a design that exists**.
+- **Requirement.**  Each of `MOD1…MOD7` shall have a **10 kΩ pull-down to GND on the panel side, at the 74AHCT541
+  input** (the same value and the same job as the retired gate pull-downs; 0603, ≈ 0.33 mA per line at 3.3 V, well
+  inside the expander's drive).  The panel side is the right side: it keeps the defined level when the link is
+  unmated, and the panel is where the module header is.  Alternative accepted only if it is explicit and tested:
+  drive the 541's two `/OE` pins from a line that is itself pulled **high** at power-up, so the buffer is
+  three-stated until firmware enables it — but a three-stated output is not a defined *module* input either unless
+  the module header's outputs carry their own pull-downs.  **Seven 10 kΩ resistors is the cheap, unconditional
+  fix.**
+- Verify: schematic review of the panel (seven pull-downs present, one per MOD line); **T-10** in `bring-up.md` —
+  with the board powered and the firmware not yet running, every MODULE OUT pin must read **low** and stay low
+  through a reset.
+

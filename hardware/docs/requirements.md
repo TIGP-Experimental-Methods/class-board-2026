@@ -10,6 +10,27 @@ T-nn = bring-up test in `bring-up.md`.  Numbers are from the design brief v0.6, 
 (400 turns AWG26, 4 cm × 10 cm: L = 2.53 mH, R_DC = 6.7 Ω, X_L = 1419 Ω and R_p = 14.2 kΩ at Q = 10, tuned with
 1.25 nF at 89.4 kHz).  **Nothing in this register is hardware-verified: no board has been built.**
 
+---
+
+## 2026-09-17 update (v0.7d) — rows the register no longer asserts
+
+The instructor's decision of 2026-09-17 (course repo `DECISIONS.md` **#58**, design record **D-53…D-57**) removed the
+relays and all mains switching, moved the isolated inputs to the front-panel board and made **section C = the
+front-panel project**.  **The rows below are not rewritten**; this is what has changed about them.
+
+| Row | Status after 2026-09-17 |
+|---|---|
+| **R-14** 4 mains-capable relays, MAINS clearances | **Void** (D-53).  No relay, no terminal, no `MAINS*` class, no `mains_*` rule, no 250 V AC board rating.  Replaced by **R-45** and **R-46**. |
+| **R-15** 2 isolated inputs 5–24 V | **Valid, relocated** (D-54): same circuit, same numbers, now on the **front-panel** board; the ISO_IN clearance is verified by the panel's DRC, and T-12 is performed on the panel.  See **R-47**. |
+| **R-03 / R-44** GPIO and expander map | **Amended** (D-53): `P1.0–P1.3` are `MOD1–MOD4`, not `RLY_IN1–4`; `P1.5–P1.7` are `MOD5–MOD7`; **P1.4 = `EXP_P14`**, the NMR receiver's 74HC74 `/CLR`.  `OPTO_IN1/2` reach GPIO16/17 over link J8 pins 35/37. |
+| **R-22** front panel 180 × 65, 2-layer, 15 SMA at 20 mm | **Superseded**: **180 × 100 mm, 4-layer**, 17 SMA on an **18 mm** grid, plus the isolated inputs and the module header; it is **student section C** (D-55). |
+| **R-23** main board, three owner areas ZONE_A/B/C | **Amended** (D-56): the areas are **ZONE_A / ZONE_B / ZONE_INSTR** (+ ZONE_BASE); ZONE_B also owns the rear-right strip x 96–179.5, y 0.5–36; 341 footprints. |
+| **R-25** design rules incl. the 5.0 mm / 3.0 mm mains values | **Amended**: every `mains` figure is deleted.  The rule file is `no_inner_tracks`, `iso_in_clearance`, `analog_in_clearance`, the manufacturing margins and `owner_A` / `owner_B` / `owner_INSTR`. |
+| **R-26** 97 LCSC lines, ≈ US$720 | **To be recounted**: the relay parts left the main board, the module-header parts joined the panel. |
+| **R-29** "no DC-DC module, relay or fast digital trace inside the analog zones" | Valid; the relay clause is moot. |
+
+New rows **R-45…R-47** are at the end of the table.
+
 | ID | Requirement | Acceptance criterion | Source | Status | Verification |
 |---|---|---|---|---|---|
 | R-01 | Carrier for Jinhua #40729 (ESP32-S3-DevKitC-1 pin order, 2×22) | socket pin names match the Espressif v1.1 header tables; 5V pin fed from +5V_RAW; 3V3 pins open | brief 7.1, Espressif user guide, HANDOVER 2026-09-05 | C | ERC, T-01 |
@@ -56,6 +77,9 @@ T-nn = bring-up test in `bring-up.md`.  Numbers are from the design brief v0.6, 
 | R-42 | **External power input range and protection** | J901 accepts 7–18 V DC (silkscreen), 24 V only with U802 unfitted; 5 A fuse, SMBJ26A clamp (26 V standoff), reverse polarity blocked by an AOD4185 P-FET (0.375 W at 5 A) whose V_GS is clamped to 12 V; loads are the OPA564 V+, the DRV8871 VM and the UCC27517 VDD only | circuits doc 7; parts-verified Group 7 | P (D-41) | DS calc, T-14 |
 | R-43 | **Supply sequencing** | VDIG (+3V3, from USB) is applied **before** V+ (+VEXT, bench supply); the reverse order is marked "not allowed" in the OPA564 datasheet.  Board and documentation must say "USB first, then the bench supply" | DS OPA564 SBOS372E Fig. 36 | P (D-35) | DS, T-23; **the silkscreen note at J901 is still missing (F-16)** |
 | R-44 | **DIO and relays through the I²C expander** | TCA9535 at 0x20: P0.0–P0.7 → DIO1–8 (74AHCT541), P1.0–P1.3 → RLY_IN1–4 (AO3400A gates), P1.4–P1.7 spare on TP501–TP504; every relay stays off while the expander ports are still inputs (10 k gate pull-downs); ~100 µs update, not timing-critical | re-spec 8.1/8.2; DS TCA9535 | P (D-40) | ERC, T-10, T-11 |
+| R-45 | **v0.7d** Module header: 7 buffered 5 V TTL outputs for a bought relay / H-bridge module | TCA9535 `P1.0–P1.3` + `P1.5–P1.7` = MODULE OUT 1…7 → link J8 pins 19…31 odd (GND on every adjacent even pin) → one 74AHCT541 on +5V_RAW on the panel, 47 Ω in series → 2×6 shrouded box header (1,2 = +5 V; 3…10 = OUT 1…8; 11,12 = GND).  V_OH ≥ 3.8 V into a 5 mA opto input; OUT 8 is a reserved spare (J8 pin 33 not connected on the main board); module coil current is **not** taken from +5V_RAW by design (the rail is fused at 1.5 A) | Decision #58 e/f (D-53) | P (D-53) | netlist audit of J8 19…33, **T-10** |
+| R-46 | **v0.7d** MODULE OUT lines defined at power-up | Every `MOD1…MOD7` line sits at a **defined low** while the TCA9535 ports are still inputs (power-up, reset, I²C not configured) and while the link is unmated: **10 kΩ pull-down to GND at each 74AHCT541 input on the panel**.  **Not built today** — only MOD8 has one (R489) | D-57; TCA9535 ports are inputs at reset with no internal pull-up/pull-down | **Q → P** (D-57), open | panel schematic review (7 pull-downs); **T-10** (all outputs low with firmware idle and through a reset) |
+| R-47 | **v0.7d** The two isolated inputs live on the front-panel board | Terminals J411/J412, the 1N4148W + 220 Ω + 2 × MMBT5551 current source (I_LED ≈ 6.8 mA over 5–24 V) and the 6N137S with its 1 kΩ pull-up are all on the panel; `OPTO_IN1/2` reach GPIO16/17 over J8 pins 35/37, active LOW; `ISO_IN` class, 2.5 mm clearance on every layer and no foreign copper under either isolated group, enforced by `front-panel.kicad_dru` and the two `ISO*_KEEPOUT` areas | Decision #58 g (D-54, D-08 unchanged) | P (D-54) | panel DRC (`iso_in_clearance`), `gen_panel.py` mating audit, **T-12** on the panel |
 
 ## Requirements the build cannot verify without hardware
 
@@ -68,7 +92,10 @@ other board result is used as evidence for this design.  Open items carried into
 
 - **R-02 / D-12** dev-board socket row spacing 25.4 mm, assumed, never measured.
 - **R-26 / D-49** JLC library type (Basic/Preferred/Extended) unread for most of the ≈ 22 new lines.
-- **R-33** OLED socket stock to be re-checked at order time; its panel reference is now J17 (D-46).
+- **R-33** OLED socket stock to be re-checked at order time (the panel now uses the composite
+  `class_board:OLED-0.96in-4P-module-socket`, Decision #56).
+- **R-46 / D-57** the seven MODULE OUT pull-downs on the panel are a **requirement, not yet built** — the single
+  highest-priority open item of the v0.7d change.
 - **D-25** panel header mating height.
 - IC land patterns still unchecked against datasheets — for the v0.6 ICs and for every new v0.7 package
   (HSOP-20 PowerPAD, SO-8-EP, TSSOP-24, MSOP-10, SOIC-14, TO-252, SMB): `design-review.md` F-12.

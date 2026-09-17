@@ -4,9 +4,16 @@ Status: **HARDWARE VALIDATION PENDING** — nothing below has been executed; eve
 design (datasheets, brief, `design-decisions.md`).  Record results in `logbook/sessions.md` and update
 `requirements.md` (column *Status*) as tests pass.
 
+**2026-09-17 (v0.7d, D-53…D-57):** the relays and all mains switching are gone, so the relay test and every mains
+precaution are removed from this plan — **there is no mains test on this board and no relay pinout to meter**.
+**T-10 is now the module-header check**, and **T-12 (isolated inputs) is performed on the front-panel board**, where
+those channels now live.
+
 Equipment: bench supply 5 V / 2 A with current readout; DMM (4½ digit); oscilloscope ≥ 100 MHz with two probes and a
 50 Ω feed-through terminator; function generator (±10 V, 100 kHz); 4 SMA–BNC cables; insulated 5–24 V source for the
-isolated inputs; a Jinhua #40729 dev board with the class firmware; the main board **without** the dev board for T-01–T-03.
+isolated inputs (on the panel); a Jinhua #40729 dev board with the class firmware; the main board **without** the dev
+board for T-01–T-03.  For T-10: the assembled front panel mated to the main board, and either a 2×6 IDC ribbon broken
+out to test clips or a DMM probing the box-header pins directly.
 
 For the v0.7 NMR tests T-14…T-23 additionally: a **second bench supply, 0–24 V / 5 A with a current limit** (the +VEXT
 input); a **60 dB SMA attenuator** (or a 1 k / 1 Ω divider built on an SMA pigtail) to make microvolt test signals; a
@@ -19,8 +26,10 @@ D-35 — the OPA564 requires VDIG before V+).  Switch off in the reverse order. 
 fitted; +VCOIL never above 24 V (external RC snubber) or 12 V (SMBJ20A fitted).  Keep a hand away from the polarizer
 terminal while a coil is connected: 13 A and 81 mJ of stored energy.
 
-Safety: the isolated inputs and the relay contacts are the only nodes that may carry external voltage; never exceed
-30 V DC / 1 A on the relay contacts (board rating, brief 4.3) or 24 V on the isolated inputs.
+Safety: **nothing on either board switches mains** (D-53 — the relays are removed).  The only nodes that may carry an
+external voltage are the two **isolated inputs on the panel** (≤ 24 V DC), the **+VEXT** input J901 (7–18 V) and the
+coil terminals J903 / J905; the module header hands out **5 V TTL only** — any mains-rated relay a student adds is a
+bought, separately powered module and is tested on the bench, never on this board.
 
 | Test | Setup / conditions | Measure | Expected | Pass / fail | Requirement |
 |---|---|---|---|---|---|
@@ -34,10 +43,10 @@ Safety: the isolated inputs and the relay contacts are the only nodes that may c
 | **T-07 Analog inputs (dynamic)** | 1 kHz and 100 kHz sine 2 Vpp into AI1 and AI8; other inputs shorted | FFT of 4096 samples | −3 dB at ≈ 159 kHz (1 k / 1 nF); crosstalk into shorted neighbours < −80 dB at 1 kHz; noise floor < 3 LSB rms | crosstalk > −70 dB → fail | R-10, R-29 |
 | **T-08 Input clamps** | +14 V then −14 V DC into AI1 through 1 kΩ external series (protects the generator) | current into the SMA, node voltage at the ADC pin | node clamps to ≈ +12.6 / −12.6 V; input current ≈ (14−12.6)/2 k ≈ 0.7 mA | ADC pin beyond ±13 V → fail | R-09 |
 | **T-09 Analog outputs** | firmware DAC codes 0, 32768, 65535; 1 kΩ then 50 Ω load on AO1/AO2 | SMA voltage, settling to 0.1 % after a full-scale step | −10.0 / 0.0 / +10.0 V ± 50 mV into 1 kΩ (4.02 gain, D-07); ≈ ±6 V into 50 Ω; settling < 5 µs | offset > 100 mV → fail | R-12, R-13 |
-| **T-10 Relays** | +5V_RAW at 4.5 V (worst case, adjustable supply), drive RELAY1…4 | coil voltage, contact continuity NO/NC/COM at J401…J404, LED | pull-in at ≤ 3.75 V coil (D-03); NO closes / NC opens on drive; flyback spike < 0.7 V above +5V_RAW | no pull-in at 4.5 V → fail | R-14 |
+| **T-10 Module header (MODULE OUT 1…7)** | panel mated to the main board, USB power. (a) **firmware not running / just after reset**, nothing plugged into the box header; (b) firmware sets each TCA9535 port `P1.0–P1.3`, `P1.5–P1.7` high then low in turn; (c) one output loaded with 1 kΩ to GND (≈ a module's 5 mA opto input) | DMM/scope on box-header pins 3…10 against pin 11 (GND); +5 V on pins 1/2; the state of every pin through a reset | (a) **every output LOW (< 0.5 V) and steady**, before, during and after a reset, with nothing driving the lines — this is the D-57 / R-46 check, and **it fails today unless the seven 10 kΩ pull-downs are fitted on the panel**; (b) the addressed output goes to **V_OH ≥ 4.4 V unloaded, ≥ 3.8 V into 1 kΩ** (74AHCT541 + 47 Ω), every other output stays low, and the bit order matches MODULE OUT 1…7; (c) pin 10 (OUT 8) stays low throughout — it is the reserved spare (J8 pin 33 not connected, R489 pull-down); pins 1/2 = +5 V | any output high or oscillating in (a) → **stop, fit the pull-downs (D-57)**; wrong bit order → check the J8 19…31 map | R-45, R-46, D-53, D-57 |
 | **T-11 Digital I/O, fast outputs, TRIG** | firmware toggles DIO1…8, FAST_OUT1/2, TRIG out and in | TTL1…8 at the terminals into 10 kΩ; FAST1/2 edges; TRIG SMA into open and into 50 Ω | V_OH ≥ 3.8 V, V_OL ≤ 0.4 V; FAST rise < 10 ns into 50 Ω through 49.9 Ω; TRIG ≈ 5 V open, ≈ 2.4 V into 50 Ω (D-09); TRIG input threshold ≈ 1.6 V | levels outside → fail | R-16, R-17, R-18 |
-| **T-12 Isolated inputs and mechanics** | 5 V, 12 V and 24 V DC into ISO1/ISO2; then 30 V DC between the isolated group and GND (leakage) | OPTO_IN1/2 level; LED current (series DMM); isolation leakage | input LOW (active) for 5–24 V with 5–15 mA LED current (D-08); leakage < 1 µA at 30 V; panel bottom edge clears the bench (D-25) | > 15 mA or no switching at 5 V → fail | R-15 |
-| **T-13 Thermal** | full load: dev board WiFi, all relays on, ±12 V loaded 40/20 mA, 30 min | IR camera or thermocouple: AMS1117, 78L05, PS201/PS202, LM66100 | AMS1117 < 60 °C, 78L05 < 70 °C (0.28 W, D-04), modules < 55 °C | > 85 °C anywhere → fail | R-05, R-07 |
+| **T-12 Isolated inputs (on the front panel) and mechanics** | panel mated to the main board; 5 V, 12 V and 24 V DC into the panel terminals J411/J412; then 30 V DC between an isolated group and GND (leakage) | OPTO_IN1/2 level; LED current (series DMM); isolation leakage | GPIO16/17 read LOW (active) for 5–24 V with 5–15 mA LED current (D-08, D-54 — the signal crosses link J8 pins 35/37); leakage < 1 µA at 30 V; the stand-offs hold the panel clear of the main board (D-25) | > 15 mA or no switching at 5 V → fail | R-15, R-47 |
+| **T-13 Thermal** | full load: dev board WiFi, all seven MODULE OUT lines high into 1 kΩ each, ±12 V loaded 40/20 mA, 30 min | IR camera or thermocouple: AMS1117, 78L05, PS201/PS202, LM66100 | AMS1117 < 60 °C, 78L05 < 70 °C (0.28 W, D-04), modules < 55 °C | > 85 °C anywhere → fail | R-05, R-07 |
 | **T-14 +VEXT and +3V3A rails** | USB only, then 12 V on J901 through a 0.5 A current limit, then 18 V; nothing else connected | +VEXT at C940, drop across Q901, +3V3A at C905, +VEXT LED | +VEXT = V_in − (I·0.015 Ω) ≈ V_in; reverse polarity on J901 draws **0 mA** (P-FET blocks); +3V3A = 3.30 ± 0.06 V and its ripple ≤ 10 mVpp; LED on from 7 V | any current with the input reversed, or +VEXT missing → check F901/Q901/D932 | R-42, D-41 |
 | **T-15 Si5351 outputs and the quadrature LO** | USB only; firmware sets PLLA → CLK0 = 50.000 MHz, PLLB → CLK1 = 336.000 kHz (= 4 × 84 kHz), then pulses /CLR (expander P1.4) | scope on CLK0 (TP/R703), CLK1 (R704) and on LO_I / LO_Q at the U702 outputs, two channels, 50 % trigger | CLK0 50.000 MHz ± 10 ppm square; CLK1 336.000 kHz; **LO_I and LO_Q at exactly 84.000 kHz, 50 % duty, phase difference 90° ± 2°**, and the same phase relation after every /CLR pulse and every PLLB retune | no 90°, or a phase that moves between runs → /CLR is not being pulsed (D-33) | R-37 |
 | **T-16 DDS output and the reconstruction filter** | USB only, TX_EN low; firmware writes FREQ0 for 89.400 kHz, then sweeps 10 kHz → 2 MHz | scope (and, if available, a spectrum measurement) at the C810 filter output, before the power stage | 0.636 V pp ± 10 % sine at 89.400 kHz ± 0.2 Hz; passband flat to 2 MHz within 0.5 dB; no visible 48 MHz image on a 100 MHz scope; DDS phase register toggling with PSELECT shifts the phase by 90°/180° | level below 0.5 V pp → check R801/R802; steps in the sweep → L801 substituted | R-34, D-34 |
@@ -63,4 +72,6 @@ high-current pair T-21 / T-22.  Do not connect a real coil to the TX terminal be
 Open hardware decisions the bring-up must close: D-12 (socket row spacing 25.4 mm assumed), D-25 (panel header
 height), R-33 (OLED socket part availability), and for v0.7: the land patterns of every new package (F-12), the CPL
 rotations in the JLC preview (F-13), the missing +VEXT / sequencing silkscreen notes (F-16), and whether the tuned
-tank really reaches Q = 10 with the student-wound coil (R-35).
+tank really reaches Q = 10 with the student-wound coil (R-35).  **For v0.7d: the seven MODULE OUT pull-downs on the
+panel (D-57 / R-46 / F-23) must be designed in before the boards are ordered — T-10 (a) is the test that proves
+them, and there is nothing to test if they are not fitted.**

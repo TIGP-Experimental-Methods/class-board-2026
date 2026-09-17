@@ -9,6 +9,35 @@ Sources: brief v0.6 **plus the v0.7 re-spec** (`notes/2026-09-13-nmr-respec-prop
 via annular 0.05 mm — we use 0.25/0.2, 0.3 drill, 0.15 ring).  **Routing is by hand (instructor + students in
 Workshop 2) and has not started; §9 is therefore still empty.**
 
+---
+
+## 2026-09-17 update (v0.7d) — what this review no longer covers
+
+The instructor's decision of 2026-09-17 (course repo `DECISIONS.md` **#58**; new entries **D-53…D-57** in
+`design-decisions.md`) removed the relays and all mains switching, moved the isolated inputs to the front panel and
+made the panel student section C.  **The sections below are not rewritten** — they are the record of the review as it
+stood.  What they no longer describe:
+
+- **§2 floorplan table, `ZONE_C` row** — that area is now **`ZONE_INSTR`** (power entry `b2_power` + the coil
+  switches `c_switch`), its L-shape reaches x 96 on the rear edge, the **relay row and the isolated inputs are not in
+  it**, and the instructor's block is placed as one piece at **x 45–86** with J901/J903/J905 at x 51.0 / 62.7 / 76.9
+  (rot 180).  `ZONE_B` now also owns the rear-right strip **x 96–179.5, y 0.5–36**.  (D-56)
+- **§2 energy map** — the relay coils are no longer a switched-current source on this board (286 mA of +5V_RAW
+  returned to the budget).
+- **§5.3 B4 — relays (mains-capable)** — **void in full** with D-51: no relay, no `MAINS*` class, no `mains_*` rule,
+  no 250 V AC silkscreen rating.  (D-53)
+- **§5.4 B4 — isolated inputs** — **valid but relocated**: the analysis holds unchanged, on the **front-panel**
+  project, whose `front-panel.kicad_dru` and two `ISO*_KEEPOUT` areas now carry the 2.5 mm rule.  (D-54)
+- **§6 routing concept, item 7 "Relay drive/contact"** — void; the corresponding traffic is now seven 3.3 V logic
+  lines from the expander to link J8 pins 19…31 odd.
+- **§7 manufacturing, through-hole content** — the four KF301-5.0-3P relay terminals and the two 2P isolated-input
+  terminals are off the main board; the panel gains a 2×6 shrouded box header and the two 2P terminals.  The panel
+  itself is now **4-layer**, 180 × 100 mm, single-sided for assembly except the three link headers.
+- **§8 findings: F-21** (relay channels vs mains) — **closed by removal**, not by design.  **F-22** (+VEXT TVS vs
+  relay 1) — **void**: relay 1 no longer exists and the pocket it constrained is gone.  **F-02** (relay coils vs
+  Darlington drive) — void.  **F-17**'s footprint count is now **341**.
+- **New finding F-23** (below) replaces the safety property the relay gate pull-downs used to provide.
+
 ## 1. Board, coordinate system and stack-up
 
 - Main board **180 × 100 mm** (v0.7, D-31: the 140 mm outline had 5.2 mm of free rear edge and 5.1 mm of free right
@@ -283,8 +312,20 @@ Renders: `docs/board-top-v07b-placement.png`, `docs/board-bottom-v07b-headers.pn
 Routing has still **not** started.
 
 | F-22 | **Medium** | +VEXT TVS vs relay 1 | D931 was 4.63 mm from relay 1's NC pin where `mains_to_other` asks 5.00 mm: the pocket between the isolated inputs and relay 1 is 12 mm wide, and the 5 mm MAINS envelope on one side plus the 2.5 mm ISO_IN band on the other left ~0.5 mm too little for the P-FET, the TVS and the bulk capacitor in one column | **Fixed** (D-52, second pass): the side strip beside the bulk capacitor was re-stacked — C940 1.9 mm left, D931 to (68.85, 29.0, rot 90) where the envelope opens out, R940/R941/C941 to the ends of the same strip.  DRC 0 errors | `kicad-cli pcb drc --severity-all --refill-zones` |
+| F-23 | **High** | MODULE OUT 1…7 at power-up | Every TCA9535 port is an **input** at power-up and reset (no internal pull-up or pull-down), and the 10 kΩ relay-gate pull-downs that used to define those lines were deleted with the relays.  `MOD1…MOD7` now run unterminated from the expander across link J8 into the panel's 74AHCT541 inputs: the buffer output is indeterminate and can switch a connected relay / H-bridge module at power-up, on reset, and whenever the link is unmated | **Open — requirement, not yet built** (D-57): fit a **10 kΩ pull-down to GND on each of MOD1…MOD7 at the 74AHCT541 input on the panel**.  Checked 2026-09-17 in `scripts/gen_panel.py`: only **MOD8** has one (R489, because that link pin has no driver); MOD1…MOD7 have none | panel schematic review; **T-10** — every MODULE OUT pin low with the firmware not running, and low through a reset |
 
 (the rest is still the placeholder — **routing has not started**.  In v0.7 the main board is routed **by hand**: students route
 their own section in Workshop 2 and the instructor routes the base, the rails and SPI, so this log is filled in from
 the finished hand layout, not from `router.py`.  It must record: distances module↔ADC and LO↔LNA, the TX/polarizer
 return loop areas, corner quality, the via list, the pour fills and the final DRC result.)
+
+**2026-09-17 — relays removed, isolated inputs moved to the panel, board re-placed (v0.7d, D-53…D-57,
+Decision #58).**  **341 footprints**, 0 tracks, 0 vias.  The four relays, their terminals and drive parts and the
+whole `b4_switching` sheet are gone, with the `MAINS*` classes and the `mains_*` / `inside_K40x` / `inside_J40x`
+rules; the two isolated inputs went to the front-panel project with their ISO_IN rule and keep-outs; the seven free
+TCA9535 ports became MODULE OUT 1…7 on link J8 pins 19…31 odd (pin 33 = the reserved OUT 8, not connected).  The
+instructor's block (power entry + `c_switch`) is one piece at **x 45–86** on the rear edge — J901 (51.0), J903
+(62.7), J905 (76.9), all rot 180 — inside the renamed **`ZONE_INSTR`**; `ZONE_B` took the rear-right strip
+x 96–179.5, y 0.5–36.  Renders: `docs/board-top-v07d-placement.png`, `docs/board-bottom-v07d-headers.png`,
+`docs/board-zones-v07d.png`.  Routing has still **not** started.  *(DRC/`place_check` results for this placement are
+recorded by whoever regenerated the board — this entry documents the design change, not a checking run.)*

@@ -39,7 +39,7 @@ Requests are handled in the firmware's `loop()`, in order, one at a time.
  "blocks": {"base": {"counter": 1234, "temp_c": 41.2, "uptime_s": 123, "rssi": 0, "heap_free": 250000,
                      "clients": 1, "led": {"r": 0, "g": 0, "b": 40, "brightness": 40}},
             "b1": {"ai1": 3.91, "ai2": -1.2, "...": 0, "range": 0},
-            "b4": {"relay1": false, "opto1": 17, "...": 0}}}
+            "b4": {"module1": false, "opto1": 17, "...": 0}}}
 ```
 
 Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what the live chart can plot and what alarm rules can test. Nested objects (`base.led`) are for display only.
@@ -47,7 +47,7 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 **`alarm`** — when a rule fires (rising edge).
 
 ```json
-{"type": "alarm", "t": 123456, "rule": 2, "block": "b1", "key": "ai1", "value": 9.4, "action": "relay:1:off"}
+{"type": "alarm", "t": 123456, "rule": 2, "block": "b1", "key": "ai1", "value": 9.4, "action": "module:1:off"}
 ```
 
 ## 3. HTTP
@@ -68,8 +68,8 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | `b3` | `set_dc` | `{ch:1..2, volts}` | `{ch, mode}` |
 | | `sine` | `{ch, freq, amp, offset}` | `{ch, mode}` |
 | | `off` | `{ch}` | `{ch, mode}` |
-| `b4` | `relay` | `{n:1..4, on}` | `{n, on}` |
-| | `relay_all` | `{on}` | `{on}` |
+| `b4` | `module` | `{n:1..7, on}` | `{n, on}` |
+| | `module_all` | `{on}` | `{on}` |
 | | `opto_reset` | — | `{}` |
 | | `hbridge` | `{mode: off\|fwd\|rev\|brake}` (DRV8871 field-cycling bridge; refused while an NMR scan runs) | `{mode}` |
 | | `polarizer` | `{on}` (AOD4184A polarizer switch; refused while an NMR scan runs) | `{on}` |
@@ -85,13 +85,13 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | | `remove` | `{id}` | `{removed}` |
 | | `clear` | — | `{}` |
 
-Alarm rule fields: `op` ∈ `gt lt ge le eq ne`; `action` = `notify` or `relay:<n>:on` / `relay:<n>:off`. Rules fire once per rising edge and are saved to `/alarms.json` on the board.
+Alarm rule fields: `op` ∈ `gt lt ge le eq ne`; `action` = `notify` or `module:<n>:on` / `module:<n>:off` (a module output on the front panel; renamed from `relay:<n>:...` on 2026-09-17). Rules fire once per rising edge and are saved to `/alarms.json` on the board.
 
 ## 5. Status keys per block
 
 `base`: counter, temp_c, uptime_s, rssi, heap_free, clients, led{r,g,b,brightness} ·
 `b1`: ai1…ai8, range · `b2`: v5_raw, v3v3, v12p, v12n, v5a, measured ·
-`b3`: ao1, ao2, mode1, mode2 · `b4`: relay1…relay4, opto1, opto2, opto1_level, opto2_level, hbridge, polarizer ·
+`b3`: ao1, ao2, mode1, mode2 · `b4`: module1…module7, opto1, opto2, opto1_level, opto2_level, hbridge, polarizer (the H-bridge and polarizer are on the main board and are the instructor's hardware) ·
 `b5`: dio, dio1…dio8, trig_dir, trig, fast1_hz, fast2_hz · `template`: value, setpoint · `alarms`: rules, active ·
 `nmr`: see §7
 

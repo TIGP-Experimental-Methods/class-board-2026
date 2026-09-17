@@ -14,10 +14,11 @@ are the intended ERC findings.
 |---|---|---|---|
 | **A** | inputs + NMR receiver | `student/b1_inputs_gapped.kicad_sch`, `student/nmr_rx_gapped.kicad_sch` | **OPA1656IDR** (C1849431, SOIC-8) — the LNA op-amp U703 on the NMR RX sheet |
 | **B** | outputs + timing + NMR transmitter | `student/b3_outputs_gapped.kicad_sch`, `student/b5_dio_trig_gapped.kicad_sch`, `student/nmr_tx_gapped.kicad_sch` | **AD9834BRUZ** (C116589, TSSOP-20) — the DDS U801 on the NMR TX sheet |
-| **C** | power switching + coil drive | `student/b4_switching_gapped.kicad_sch`, `student/c_switch_gapped.kicad_sch` | **DRV8871DDAR** (C75864, SOIC-8 (PowerPAD)) — the H-bridge U903 on the coil-switch sheet |
 
-`b2_power` is **not** gapped. The instructor keeps the power-entry block (proposal §8.3: it is the block a
-student mistake would brick), so section C places parts back on `b4_switching` and `c_switch` only.
+| **C** | the front-panel board (4-layer): SMA field, OLED, LEDs, TTL strip, TX terminal, Qwiic, the two isolated inputs, the module header with its 5 V buffer | `student/front-panel/front-panel.kicad_pro` — the complete panel, **unrouted**; section C places nothing back, it routes the board (`python scripts/gen_panel.py --student` regenerates it) | **6N137S-TA1-L** (C92651, SOP-8) — the isolated-input optocoupler U401/U402 on the panel |
+
+`b2_power` and `c_switch` are **not** gapped: the instructor keeps the power entry, the external 7-18 V input, the
+H-bridge and the polarizer (Decision #58, 2026-09-17). The former `b4_switching` sheet (relays, mains) no longer exists.
 
 Each section also adds its one JLC-library part: fetch the symbol + footprint with the JLC/LCSC part number
 above, check the pin numbering and the footprint against the datasheet, and commit it to `lib/class_board`.
@@ -106,7 +107,7 @@ Full schematic PDF: **page 7**, *B5: 8 TTL DIO, 2 fast TTL outs, bidirectional T
 | **C502** | 100nF | C_0603_1608Metric | C14663 | 〃 | 〃 |
 | **R501** | 1k | R_0603_1608Metric | C21190 | one TTL output series resistor (TTL1) | B5 sheet, at the 74AHCT541 outputs, the first of the R501-R508 column |
 
-Expected ERC items: **23 new** (standalone ERC on the sheet: 44 on the full sheet, 67 on the gapped
+Expected ERC items: **23 new** (standalone ERC on the sheet: 47 on the full sheet, 70 on the gapped
 copy, `--severity-all`) —
 
 - `isolated_pin_label` -5  (fewer — the deleted symbol took its own pins with it)
@@ -134,54 +135,6 @@ Expected ERC items: **7 new** (standalone ERC on the sheet: 31 on the full sheet
 copy, `--severity-all`) —
 
 - `pin_not_connected` +1
-- `unconnected_wire_endpoint` +6
-
-These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
-they disappear when the parts are placed back. Any *other* ERC item is the student's own.
-
-### Section C — `student/b4_switching_gapped.kicad_sch`
-
-Full schematic PDF: **page 6**, *B4: 4 mains-capable relays (MOSFET drive) + 2 isolated 5-24 V inputs* (`docs/schematic-full.pdf`).
-
-| Ref | Value | Footprint | LCSC | Item | Where on the full PDF |
-|---|---|---|---|---|---|
-| **K401** | JQC-3FF/005-1ZS | Relay_SPDT_Hongfa_JQC-3FF_0XX-1Z | C9221 | one complete relay channel (relay, coil-on LED, 2.2 k LED resistor) | B4 sheet, relay channel 1 (leftmost of the four) |
-| **D411** | YELLOW | LED0603-RD-YELLOW | C965802 | 〃 | 〃 |
-| **R421** | 2.2k | R_0603_1608Metric | C4190 | 〃 | 〃 |
-| **J401** | KF301-5.0-3P | CONN-TH_3P-P5.00_KF301-5.0-3P | C474882 | that channel's 3P screw terminal (NO / COM / NC) | B4 sheet, relay channel 1, at the board edge |
-| **D421** | 1N4148W | SOD-123F_L2.7-W1.6-LS3.8-RD | C81598 | one isolated-input current limiter (series diode, 220 R, 10 k bias, the two MMBT5551 and their 100 R / 1 k emitter set) | B4 sheet, isolated input 1 (lower left), between J411 and the 6N137 U401 |
-| **R431** | 220 | R_0603_1608Metric | C22962 | 〃 | 〃 |
-| **R441** | 10k | R_0603_1608Metric | C25804 | 〃 | 〃 |
-| **Q411** | MMBT5551 | SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR | C2145 | 〃 | 〃 |
-| **Q421** | MMBT5551 | SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR | C2145 | 〃 | 〃 |
-| **R451** | 100 | R_0603_1608Metric | C22775 | 〃 | 〃 |
-| **R461** | 1k | R_0603_1608Metric | C21190 | 〃 | 〃 |
-
-Expected ERC items: **32 new** (standalone ERC on the sheet: 15 on the full sheet, 47 on the gapped
-copy, `--severity-all`) —
-
-- `isolated_pin_label` +2
-- `label_dangling` +7
-- `unconnected_wire_endpoint` +23
-
-These are the unconnected pins and dangling wire/label ends left where the parts were removed, and
-they disappear when the parts are placed back. Any *other* ERC item is the student's own.
-
-### Section C — `student/c_switch_gapped.kicad_sch`
-
-Full schematic PDF: **page 12**, *C: external power input, DRV8871 field-cycling H-bridge, polarizer MOSFET switch* (`docs/schematic-full.pdf`).
-
-| Ref | Value | Footprint | LCSC | Item | Where on the full PDF |
-|---|---|---|---|---|---|
-| **D931** | SMBJ26A | SMB_L4.6-W3.6-LS5.3-RD | C123820 | the external-input TVS | C sheet, external power input row: J901 -> F901 -> D931 -> Q901 |
-| **F901** | 5A fast | F1206 | C57525 | the external-input fuse | C sheet, external power input row, between J901 and the TVS |
-| **R922** | 10k | R_0603_1608Metric | C25804 | one H-bridge input pull-down (IN2 = coast at reset) | C sheet, DRV8871 block, at the U903 IN1/IN2 pins next to R921 |
-
-Expected ERC items: **9 new** (standalone ERC on the sheet: 7 on the full sheet, 16 on the gapped
-copy, `--severity-all`) —
-
-- `isolated_pin_label` +2
-- `pin_not_driven` +1
 - `unconnected_wire_endpoint` +6
 
 These are the unconnected pins and dangling wire/label ends left where the parts were removed, and

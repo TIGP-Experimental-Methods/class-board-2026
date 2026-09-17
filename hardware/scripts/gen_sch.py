@@ -4,7 +4,7 @@ Run from hardware/scripts:  python gen_sch.py
 Writes ../class-board.kicad_sch (root), ../sheets/*.kicad_sch and ../class-board.kicad_pro.
 
 Design sources: 10-Class-Board-Design-Brief.md v0.6, docs/design-decisions.md (datasheet-derived
-changes: LM66100 ORing, MOSFET relay drivers, opto current limiter, 74HCT125 DAC level shift,
+changes: LM66100 ORing, 74HCT125 DAC level shift,
 ADS8688/DAC8563 decoupling values).  Interface nets between sheets are GLOBAL labels; rails are
 power symbols.  The single AGND-GND join is the net tie NT1 on the base sheet.
 """
@@ -193,16 +193,16 @@ def build_base(root_uuid):
               ["12 / 11 / 13", "SPI_SCLK/MOSI/MISO", "SPI2 on IO_MUX, 33 R at source", "base"],
               ["10 / 5", "CS_ADC / CS_DAC", "ADS8688 /CS; DAC8563 /SYNC", "B1 / B3"],
               ["1 / 2", "I2C_SDA / I2C_SCL", "400 kHz: 0x20, 0x60, 0x3C", "base"],
-              ["16 / 17", "OPTO_IN1 / 2", "6N137 outputs, active LOW", "B4"],
+              ["16 / 17", "OPTO_IN1 / 2", "panel opto outputs, active LOW", "panel"],
               ["18 / 21", "FAST_OUT1 / 2", "74HCT125 -> 49.9 R -> panel link", "B5"],
               ["38 / 39", "TRIG_IO / TRIG_DIR", "74LVC1T45 (1 = out to the SMA)", "B5"],
               ["41 / 42", "DDS_FSYNC / DDS_PSEL", "AD9834 sync / phase select", "NMR TX"],
-              ["40 / 47", "TX_EN / FET_GATE", "OPA564 enable; polarizer FET", "TX / B4"],
+              ["40 / 47", "TX_EN / FET_GATE", "OPA564 enable; polarizer FET", "TX / C_SW"],
               ["8", "RX_BLANK", "receiver blanking switch", "NMR RX"],
-              ["9 / 14", "HB_IN1 / HB_IN2", "DRV8871 field-cycling bridge", "B4"],
+              ["9 / 14", "HB_IN1 / HB_IN2", "DRV8871 field-cycling bridge", "C_SW"],
               ["4 / 6 / 7 / 15", "GPIO4/6/7/15", "freed -> expansion header J5", "base"],
               ["43 / 44", "GPIO43 / GPIO44", "LED_WIFI/ACT via JP1/JP2; hdr", "base"],
-              ["expander", "DIO1-8, RLY_IN1-4", "P00-P07 -> 541; P10-P13 relays", "B5 / B4"],
+              ["expander", "DIO1-8, MOD OUT 1-7", "P00-P07 -> 541; P10-P13/P15-P17 -> panel", "B5"],
               ["0/45/46, 3, 48", "-", "strapping / unused / PSRAM 35-37", "-"]]
     sh.text("GPIO map v0.7 (re-spec 8.2) — interface contract", 14, 42, 1.5, True)
     sh.table(14, 44, gpio07, [20, 28, 48, 12], 1.2)
@@ -737,154 +737,13 @@ def build_b3(root_uuid):
     return sh
 
 
-# ================================================================== B4 SWITCHING
-def build_b4(root_uuid):
-    sh = Sheet("b4_switching", "B4: 4 mains-capable relays (MOSFET drive) + 2 isolated 5-24 V inputs", "A3", 6, "JQC-3FF/005-1ZS 10 A relays on AO3400A + 1N4148W flyback; 6N137 inputs with a 2-transistor current limiter")
-    c = Ctx(sh, "B4", 4000)
-    sheet_frame(sh, "B4", "B4 — MAINS-CAPABLE SWITCHING: 4 x SPDT relay (10 A @ 277 V AC) on AO3400A MOSFETs; 2 x 6N137 isolated inputs, 5-24 V", [
-        "Relay drive: AO3400A (48 mOhm) instead of a Darlington: the 5 V coil gets the full +5V_RAW (JQC-3FF/005-1ZS pull-in <= 3.75 V, coil 70 ohm = 71 mA per relay, 4 x 71 = 285 mA from +5V_RAW). 1 k gate series, 1N4148W flyback across the coil. Yellow LED shows coil on.",
-        "v0.7: the gates are driven by RLY_IN1..4 from the TCA9535 I2C expander (B5, address 0x20), not by a GPIO. The 10 k gate pull-down is what keeps every relay OFF while the ESP32 boots and while the expander powers up with all its ports as inputs (high-impedance) — it must not be omitted.",
-        "MAINS-capable channel: relay 10 A @ 277 V AC; board rating 250 V AC 5 A MAX per channel, load fused <= 5 A; MAINS net class: 5 mm to all other copper on every layer, F.Cu only, no vias, >= 3 mm tracks; terminal directly behind its relay on the rear edge; coil 70 ohm = 71 mA per relay (4 x 71 = 285 mA from +5V_RAW).",
-        "Contacts: COM/NO/NC to the 3P terminal, NO = pad 1, COM = pad 2, NC = pad 3. Relay pins are the footprint pad names (EN 50005): A1/A2 = coil, 11 = COM, 12 = NC, 14 = NO. The coil-to-contact distance inside the relay is the manufacturer's isolation (1.5 kV test) and is excluded from the 5 mm rule; mains is switched only with the instructor present, the load fused <= 5 A and the lid on.",
-        "Isolated input: series 1N4148W (reverse blocking) -> 220 R -> Q1 pass transistor with Q2 sensing 0.65 V across Rs (100 R || 1 k = 91 R): LED current ~6.5-7 mA from 5 V to 24 V (6N137 needs 5-15 mA). At 24 V Q1 dissipates ~125 mW (MMBT5551 300 mW).",
-        "6N137: VCC/VE = +3V3, 1 k pull-up; output LOW when the input is driven (inverting). The isolated side nets (ISO1_*, ISO2_*) have a 2.5 mm clearance class and no copper of any other net underneath.",
-    ])
-    for k in range(4):
-        x0 = 40 + k * 90
-        y0 = 70
-        K = c.place("K40%d" % (k + 1), "JQC-3FF-005-1ZS", x0 + 45, y0, 0)
-        coil_p = K.pin_pos("A1")          # coil, + side (no internal diode: the polarity is a convention)
-        coil_m = K.pin_pos("A2")          # coil, driven side (MOSFET drain)
-        yA = coil_p[1]                 # +5V_RAW node line
-        yB = coil_m[1] + 15.24         # drain node line
-        xL = K.x - 33.02
-        sh.wire(coil_p[0], coil_p[1], xL, yA)
-        sh.wire(coil_m[0], coil_m[1], coil_m[0] - 2.54, coil_m[1])
-        sh.wire(coil_m[0] - 2.54, coil_m[1], coil_m[0] - 2.54, yB)
-        sh.wire(coil_m[0] - 2.54, yB, xL, yB)
-        c.power_at(xL, yA, "+5V_RAW")
-        # flyback: K up on the +5V_RAW line, A down on the drain line
-        df = c.place("D40%d" % (k + 1), "1N4148W", K.x - 15.24, (yA + yB) / 2, 270)
-        sh.wire(df.pin_pos(1)[0], df.pin_pos(1)[1], df.pin_pos(1)[0], yA)
-        sh.wire(df.pin_pos(2)[0], df.pin_pos(2)[1], df.pin_pos(2)[0], yB)
-        # coil-on LED: +5V_RAW -> 2.2k -> LED -> drain
-        rl = c.place("R42%d" % (k + 1), "R0603_2R2k", K.x - 24.13, yA + 3.81, 0)
-        dl = c.place("D41%d" % (k + 1), "LED_YELLOW_0603", K.x - 24.13, yA + 11.43, 90)
-        sh.wire(rl.pin_pos(1)[0], rl.pin_pos(1)[1], rl.pin_pos(1)[0], yA)
-        sh.wire(rl.pin_pos(2)[0], rl.pin_pos(2)[1], dl.pin_pos(2)[0], dl.pin_pos(2)[1])
-        sh.wire(dl.pin_pos(1)[0], dl.pin_pos(1)[1], dl.pin_pos(1)[0], yB)
-        # MOSFET: drain on the drain line at xL, source to GND, gate from RLY_INn (expander) via 1 k, 10 k pull-down
-        Q = c.place("Q40%d" % (k + 1), "AO3400A", xL - 2.54, yB + 12.7, 0)
-        d = Q.pin_pos(3)
-        sh.wire(d[0], d[1], d[0], yB)
-        c.pwr_pin(Q, 2, "GND")
-        gpos = Q.pin_pos(1)
-        rg = c.place("R40%d" % (k + 1), "R0603_1k", gpos[0] - 10.16, gpos[1], 90)
-        sh.wire(rg.pin_pos(2)[0], rg.pin_pos(2)[1], gpos[0], gpos[1])
-        e = sh.stub(rg, 1, 3.81)
-        sh.label("RLY_IN%d" % (k + 1), e[0], e[1], 180, "global")
-        rpd = c.place("R41%d" % (k + 1), "R0603_10k", gpos[0] - 2.54, gpos[1] + 8.89, 0)
-        sh.wire(rpd.pin_pos(1)[0], rpd.pin_pos(1)[1], rpd.pin_pos(1)[0], gpos[1])
-        c.pwr_pin(rpd, 2, "GND")
-        # contacts -> terminal J40n: 1 = NO, 2 = COM, 3 = NC.  The relay has one COM pin (11) and the
-        # terminal sits at the same height, so all three wires are straight.  On the board the terminal is
-        # directly behind its own relay on the rear edge (MAINS tracks as short as the placement allows).
-        J = c.place("J40%d" % (k + 1), "KF301-5.0-3P", K.x + 30.48, y0, 0, mirror="y")
-        no = K.pin_pos("14")
-        com = K.pin_pos("11")
-        nc = K.pin_pos("12")
-        t1 = J.pin_pos(1)
-        t2 = J.pin_pos(2)
-        t3 = J.pin_pos(3)
-        sh.wire(no[0], no[1], t1[0], t1[1])
-        sh.wire(com[0], com[1], t2[0], t2[1])
-        sh.wire(nc[0], nc[1], t3[0], t3[1])
-        sh.label("RLY_NO%d" % (k + 1), t1[0] - 8.89, no[1], 0)
-        sh.label("RLY_COM%d" % (k + 1), t2[0] - 8.89, com[1], 0)
-        sh.label("RLY_NC%d" % (k + 1), t3[0] - 8.89, nc[1], 0)
-        sh.text("J40%d: 1 = NO, 2 = COM, 3 = NC   MAINS: 250 V AC 5 A MAX, load fused <= 5 A" % (k + 1), x0 + 5, y0 + 62, 1.2)
-        sh.text("K40%d: SPDT 10 A @ 277 V AC / 28 V DC, coil 5 V 70 ohm (71 mA); terminal directly behind the relay" % (k + 1), x0 + 5, y0 + 65.5, 1.2)
-    sh.text("v0.7 gate drive: RLY_IN1..4 = TCA9535 P10..P13 (expander U505 on B5, I2C address 0x20) through the 1 k series resistor; the 10 k pull-down holds every relay off at boot and while the expander ports are still inputs.", 40, 142, 1.3)
-    sh.text("MAINS design rules (class-board.kicad_dru): MAINS copper keeps 5 mm to every other net on every layer and 5 mm channel-to-channel, 2 mm between the nets of one channel, 2 mm to the board edge; F.Cu only, no vias, tracks >= 3 mm.", 40, 146, 1.3)
-    sh.text("Coil current: 4 x 71 mA = 285 mA from +5V_RAW (the 125 ohm HK4100F coils drew 160 mA) — see the rails table on the root sheet.", 40, 150, 1.3)
-    # ---- opto inputs -------------------------------------------------------------------------
-    for k in range(2):
-        x0 = 40 + k * 190
-        y0 = 190
-        n = k + 1
-        J = c.place("J41%d" % n, "KF301-5.0-2P", x0, y0, 0)
-        inp = sh.stub(J, 1, 10.16)    # IN+
-        inm = sh.stub(J, 2, 5.08)     # IN-
-        sh.label("ISO%d_IN+" % n, inp[0] - 5.08, inp[1], 0)
-        sh.label("ISO%d_IN-" % n, inm[0] - 2.54, inm[1], 0)
-        ds = c.place("D42%d" % n, "1N4148W", inp[0] + 7.62, inp[1], 180)   # A left (pin2), K right (pin1)
-        sh.wire(inp[0], inp[1], ds.pin_pos(2)[0], ds.pin_pos(2)[1])
-        xA, yA0 = ds.pin_pos(1)                                            # node after the diode
-        sh.label("ISO%d_NODE" % n, xA + 1.27, yA0, 0)
-        # 220 R -> Q1 collector
-        rs = c.place("R43%d" % n, "R0603_220", xA + 8.89, yA0, 90)
-        sh.wire(xA, yA0, rs.pin_pos(1)[0], rs.pin_pos(1)[1])
-        Q1 = c.place("Q41%d" % n, "MMBT5551", xA + 17.78, yA0 + 10.16, 0)
-        col, base, emit = Q1.pin_pos(3), Q1.pin_pos(1), Q1.pin_pos(2)
-        sh.wire(rs.pin_pos(2)[0], rs.pin_pos(2)[1], col[0], yA0)
-        sh.wire(col[0], yA0, col[0], col[1])
-        sh.label("ISO%d_C" % n, rs.pin_pos(2)[0] + 1.27, yA0, 0)
-        # 10 k bias from the node to the base line
-        rb = c.place("R44%d" % n, "R0603_10k", xA + 2.54, yA0 + 6.35, 0)
-        sh.wire(xA + 2.54, yA0, rb.pin_pos(1)[0], rb.pin_pos(1)[1])
-        sh.wire(rb.pin_pos(2)[0], rb.pin_pos(2)[1], base[0], base[1])
-        sh.label("ISO%d_B" % n, rb.pin_pos(2)[0] + 3.81, base[1], 0)
-        # Q2 (mirrored: base on the right) senses the emitter resistor
-        Q2 = c.place("Q42%d" % n, "MMBT5551", xA + 15.24, yA0 + 25.4, 0, mirror="y")
-        q2c, q2b, q2e = Q2.pin_pos(3), Q2.pin_pos(1), Q2.pin_pos(2)
-        sh.wire(q2c[0], q2c[1], q2c[0], base[1])
-        y_e = emit[1]
-        sh.wire(q2b[0], q2b[1], q2b[0], y_e)
-        sh.wire(q2b[0], y_e, emit[0], y_e)
-        r100 = c.place("R45%d" % n, "R0603_100", emit[0] + 5.08, y_e + 3.81, 0)
-        r1k = c.place("R46%d" % n, "R0603_1k", emit[0] + 12.7, y_e + 3.81, 0)
-        sh.wire(emit[0], y_e, r1k.pin_pos(1)[0], y_e)
-        sh.label("ISO%d_E" % n, emit[0] + 1.27, y_e, 0)
-        y_a = q2e[1] + 2.54                                                 # LED anode line
-        for r in (r100, r1k):
-            sh.wire(r.pin_pos(2)[0], r.pin_pos(2)[1], r.pin_pos(2)[0], y_a)
-        sh.wire(q2e[0], q2e[1], q2e[0], y_a)
-        # opto: anode on the anode line, cathode back to IN-
-        U = c.place("U40%d" % n, "6N137S-TA1-L", r1k.pin_pos(2)[0] + 33.02, y_a + 5.08, 0)
-        an, ka = U.pin_pos(2), U.pin_pos(3)
-        sh.wire(q2e[0], y_a, an[0], y_a)
-        sh.wire(an[0], y_a, an[0], an[1])
-        sh.label("ISO%d_LEDA" % n, r1k.pin_pos(2)[0] + 5.08, y_a, 0)
-        y_ret = U.bbox()[3] + 5.08
-        sh.wire(ka[0], ka[1], ka[0] - 5.08, ka[1])
-        sh.wire(ka[0] - 5.08, ka[1], ka[0] - 5.08, y_ret)
-        sh.wire(ka[0] - 5.08, y_ret, inm[0], y_ret)
-        sh.wire(inm[0], inm[1], inm[0], y_ret)
-        c.nc_pin(U, "1")
-        c.nc_pin(U, "4")
-        c.pwr_pin(U, "8", "+3V3", 3.81)
-        c.pwr_pin(U, "5", "GND", 3.81)
-        c.pwr_pin(U, "7", "+3V3", 7.62)
-        vo = sh.stub(U, "6", 10.16)
-        rp = c.place("R47%d" % n, "R0603_1k", vo[0] - 2.54, vo[1] - 8.89, 0)
-        sh.wire(rp.pin_pos(2)[0], rp.pin_pos(2)[1], rp.pin_pos(2)[0], vo[1])
-        c.pwr_pin(rp, 1, "+3V3")
-        sh.label("OPTO_IN%d" % n, vo[0], vo[1], 0, "global")
-        cb = c.place("C40%d" % n, "C0603_100nF", U.x + 22.86, U.y - 15.24, 0)
-        c.pwr_pin(cb, 1, "+3V3")
-        c.pwr_pin(cb, 2, "GND")
-        sh.text("J41%d: 1 = IN+, 2 = IN- (5-24 V DC, isolated, 1.5 kV opto)" % n, x0, y0 + 80, 1.2)
-    auto_junctions(sh)
-    return sh
-
-
 # ================================================================== B5 DIO/TRIG
 def build_b5(root_uuid):
     sh = Sheet("b5_dio_trig", "B5: 8 TTL DIO, 2 fast TTL outs, bidirectional TRIG, TCXO option", "A3", 7, "74AHCT541 x8 with 1 k series; 74HCT125 fast outs with 49.9 R; 74LVC1T45 TRIG with 33 R + BAV99 clamp; DNP TCXO + Schmitt buffer")
     c = Ctx(sh, "B5", 5000)
     sheet_frame(sh, "B5", "B5 — DIGITAL I/O AND TIMING: 8 x 5 V TTL outputs, 2 fast outputs, bidirectional TRIG (panel SMA), 10 MHz TCXO option", [
         "74AHCT541 (TTL-compatible inputs accept 3.3 V) buffers DIO1..8 to 5 V; 1 k series per output limits a shorted output to 5 mA (students!). Outputs are static/slow (kHz): 1 k x 100 pF cable = 100 ns. v0.8: TTL1..8 and FASTTTL1/2 leave on the panel link, not on board-edge terminals.",
-        "v0.7: DIO1..8 keep their names but are no longer MCU pins — they come from the TCA9535 I2C expander U505 (address 0x20, A0 = A1 = A2 = GND), P00..P07. The 541 runs at +5V_RAW while the expander drives 3.3 V: the AHCT TTL thresholds (VIH 2.0 V) accept that. P10..P13 = RLY_IN1..4 (relay gates, B4), P14..P17 = spare on test points EXP_P14..P17.",
+        "v0.7: DIO1..8 keep their names but are no longer MCU pins — they come from the TCA9535 I2C expander U505 (address 0x20, A0 = A1 = A2 = GND), P00..P07. The 541 runs at +5V_RAW while the expander drives 3.3 V: the AHCT TTL thresholds (VIH 2.0 V) accept that. v0.7d: P10..P13 and P15..P17 = MODULE OUT 1..7 to the panel link J8 (P10..P13 are the ports the four relay gates used); P14 stays EXP_P14, the Johnson-counter /CLR of the NMR receiver; MODULE OUT 8 is reserved (J8 pin 33 not connected).",
         "74HCT125: FAST_OUT1/2 (MCPWM/RMT) -> 49.9 R series -> the panel link -> the two fast SMAs on the panel; drive +-6 mA rated, so a 50 R termination gives ~1 V: fast outs are for high-impedance TTL loads.",
         "TRIG: 74LVC1T45 A = TRIG_IO (3.3 V), B = 5 V side -> 33 R -> TRIG_5V -> panel SMA; DIR (GPIO39) 1 = output. Into a 50 R termination ~2.4 V typ (beyond the rated 32 mA), 5 V into high-Z. BAV99 clamps B to GND/+5V_RAW.",
         "TCXO option (all DNP): clipped-sine 10 MHz -> 1 nF -> Schmitt buffer biased at VCC/2 -> 74LVC1G17 -> JP501 -> GPIO44 (open JP2 on the base sheet when used). VCONT at 1.65 V from a divider.",
@@ -1004,17 +863,19 @@ def build_b5(root_uuid):
     c.nc_pin(U5, "1")                                # INT (open drain) unused: the firmware polls the outputs
     for i in range(8):                               # P00..P07 (pins 4..11) -> 74AHCT541 inputs A1..A8
         c.glabel_pin(U5, str(4 + i), "DIO%d" % (i + 1), 7.62)
-    for i in range(4):                               # P10..P13 (pins 13..16) -> relay MOSFET gates (B4)
-        c.glabel_pin(U5, str(13 + i), "RLY_IN%d" % (i + 1), 7.62)
-    for i in range(4):                               # P14..P17 (pins 17..20) -> spare, on test points
-        c.glabel_pin(U5, str(17 + i), "EXP_P1%d" % (4 + i), 7.62)
+    for i in range(4):                               # P10..P13 (pins 13..16) -> MOD1..MOD4 (the ports the relay gates used)
+        c.glabel_pin(U5, str(13 + i), "MOD%d" % (i + 1), 7.62)
+    c.glabel_pin(U5, "17", "EXP_P14", 7.62)          # P14 is taken: /CLR of the 74HC74 Johnson counter (nmr_rx)
+    for i in range(3):                               # P15..P17 (pins 18..20) -> MOD5..MOD7
+        c.glabel_pin(U5, str(18 + i), "MOD%d" % (i + 5), 7.62)
     c.decouple("C507", "C0603_100nF", 270, 235, "+3V3", "GND").fields["Block"] = "BASE"
-    for i in range(4):
-        tp = c.place("TP50%d" % (i + 1), "TestPoint", 300 + i * 17.78, 230, 0, block="BASE")
-        c.glabel_pin(tp, 1, "EXP_P1%d" % (4 + i), 3.81)
+    tp = c.place("TP501", "TestPoint", 300, 230, 0, block="BASE")     # /CLR of the Johnson counter, for bring-up
+    c.glabel_pin(tp, 1, "EXP_P14", 3.81)
     sh.text("U505 TCA9535 (TSSOP-24, address 0x20, A0 = A1 = A2 = GND): the I2C port expander that replaced 12 direct GPIO in v0.7 —", 40, 197, 1.3)
-    sh.text("P00..P07 = DIO1..8 into the 74AHCT541 above, P10..P13 = RLY_IN1..4 to the relay gates (B4), P14..P17 spare on TP501..TP504.", 40, 200.5, 1.3)
-    sh.text("Every port is an input after power-up and after a reset: the relay gate pull-downs (B4) are what set the safe state.", 40, 204, 1.3)
+    sh.text("P00..P07 = DIO1..8 into the 74AHCT541 above; P10..P13 and P15..P17 = MODULE OUT 1..7, the 3.3 V module outputs, to the panel link J8 (v0.7d).", 40, 200.5, 1.3)
+    sh.text("P14 is NOT free: it is EXP_P14, the /CLR of the 74HC74 Johnson counter on the NMR receiver sheet (TP501 is its test point). MODULE OUT 8 is", 40, 204, 1.3)
+    sh.text("reserved: J8 pin 33 is not connected on this board and the panel pulls it down. MOD1..MOD4 keep the ports the relay gates used, so the firmware", 40, 207.5, 1.3)
+    sh.text("mapping is unchanged. Every port is an input after power-up and after a reset: the pull-down on the panel buffer decides the state of a module.", 40, 211, 1.3)
     auto_junctions(sh)
     return sh
 
@@ -1213,13 +1074,16 @@ LINK_B = {1: "TTL1", 2: "GND", 3: "TTL2", 4: "GND", 5: "TTL3", 6: "GND", 7: "TTL
           23: "I2C_SDA", 24: "GND", 25: "I2C_SCL", 26: "GND", 27: "+3V3", 28: "GND",
           29: "LED_PWR", 30: "GND", 31: "LED_WIFI", 32: "GND", 33: "LED_ACT", 34: "GND",
           35: None, 36: "GND", 37: None, 38: "GND", 39: None, 40: "GND"}
+# v0.7d (2026-09-17): the four relays and the two isolated inputs left the main board. The eight
+# free expander ports are now MOD1..MOD7 ("module outputs", 3.3 V logic) and the two opto outputs come
+# back from the panel, so J8 carries them all. gen_panel.py builds the panel against exactly this map.
 LINK_C = {1: "+5V_RAW", 2: "GND", 3: "+5V_RAW", 4: "GND", 5: "+3V3", 6: "GND",
           7: "GPIO4", 8: "GND", 9: "GPIO6", 10: "GND", 11: "GPIO7", 12: "GND", 13: "GPIO15", 14: "GND",
           15: "GPIO43", 16: "GND", 17: "GPIO44", 18: "GND",
-          19: None, 20: "GND", 21: None, 22: "GND", 23: None, 24: "GND", 25: None, 26: "GND",
-          27: None, 28: "GND", 29: None, 30: "GND", 31: None, 32: "GND", 33: None, 34: "GND",
-          35: None, 36: "GND", 37: None, 38: "GND", 39: None, 40: "GND"}
-LINKS = [("J6", LINK_A, "analog", 12), ("J7", LINK_B, "digital", 90), ("J8", LINK_C, "power + spares", 168)]
+          19: "MOD1", 20: "GND", 21: "MOD2", 22: "GND", 23: "MOD3", 24: "GND", 25: "MOD4", 26: "GND",
+          27: "MOD5", 28: "GND", 29: "MOD6", 30: "GND", 31: "MOD7", 32: "GND", 33: None, 34: "GND",   # 33 = MODULE OUT 8, reserved: no expander port is free
+          35: "OPTO_IN1", 36: "GND", 37: "OPTO_IN2", 38: "GND", 39: None, 40: "GND"}
+LINKS = [("J6", LINK_A, "analog", 12), ("J7", LINK_B, "digital", 90), ("J8", LINK_C, "rails, GPIO, module outputs", 168)]
 
 
 def link_rows(pins, per_row=6):
@@ -1241,7 +1105,7 @@ def build_link(root_uuid):
     c = Ctx(sh, "BASE", 6000)
     sheet_frame(sh, "LINK", "FRONT-PANEL LINK - three 2x20 straight male headers on the BOTTOM side of the main board (v0.8)", [
         "The panel stacks flat on the BACK of the main board (Decision #45). J6/J7/J8 are mounted on the BOTTOM side of the main board and hand-soldered from the top; they mate the panel's three female headers. Positions along the 180 mm edge: x ~ 12 (J6), x ~ 90 (J7), x ~ 168 (J8) mm.",
-        "Odd pins = row 1 (signal), even pins = row 2 (return): every signal pin has its return, AGND or GND, on the adjacent even pin. J6 carries the analog signals (nearest the panel SMAs), J7 the digital ones, J8 the rails and the spare GPIO.",
+        "Odd pins = row 1 (signal), even pins = row 2 (return): every signal pin has its return, AGND or GND, on the adjacent even pin. J6 carries the analog signals (nearest the panel SMAs), J7 the digital ones, J8 the rails, the free GPIO, the seven module outputs MODULE OUT 1..7 and the two isolated-input returns OPTO_IN1/2.",
         "LED_PWR is +3V3 (always on; the LED series resistor sits on the panel). LED_WIFI / LED_ACT come from GPIO43 / GPIO44 through JP1 / JP2 (base sheet). GPIO4/6/7/15/43/44 on J8 are the same nets as on the expansion header J5. TX is on two pins (19 and 21) so the coil current has two paths.",
         "Pins marked spare are not connected on the main board; on the panel they reach labelled test pads, so a later panel part needs no new main-board revision. Panel copper is AGND and meets GND only at the star point NT1 on the main board.",
         "The three headers (and the panel's three female headers) are bought separately and soldered by the instructor: they carry the field Assembly = hand and are excluded from the JLC BOM and CPL.",
@@ -1267,7 +1131,10 @@ def build_link(root_uuid):
         sh.table(20 + k * 132, 200, link_rows(pins), [14, 110], 1.25)
         sh.text("%s pin table" % ref, 20 + k * 132, 198, 1.3, True)
     sh.text("Pin 29 of J7 (LED_PWR) is +3V3 directly; the panel LED series resistor sits on the panel PCB.", 20, 265, 1.3)
-    sh.text("Spare pins: J6 has 6 (29-39 odd, AGND partners), J7 has 3 (35-39 odd), J8 has 11 (19-39 odd) - 20 spare signal pins with their returns.", 20, 268.5, 1.3)
+    sh.text("MODULE OUT 1..7 (J8 pins 19-31 odd) are 3.3 V logic from the TCA9535 expander: the panel buffers them to 5 V TTL to drive commercial", 20, 268.5, 1.3)
+    sh.text("opto-isolated relay modules (5 mA per input). MODULE OUT 8 (pin 33) is RESERVED: no expander port is free for it, so it is not connected", 20, 272, 1.3)
+    sh.text("on the main board and the panel pulls it down. OPTO_IN1/2 (pins 35, 37) come the other way: the two 6N137 isolated inputs live on the panel", 20, 275.5, 1.3)
+    sh.text("and their open-collector outputs reach GPIO16/17 here. Spare pins: J6 has 6 (29-39 odd), J7 has 3 (35-39 odd), J8 has 2 (33, 39).", 20, 279, 1.3)
     auto_junctions(sh)
     return sh
 
@@ -1278,12 +1145,12 @@ def build_root(sheets, root_uuid):
     sh.uuid = root_uuid
     sh.text("TIGP CLASS BOARD 2026 — laboratory instrument carrier (ESP32-S3 dev board) with NMR console, rev B (v0.7, 2026-09-13)", 12.7, 16, 3.5, True)
     sh.text("Design brief v0.6 + notes/2026-09-13-nmr-respec-proposal.md (v0.7) + hardware/docs/design-decisions.md. Interface nets between sheets are global labels; rails are power symbols; AGND meets GND only at NT1.", 12.7, 21, 1.5)
-    sh.text("Stack-up: L1 signal/power, L2 GND, L3 GND, L4 signal/power. Board 180 x 100 mm, 4 x M3. Bottom side: three 2x20 straight male headers (J6 at x 12, J7 at x 90, J8 at x 168 mm) carry the front panel (180 x 100, 17 SMA) flat on the back of the board. Rear edge: USB-C, 5 V jack, relay contacts, isolated inputs, external power, H-bridge and polarizer coil terminals. Sections: A = B1 + NMR RX, B = B3 + B5 + NMR TX, C = B2 + B4 + coil switches.", 12.7, 25, 1.5)
-    core = ["base_mcu", "b2_power", "b1_inputs", "b3_outputs", "b4_switching", "b5_dio_trig", "front_panel_link"]
+    sh.text("Stack-up: L1 signal/power, L2 GND, L3 GND, L4 signal/power. Board 180 x 100 mm, 4 x M3. Bottom side: three 2x20 straight male headers (J6 at x 12, J7 at x 90, J8 at x 168 mm) carry the front panel (180 x 100, 17 SMA) flat on the back of the board. Rear edge: USB-C, 5 V jack, external power, H-bridge and polarizer coil terminals. Sections: A = B1 + NMR RX, B = B3 + B5 + NMR TX, C = the front-panel board; the power entry and the coil switches are the instructor’s (ZONE_INSTR). v0.7d: the four relays and the two isolated inputs left the main board — it offers 5 V TTL module outputs instead and switches no mains.", 12.7, 25, 1.5)
+    core = ["base_mcu", "b2_power", "b1_inputs", "b3_outputs", "b5_dio_trig", "front_panel_link"]
     order = [n for n in core if n in sheets] + [n for n in sheets if n not in core]
     titles = {"base_mcu": "BASE: dev-board socket, buses, expansion, star point", "b2_power": "B2 (C): power entry, +-12 V, LDOs",
-              "b1_inputs": "B1 (A): 8 x +-10 V inputs, ADS8688", "b3_outputs": "B3 (B): DAC8563 + OPA2192 -> AO1/AO2", "b4_switching": "B4 (C): 4 relays, 2 isolated inputs",
-              "b5_dio_trig": "B5 (B): TCA9535 -> 8 TTL DIO + relays, 2 fast outs, TRIG", "front_panel_link": "LINK: 3 x 2x20 to the front panel (bottom side)"}
+              "b1_inputs": "B1 (A): 8 x +-10 V inputs, ADS8688", "b3_outputs": "B3 (B): DAC8563 + OPA2192 -> AO1/AO2",
+              "b5_dio_trig": "B5 (B): TCA9535 -> 8 TTL DIO + 8 module outputs, 2 fast outs, TRIG", "front_panel_link": "LINK: 3 x 2x20 to the front panel (bottom side)"}
     for k, name in enumerate(order):
         col, row = k % 4, k // 4
         x, y = 12.7 + col * 100, 35 + row * 45
@@ -1292,21 +1159,21 @@ def build_root(sheets, root_uuid):
         sh.text(titles.get(name, s.title), x + 1.5, y + 27, 1.3)
     # interface tables
     gpio = [["GPIO", "Net", "Function", "Section"], ["12/11/13", "SPI_SCLK/MOSI/MISO", "SPI2 IO_MUX, 33 R at source (ADC, DAC, DDS)", "base"], ["10", "CS_ADC", "ADS8688 /CS", "A"], ["5", "CS_DAC", "DAC8563 /SYNC (via 74HCT125)", "B"],
-            ["1/2", "I2C_SDA/SCL", "400 kHz: OLED 0x3C, TCA9535 0x20, Si5351A 0x60, Qwiic J4 + panel Qwiic", "base"], ["16/17", "OPTO_IN1/2", "6N137 outputs, 1 k pull-up, active LOW", "C"], ["18/21", "FAST_OUT1/2", "74HCT125 -> 49.9 R -> panel link -> 2 fast SMAs on the panel", "B"],
+            ["1/2", "I2C_SDA/SCL", "400 kHz: OLED 0x3C, TCA9535 0x20, Si5351A 0x60, Qwiic J4 + panel Qwiic", "base"], ["16/17", "OPTO_IN1/2", "the two isolated inputs, now on the front panel; active LOW", "panel"], ["18/21", "FAST_OUT1/2", "74HCT125 -> 49.9 R -> panel link -> 2 fast SMAs on the panel", "B"],
             ["38/39", "TRIG_IO / TRIG_DIR", "74LVC1T45; DIR 1 = output to the panel SMA", "B"], ["41/42", "DDS_FSYNC / DDS_PSEL", "AD9834 frame sync / phase-register select", "B"],
             ["40", "TX_EN", "OPA564 enable = transmit gate (10 k pull-down)", "B"], ["8", "RX_BLANK", "DG419 receiver blanking (pull-up: blanked)", "A"],
             ["9/14", "HB_IN1/2", "DRV8871 H-bridge inputs (10 k pull-downs)", "C"], ["47", "FET_GATE", "UCC27517 -> AOD4184A polarizer switch", "C"],
-            ["TCA9535 P00-P07", "DIO1..8", "74AHCT541 -> 1 k -> panel link -> panel TTL strip", "B"], ["TCA9535 P10-P13", "RLY_IN1..4", "AO3400A relay gates (10 k pull-down)", "C"],
+            ["TCA9535 P00-P07", "DIO1..8", "74AHCT541 -> 1 k -> panel link -> panel TTL strip", "B"], ["TCA9535 P10-P13, P15-P17", "MODULE OUT 1..7", "3.3 V -> panel link J8 -> 5 V TTL buffers on the panel (OUT 8 reserved, J8 pin 33 n/c)", "B"], ["TCA9535 P14", "EXP_P14", "/CLR of the 74HC74 Johnson counter (NMR RX); TP501", "A"],
             ["4/6/7/15", "GPIO4/6/7/15", "free -> 2x10 expansion header", "base"], ["19/20", "USB_DN/DP", "native USB from the carrier USB-C", "base"],
             ["43/44", "GPIO43/44", "header; LED_WIFI/ACT via JP1/JP2; TCXO option", "base"], ["3, 0/45/46, 35-37, 48", "-", "strapping / PSRAM / on-board LED: unused", "-"]]
     sh.table(12.7, 180, gpio, [34, 40, 92, 14], 1.3)
-    rails = [["Rail", "Source", "Budget", "Feeds"], ["+5V_RAW", "USB-C or jack via polyfuse + TVS + LM66100", "<= 1.5 A (est. 1.15-1.35 A)", "dev board, relays (4 x 71 mA), 5 V logic, LDO, DC-DC"],
+    rails = [["Rail", "Source", "Budget", "Feeds"], ["+5V_RAW", "USB-C or jack via polyfuse + TVS + LM66100", "<= 1.5 A (est. 0.87-1.07 A)", "dev board, 5 V logic, LDO, DC-DC, the panel through J8"],
              ["+3V3", "AMS1117-3.3", "<= 500 mA (est. < 150 mA)", "logic side, OLED, optos, Qwiic"], ["+12V / -12V", "B0512S-2WR3 x2, AGND-referenced", "166 mA each (est. 40 / 20 mA incl. bleeders)", "78L05, OPA2192, clamps, OPT"],
              ["+5VA", "78L05G from +12V", "<= 100 mA (est. 17 mA)", "ADS8688 / DAC8563 AVDD"], ["AGND", "star point NT1 (net tie) to GND", "-", "L1/L4 analog copper, panel copper (through J6)"]]
     sh.table(200, 180, rails, [26, 62, 52, 60], 1.3)
     sh.text("GPIO map v0.7 (interface contract, brief 4.2 + proposal 8.2)", 12.7, 177, 1.5, True)
     sh.text("Rails (brief 4.1, updated per design-decisions D-02/D-04; +VEXT 7-18 V external input on the C sheet)", 200, 177, 1.5, True)
-    sh.text("Reference ranges: base 1-99, B1 100-199, B2 200-299, B3 300-399, B4 400-499, B5 500-599, NMR RX 700-799, NMR TX 800-899, coil switches / external power 900-999 (owner-zone DRC uses the Block field: A / B / C).", 12.7, 272, 1.4)
+    sh.text("Reference ranges: base 1-99, B1 100-199, B2 200-299, B3 300-399, B5 500-599, NMR RX 700-799, NMR TX 800-899, coil switches / external power 900-999. B4 (400-499, relays and isolated inputs) was deleted in v0.7d; the owner-zone DRC uses the Block field.", 12.7, 272, 1.4)
     sh.text("Student gapped copies (D6) are derived from these sheets: see hardware/student/ and docs/student-deletions.md.", 12.7, 276, 1.4)
     return sh
 
@@ -1339,12 +1206,7 @@ def write_project(path):
             {"name": "ANALOG_IN", "clearance": 0.2, "track_width": 0.25, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 2},
             {"name": "ANALOG_OUT", "clearance": 0.2, "track_width": 0.3, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 3},
             {"name": "FAST", "clearance": 0.2, "track_width": 0.25, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 4},
-            {"name": "ISO_IN", "clearance": 0.2, "track_width": 0.3, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 5},
-            {"name": "MAINS", "clearance": 5.0, "track_width": 3.0, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 6},
-            {"name": "MAINS1", "clearance": 5.0, "track_width": 3.0, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 7},
-            {"name": "MAINS2", "clearance": 5.0, "track_width": 3.0, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 8},
-            {"name": "MAINS3", "clearance": 5.0, "track_width": 3.0, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 9},
-            {"name": "MAINS4", "clearance": 5.0, "track_width": 3.0, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 10}],
+            {"name": "ISO_IN", "clearance": 0.2, "track_width": 0.3, "via_diameter": 0.6, "via_drill": 0.3, "bus_width": 12, "wire_width": 6, "line_style": 0, "pcb_color": "rgba(0, 0, 0, 0.000)", "schematic_color": "rgba(0, 0, 0, 0.000)", "priority": 5}],
             "meta": {"version": 4},
             "net_colors": None, "netclass_assignments": None,
             "netclass_patterns": [
@@ -1353,11 +1215,7 @@ def write_project(path):
                 {"netclass": "ANALOG_IN", "pattern": "/b1_inputs/AIN*"}, {"netclass": "ANALOG_IN", "pattern": "AI?"},
                 {"netclass": "ANALOG_OUT", "pattern": "AO?"}, {"netclass": "ANALOG_OUT", "pattern": "/b3_outputs/AOUT*"},
                 {"netclass": "FAST", "pattern": "SPI_*"}, {"netclass": "FAST", "pattern": "CS_*"}, {"netclass": "FAST", "pattern": "FAST_OUT?"}, {"netclass": "FAST", "pattern": "TRIG_*"},
-                {"netclass": "FAST", "pattern": "/b3_outputs/DAC_*"}, {"netclass": "FAST", "pattern": "/base_mcu/*_MCU"},
-                {"netclass": "ISO_IN", "pattern": "/b4_switching/ISO*"}, {"netclass": "ISO_IN", "pattern": "unconnected-(U401-NC*"}, {"netclass": "ISO_IN", "pattern": "unconnected-(U402-NC*"},
-                {"netclass": "MAINS", "pattern": "/b4_switching/RLY_*"},
-                {"netclass": "MAINS1", "pattern": "/b4_switching/RLY_*1"}, {"netclass": "MAINS2", "pattern": "/b4_switching/RLY_*2"},
-                {"netclass": "MAINS3", "pattern": "/b4_switching/RLY_*3"}, {"netclass": "MAINS4", "pattern": "/b4_switching/RLY_*4"}]},
+                {"netclass": "FAST", "pattern": "/b3_outputs/DAC_*"}, {"netclass": "FAST", "pattern": "/base_mcu/*_MCU"}]},
         "pcbnew": {"last_paths": {"gencad": "", "idf": "", "netlist": "", "plot": "", "pos_files": "", "specctra_dsn": "", "step": "", "svg": "", "vrml": ""}, "page_layout_descr_file": ""},
         "schematic": {"annotate_start_num": 0, "bom_export_filename": "", "bom_fmt_presets": [], "bom_fmt_settings": {}, "bom_presets": [], "bom_settings": {},
                       "connection_grid_size": 50.0, "drawing": {"default_line_thickness": 6.0, "default_text_size": 50.0, "field_names": [], "intersheets_ref_own_page": False,
@@ -1376,7 +1234,7 @@ def write_project(path):
 def main():
     root_uuid = uid_for("root:" + PROJECT)
     sheets = {}
-    for fn in (build_base, build_b2, build_b1, build_b3, build_b4, build_b5, build_link):
+    for fn in (build_base, build_b2, build_b1, build_b3, build_b5, build_link):
         s = fn(root_uuid)
         sheets[s.name] = s
     # v0.7 (2026-09-13): the OPT conditioning sheet is deleted; extra sheets come from scripts/sheet_*.py,

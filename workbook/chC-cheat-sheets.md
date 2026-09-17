@@ -236,7 +236,7 @@ pio run -e esp32s3 -t upload           # the REAL class board (no SIM) — from 
 | 3D view | PCB | `Alt+3` |
 | Layers | PCB | F.Cu top signals · **In1.Cu and In2.Cu = unbroken ground planes, no tracks at all** · B.Cu bottom signals |
 
-Your rule area is `ZONE_A`, `ZONE_B` or `ZONE_C` — the one for your section; nothing outside it; do not touch net classes or the instructor's tracks. The board is `hardware/class-board.kicad_pro`; your **gapped sheets** are small projects of their own in `hardware/student/` — open the `.kicad_pro` next to the sheet (A: `b1_inputs_gapped`, `nmr_rx_gapped` · B: `b3_outputs_gapped`, `b5_dio_trig_gapped`, `nmr_tx_gapped` · C: `b4_switching_gapped`, `c_switch_gapped`), and what is missing from each is listed in `hardware/docs/student-deletions.md`. Library: `hardware/lib/class_board.*`; new part: `easyeda2kicad --full --lcsc_id C… --output "<abs path>/hardware/lib/class_board"`.
+Your rule area is `ZONE_A` or `ZONE_B` on the main board — the one for your section — and for Section C it is the whole front-panel project; nothing outside it; do not touch net classes or the instructor's tracks. The board is `hardware/class-board.kicad_pro`; your **gapped sheets** are small projects of their own in `hardware/student/` — open the `.kicad_pro` next to the sheet (A: `b1_inputs_gapped`, `nmr_rx_gapped` · B: `b3_outputs_gapped`, `b5_dio_trig_gapped`, `nmr_tx_gapped` · C: the gapped copy of the front-panel sheet), and what is missing from each is listed in `hardware/docs/student-deletions.md`. Library: `hardware/lib/class_board.*`; new part: `easyeda2kicad --full --lcsc_id C… --output "<abs path>/hardware/lib/class_board"`.
 
 ## C.4 The review checklist (the instructor's merge list for the class board)
 - [ ] ERC 0 errors · DRC 0 errors, 0 unrouted
@@ -247,15 +247,15 @@ Your rule area is `ZONE_A`, `ZONE_B` or `ZONE_C` — the one for your section; n
 - [ ] nothing outside the rule area
 - [ ] pin 1 marked on the silkscreen for every IC and connector
 - [ ] ground pour joined (no islands)
-- [ ] Section C: isolation band ≥ 2.5 mm at the isolated inputs, no copper under it; high-current traces wide, no neck-downs
-- [ ] Section C: MAINS nets — 5 mm to everything on every layer, top layer only, no vias, tracks ≥ 3 mm, the rating text on the silkscreen
+- [ ] Section C: isolation band ≥ 2.5 mm at the isolated inputs, no copper of any other net under it on any layer
+- [ ] Section C: every terminal flush with a panel edge, wire entry off the edge; the OLED on its four M2 holes and clear of the link-header solder tails; a silkscreen label on every connector and on all seven module outputs
 - [ ] a silkscreen label on every connector
 - [ ] CI green
 
 ## C.5 The protocol in one screen
-Command: `{"id":1,"block":"b4","cmd":"relay","args":{"n":1,"on":true}}` → reply `{"id":1,"ok":true,"result":{…}}`.
+Command: `{"id":1,"block":"b4","cmd":"module","args":{"n":1,"on":true}}` → reply `{"id":1,"ok":true,"result":{…}}`.
 Status (20 Hz): `{"type":"status","t":ms,"blocks":{"base":{…},"b1":{…}}}` — numeric top-level keys are chartable and alarmable.
-Alarm rule: `{block, key, op: gt|lt|ge|le|eq|ne, threshold, action: notify | relay:<n>:on|off}`.
+Alarm rule: `{block, key, op: gt|lt|ge|le|eq|ne, threshold, action: notify | module:<n>:on|off}`.
 Scope: `stream {ch, rate_hz, chunk}` (rolling; `rate_hz: 0` stops) · `capture {ch, rate_hz, n, trig:{level, edge, pre}}` (one binary frame). Full list: `firmware/PROTOCOL.md`.
 
 ## C.6 The four log lines (`PROGRESS.md`, every session)

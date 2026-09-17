@@ -3,9 +3,10 @@
 One gapped copy per sheet a section owns:
     A (inputs + NMR receiver)     b1_inputs_gapped    nmr_rx_gapped
     B (outputs + timing + NMR TX) b3_outputs_gapped   b5_dio_trig_gapped   nmr_tx_gapped
-    C (power switching + coil)    b4_switching_gapped c_switch_gapped
-b2_power is NOT gapped: the instructor keeps the power-entry block (proposal 8.3 — it is the block a
-student error would brick), so section C only places parts back on b4_switching and c_switch.
+    C (the front-panel board)     student/front-panel/ (written UNROUTED by gen_panel.py --student)
+b2_power and c_switch are NOT gapped: the instructor keeps the power entry, the external 7-18 V input,
+the H-bridge and the polarizer (Decision #58, 2026-09-17: section C is the front-panel board; the
+relays and the mains switching left the design).  gen_panel.py --student writes section C's project.
 
 Each copy loses 3-4 *items* picked by the brief's rule (a decoupling pair, one repeated channel, one
 connector).  The reference designators are unchanged in the full design, so a student who re-places
@@ -85,33 +86,6 @@ SECTIONS = [
              ("the output isolation resistor",
               ["R813"],
               "NMR TX sheet, between the clamp node and C818 / the TX SMA"),
-         ]),
-     ]),
-    ("C", "power switching + coil drive",
-     ("DRV8871DDAR", "C75864", "SOIC-8 (PowerPAD)", "the H-bridge U903 on the coil-switch sheet"),
-     [
-         ("b4_switching", [
-             ("one complete relay channel (relay, coil-on LED, 2.2 k LED resistor)",
-              ["K401", "D411", "R421"],
-              "B4 sheet, relay channel 1 (leftmost of the four)"),
-             ("that channel's 3P screw terminal (NO / COM / NC)",
-              ["J401"],
-              "B4 sheet, relay channel 1, at the board edge"),
-             ("one isolated-input current limiter (series diode, 220 R, 10 k bias, the two MMBT5551 "
-              "and their 100 R / 1 k emitter set)",
-              ["D421", "R431", "R441", "Q411", "Q421", "R451", "R461"],
-              "B4 sheet, isolated input 1 (lower left), between J411 and the 6N137 U401"),
-         ]),
-         ("c_switch", [
-             ("the external-input TVS",
-              ["D931"],
-              "C sheet, external power input row: J901 -> F901 -> D931 -> Q901"),
-             ("the external-input fuse",
-              ["F901"],
-              "C sheet, external power input row, between J901 and the TVS"),
-             ("one H-bridge input pull-down (IN2 = coast at reset)",
-              ["R922"],
-              "C sheet, DRV8871 block, at the U903 IN1/IN2 pins next to R921"),
          ]),
      ]),
 ]
@@ -312,8 +286,10 @@ def write_doc(results, pages, did_erc):
           % (sec, secname, ", ".join("`student/%s_gapped.kicad_sch`" % s for s in stems),
              fetch[0], fetch[1], fetch[2], fetch[3]))
     w("")
-    w("`b2_power` is **not** gapped. The instructor keeps the power-entry block (proposal §8.3: it is the block a")
-    w("student mistake would brick), so section C places parts back on `b4_switching` and `c_switch` only.\n")
+    w("| **C** | the front-panel board (4-layer): SMA field, OLED, LEDs, TTL strip, TX terminal, Qwiic, the two isolated inputs, the module header with its 5 V buffer | `student/front-panel/front-panel.kicad_pro` — the complete panel, **unrouted**; section C places nothing back, it routes the board (`python scripts/gen_panel.py --student` regenerates it) | **6N137S-TA1-L** (C92651, SOP-8) — the isolated-input optocoupler U401/U402 on the panel |")
+    w("")
+    w("`b2_power` and `c_switch` are **not** gapped: the instructor keeps the power entry, the external 7-18 V input, the")
+    w("H-bridge and the polarizer (Decision #58, 2026-09-17). The former `b4_switching` sheet (relays, mains) no longer exists.\n")
     w("Each section also adds its one JLC-library part: fetch the symbol + footprint with the JLC/LCSC part number")
     w("above, check the pin numbering and the footprint against the datasheet, and commit it to `lib/class_board`.")
     w("The part is already used in the full design — the exercise is the library entry, not the placement.\n")
