@@ -8,7 +8,13 @@ library conventions (2.54 mm pin grid, pin ends on the 1.27 mm grid).
 The symbol definitions are also imported by the schematic generator, which needs the pin
 coordinates to compute wire end points.
 """
+import os
+import subprocess
+
 from sexp import q, num, font
+
+# kicad-cli, same convention as gen_panel.py / gen_student.py / release.py
+KICAD_CLI = os.environ.get("KICAD_CLI", r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe")
 
 # --------------------------------------------------------------------------------------
 # datasheet URLs (verified downloads, see .local/datasheets and docs/design-decisions.md)
@@ -979,12 +985,33 @@ SYMBOLS = build_library()
 
 
 def write_library(path):
+    # This writer emits the 20241209 symbol format, two generations older than the format the
+    # sheets that cache these symbols are saved in.  KiCad reads it happily and ERC is unaffected,
+    # but the library is then the one file in the project still on the old format: the Symbol
+    # Editor rewrites all 30 000 lines of it the first time anyone saves from the GUI, which
+    # buries whatever real change that commit was meant to carry.  Upgrading the written file
+    # keeps it in step -- the symbol-side twin of the `kicad-cli fp upgrade` rule that already
+    # applies to the footprints (AGENTS.md rule 5).
     out = ['(kicad_symbol_lib (version 20241209) (generator "class_board_gen") (generator_version "1.0")']
     for name in sorted(SYMBOLS):
         out.append(SYMBOLS[name].sexp())
     out.append(")")
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(out) + "\n")
+    upgrade_library(path)
+
+
+def upgrade_library(path):
+    """Rewrite the library in the current KiCad format (content-neutral: only the serialisation
+    changes).  Without kicad-cli the library is still usable, so this warns rather than fails."""
+    try:
+        r = subprocess.run([KICAD_CLI, "sym", "upgrade", path], capture_output=True, text=True)
+    except OSError as e:
+        print("  kicad-cli not run (%s): %s is in the old symbol format, eeschema will report it "
+              "as out of date -- set KICAD_CLI and rerun" % (e, os.path.basename(path)))
+        return
+    if r.returncode != 0:
+        print("  kicad-cli sym upgrade failed: %s" % (r.stderr or r.stdout).strip()[:200])
 
 
 if __name__ == "__main__":
