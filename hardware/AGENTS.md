@@ -18,7 +18,7 @@ pins 35/37 to GPIO16/17.  **Student section C is now the front-panel project** (
 former `ZONE_C` — the power entry (`b2_power`) and the coil switches (`c_switch`: +VEXT input, DRV8871 H-bridge,
 polarizer) — is the instructor's **`ZONE_INSTR`**.  Everything below is written for that state.
 
-## The five rules that matter most (v0.7)
+## The six rules that matter most (v0.7)
 
 1. **Never regenerate the PCB once hand routing has started.**  The main board is routed **by hand** (students in
    Workshop 2, instructor for the base/rails/SPI).  From the first track, `class-board.kicad_pcb` is the hand-edited
@@ -56,6 +56,12 @@ polarizer) — is the instructor's **`ZONE_INSTR`**.  Everything below is writte
    library nickname is `class_board:` — **never an `easyeda2kicad:` prefix** in a symbol's `Footprint` field.  After
    adding any footprint, run `python fix_courtyards.py` (courtyard = body ∪ pads + 0.25 mm, D-27) and then
    `place_check.py`, or the collision checks are blind.
+6. **Symbols must be in KiCad 10 format too.**  `cb_symbols.py` writes the 20241209 format and then runs
+   `kicad-cli sym upgrade` on its own output, so `lib/class_board.kicad_sym` lands in the format the schematics are
+   saved in.  Do not drop that step: without it the library sits two KiCad generations behind the sheets that cache
+   its symbols, and the Symbol Editor rewrites the whole file the first time anyone saves from the GUI — a 30 000-line
+   diff that hides the real change.  It needs `KICAD_CLI`; the generator warns and leaves the old format if it cannot
+   run it (2026-09-18).
 
 ## Layout of the directory
 
@@ -83,6 +89,7 @@ python gen_sch.py               # -> class-board.kicad_sch + sheets/*.kicad_sch 
 kicad-cli sch export netlist --format kicadxml -o ../.netlist.xml ../class-board.kicad_sch
 kicad-cli sch erc --severity-all --format json -o ../.erc.json ../class-board.kicad_sch
 kicad-cli fp upgrade ../lib/class_board.pretty      # after importing any footprint (KiCad 10 format)
+kicad-cli sym upgrade ../lib/class_board.kicad_sym  # only if cb_symbols.py could not (no KICAD_CLI)
 python fix_courtyards.py        # after importing footprints: courtyard = body + pads + 0.25 mm
 python place_check.py           # fast courtyard/pad collision check of the placement in gen_pcb.py
 python gen_pcb.py --no-route    # placement + zones + rule areas -> class-board.kicad_pcb   (SEE RULE 1)
@@ -99,6 +106,19 @@ for reference only: v0.7 routing is done by hand in the KiCad GUI, and running t
 Checks that must be clean before a release: ERC 0, DRC 0 errors and 0 unconnected items (with zones refilled), the
 `owner_A/B/C` assertions passing, angle audit ok, `place_check.py` 0 collisions, `gen_panel.py` link-mating audit,
 BOM without missing LCSC numbers, and the JLC rotation preview checked by hand.
+
+## Known issue — F-16: two connectors come from foreign personal libraries (2026-09-18)
+
+`DDS_Library:C2937625_-_Conn_01x03` (J3, J9, J10, J11, J12) and `mike_JLCPCB:C492401-PZ254V-11-02P` (J13) are
+referenced for **both** symbol and footprint, and neither library is in this repository or in any lib table — they
+resolved only on the machine that imported them.  They are the 12 `lib_symbol_issues` / `footprint_link_issues`
+violations a fresh clone reports (the only ERC entries besides 2 `pin_to_pin`).  The board still fabricates, because
+`class-board.kicad_pcb` carries the footprint geometry inline, but the parts show as unresolved in eeschema and
+*Update PCB from Schematic* cannot re-place them.  Both are ordinary 2.54 mm vertical pin headers (3-pin and 2-pin).
+The fix is to add both to `cb_symbols.py` and `class_board.pretty` and re-point `sheet_c_switch.py` /
+`sheet_nmr_rx.py` / `sheet_nmr_tx.py` at `class_board:`, then regenerate the schematic — rule 1 keeps the routed
+board out of it, so the PCB side is a footprint-library remap, not a re-place.  Not a drive-by edit; do it as its
+own change.
 
 ## Conventions
 
