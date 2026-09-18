@@ -109,5 +109,8 @@ firmware/
 host/
   pwa/                      index.html app.js style.css sw.js manifest, panels/*.js
   instrument.py, pyproject.toml
+docs/
+  references.md             papers (NMR at low field), datasheets of every part, tools and suppliers
+  references/               the two Creative-Commons papers as PDF
 .github/workflows/build.yml  both envs + ruff on every push/PR
 ```
