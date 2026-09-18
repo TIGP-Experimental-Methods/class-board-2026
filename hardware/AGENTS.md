@@ -63,7 +63,7 @@ polarizer) — is the instructor's **`ZONE_INSTR`**.  Everything below is writte
 |---|---|
 | `class-board.kicad_pro/.kicad_sch`, `sheets/*.kicad_sch` | main board: root + **9** hierarchical sheets (`base_mcu`, `b1_inputs`, `b2_power`, `b3_outputs`, `b5_dio_trig`, `nmr_rx`, `nmr_tx`, `c_switch`, `front_panel_link`).  `opt_conditioning` was deleted in v0.7 (D-32); **`b4_switching` was deleted on 2026-09-17** (D-53/D-54) |
 | `class-board.kicad_pcb`, `class-board.kicad_dru` | 4-layer main board **180 × 100 mm** and the custom DRC rules KiCad loads; `rules/class-board.kicad_dru` is the edit source |
-| `front-panel/front-panel.kicad_*` | **4-layer** front panel **180 × 100 mm** (D-50, 4 layers since Decision #57): 17 SMA (3 × 6 grid at **18 mm** pitch, one position empty), OLED module socket, 3 LEDs, TTL screw strip, TX terminal, Qwiic, **the two isolated 5–24 V inputs** (D-54) and **the module header** (74AHCT541 + 2×6 shrouded box header, D-53); three 2×20 female headers on the inner face mate J6/J7/J8 and are the **only** parts on that face — the panel is single-sided for assembly otherwise.  **This project is student section C** (D-55).  Panel coordinates are mirrored in x against the main board (`panel x = 180 − main x`); its lib tables point at `../lib`, the KiCad standard footprints come from the global table |
+| `front-panel/front-panel.kicad_*` | **4-layer** front panel **180 × 100 mm** (D-50, 4 layers since Decision #57): 16 SMA (3 × 6 grid at **18 mm** pitch, two positions empty; J26 removed 2026-09-18), OLED module socket, 3 LEDs, TTL screw strip, TX terminal, Qwiic, **the two isolated 5–24 V inputs** (D-54) and **the module header** (74AHCT541 + 2×6 shrouded box header, D-53); three 2×20 female headers on the inner face mate J6/J7/J8 and are the **only** parts on that face — the panel is single-sided for assembly otherwise.  **This project is student section C** (D-55).  Panel coordinates are mirrored in x against the main board (`panel x = 180 − main x`); its lib tables point at `../lib`, the KiCad standard footprints come from the global table |
 | `lib/class_board.kicad_sym`, `lib/class_board.pretty/`, `lib/class_board.3dshapes/` | project-local library (one symbol per BOM line, LCSC/JLC fields; EasyEDA-derived footprints with rewritten courtyards) |
 | `student/<sheet>_gapped.kicad_sch` (+ `.kicad_pro`) | student copies for sections **A** and **B** (brief §12); section **C** is the whole front-panel project, unrouted, not a gapped sheet.  `docs/student-deletions.md` lists what was removed |
 | `release/<rev>/{main-board,front-panel}/` | Gerbers + drill (bottom-left aux origin), BOM/CPL (JLC columns), PDFs, SVG/PNG, STEP, ERC/DRC reports, `hashes.txt` |
@@ -107,9 +107,12 @@ BOM without missing LCSC numbers, and the JLC rotation preview checked by hand.
   Decision #46); **ZONE_BASE** (37.5, 36)–(100, 57); **ZONE_A** the front-left; **ZONE_B** x 100–179.5 front **plus the
   rear-right strip x 96–179.5, y 0.5–36** that the relay row used to occupy (D-56).
 - Board coordinates: x right (0…180), y down; rear edge (USB-C, jack, terminals) at y = 0; front edge at y = 100.
-  The panel stacks on the **back** of the board on three 2×20 headers (J6/J7/J8, B.Cu, centred on (12, 50) (90, 50)
-  (168, 50), rotation 180 so pin 1 is at the rear); the panel is drawn from its outer face, so `gen_panel.py` mirrors
-  x (`panel x = 180 − main x`, `panel y = main y`) and the main board's rear edge is the panel's top edge.
+  The panel stacks on the **back** of the board on three 2×20 headers (J6/J7/J8 on B.Cu). **Since the instructor's
+  hand rework of 2026-09-18** (both boards hand-edited, generators retired, outlines drawn at y 15–115): J6 ↔ panel J1 =
+  analog along the rear edge (pads x 114.4–162.6, y 19.5/22.0), J7 ↔ panel J3 = power + OPTO_IN + MOD1–7 on the right
+  edge (x 169.2/171.7, y 30.9–79.1), J8 ↔ panel J2 = digital on the left edge (x 3.7/6.3, y 53.5–101.8). The panel is
+  drawn from its outer face: `panel x = 180 − main x`, `panel y = main y`; the main board's rear edge is the panel's top
+  edge. Pin maps: course repo `notes/2026-09-18-board-rework-review.md`.
 - Reference ranges: 1xx B1 · 2xx B2 · 3xx B3 · **4xx retired B4 — now used on the panel only** (J411/J412 and the
   isolated-input parts that moved with them, plus the module-header block U410 / C410 / R481–R489 / J40) · 5xx B5 ·
   6xx deleted OPT · **7xx clocks + receiver** · **8xx DDS + transmitter** · **9xx mixer/IF, coil switches, external
