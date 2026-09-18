@@ -1,4 +1,0 @@
-(fp_lib_table
-  (version 7)
-  (lib (name "class_board")(type "KiCad")(uri "${KIPRJMOD}/../../lib/class_board.pretty")(options "")(descr "shared class-board library"))
-)

@@ -1,0 +1,54 @@
+(version 1)
+# Front panel, 4 layers (2026-09-17): F.Cu signals + AGND pour, In1.Cu AGND plane, In2.Cu GND plane,
+# B.Cu signals + AGND pour.  Manufacturing margins are JLC 4-layer (0.09/0.09 mm trace/space,
+# 0.15 mm drill, 0.2 mm hole-to-hole); ours are deliberately wider, as on the main board.
+
+# ---- inner layers are pure planes: no tracks there (same rule as the main board, D-01)
+(rule "no_inner_tracks"
+	(layer inner)
+	(condition "A.Type == 'Track' || A.Type == 'Arc'")
+	(constraint disallow track))
+
+# ---- isolated inputs: 2.5 mm to everything that is not part of the isolated group (brief 4.3 / 7.5).
+#      Copied verbatim from class-board.kicad_dru: the two 6N137 channels moved to the panel and the
+#      rule moved with them.  Pad pairs inside one footprint are excluded - the 6N137's own input-to-
+#      output distance is the manufacturer's isolation (5 kVrms), not a spacing the layout may change.
+#      The two ISO keep-out areas in the PCB add "no other net's copper under the group on any layer".
+(rule "iso_in_clearance"
+	(condition "A.NetClass == 'ISO_IN' && B.NetClass != 'ISO_IN' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
+	(constraint clearance (min 2.5mm)))
+
+# ---- KiCad 10 does not evaluate A.memberOfFootprint(B) in the exclusion above, so the 6N137's own
+#      NC pins 1 and 4 - netless pads 1.27 mm from its ANODE and CATHODE in the same SOP-8 row -
+#      make every isolated track that reaches the anode fail the 2.5 mm rule.  ISO1_NC / ISO2_NC are
+#      rule areas that cover ONLY that pin row; inside them a pad with NO NET keeps the ordinary
+#      0.2 mm.  Nothing else in those two 10 x 3.2 mm boxes is netless, and the last matching rule
+#      wins, so these must stand after iso_in_clearance.  Both operand orders are spelt out because
+#      KiCad reports a pad-versus-track pair in whichever order it finds them.
+(rule "iso1_nc_pad_a"
+	(condition "A.Type == 'Pad' && A.NetName == '' && A.insideArea('ISO1_NC')")
+	(constraint clearance (min 0.2mm)))
+(rule "iso1_nc_pad_b"
+	(condition "B.Type == 'Pad' && B.NetName == '' && B.insideArea('ISO1_NC')")
+	(constraint clearance (min 0.2mm)))
+(rule "iso2_nc_pad_a"
+	(condition "A.Type == 'Pad' && A.NetName == '' && A.insideArea('ISO2_NC')")
+	(constraint clearance (min 0.2mm)))
+(rule "iso2_nc_pad_b"
+	(condition "B.Type == 'Pad' && B.NetName == '' && B.insideArea('ISO2_NC')")
+	(constraint clearance (min 0.2mm)))
+
+# ---- analog inputs: 0.3 mm clearance (brief 4.3)
+(rule "analog_in_clearance"
+	(condition "A.NetClass == 'ANALOG_IN' && A.Type == 'Track' && B.NetName != 'AGND'")
+	(constraint clearance (min 0.3mm)))
+
+# ---- manufacturing margins
+(rule "hole_to_hole"
+	(constraint hole_to_hole (min 0.5mm))
+	(condition "A.Type == 'Via' || A.Type == 'Pad'"))
+(rule "annular_ring"
+	(constraint annular_width (min 0.15mm))
+	(condition "A.Type == 'Via'"))
+(rule "copper_to_edge"
+	(constraint edge_clearance (min 0.3mm)))
