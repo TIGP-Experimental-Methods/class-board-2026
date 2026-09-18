@@ -1,4 +1,6 @@
 (fp_lib_table
   (version 7)
   (lib (name "class_board")(type "KiCad")(uri "${KIPRJMOD}/lib/class_board.pretty")(options "")(descr "TIGP class board project footprints (LCSC/EasyEDA land patterns + KiCad standard mechanical)"))
+  (lib (name "DDS_Library")(type "KiCad")(uri "${KIPRJMOD}/lib/DDS_Library.pretty")(options "")(descr "instructor parts used on the class board (2026-09-18): 1x3 header C2937625"))
+  (lib (name "mike_JLCPCB")(type "KiCad")(uri "${KIPRJMOD}/lib/mike_JLCPCB.pretty")(options "")(descr "instructor parts used on the class board (2026-09-18): 1x2 header C492401"))
 )
