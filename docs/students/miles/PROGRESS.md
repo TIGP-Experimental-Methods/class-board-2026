@@ -21,5 +21,5 @@
 ## 2026-09-21 — L1 (class)
 - Done: finished the first version of the Breakout game.
 - Verified: checked the 60° paddle-edge bounce angle and the 450 px/s level-1 speed cap against the running game.
-- Next: improve the interface — icons, background, and the game's overall visual smoothness/polish.
+- Next: improve the interface — icons, background, and the game's overall visual smoothness/polish. Then, with the polished version: write the Project 1 project website (`index.html` at the `Game_Breakout` repository root) and add the class project wall entry — student explicitly chose to do both after the visual pass rather than now, so the screenshot/GIF only needs to be taken once.
 - Gotchas: some bugs turned up along the way (see the Playwright question and the review's 14 findings above); VS Code's Source Control "Sync Changes" button failed silently (stale `git.sync` command) — worked around by running `git push` directly. With AI's help, problems like these get found and fixed efficiently.
