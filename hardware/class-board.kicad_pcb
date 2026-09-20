@@ -93577,37 +93577,6 @@
 		(uuid "95d10b7e-402e-407f-b501-a98aca71bd68")
 	)
 	(zone
-		(layer "F.Cu")
-		(uuid "0170abe3-0074-5dd5-9b59-6d0d1cf92e5f")
-		(name "ZONE_A")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0)
-		)
-		(min_thickness 0.25)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.5)
-			(thermal_bridge_width 0.5)
-			(island_removal_mode 0)
-		)
-		(polygon
-			(pts
-				(xy 0.5 72.5) (xy 45 72.5) (xy 45 72) (xy 100 72) (xy 100 86) (xy 113 86) (xy 113 114.5) (xy 0.5 114.5)
-			)
-		)
-	)
-	(zone
 		(net "AGND")
 		(layer "F.Cu")
 		(uuid "1383da26-c53e-5646-977e-d766374d31f4")
@@ -99587,69 +99556,6 @@
 		)
 	)
 	(zone
-		(layer "F.Cu")
-		(uuid "2ff356c0-f942-5de4-b3e0-259b806dae78")
-		(name "ZONE_B")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0)
-		)
-		(min_thickness 0.25)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.5)
-			(thermal_bridge_width 0.5)
-			(island_removal_mode 0)
-		)
-		(polygon
-			(pts
-				(xy 96 15.5) (xy 179.5 15.5) (xy 179.5 114.5) (xy 113 114.5) (xy 113 86) (xy 100 86) (xy 100 51)
-				(xy 96 51)
-			)
-		)
-	)
-	(zone
-		(layer "F.Cu")
-		(uuid "359b3b84-2ad8-5469-9813-99a2d937e7b5")
-		(name "ZONE_INSTR")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0)
-		)
-		(min_thickness 0.25)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.5)
-			(thermal_bridge_width 0.5)
-			(island_removal_mode 0)
-		)
-		(polygon
-			(pts
-				(xy 0.5 15.5) (xy 96 15.5) (xy 96 51) (xy 37.5 51) (xy 37.5 72.5) (xy 0.5 72.5)
-			)
-		)
-	)
-	(zone
 		(net "/c_switch/HB_OUT1")
 		(layer "F.Cu")
 		(uuid "510362a9-cb0d-4c5a-bdc9-94689000a666")
@@ -99765,37 +99671,6 @@
 				(xy 83.857345 18.429205) (xy 83.679205 18.607345) (xy 83.679201 18.60735) (xy 83.531132 18.811151)
 				(xy 83.41676 19.035616) (xy 83.33891 19.275214) (xy 83.2995 19.524038) (xy 82.7 19.524038) (xy 82.7 17.020597)
 				(xy 82.719685 16.953558) (xy 82.772489 16.907803) (xy 82.820549 16.896645) (xy 89.759053 16.703546)
-			)
-		)
-	)
-	(zone
-		(layer "F.Cu")
-		(uuid "767297bb-0537-5c86-852d-78f1571df28f")
-		(name "ZONE_BASE")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0)
-		)
-		(min_thickness 0.25)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.5)
-			(thermal_bridge_width 0.5)
-			(island_removal_mode 0)
-		)
-		(polygon
-			(pts
-				(xy 37.5 51) (xy 100 51) (xy 100 72) (xy 37.5 72)
 			)
 		)
 	)
@@ -122548,4 +122423,184 @@
 		)
 	)
 	(embedded_fonts no)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu" "B.Cu")
+		(uuid "47713775-f12f-5ab0-999a-4a68d8da893d")
+		(name "ZONE_A")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 96 15.5) (xy 179.5 15.5) (xy 179.5 59.5) (xy 109 59.5) (xy 109 52) (xy 96 52)
+			)
+		)
+	)
+	(gr_text "AREA A"
+		(at 97 16.2 0)
+		(layer "Cmts.User")
+		(uuid "99374f6b-a7aa-585c-86f6-8d42cda15ac6")
+		(effects
+			(font
+				(size 2 2)
+				(thickness 0.25)
+			)
+			(justify left)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu" "B.Cu")
+		(uuid "ea9f2641-7222-554c-9ef0-0f8cdaf86b53")
+		(name "ZONE_B")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 109 59.5) (xy 179.5 59.5) (xy 179.5 114.5) (xy 109 114.5)
+			)
+		)
+	)
+	(gr_text "AREA B"
+		(at 110.5 60.5 0)
+		(layer "Cmts.User")
+		(uuid "1760b19f-dade-570f-86e9-3767a4294c6d")
+		(effects
+			(font
+				(size 2 2)
+				(thickness 0.25)
+			)
+			(justify left)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu" "B.Cu")
+		(uuid "75aafcf0-eee0-5639-b48e-8faa5471afe9")
+		(name "ZONE_C")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 0.5 75) (xy 109 75) (xy 109 114.5) (xy 0.5 114.5)
+			)
+		)
+	)
+	(gr_text "AREA C"
+		(at 45 76 0)
+		(layer "Cmts.User")
+		(uuid "91992028-9e06-516e-8bdc-782b93a921fc")
+		(effects
+			(font
+				(size 2 2)
+				(thickness 0.25)
+			)
+			(justify left)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu" "B.Cu")
+		(uuid "b61ae446-507f-5311-ac61-6917f582d611")
+		(name "ZONE_D")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 0.5 15.5) (xy 96 15.5) (xy 96 52) (xy 109 52) (xy 109 75) (xy 0.5 75)
+			)
+		)
+	)
+	(gr_text "AREA D"
+		(at 3 49.5 0)
+		(layer "Cmts.User")
+		(uuid "132a9e8b-1084-5368-a762-a529afc5eeab")
+		(effects
+			(font
+				(size 2 2)
+				(thickness 0.25)
+			)
+			(justify left)
+		)
+	)
 )

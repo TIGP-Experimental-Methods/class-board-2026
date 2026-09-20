@@ -43,3 +43,8 @@ hardware/scripts/__pycache__/
 
 # Claude Code MCP configuration (machine-specific path to the Konnect binary; SETUP.md Step 10)
 .mcp.json
+
+# main_sections.py / panel_sections.py outputs (the instructor accepts a merge by hand)
+hardware/class-board-merged.*
+hardware/front-panel/front-panel-merged.*
+hardware/scratchpad/
