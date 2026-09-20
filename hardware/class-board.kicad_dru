@@ -29,11 +29,10 @@
 (rule "copper_to_edge"
 	(constraint edge_clearance (min 0.3mm)))
 
-# ---- section ownership (v0.7d, 2026-09-17): Block field -> owner area.
-#      A = B1/OPT/NMR_RX, B = B3/B5/NMR_TX.  Section C is the front-panel board now (its own
-#      project), so what was ZONE_C on the main board is the instructor's area ZONE_INSTR:
-#      the power entry (B2) and the coil switches (C_SW).  The B4 block (relays and isolated
-#      inputs) was deleted in v0.7d, together with the MAINS net classes and their rules.
-(rule "owner_A" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B1' || A.getField('Block') == 'OPT' || A.getField('Block') == 'NMR_RX' || A.getField('Block') == 'A')") (constraint assertion "A.enclosedByArea('ZONE_A')"))
-(rule "owner_B" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B3' || A.getField('Block') == 'B5' || A.getField('Block') == 'NMR_TX' || A.getField('Block') == 'B')") (constraint assertion "A.enclosedByArea('ZONE_B')"))
-(rule "owner_INSTR" (condition "A.Type == 'Footprint' && (A.getField('Block') == 'B2' || A.getField('Block') == 'C_SW' || A.getField('Block') == 'C')") (constraint assertion "A.enclosedByArea('ZONE_INSTR')"))
+# ---- routing areas (2026-09-21): the main board is finished by four students, one AREA each - rule areas
+#      ZONE_A..ZONE_D on the board (nothing disallowed; they mark territory).  A student routes only connections
+#      whose both ends lie inside the area; anything that crosses a boundary is the instructor's, and the
+#      instructor routes anywhere.  hardware/scripts/main_sections.py draws the areas, splits the board into
+#      hardware/sections/{A,B,C,D}/ (the instructor's routing locked) and merges the copies back by area.
+#      The former Block-field owner assertions (owner_A / owner_B / owner_INSTR) are retired: ownership is by
+#      area now, not by schematic block, and a part may sit in any area.
