@@ -12,6 +12,204 @@
 		(comment 1 "AI1..AI8 -> 1k / 1nF / BAV99 clamp -> ADS8688 AIN_0..7; ch 7/8 solder jumpers to the OPT chain")
 	)
 	(lib_symbols
+		(symbol "DDS_Library:C2937625_-_Conn_01x03"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "C2937625_-_Conn_01x03"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "DDS_Library:C2937625-HDR-TH_3P-P2.54-V-M"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "LCSC" "C2937625"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "C2937625_-_Conn_01x03_1_1"
+				(rectangle
+					(start -1.27 3.81)
+					(end 1.27 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(rectangle
+					(start -1.27 2.667)
+					(end 0 2.413)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 2.54 0)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -2.54 0)
+					(length 3.81)
+					(name "Pin_3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "class_board:ADS8688IDBTR"
 			(pin_names
 				(offset 1.016)
@@ -3989,209 +4187,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "class_board:SolderJumper_3_Bridged12"
-			(pin_names
-				(offset 0)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom no)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "JP"
-				(at -2.54 -2.54 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "SolderJumper_3_Bridged12"
-				(at 0 2.794 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" "class_board:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "3-pad solder jumper, 1-2 bridged by default"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "SolderJumper_3_Bridged12_0_1"
-				(polyline
-					(pts
-						(xy -2.54 0) (xy -2.032 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(rectangle
-					(start -1.27 0.508)
-					(end 0 -0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(circle
-					(center -1.27 0)
-					(radius 1.016)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(rectangle
-					(start -0.508 1.016)
-					(end 0.508 -1.016)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -1.27) (xy 0 -1.016)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 1.27 0)
-					(radius 1.016)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.54 0) (xy 2.032 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "SolderJumper_3_Bridged12_1_1"
-				(pin passive line
-					(at -5.08 0 0)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -3.81 90)
-					(length 2.54)
-					(name "C"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 0 180)
-					(length 2.54)
-					(name "B"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "class_board:TestPoint"
 			(pin_numbers
 				(hide yes)
@@ -4986,16 +4981,6 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 182.88) (xy 234.95 182.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "053e8a47-358f-5c81-9982-ff6d8d519691")
-	)
-	(wire
-		(pts
 			(xy 129.54 134.62) (xy 137.16 134.62)
 		)
 		(stroke
@@ -5246,6 +5231,16 @@
 	)
 	(wire
 		(pts
+			(xy 228.6 181.61) (xy 234.95 181.61)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "292a56fe-7482-4ea2-b36d-89ea42374672")
+	)
+	(wire
+		(pts
 			(xy 457.2 143.51) (xy 426.72 143.51)
 		)
 		(stroke
@@ -5376,7 +5371,7 @@
 	)
 	(wire
 		(pts
-			(xy 220.98 182.88) (xy 209.55 182.88)
+			(xy 210.82 181.61) (xy 223.52 181.61)
 		)
 		(stroke
 			(width 0)
@@ -5553,16 +5548,6 @@
 			(type default)
 		)
 		(uuid "59df4673-a962-569e-bc37-0434384dde4d")
-	)
-	(wire
-		(pts
-			(xy 231.14 204.47) (xy 234.95 204.47)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5b9202e1-c141-5a5c-a734-18607db38ad0")
 	)
 	(wire
 		(pts
@@ -6396,7 +6381,7 @@
 	)
 	(wire
 		(pts
-			(xy 220.98 204.47) (xy 209.55 204.47)
+			(xy 210.82 200.66) (xy 223.52 200.66)
 		)
 		(stroke
 			(width 0)
@@ -6463,6 +6448,16 @@
 			(type default)
 		)
 		(uuid "cd2a9cff-5166-42ed-9a30-678ce2e55d15")
+	)
+	(wire
+		(pts
+			(xy 226.06 181.61) (xy 226.06 189.23)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cddc321d-9aa9-4204-bdbd-50ad2eaee0c8")
 	)
 	(wire
 		(pts
@@ -6576,7 +6571,7 @@
 	)
 	(wire
 		(pts
-			(xy 226.06 186.69) (xy 261.62 186.69)
+			(xy 226.06 189.23) (xy 261.62 189.23)
 		)
 		(stroke
 			(width 0)
@@ -6614,6 +6609,16 @@
 		)
 		(uuid "e7c848fb-8f72-43ad-8bd1-575678bdd489")
 	)
+	(wire
+		(pts
+			(xy 261.62 189.23) (xy 261.62 186.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e8d4bcb4-6bde-4aa7-ac2d-3d8e93e02cc8")
+	)
 	(polyline
 		(pts
 			(xy 42.86 189.41) (xy 166.86 189.41)
@@ -6643,6 +6648,16 @@
 			(type default)
 		)
 		(uuid "eacb4dcb-9e3b-45e4-8cd4-4c43e7af660b")
+	)
+	(wire
+		(pts
+			(xy 226.06 200.66) (xy 226.06 208.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f05485c8-c910-45e9-a124-9094c6467779")
 	)
 	(wire
 		(pts
@@ -6693,6 +6708,16 @@
 			(type default)
 		)
 		(uuid "f90077d8-471a-5c1c-8a78-412c8207aa26")
+	)
+	(wire
+		(pts
+			(xy 228.6 200.66) (xy 234.95 200.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f9c724fb-85f8-4703-b17b-103be75228d7")
 	)
 	(wire
 		(pts
@@ -7025,7 +7050,7 @@
 		(uuid "bf417e4c-a88f-5dfd-9fbf-fca7f82aa355")
 	)
 	(label "AI8"
-		(at 209.55 204.47 0)
+		(at 210.82 200.66 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -7055,7 +7080,7 @@
 		(uuid "e5ed35e1-39d2-42fc-b60d-6c35dd01d20f")
 	)
 	(label "AI7"
-		(at 209.55 182.88 0)
+		(at 210.82 181.61 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -7168,7 +7193,7 @@
 	)
 	(hierarchical_label "COND_OUT1"
 		(shape input)
-		(at 234.95 182.88 0)
+		(at 234.95 181.61 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -7201,7 +7226,7 @@
 	)
 	(hierarchical_label "COND_OUT2"
 		(shape input)
-		(at 234.95 204.47 0)
+		(at 234.95 200.66 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -8863,6 +8888,101 @@
 		)
 	)
 	(symbol
+		(lib_id "DDS_Library:C2937625_-_Conn_01x03")
+		(at 226.06 186.69 90)
+		(mirror x)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2595c04a-8929-45fd-a00a-caf64b691879")
+		(property "Reference" "J14"
+			(at 231.14 187.9601 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "C2937625_-_Conn_01x03"
+			(at 231.14 186.69 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "DDS_Library:C2937625-HDR-TH_3P-P2.54-V-M"
+			(at 226.06 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 226.06 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 226.06 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2937625"
+			(at 226.06 186.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "3"
+			(uuid "1f184332-6381-4220-9c9d-2eb2678cc829")
+		)
+		(pin "1"
+			(uuid "b298bbec-9eb3-42d5-a8d2-8e94bd90e7a7")
+		)
+		(pin "2"
+			(uuid "5a48f93a-f1e2-4965-b545-89955054d4e1")
+		)
+		(instances
+			(project "class-board"
+				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/5252c7cc-85b3-5eaf-aa08-4fcc9b4f667c"
+					(reference "J14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "class_board:PWR_AGND")
 		(at 160.02 160.02 0)
 		(unit 1)
@@ -9447,102 +9567,6 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/5252c7cc-85b3-5eaf-aa08-4fcc9b4f667c"
 					(reference "#PWR2017")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:SolderJumper_3_Bridged12")
-		(at 226.06 204.47 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "45653baa-8e28-51e7-95cc-ec7876ddad80")
-		(property "Reference" "JP102"
-			(at 220.98 202.438 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "SolderJumper_3_Bridged12"
-			(at 220.98 209.042 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "class_board:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm"
-			(at 226.06 204.47 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 226.06 204.47 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "3-pad solder jumper, 1-2 bridged by default"
-			(at 226.06 204.47 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B1"
-			(at 226.06 204.47 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "db764593-a914-5ba0-ad46-5279759b7feb")
-		)
-		(pin "2"
-			(uuid "58f0ea18-5088-59d5-bbea-45fe7bc0d822")
-		)
-		(pin "3"
-			(uuid "62655241-09de-51fe-b0e0-d4352870f0ed")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/5252c7cc-85b3-5eaf-aa08-4fcc9b4f667c"
-					(reference "JP102")
 					(unit 1)
 				)
 			)
@@ -12608,7 +12632,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
+		(property "Value" "AGND"
 			(at 524.51 206.502 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13122,6 +13146,101 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/5252c7cc-85b3-5eaf-aa08-4fcc9b4f667c"
 					(reference "R101")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DDS_Library:C2937625_-_Conn_01x03")
+		(at 226.06 205.74 90)
+		(mirror x)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "bd627a7e-cc30-4602-be9b-23e295cfe897")
+		(property "Reference" "J15"
+			(at 231.14 207.0101 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "C2937625_-_Conn_01x03"
+			(at 231.14 205.74 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "DDS_Library:C2937625-HDR-TH_3P-P2.54-V-M"
+			(at 226.06 205.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 226.06 205.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 226.06 205.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2937625"
+			(at 226.06 205.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "3"
+			(uuid "95d2be9f-a0ea-47f8-b90f-b9712350b79e")
+		)
+		(pin "1"
+			(uuid "17c05dd1-fdd9-45b2-94ef-b0e058078252")
+		)
+		(pin "2"
+			(uuid "fcfffeb1-bda6-45bb-abd1-4a6238ea1e77")
+		)
+		(instances
+			(project "class-board"
+				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/5252c7cc-85b3-5eaf-aa08-4fcc9b4f667c"
+					(reference "J15")
 					(unit 1)
 				)
 			)
@@ -15670,102 +15789,6 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/5252c7cc-85b3-5eaf-aa08-4fcc9b4f667c"
 					(reference "#PWR2026")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:SolderJumper_3_Bridged12")
-		(at 226.06 182.88 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "f35cc53d-a1af-5d71-87d3-6e4a205f8361")
-		(property "Reference" "JP101"
-			(at 220.98 180.848 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "SolderJumper_3_Bridged12"
-			(at 220.98 187.452 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "class_board:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm"
-			(at 226.06 182.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 226.06 182.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "3-pad solder jumper, 1-2 bridged by default"
-			(at 226.06 182.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B1"
-			(at 226.06 182.88 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "70f6b965-5310-5915-988f-fd2f23c5317e")
-		)
-		(pin "2"
-			(uuid "0ed2815c-4309-5261-8812-829e49b859aa")
-		)
-		(pin "3"
-			(uuid "6ba808ca-c4c1-54a7-ba27-8e3d4386b943")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/5252c7cc-85b3-5eaf-aa08-4fcc9b4f667c"
-					(reference "JP101")
 					(unit 1)
 				)
 			)

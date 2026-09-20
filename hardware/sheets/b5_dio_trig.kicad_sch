@@ -8053,7 +8053,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
+		(property "Value" "EXP_P14"
 			(at 139.446 116.332 0)
 			(show_name no)
 			(do_not_autoplace no)

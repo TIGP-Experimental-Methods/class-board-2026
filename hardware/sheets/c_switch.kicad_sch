@@ -12305,7 +12305,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "0"
+		(property "Value" "0R"
 			(at 223.774 275.082 0)
 			(show_name no)
 			(do_not_autoplace no)
