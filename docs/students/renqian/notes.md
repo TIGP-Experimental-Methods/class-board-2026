@@ -179,3 +179,56 @@ deviation. The ADS8688 on +-10 V gives 20 V / 65536 = **305 uV per LSB**. A good
 converter on a quiet board should give **a few LSB rms** — so of order 1–3 LSB, i.e. roughly
 0.3–1 mV rms. If it comes out much larger, the first suspects are digital return current in
 the analog ground and the local-oscillator lines coupling into the input networks.
+
+---
+
+## E8 — the JLCPCB library part (OPA1656IDR, C1849431)
+
+Fetched with `easyeda2kicad --full --lcsc_id C1849431`. The part is **already in
+`hardware/lib/class_board`**, as the section page says it would be, so the exercise is the
+library entry, not the placement. I fetched it to a scratch folder instead of using
+`--overwrite`, so the instructor's own curated entry is untouched, and compared the two.
+
+### Pin numbering — checked against the OPA1656 datasheet
+
+| Pin | Function | easyeda2kicad | library |
+|---|---|---|---|
+| 1 | OUT A | OUTA | output |
+| 2 | -IN A | -INA | input |
+| 3 | +IN A | +INA | input |
+| 4 | V- | V- | power_in |
+| 5 | +IN B | +INB | input |
+| 6 | -IN B | -INB | input |
+| 7 | OUT B | OUTB | output |
+| 8 | V+ | V+ | power_in |
+
+Both agree, and both match the standard dual-op-amp SOIC-8 arrangement in the datasheet.
+**The numbering is right.** Two things about the fetched symbol are not:
+
+1. **Every pin comes out as `unspecified`.** The library's entry types them properly
+   (output / input / power_in). This matters: with `unspecified` pins ERC cannot tell an
+   unconnected input from a driven one, and cannot flag a power pin that nothing drives -
+   so a fetched-as-is symbol quietly disables the checks that catch real wiring mistakes.
+2. **It arrives as one symbol; the library splits it into three units** - op-amp A
+   (1/2/3), op-amp B (5/6/7), and the power pins (4/8) on their own. That is the normal
+   way to draw a dual op-amp: each half can be placed where its own circuit is, and the
+   supply pins appear once on the rails sheet instead of being dragged around twice.
+
+### Footprint — the two differ, and the library's is the better land pattern
+
+| | library `SOIC-8_L5.0-W4.0-...` | fetched `SOIC-8_L4.9-W3.9-...` |
+|---|---|---|
+| pad X | ±1.90, ±0.63 (1.27 mm pitch) | **identical** |
+| pad Y | ±2.71 mm | ±2.60 mm |
+| pad size | 0.568 × 1.95 mm | 0.588 × 1.800 mm |
+
+The pitch and the 6.0 mm lead span are the same, so both fit the same physical part. The
+library's pads sit **0.11 mm further out and are 0.15 mm longer** - more room for the
+solder fillet at the toe, which is the more forgiving land pattern. The library holds
+three SOIC-8 variants (`L4.9-W3.9`, the same with a `EP3.1` thermal pad, and `L5.0-W4.0`)
+and the design uses `L5.0-W4.0`, so this looks like a deliberate choice, not an accident.
+
+**What I would say in the pull request:** the fetched part is correct where it counts
+(pin numbering, pitch, lead span) but would be a downgrade if committed over the existing
+entry - it loses the pin electrical types that ERC depends on, loses the three-unit split,
+and lands a tighter footprint. So nothing in `hardware/lib/` is changed by this exercise.
