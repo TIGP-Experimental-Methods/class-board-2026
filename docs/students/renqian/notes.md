@@ -232,3 +232,28 @@ and the design uses `L5.0-W4.0`, so this looks like a deliberate choice, not an 
 (pin numbering, pitch, lead span) but would be a downgrade if committed over the existing
 entry - it loses the pin electrical types that ERC depends on, loses the three-unit split,
 and lands a tighter footprint. So nothing in `hardware/lib/` is changed by this exercise.
+
+### E8, second reading — C474881 (KF301-5.0-2P screw terminal)
+
+The workshop outline gives E8 as `--lcsc_id C474881` (the 2-pin screw terminal) while the
+workbook's ch. 2 gives it per section (Section A: OPA1656, C1849431). The two disagree, so
+I did both. C474881 is **also already in `hardware/lib/class_board`**, so again a check.
+
+| | pad 1 | pad 2 | size | drill |
+|---|---|---|---|---|
+| board (J411, J412) | -2.5 | +2.5 | 2.2 x 2.2 | 1.400 |
+| `hardware/lib` | -2.5 | +2.5 | 2.2 x 2.2 | 1.400 |
+| easyeda2kicad | -2.5 | +2.5 | 2.2 x 2.2 | 1.400 |
+
+**All three agree exactly** on everything that reaches the factory - 5.0 mm pitch, 2.2 mm
+pads, 1.4 mm drill. The difference is drawing only: the board and the library each carry
+**17** graphic elements, the fetched one **21**. So importing it would *add* four silkscreen
+or fab shapes that neither the board nor the library has - it would create a mismatch
+rather than resolve one. Same verdict as the OPA1656: leave the library alone.
+
+**On the `lib_footprint_mismatch` warnings.** Two of the three on the front panel are this
+footprint, on **J411 and J412** - and those are the isolated-input terminals, which
+`front-panel/sections/D/SECTION.md` assigns to **Section D**, not to me. The pads match the
+library exactly, so it is a metadata difference from the library being re-saved in KiCad 10
+format (commit `78ad796`), not a geometry problem. Nothing to fix, and not my section's to
+fix in any case.
