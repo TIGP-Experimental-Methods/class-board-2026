@@ -109,6 +109,8 @@ firmware/
 host/
   pwa/                      index.html app.js style.css sw.js manifest, panels/*.js
   instrument.py, pyproject.toml
+hardware/sections/                the main board split four ways BY AREA for routing (A rear right, B front right, C front left, D rear left); README.md there
+hardware/scripts/main_sections.py  areas / split / check / merge / report for the main-board areas
 hardware/front-panel/sections/    the front panel split four ways for routing (A analog, B digital, C modules, D isolated + power); README.md there
 hardware/scripts/panel_sections.py  split / check / merge the four sections back into one board
 docs/

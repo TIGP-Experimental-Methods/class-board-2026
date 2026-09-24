@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "class_board")(type "KiCad")(uri "${KIPRJMOD}/../../lib/class_board.kicad_sym")(options "")(descr "TIGP class board project symbols (one per BOM line, MPN names, LCSC/JLC fields)"))
+  (lib (name "DDS_Library")(type "KiCad")(uri "${KIPRJMOD}/../../lib/DDS_Library.kicad_sym")(options "")(descr "instructor parts used on the class board (2026-09-18)"))
+  (lib (name "mike_JLCPCB")(type "KiCad")(uri "${KIPRJMOD}/../../lib/mike_JLCPCB.kicad_sym")(options "")(descr "instructor parts used on the class board (2026-09-18)"))
+)
