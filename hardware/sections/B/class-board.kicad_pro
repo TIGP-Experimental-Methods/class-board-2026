@@ -65,13 +65,13 @@
           "hatch_smoothing_level": 0,
           "hatch_smoothing_value": 0.1,
           "hatch_thickness": 1.0,
-          "min_clearance": 0.5,
-          "min_island_area": 10.0,
+          "min_clearance": 0.3,
+          "min_island_area": 0.0013161349,
           "min_thickness": 0.25,
           "pad_connection": 2,
           "remove_islands": 0,
-          "thermal_relief_gap": 0.5,
-          "thermal_relief_spoke_width": 0.5
+          "thermal_relief_gap": 0.4,
+          "thermal_relief_spoke_width": 0.4
         }
       },
       "diff_pair_dimensions": [
@@ -222,7 +222,8 @@
         0.3,
         0.5,
         0.8,
-        1.0
+        1.0,
+        2.0
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -890,7 +891,7 @@
         "uuid": "21416d14-3056-576f-bbf8-3b43eaeb7e71"
       }
     ],
-    "used_designators": "J14-15,R717-719",
+    "used_designators": "J14-15,R717-719,#PWR3031",
     "variants": []
   },
   "sheets": [

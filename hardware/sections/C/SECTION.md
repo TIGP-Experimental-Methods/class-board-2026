@@ -9,29 +9,15 @@ leaves the area is the instructor's — do not route it. Other students route th
 instructor merges all four copies with `hardware/scripts/main_sections.py merge`: only new tracks and vias that lie
 completely inside your area are taken from your copy; tracks outside it, moved parts and new zones are ignored.
 
-**Parts in your area** (78): C701 C702 C706 C710-C712 C720 C721 C901-C904 C910-C915 D703 D704 D905-D908 J3 J9 R1 R2 R703-R706 R710-R718 R721-R724 R901-R919 R923 R924 TP501 TP701 TP702 U701-U706 U901 U902 Y701
+**Parts in your area** (104): C210-C212 C701 C702 C706 C710-C712 C720-C727 C901-C904 C910-C919 D205 D206 D703 D704 D905-D908 J3 J9 PS201 PS202 R1 R2 R203-R208 R211 R212 R703-R706 R710-R716 R721-R724 R901-R919 R923 R924 TP203 TP204 TP501 TP701 TP702 U203 U701-U706 U901 U902 Y701
 
 **Connections still to route in your area** (from the DRC of the master when this copy was made; `AGND` and `GND` are
 a via from the pad to the plane or to the ground pour next to it):
 
 | Net | Connections |
 |---|---|
-| `+3V3A` | 5 |
-| `-12V` | 3 |
-| `+12V` | 3 |
-| `/nmr_rx/LNA_OUT` | 2 |
-| `+3V3` | 1 |
-| `SPI_MISO` | 1 |
-| `V_MID` | 1 |
-| `/nmr_rx/IF_QP` | 1 |
-| `/nmr_rx/LO_I` | 1 |
-| `/nmr_rx/LO_Q` | 1 |
-| `/nmr_rx/IF_QN` | 1 |
-| `/b5_dio_trig/EXP_P14` | 1 |
-| `I2C_SDA` | 1 |
-| `SPI_SCLK` | 1 |
-| `SPI_MOSI` | 1 |
-| `I2C_SCL` | 1 |
+| `/b3_outputs/CS_DAC` | 1 |
+| `+12V` | 1 |
 
 Rules of the board (the design rules in `class-board.kicad_dru` check them for you with DRC):
 

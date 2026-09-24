@@ -16,17 +16,9 @@ a via from the pad to the plane or to the ground pour next to it):
 
 | Net | Connections |
 |---|---|
-| `AGND` | 7 |
-| `GND` | 3 |
-| `+3V3` | 2 |
-| `/nmr_tx/+VEXT_TX` | 2 |
-| `-12V` | 2 |
-| `/nmr_tx/TX_VMID` | 1 |
 | `/b3_outputs/VREF_DAC` | 1 |
-| `+12V` | 1 |
 | `SPI_SCLK` | 1 |
 | `SPI_MOSI` | 1 |
-| `/nmr_tx/TX_FB` | 1 |
 
 Rules of the board (the design rules in `class-board.kicad_dru` check them for you with DRC):
 

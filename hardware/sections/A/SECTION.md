@@ -16,10 +16,7 @@ a via from the pad to the plane or to the ground pour next to it):
 
 | Net | Connections |
 |---|---|
-| `AGND` | 11 |
-| `GND` | 1 |
-| `/b1_inputs/AIN7` | 1 |
-| `/b1_inputs/AIN8` | 1 |
+| `+3V3` | 1 |
 
 Rules of the board (the design rules in `class-board.kicad_dru` check them for you with DRC):
 

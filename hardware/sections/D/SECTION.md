@@ -9,20 +9,16 @@ leaves the area is the instructor's — do not route it. Other students route th
 instructor merges all four copies with `hardware/scripts/main_sections.py merge`: only new tracks and vias that lie
 completely inside your area are taken from your copy; tracks outside it, moved parts and new zones are ignored.
 
-**Parts in your area** (111): C201-C204 C206-C217 C502-C504 C703-C705 C707 C722-C727 C905-C908 C916-C921 C930 C931 C940 C941 D201-D206 D501 D920 D930-D934 F201 F202 F901 FB201-FB204 FB901 J12 J13 J201 J202 J901 J903 J905 PS201 PS202 Q901 Q904 R201-R212 R509-R511 R920-R922 R930-R933 R940 R941 TP201-TP204 U201-U204 U502 U503 U903 U904
+**Parts in your area** (83): C201-C204 C206-C209 C213-C217 C502-C504 C703-C705 C707 C905-C908 C920 C921 C930 C931 C940 C941 D201-D204 D501 D920 D930-D934 F201 F202 F901 FB201-FB204 FB901 J12 J13 J201 J202 J901 J903 J905 Q901 Q904 R201 R202 R209 R210 R509-R511 R920-R922 R930-R933 R940 R941 TP201 TP202 U201 U202 U204 U502 U503 U903 U904
 
 **Connections still to route in your area** (from the DRC of the master when this copy was made; `AGND` and `GND` are
 a via from the pad to the plane or to the ground pour next to it):
 
 | Net | Connections |
 |---|---|
-| `GND` | 10 |
-| `AGND` | 10 |
-| `+3V3` | 3 |
-| `+5V_RAW` | 3 |
-| `/c_switch/VDD904` | 1 |
+| `+3V3` | 4 |
+| `+5V_RAW` | 1 |
 | `/b5_dio_trig/FASTTTL1` | 1 |
-| `+VCOIL` | 1 |
 | `/b5_dio_trig/TRIG_5V` | 1 |
 | `/b5_dio_trig/FASTTTL2` | 1 |
 
