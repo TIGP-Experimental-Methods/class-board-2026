@@ -16,9 +16,8 @@ a via from the pad to the plane or to the ground pour next to it):
 
 | Net | Connections |
 |---|---|
-| `+5V_RAW` | 1 |
-| `+5VA` | 1 |
-| `AGND` | 1 |
+| `AGND` | 11 |
+| `GND` | 1 |
 | `/b1_inputs/AIN7` | 1 |
 | `/b1_inputs/AIN8` | 1 |
 

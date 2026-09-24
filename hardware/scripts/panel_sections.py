@@ -33,6 +33,8 @@ SECTIONS_DIR = os.path.join(PANEL, "sections")
 MASTER_PCB = os.path.join(PANEL, "front-panel.kicad_pcb")
 KICAD_CLI = r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
 SHARED = {"GND", "AGND"}
+# who routes which section (instructor, 2026-09-24: three students on the boards; section C has no student)
+ASSIGNED = {"A": "Renqian (branch `a-renqian`)", "B": "Yi-Tsai (branch `w1-yi-tsai`)", "C": "the instructor (no student)", "D": "Lihdong (branch `d-lihdong`)"}
 
 NETS = {
     "A": ("Analog signals: link J1 to the SMA field and the TX coil terminal",
@@ -119,7 +121,8 @@ def split():
         io.open(os.path.join(d, "SECTION.md"), "w", encoding="utf-8", newline="\n").write(section_md(sec, what, nets))
         print("section %s: %d nets -> %s" % (sec, len(nets), os.path.relpath(d, HW)))
     io.open(os.path.join(SECTIONS_DIR, "README.md"), "w", encoding="utf-8", newline="\n").write(readme_md())
-    print("wrote", os.path.relpath(os.path.join(SECTIONS_DIR, "README.md"), HW))
+    record_base(items)
+    print("wrote", os.path.relpath(os.path.join(SECTIONS_DIR, "README.md"), HW), "and BASE_UUIDS.txt")
 
 
 def section_md(sec, what, nets):
@@ -158,9 +161,9 @@ def readme_md():
              "The front panel is one board, but its routing is done by four students, one section each. Every section folder holds a",
              "complete copy of the unrouted panel and a `SECTION.md` with the nets to route. The instructor merges the four copies",
              "with `python hardware/scripts/panel_sections.py merge`, which takes only each section's own nets from each copy.\n",
-             "| Section | Routes | Nets |", "|---|---|---|"]
+             "| Section | Who | Routes | Nets |", "|---|---|---|---|"]
     for sec, (what, nets) in NETS.items():
-        lines.append("| **%s** | %s | %d |" % (sec, what, len(nets)))
+        lines.append("| **%s** | %s | %s | %d |" % (sec, ASSIGNED.get(sec, "-"), what, len(nets)))
     lines += ["", "GND and AGND are the inner planes: every section drops the vias its own parts need. Nothing else is shared.",
               "", "Why by nets and not by area: every panel net runs from a link header at an edge to a connector in the middle of the board,",
               "so a geometric cut would leave half a trace on every boundary. With net groups each connection is complete in one copy.", ""]
@@ -168,16 +171,42 @@ def readme_md():
 
 
 # ---------------------------------------------------------------- check / merge
+BASE_FILE = os.path.join(SECTIONS_DIR, "BASE_UUIDS.txt")
+
+
+def item_uuid(item):
+    m = re.search(r'\(uuid\s+"([^"]+)"\)', item)
+    return m.group(1) if m else None
+
+
+def base_uuids():
+    """uuids of every routed item that was ever in the master when a split was made: such an item is the instructor's,
+    and if the master no longer has it he deleted it - a section copy must never bring it back"""
+    if not os.path.exists(BASE_FILE):
+        return set()
+    return {l.strip() for l in io.open(BASE_FILE, encoding="utf-8") if l.strip() and not l.startswith("#")}
+
+
+def record_base(items):
+    u = base_uuids() | {item_uuid(it) for it in items if item_kind(it) in ("segment", "arc", "via")}
+    os.makedirs(SECTIONS_DIR, exist_ok=True)
+    io.open(BASE_FILE, "w", encoding="utf-8", newline="\n").write(
+        "# routed items (segments/arcs/vias) that were ever in the master: never taken from a section copy\n" + "\n".join(sorted(x for x in u if x)) + "\n")
+
+
 def collect(sec):
-    """(kept items, foreign items, moved refs) from a section's board"""
+    """(kept items, foreign items, moved refs) from a section's board - only NEW items, never the master's own"""
     path = os.path.join(SECTIONS_DIR, sec, "front-panel.kicad_pcb")
     text = io.open(path, encoding="utf-8").read()
     master = io.open(MASTER_PCB, encoding="utf-8").read()
+    master_uuids = {item_uuid(it) for it in top_items(master)[1]} | base_uuids()
     own = set(NETS[sec][1]) | SHARED
     kept, foreign = [], []
     for it in top_items(text)[1]:
         if item_kind(it) not in ("segment", "arc", "via"):
             continue
+        if item_uuid(it) in master_uuids:
+            continue                      # the instructor's routing: the master has it, or he deleted it since
         net = item_net(it)
         (kept if net in own else foreign).append(it)
     fm, fs = footprints(master), footprints(text)

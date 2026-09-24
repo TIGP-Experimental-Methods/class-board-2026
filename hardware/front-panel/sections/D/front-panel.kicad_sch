@@ -8185,12 +8185,6 @@
 		(uuid "1f753fda-12f4-4c08-9b09-8627a5328e7e")
 	)
 	(junction
-		(at 410.21 391.16)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "20458f19-c86b-41b2-9e40-20d52903669e")
-	)
-	(junction
 		(at 618.49 97.79)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -8359,6 +8353,12 @@
 		(uuid "6a73cdca-8cb7-4f55-86ff-26310b97ef5e")
 	)
 	(junction
+		(at 425.45 373.38)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6e2292be-0717-47ff-8961-61bec7ffe702")
+	)
+	(junction
 		(at 93.98 114.3)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -8405,6 +8405,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "870a68c0-eed0-466e-974e-1ea9e528e96f")
+	)
+	(junction
+		(at 407.67 355.6)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "8876db11-eaf5-4529-a664-24f9053f37b1")
 	)
 	(junction
 		(at 678.18 281.94)
@@ -8970,6 +8976,16 @@
 	)
 	(wire
 		(pts
+			(xy 407.67 355.6) (xy 398.78 355.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "154f5ff2-2197-4fb6-95f8-8ddbd3bc4453")
+	)
+	(wire
+		(pts
 			(xy 679.45 87.63) (xy 679.45 82.55)
 		)
 		(stroke
@@ -9197,6 +9213,16 @@
 			(type default)
 		)
 		(uuid "23166f00-dfdb-518e-ad5a-70e4f9a38740")
+	)
+	(wire
+		(pts
+			(xy 425.45 373.38) (xy 427.99 373.38)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "23e6e7c2-2fed-46fe-a61a-09ce7cfc3a05")
 	)
 	(wire
 		(pts
@@ -9690,7 +9716,7 @@
 	)
 	(wire
 		(pts
-			(xy 426.72 365.76) (xy 426.72 360.68)
+			(xy 425.45 361.95) (xy 425.45 365.76)
 		)
 		(stroke
 			(width 0)
@@ -9850,7 +9876,7 @@
 	)
 	(wire
 		(pts
-			(xy 410.21 391.16) (xy 398.78 391.16)
+			(xy 398.78 391.16) (xy 435.61 391.16)
 		)
 		(stroke
 			(width 0)
@@ -9907,6 +9933,16 @@
 			(type default)
 		)
 		(uuid "51f26234-4f11-542b-b193-eda1426071fd")
+	)
+	(wire
+		(pts
+			(xy 435.61 379.73) (xy 435.61 383.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "52000ac2-5bbc-4d16-a5f4-2823ef8b9c3a")
 	)
 	(wire
 		(pts
@@ -10220,7 +10256,7 @@
 	)
 	(wire
 		(pts
-			(xy 398.78 373.38) (xy 426.72 373.38)
+			(xy 398.78 373.38) (xy 425.45 373.38)
 		)
 		(stroke
 			(width 0)
@@ -10307,16 +10343,6 @@
 			(type default)
 		)
 		(uuid "6598e586-34f8-5fb0-82d3-79badb2acdba")
-	)
-	(wire
-		(pts
-			(xy 410.21 389.89) (xy 410.21 391.16)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "666dbfc1-0066-4143-8b17-138a0b715671")
 	)
 	(wire
 		(pts
@@ -11100,16 +11126,6 @@
 	)
 	(wire
 		(pts
-			(xy 435.61 383.54) (xy 435.61 378.46)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a8dba076-4252-58e1-ab4a-710d2f3c4ba6")
-	)
-	(wire
-		(pts
 			(xy 694.69 439.42) (xy 694.69 459.74)
 		)
 		(stroke
@@ -11257,16 +11273,6 @@
 			(type default)
 		)
 		(uuid "af571dc6-3701-4399-8fba-7e72f88d4ab2")
-	)
-	(wire
-		(pts
-			(xy 435.61 391.16) (xy 410.21 391.16)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "af95cc76-f0d9-56ba-b077-16be0efa88e6")
 	)
 	(wire
 		(pts
@@ -11470,16 +11476,6 @@
 	)
 	(wire
 		(pts
-			(xy 407.67 355.6) (xy 398.78 355.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b9e04015-2880-53bd-9e7d-bb831653727b")
-	)
-	(wire
-		(pts
 			(xy 252.73 120.65) (xy 264.16 120.65)
 		)
 		(stroke
@@ -11627,6 +11623,16 @@
 			(type default)
 		)
 		(uuid "c1904d60-3167-4723-9952-7959393d3837")
+	)
+	(wire
+		(pts
+			(xy 144.78 217.17) (xy 144.78 214.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c1974f39-2f47-400b-aeb4-710926bc9792")
 	)
 	(wire
 		(pts
@@ -12350,6 +12356,16 @@
 	)
 	(wire
 		(pts
+			(xy 412.75 355.6) (xy 407.67 355.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ed846188-186c-4503-9873-ed8521c168d4")
+	)
+	(wire
+		(pts
 			(xy 163.83 375.92) (xy 163.83 369.57)
 		)
 		(stroke
@@ -12959,12 +12975,12 @@
 		(uuid "5339268e-49de-5d8d-a8ae-16fba1a598c7")
 	)
 	(label "LED_ACT"
-		(at 435.61 378.46 90)
+		(at 435.61 379.73 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
 		(uuid "53cf355c-e44c-47b8-bc76-c550b5578fd3")
 	)
@@ -13089,7 +13105,7 @@
 		(uuid "66326dc5-6c98-5009-9235-5711581c1696")
 	)
 	(label "LED_PWR_A"
-		(at 407.67 355.6 0)
+		(at 412.75 355.6 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -13499,7 +13515,7 @@
 		(uuid "bd6c2633-453f-4eb3-89a9-15c08af1dea3")
 	)
 	(label "LED_ACT_A"
-		(at 410.21 389.89 0)
+		(at 411.48 391.16 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -13589,12 +13605,12 @@
 		(uuid "cc99002a-9ef2-5327-ad52-94820950e1b6")
 	)
 	(label "LED_WIFI"
-		(at 426.72 360.68 90)
+		(at 425.45 361.95 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
 		(uuid "cdc86e28-cebb-4ed3-b10d-910678849ff2")
 	)
@@ -13839,7 +13855,7 @@
 		(uuid "fd54b20b-15cb-4807-9ed5-47ac4235d29a")
 	)
 	(label "LED_WIFI_A"
-		(at 407.67 373.38 0)
+		(at 427.99 373.38 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -13888,10 +13904,9 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "046ad4f9-927a-5fc1-bba0-137041285ea1")
 		(property "Reference" "R481"
-			(at 726.44 56.388 0)
+			(at 726.44 57.15 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13902,7 +13917,7 @@
 			)
 		)
 		(property "Value" "47"
-			(at 726.44 62.992 0)
+			(at 725.678 63.246 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14699,7 +14714,7 @@
 		(dnp no)
 		(uuid "1369849c-ce79-5e72-b6ba-4b7926d0793e")
 		(property "Reference" "J10"
-			(at 55.372 203.962 0)
+			(at 55.372 205.232 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14906,6 +14921,85 @@
 			(project "front-panel"
 				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
 					(reference "#PWR0269")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "class_board:PWR_GND")
+		(at 229.87 217.17 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "151b76d0-7206-486a-b92d-c982b316fc8e")
+		(property "Reference" "#PWR06005"
+			(at 227.33 213.868 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "GND"
+			(at 229.87 220.98 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 229.87 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 229.87 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol: GND"
+			(at 229.87 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "fe29dcf0-bd6d-4d6d-839a-e5be0cefd062")
+		)
+		(instances
+			(project "front-panel"
+				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
+					(reference "#PWR06005")
 					(unit 1)
 				)
 			)
@@ -15655,86 +15749,6 @@
 			(project "front-panel"
 				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
 					(reference "J16")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:PWR_AGND")
-		(at 485.14 217.17 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "2109bac3-2b6a-53b4-b1b7-ba675b02f5a6")
-		(property "Reference" "#PWR0186"
-			(at 488.442 214.63 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "AGND"
-			(at 485.14 220.472 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 485.14 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 485.14 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol: AGND"
-			(at 485.14 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "d40b4e22-3900-5244-a32d-764ab72f8190")
-		)
-		(instances
-			(project "front-panel"
-				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
-					(reference "#PWR0186")
 					(unit 1)
 				)
 			)
@@ -16817,7 +16831,7 @@
 	)
 	(symbol
 		(lib_id "class_board:PWR_AGND")
-		(at 144.78 214.63 0)
+		(at 144.78 217.17 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -16828,7 +16842,7 @@
 		(fields_autoplaced yes)
 		(uuid "320d5c3e-3359-5086-8656-cec41aa67b89")
 		(property "Reference" "#PWR0170"
-			(at 148.082 212.09 0)
+			(at 148.082 214.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16840,7 +16854,7 @@
 			)
 		)
 		(property "Value" "AGND"
-			(at 147.32 215.9634 0)
+			(at 147.32 218.5034 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -16851,7 +16865,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 144.78 214.63 0)
+			(at 144.78 217.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16862,7 +16876,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 144.78 214.63 0)
+			(at 144.78 217.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16873,7 +16887,7 @@
 			)
 		)
 		(property "Description" "Power symbol: AGND"
-			(at 144.78 214.63 0)
+			(at 144.78 217.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -16969,6 +16983,85 @@
 			(project "front-panel"
 				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
 					(reference "#PWR0277")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "class_board:PWR_GND")
+		(at 485.14 217.17 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "33a87e48-26e0-4d88-9fec-60ae865b1489")
+		(property "Reference" "#PWR06004"
+			(at 482.6 213.868 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "GND"
+			(at 485.14 220.98 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 485.14 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 485.14 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol: GND"
+			(at 485.14 217.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "9fcc9f92-2d11-4704-8321-4aaaea5a77c6")
+		)
+		(instances
+			(project "front-panel"
+				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
+					(reference "#PWR06004")
 					(unit 1)
 				)
 			)
@@ -17897,7 +17990,7 @@
 	)
 	(symbol
 		(lib_id "class_board:R0603_1k")
-		(at 426.72 369.57 0)
+		(at 425.45 369.57 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -17908,7 +18001,7 @@
 		(fields_autoplaced yes)
 		(uuid "44fae14c-f53e-5110-b198-48331439d6fe")
 		(property "Reference" "R2"
-			(at 424.18 364.998 0)
+			(at 422.91 364.998 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -17919,7 +18012,7 @@
 			)
 		)
 		(property "Value" "1k"
-			(at 424.18 374.142 0)
+			(at 422.91 374.142 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -17930,7 +18023,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 426.72 369.57 0)
+			(at 425.45 369.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17941,7 +18034,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 426.72 369.57 0)
+			(at 425.45 369.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17952,7 +18045,7 @@
 			)
 		)
 		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 426.72 369.57 0)
+			(at 425.45 369.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17963,7 +18056,7 @@
 			)
 		)
 		(property "LCSC" "C21190"
-			(at 426.72 369.57 0)
+			(at 425.45 369.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17974,7 +18067,7 @@
 			)
 		)
 		(property "JLC_CLASS" "Basic"
-			(at 426.72 369.57 0)
+			(at 425.45 369.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17985,7 +18078,7 @@
 			)
 		)
 		(property "MPN" "0603WAF1001T5E"
-			(at 426.72 369.57 0)
+			(at 425.45 369.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17996,7 +18089,7 @@
 			)
 		)
 		(property "Manufacturer" "UNI-ROYAL"
-			(at 426.72 369.57 0)
+			(at 425.45 369.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18007,7 +18100,7 @@
 			)
 		)
 		(property "Block" "PANEL"
-			(at 426.72 369.57 0)
+			(at 425.45 369.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18243,6 +18336,85 @@
 			(project "front-panel"
 				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
 					(reference "R491")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "class_board:PWR_GND")
+		(at 485.14 271.78 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "57c2b17a-c33d-41fc-802c-466040ef9640")
+		(property "Reference" "#PWR06003"
+			(at 482.6 268.478 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "GND"
+			(at 485.14 275.59 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 485.14 271.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 485.14 271.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol: GND"
+			(at 485.14 271.78 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "703cea2e-b042-4498-916d-043926f6484d")
+		)
+		(instances
+			(project "front-panel"
+				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
+					(reference "#PWR06003")
 					(unit 1)
 				)
 			)
@@ -19152,86 +19324,6 @@
 			(project "front-panel"
 				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
 					(reference "J17")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:PWR_AGND")
-		(at 229.87 217.17 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "6383e9e8-125d-5fd6-a997-821070bc3ce0")
-		(property "Reference" "#PWR0174"
-			(at 233.172 214.63 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "AGND"
-			(at 229.87 220.472 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 229.87 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 229.87 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol: AGND"
-			(at 229.87 217.17 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b3f79601-4fb4-5aaf-8d29-45f9fc6ae154")
-		)
-		(instances
-			(project "front-panel"
-				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
-					(reference "#PWR0174")
 					(unit 1)
 				)
 			)
@@ -20478,7 +20570,7 @@
 			)
 		)
 		(property "Value" "Conn_02x20_Odd_Even"
-			(at 246.38 69.85 0)
+			(at 245.364 68.58 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -21141,86 +21233,6 @@
 			(project "front-panel"
 				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
 					(reference "J1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:PWR_AGND")
-		(at 485.14 271.78 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "7ea6e07f-4d9c-51e2-8d10-76292571d841")
-		(property "Reference" "#PWR0210"
-			(at 488.442 269.24 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "AGND"
-			(at 485.14 275.082 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 485.14 271.78 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 485.14 271.78 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol: AGND"
-			(at 485.14 271.78 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "1bc073f2-851a-52ac-be2f-51980129e673")
-		)
-		(instances
-			(project "front-panel"
-				(path "/8e47bc66-3933-5476-97da-e27d85ee393b"
-					(reference "#PWR0210")
 					(unit 1)
 				)
 			)
@@ -22261,7 +22273,6 @@
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "8ae4e9b1-2d8c-5906-81a0-7440ed7419c5")
 		(property "Reference" "U410"
 			(at 673.1 89.408 0)
@@ -22275,7 +22286,7 @@
 			)
 		)
 		(property "Value" "SN74AHCT541PWR"
-			(at 673.1 131.572 0)
+			(at 681.228 132.588 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects

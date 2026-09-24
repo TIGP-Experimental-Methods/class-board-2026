@@ -6,12 +6,12 @@ to route. The instructor merges the four copies with `python hardware/scripts/ma
 each copy only the new tracks and vias that lie completely inside that copy's area. A connection that crosses an area
 boundary is the instructor's; the instructor routes anywhere in the master at any time.
 
-| Area | Where | Routes | Parts | Connections left |
-|---|---|---|---|---|
-| **A** | Rear right | the analog inputs: the ADC U101, the input conditioning R11x / C11x / D11x, the AGND-select headers J14 / J15 | 49 | 5 |
-| **B** | Front right | the analog outputs (DAC U301 and the output stage) and the NMR transmitter (DDS, filter, power stage, TX terminal side) | 70 | 22 |
-| **C** | Front left | the NMR receiver: tank and blanking switch, LNA, I/Q mixer, IF filters, clock generator; the expansion header J5 | 78 | 25 |
-| **D** | Rear left | power entry and rails, the coil switches (H-bridge, polarizer), the dev-board socket J1 / J2 and the fast TTL buffer U502 | 111 | 31 |
+| Area | Who | Where | Routes | Parts | Connections left |
+|---|---|---|---|---|---|
+| **A** | Renqian (branch `a-renqian`) | Rear right | the analog inputs: the ADC U101, the input conditioning R11x / C11x / D11x, the AGND-select headers J14 / J15 | 49 | 14 |
+| **B** | Yi-Tsai (branch `w1-yi-tsai`) | Front right | the analog outputs (DAC U301 and the output stage) and the NMR transmitter (DDS, filter, power stage, TX terminal side) | 70 | 22 |
+| **C** | the instructor (no student) | Front left | the NMR receiver: tank and blanking switch, LNA, I/Q mixer, IF filters, clock generator; the expansion header J5 | 78 | 25 |
+| **D** | Lihdong (branch `d-lihdong`) | Rear left | power entry and rails, the coil switches (H-bridge, polarizer), the dev-board socket J1 / J2 and the fast TTL buffer U502 | 111 | 31 |
 
 The link sockets J6 / J7 / J8, the dev-board rows J1 / J2, the expansion header J5, the mounting holes and the fiducials
 belong to the instructor wherever they sit.
