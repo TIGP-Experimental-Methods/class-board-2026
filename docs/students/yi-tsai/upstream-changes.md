@@ -5,6 +5,90 @@ Newest entry first.
 
 ---
 
+## 2026-09-24 (later) — merged `origin/main` (3 more commits)
+
+Merged to `31a7a2a`. Two conflicts, both in panel section B.
+
+- `front-panel.kicad_pro` — took upstream.
+- `front-panel.kicad_pcb` — **rebuilt rather than kept this time.** Upstream's fresh split is the
+  base and my 200 segments plus one GND via were transplanted onto it, giving 264. KiCad 10 names
+  nets rather than numbering them, so nothing could be silently remapped, and the two sets share
+  no net: the base's 64 segments are all student A's accepted analog routing.
+
+Why rebuild and not keep mine: the new masters carry the three `PWR_AGND` to `PWR_GND` symbols,
+a new `R441` and restored zones. Staying on my old base would have meant routing against a board
+that no longer exists.
+
+**The ground swap is resolved.** The instructor made the same three-symbol change in the master,
+so it is now official and no longer mine to justify.
+
+**Decision #70** names the owners: A Renqian, B me, C the instructor, D Lihdong. That answers the
+four-sections-three-students question from the previous entry.
+
+After the rebase, `kicad-cli pcb drc` parses the file and reports 69 unconnected items, down from
+103 on the base alone, so my routing closes 34 connections. It also reports 131 clearance
+violations, nearly all "zone clearance, actual 0.0000" — the copper pours need refilling in KiCad
+before that number means anything.
+
+Full file-by-file chronology in [hardware-history.md](hardware-history.md).
+
+## 2026-09-24 — merged `origin/main` (14 commits, four days before the cutoff)
+
+Merged up to `81bddc8`. One conflict, resolved. **A second deliverable appeared.**
+
+### The conflict, and why my side won
+
+`hardware/front-panel/sections/B/front-panel.kicad_pcb` conflicted. My side had my 200 routed
+segments; the upstream side had 90 segments on section **A's** analog nets, put there when the
+instructor re-split the panel copies after accepting student A's work.
+
+Kept my side. Nothing is lost: `panel_sections.py merge` reads only each section's *own* nets
+out of each copy, so A's segments in my file were never going to be read, and A's routing is
+already in the master. Upstream's only change to that file was those 90 segments, nothing
+structural, so my copy is not missing any base update.
+
+### The second deliverable — the main board is now split too
+
+The **main board** has been divided into four routing areas as well, the same way the panel was.
+My copy is `hardware/sections/B/class-board.kicad_pcb`, a full copy with the instructor's
+routing **locked**.
+
+Area B is the front right: the analog outputs (DAC U301 and its output stage) and the NMR
+transmitter (DDS, filter, power stage, TX terminal side). Rule area `ZONE_B`, corners
+(109, 59.5) to (179.5, 114.5). 70 parts.
+
+22 connections left to route in the area:
+
+| Net | Connections |
+|---|---|
+| `AGND` | 7 |
+| `GND` | 3 |
+| `+3V3` | 2 |
+| `/nmr_tx/+VEXT_TX` | 2 |
+| `-12V` | 2 |
+| `/nmr_tx/TX_VMID`, `/b3_outputs/VREF_DAC`, `+12V`, `SPI_SCLK`, `SPI_MOSI`, `/nmr_tx/TX_FB` | 1 each |
+
+A connection with both ends inside my area is mine. One that leaves the area is the
+instructor's and I must not route it. **That copy deliberately has no schematic** — do not
+press F8 / Update PCB from Schematic on it.
+
+So I now have **two** boards to hand in, not one:
+`hardware/sections/B/class-board.kicad_pcb` and
+`hardware/front-panel/sections/B/front-panel.kicad_pcb`.
+
+### Also in this merge
+
+- The symbol library was converted to the KiCad 10 format and a script now keeps it that way.
+- The `owner_*` Block-field DRC rules are retired, replaced by the area split.
+- Student A's work was accepted into both masters on 09-21.
+- My own earlier branch was merged into `main` by the instructor on 09-19.
+
+### Open
+
+Three `PWR_AGND` symbols in my panel section schematic are changed to `PWR_GND`. Uncommitted
+intent unknown, now committed in the snapshot. The section rules say the schematic is not mine
+to edit. Decide before the pull request.
+
 ## 2026-09-18 — merged `origin/main` (4 commits, during Workshop 2)
 
 Merged `b6091c9..20d52d1` into `w1-yi-tsai`. Working tree was clean, no conflicts.
