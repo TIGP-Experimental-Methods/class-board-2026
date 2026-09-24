@@ -18,7 +18,7 @@ pins 35/37 to GPIO16/17.  **Student section C is now the front-panel project** (
 former `ZONE_C` — the power entry (`b2_power`) and the coil switches (`c_switch`: +VEXT input, DRV8871 H-bridge,
 polarizer) — is the instructor's **`ZONE_INSTR`**.  Everything below is written for that state.
 
-## The five rules that matter most (v0.7)
+## The six rules that matter most (v0.7)
 
 1. **Never regenerate the PCB once hand routing has started.**  The main board is routed **by hand** (students in
    Workshop 2, instructor for the base/rails/SPI).  From the first track, `class-board.kicad_pcb` is the hand-edited
@@ -35,13 +35,17 @@ polarizer) — is the instructor's **`ZONE_INSTR`**.  Everything below is writte
    import is skipped with a printed note, so a broken module never blocks the build — **read the console output**.
    Existing modules: `sheet_nmr_rx.py` (section A, 7xx/9xx), `sheet_nmr_tx.py` (section B, 8xx),
    `sheet_c_switch.py` (**the instructor's block**, 9xx — it was section C until 2026-09-17).
-3. **Every symbol carries a `Block` field, and it decides who owns the footprint.**  Values in use on the main board:
-   `B1`, `OPT`, `NMR_RX` → section **A**; `B3`, `B5`, `NMR_TX` → section **B**; `B2`, `C_SW` → the **instructor**
-   (`ZONE_INSTR`); `BASE` → instructor base area (it is also the escape hatch for a part that serves two sections,
-   e.g. the TCA9535 expander).  `B4` is retired — that sheet no longer exists.  The DRC rules are `owner_A`,
-   `owner_B` and **`owner_INSTR`** (`A.enclosedByArea('ZONE_A'|'ZONE_B'|'ZONE_INSTR')`); a misplaced part is an
-   assertion failure, not a silent error.  **Section C has no area on the main board**: it is the front-panel
-   project in `front-panel/`.
+3. **The main board is routed in four AREAS, one student each (instructor, 2026-09-21).** Rule areas `ZONE_A`..`ZONE_D`
+   on the board (F.Cu + B.Cu, nothing disallowed) mark the territory: A rear right (analog inputs), B front right (analog
+   outputs + NMR transmitter), C front left (NMR receiver), D rear left (power, coil switches, dev-board socket, U502).
+   `scripts/main_sections.py` is the tool: `areas` draws the four zones in the master, `split` writes `sections/{A,B,C,D}/`
+   (a copy of the board per student with the instructor's routing **locked**, `SECTION.md` with the parts and the remaining
+   connections), `check` / `merge` take from each copy only the NEW tracks and vias that lie completely inside that area,
+   `report` lists the remaining connections per area. **A connection that crosses an area boundary is the instructor's; the
+   instructor routes anywhere in the master and nothing there is locked.** The `Block` field still exists on every symbol
+   (it says which schematic sheet a part comes from) but no longer decides ownership: the former `owner_A` / `owner_B` /
+   `owner_INSTR` assertions are retired, and a part may sit in any area. J1 / J2 / J5 / J6 / J7 / J8, the holes and the
+   fiducials are the instructor's wherever they sit.
 4. **The design rules live at the project root.**  KiCad reads `<project>.kicad_dru` from the project folder, so
    `class-board.kicad_dru` must exist there; `rules/class-board.kicad_dru` is the edit source and the two must stay
    identical (D-48).  Editing only the copy in `rules/` means the rules never run.  **Order matters**: KiCad
@@ -49,13 +53,19 @@ polarizer) — is the instructor's **`ZONE_INSTR`**.  Everything below is writte
    general one — that is why the panel's per-area `iso1_inside` / `iso2_inside` clearances sit after
    `iso_in_clearance` in `front-panel/front-panel.kicad_dru` (the same trap cost a day with the retired `mains_*`
    rules, D-51/D-52).  The main board's rule file is now `no_inner_tracks`, `iso_in_clearance`,
-   `analog_in_clearance`, the three manufacturing rules and `owner_A` / `owner_B` / `owner_INSTR`: **no `mains_*`
-   rules** (D-53).  `iso_in_clearance` is kept but has no members on the main board any more — the ISO_IN nets live
+   `analog_in_clearance`, the three manufacturing rules: **no `mains_*` rules** (D-53) and, since 2026-09-21, **no owner assertions**
+   (ownership is by area, rule 3).  `iso_in_clearance` is kept but has no members on the main board any more — the ISO_IN nets live
    on the panel (D-54).  No generator writes this file; it is hand-maintained.
 5. **Footprints must be in KiCad 10 format** (`kicad-cli fp upgrade` on the library after any import) and the
    library nickname is `class_board:` — **never an `easyeda2kicad:` prefix** in a symbol's `Footprint` field.  After
    adding any footprint, run `python fix_courtyards.py` (courtyard = body ∪ pads + 0.25 mm, D-27) and then
    `place_check.py`, or the collision checks are blind.
+6. **Symbols must be in KiCad 10 format too.**  `cb_symbols.py` writes the 20241209 format and then runs
+   `kicad-cli sym upgrade` on its own output, so `lib/class_board.kicad_sym` lands in the format the schematics are
+   saved in.  Do not drop that step: without it the library sits two KiCad generations behind the sheets that cache
+   its symbols, and the Symbol Editor rewrites the whole file the first time anyone saves from the GUI — a 30 000-line
+   diff that hides the real change.  It needs `KICAD_CLI`; the generator warns and leaves the old format if it cannot
+   run it (2026-09-18).
 
 ## Layout of the directory
 
@@ -83,6 +93,7 @@ python gen_sch.py               # -> class-board.kicad_sch + sheets/*.kicad_sch 
 kicad-cli sch export netlist --format kicadxml -o ../.netlist.xml ../class-board.kicad_sch
 kicad-cli sch erc --severity-all --format json -o ../.erc.json ../class-board.kicad_sch
 kicad-cli fp upgrade ../lib/class_board.pretty      # after importing any footprint (KiCad 10 format)
+kicad-cli sym upgrade ../lib/class_board.kicad_sym  # only if cb_symbols.py could not (no KICAD_CLI)
 python fix_courtyards.py        # after importing footprints: courtyard = body + pads + 0.25 mm
 python place_check.py           # fast courtyard/pad collision check of the placement in gen_pcb.py
 python gen_pcb.py --no-route    # placement + zones + rule areas -> class-board.kicad_pcb   (SEE RULE 1)
@@ -100,13 +111,25 @@ Checks that must be clean before a release: ERC 0, DRC 0 errors and 0 unconnecte
 `owner_A/B/C` assertions passing, angle audit ok, `place_check.py` 0 collisions, `gen_panel.py` link-mating audit,
 BOM without missing LCSC numbers, and the JLC rotation preview checked by hand.
 
+## Known issue — F-16: two connectors come from foreign personal libraries (2026-09-18)
+
+`DDS_Library:C2937625_-_Conn_01x03` (J3, J9, J10, J11, J12) and `mike_JLCPCB:C492401-PZ254V-11-02P` (J13) are
+referenced for **both** symbol and footprint, and neither library is in this repository or in any lib table — they
+resolved only on the machine that imported them.  They are the 12 `lib_symbol_issues` / `footprint_link_issues`
+violations a fresh clone reports (the only ERC entries besides 2 `pin_to_pin`).  The board still fabricates, because
+`class-board.kicad_pcb` carries the footprint geometry inline, but the parts show as unresolved in eeschema and
+*Update PCB from Schematic* cannot re-place them.  Both are ordinary 2.54 mm vertical pin headers (3-pin and 2-pin).
+The fix is to add both to `cb_symbols.py` and `class_board.pretty` and re-point `sheet_c_switch.py` /
+`sheet_nmr_rx.py` / `sheet_nmr_tx.py` at `class_board:`, then regenerate the schematic — rule 1 keeps the routed
+board out of it, so the PCB side is a footprint-library remap, not a re-place.  Not a drive-by edit; do it as its
+own change.
+
 ## Conventions
 
-- Owner areas on the main board (`gen_pcb.ZONES`): **ZONE_INSTR** (0.5, 0.5)–(96, 36)–(37.5, 57.5)–(0.5, 57.5) L-shape
-  along the rear-left and left edges — power entry plus the instructor block placed as one piece at **x 45–86** on the
-  rear edge, terminals `J901` / `J903` / `J905` at x **51.0 / 62.7 / 76.9**, rotation 180 (wire entry off the edge,
-  Decision #46); **ZONE_BASE** (37.5, 36)–(100, 57); **ZONE_A** the front-left; **ZONE_B** x 100–179.5 front **plus the
-  rear-right strip x 96–179.5, y 0.5–36** that the relay row used to occupy (D-56).
+- Routing areas on the main board (`scripts/main_sections.py`, `AREAS`; drawn 0.5 mm inside the outline): **ZONE_A**
+  (96, 15)–(180, 15)–(180, 59.5)–(109, 59.5)–(109, 52)–(96, 52); **ZONE_B** (109, 59.5)–(180, 59.5)–(180, 115)–(109, 115);
+  **ZONE_C** (0, 75)–(109, 75)–(109, 115)–(0, 115); **ZONE_D** (0, 15)–(96, 15)–(96, 52)–(109, 52)–(109, 75)–(0, 75).
+  Picture: `docs/board-areas-2026-09-21.png`. The old `ZONE_INSTR` / `ZONE_BASE` L-shapes and the `gen_pcb.ZONES` table are gone.
 - Board coordinates: x right (0…180), y down; rear edge (USB-C, jack, terminals) at y = 0; front edge at y = 100.
   The panel stacks on the **back** of the board on three 2×20 headers (J6/J7/J8 on B.Cu). **Since the instructor's
   hand rework of 2026-09-18** (both boards hand-edited, generators retired, outlines drawn at y 15–115): J6 ↔ panel J1 =

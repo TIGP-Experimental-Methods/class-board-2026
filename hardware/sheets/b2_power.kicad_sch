@@ -5864,7 +5864,7 @@
 	)
 	(wire
 		(pts
-			(xy 39.37 240.03) (xy 39.37 242.57)
+			(xy 39.37 238.76) (xy 39.37 242.57)
 		)
 		(stroke
 			(width 0)
@@ -10429,7 +10429,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
+		(property "Value" "-12V"
 			(at 83.82 240.792 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12092,7 +12092,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
+		(property "Value" "+3V3"
 			(at 53.34 240.792 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12547,7 +12547,7 @@
 	)
 	(symbol
 		(lib_id "class_board:TestPoint")
-		(at 39.37 240.03 0)
+		(at 39.37 238.76 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -12558,7 +12558,7 @@
 		(fields_autoplaced yes)
 		(uuid "90d8fd7d-038f-5666-b6a6-705cb76ac4a0")
 		(property "Reference" "TP201"
-			(at 38.1 235.204 0)
+			(at 38.1 233.934 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -12568,8 +12568,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
-			(at 38.1 240.792 0)
+		(property "Value" "5V_RAW"
+			(at 38.1 239.522 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -12580,7 +12580,7 @@
 			)
 		)
 		(property "Footprint" "class_board:TestPoint_Pad_D1.5mm"
-			(at 39.37 240.03 0)
+			(at 39.37 238.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12591,7 +12591,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 39.37 240.03 0)
+			(at 39.37 238.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12602,7 +12602,7 @@
 			)
 		)
 		(property "Description" "Test point pad 1.5 mm"
-			(at 39.37 240.03 0)
+			(at 39.37 238.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12613,7 +12613,7 @@
 			)
 		)
 		(property "Block" "B2"
-			(at 39.37 240.03 0)
+			(at 39.37 238.76 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14618,7 +14618,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
+		(property "Value" "AGND"
 			(at 114.3 240.792 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17196,7 +17196,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
+		(property "Value" "+12V"
 			(at 68.58 240.792 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18686,7 +18686,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
+		(property "Value" "+5VA"
 			(at 99.06 240.792 0)
 			(show_name no)
 			(do_not_autoplace no)

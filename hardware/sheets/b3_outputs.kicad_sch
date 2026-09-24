@@ -8501,7 +8501,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "TP"
+		(property "Value" "VREF"
 			(at 203.2 112.776 0)
 			(show_name no)
 			(do_not_autoplace no)
