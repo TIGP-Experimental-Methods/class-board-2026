@@ -5,6 +5,33 @@ Newest entry first.
 
 ---
 
+## 2026-09-24 (later) — merged `origin/main` (3 more commits)
+
+Merged to `31a7a2a`. Two conflicts, both in panel section B.
+
+- `front-panel.kicad_pro` — took upstream.
+- `front-panel.kicad_pcb` — **rebuilt rather than kept this time.** Upstream's fresh split is the
+  base and my 200 segments plus one GND via were transplanted onto it, giving 264. KiCad 10 names
+  nets rather than numbering them, so nothing could be silently remapped, and the two sets share
+  no net: the base's 64 segments are all student A's accepted analog routing.
+
+Why rebuild and not keep mine: the new masters carry the three `PWR_AGND` to `PWR_GND` symbols,
+a new `R441` and restored zones. Staying on my old base would have meant routing against a board
+that no longer exists.
+
+**The ground swap is resolved.** The instructor made the same three-symbol change in the master,
+so it is now official and no longer mine to justify.
+
+**Decision #70** names the owners: A Renqian, B me, C the instructor, D Lihdong. That answers the
+four-sections-three-students question from the previous entry.
+
+After the rebase, `kicad-cli pcb drc` parses the file and reports 69 unconnected items, down from
+103 on the base alone, so my routing closes 34 connections. It also reports 131 clearance
+violations, nearly all "zone clearance, actual 0.0000" — the copper pours need refilling in KiCad
+before that number means anything.
+
+Full file-by-file chronology in [hardware-history.md](hardware-history.md).
+
 ## 2026-09-24 — merged `origin/main` (14 commits, four days before the cutoff)
 
 Merged up to `81bddc8`. One conflict, resolved. **A second deliverable appeared.**
