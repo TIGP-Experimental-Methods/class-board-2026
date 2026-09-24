@@ -56,6 +56,8 @@ AREAS = {
           [(0, 15), (96, 15), (96, 52), (109, 52), (109, 75), (0, 75)]),
 }
 INSTRUCTOR_REFS = {"J1", "J2", "J5", "J6", "J7", "J8", "H1", "H2", "H3", "H4", "FID1", "FID2", "FID3"}
+# who routes which area (instructor, 2026-09-24: three students on the boards; area C has no student)
+ASSIGNED = {"A": "Renqian (branch `a-renqian`)", "B": "Yi-Tsai (branch `w1-yi-tsai`)", "C": "the instructor (no student)", "D": "Lihdong (branch `d-lihdong`)"}
 OLD_ZONE_NAMES = {"ZONE_A", "ZONE_B", "ZONE_C", "ZONE_D", "ZONE_INSTR", "ZONE_BASE"}
 NS = uuid.UUID("6f1c2a5e-7b1d-4b8e-9a0f-2c3d4e5f6a7b")
 
@@ -417,9 +419,9 @@ def readme_md(fps, by, crossing):
              "to route. The instructor merges the four copies with `python hardware/scripts/main_sections.py merge`, which takes from",
              "each copy only the new tracks and vias that lie completely inside that copy's area. A connection that crosses an area",
              "boundary is the instructor's; the instructor routes anywhere in the master at any time.\n",
-             "| Area | Where | Routes | Parts | Connections left |", "|---|---|---|---|---|"]
+             "| Area | Who | Where | Routes | Parts | Connections left |", "|---|---|---|---|---|---|"]
     for sec, (what, poly) in AREAS.items():
-        lines.append("| **%s** | %s | %s | %d | %d |" % (sec, what.split(" - ")[0], what.split(" - ", 1)[1], len(parts_in(sec, fps)), sum(by.get(sec, Counter()).values())))
+        lines.append("| **%s** | %s | %s | %s | %d | %d |" % (sec, ASSIGNED.get(sec, "-"), what.split(" - ")[0], what.split(" - ", 1)[1], len(parts_in(sec, fps)), sum(by.get(sec, Counter()).values())))
     lines += ["", "The link sockets J6 / J7 / J8, the dev-board rows J1 / J2, the expansion header J5, the mounting holes and the fiducials",
               "belong to the instructor wherever they sit."]
     p = parked(fps)

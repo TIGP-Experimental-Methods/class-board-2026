@@ -33,6 +33,8 @@ SECTIONS_DIR = os.path.join(PANEL, "sections")
 MASTER_PCB = os.path.join(PANEL, "front-panel.kicad_pcb")
 KICAD_CLI = r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
 SHARED = {"GND", "AGND"}
+# who routes which section (instructor, 2026-09-24: three students on the boards; section C has no student)
+ASSIGNED = {"A": "Renqian (branch `a-renqian`)", "B": "Yi-Tsai (branch `w1-yi-tsai`)", "C": "the instructor (no student)", "D": "Lihdong (branch `d-lihdong`)"}
 
 NETS = {
     "A": ("Analog signals: link J1 to the SMA field and the TX coil terminal",
@@ -159,9 +161,9 @@ def readme_md():
              "The front panel is one board, but its routing is done by four students, one section each. Every section folder holds a",
              "complete copy of the unrouted panel and a `SECTION.md` with the nets to route. The instructor merges the four copies",
              "with `python hardware/scripts/panel_sections.py merge`, which takes only each section's own nets from each copy.\n",
-             "| Section | Routes | Nets |", "|---|---|---|"]
+             "| Section | Who | Routes | Nets |", "|---|---|---|---|"]
     for sec, (what, nets) in NETS.items():
-        lines.append("| **%s** | %s | %d |" % (sec, what, len(nets)))
+        lines.append("| **%s** | %s | %s | %d |" % (sec, ASSIGNED.get(sec, "-"), what, len(nets)))
     lines += ["", "GND and AGND are the inner planes: every section drops the vias its own parts need. Nothing else is shared.",
               "", "Why by nets and not by area: every panel net runs from a link header at an edge to a connector in the middle of the board,",
               "so a geometric cut would leave half a trace on every boundary. With net groups each connection is complete in one copy.", ""]
