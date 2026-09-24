@@ -56,6 +56,8 @@ AREAS = {
           [(0, 15), (96, 15), (96, 52), (109, 52), (109, 75), (0, 75)]),
 }
 INSTRUCTOR_REFS = {"J1", "J2", "J5", "J6", "J7", "J8", "H1", "H2", "H3", "H4", "FID1", "FID2", "FID3"}
+# who routes which area (instructor, 2026-09-24: three students on the boards; area C has no student)
+ASSIGNED = {"A": "Renqian (branch `a-renqian`)", "B": "Yi-Tsai (branch `w1-yi-tsai`)", "C": "the instructor (no student)", "D": "Lihdong (branch `d-lihdong`)"}
 OLD_ZONE_NAMES = {"ZONE_A", "ZONE_B", "ZONE_C", "ZONE_D", "ZONE_INSTR", "ZONE_BASE"}
 NS = uuid.UUID("6f1c2a5e-7b1d-4b8e-9a0f-2c3d4e5f6a7b")
 
@@ -336,7 +338,8 @@ def split():
         io.open(os.path.join(dst, "SECTION.md"), "w", encoding="utf-8", newline="\n").write(section_md(sec, what, poly, fps, by.get(sec, Counter())))
         print("section %s: %d parts, %d remaining connections -> %s" % (sec, len(parts_in(sec, fps)), sum(by.get(sec, Counter()).values()), os.path.relpath(dst, HW)))
     io.open(os.path.join(SECTIONS_DIR, "README.md"), "w", encoding="utf-8", newline="\n").write(readme_md(fps, by, crossing))
-    print("locked %d routed items in the copies (the master is untouched); wrote %s" % (n_lock, os.path.relpath(os.path.join(SECTIONS_DIR, "README.md"), HW)))
+    record_base(items)
+    print("locked %d routed items in the copies (the master is untouched); wrote %s and BASE_UUIDS.txt" % (n_lock, os.path.relpath(os.path.join(SECTIONS_DIR, "README.md"), HW)))
 
 
 def parts_in(sec, fps):
@@ -416,9 +419,9 @@ def readme_md(fps, by, crossing):
              "to route. The instructor merges the four copies with `python hardware/scripts/main_sections.py merge`, which takes from",
              "each copy only the new tracks and vias that lie completely inside that copy's area. A connection that crosses an area",
              "boundary is the instructor's; the instructor routes anywhere in the master at any time.\n",
-             "| Area | Where | Routes | Parts | Connections left |", "|---|---|---|---|---|"]
+             "| Area | Who | Where | Routes | Parts | Connections left |", "|---|---|---|---|---|---|"]
     for sec, (what, poly) in AREAS.items():
-        lines.append("| **%s** | %s | %s | %d | %d |" % (sec, what.split(" - ")[0], what.split(" - ", 1)[1], len(parts_in(sec, fps)), sum(by.get(sec, Counter()).values())))
+        lines.append("| **%s** | %s | %s | %s | %d | %d |" % (sec, ASSIGNED.get(sec, "-"), what.split(" - ")[0], what.split(" - ", 1)[1], len(parts_in(sec, fps)), sum(by.get(sec, Counter()).values())))
     lines += ["", "The link sockets J6 / J7 / J8, the dev-board rows J1 / J2, the expansion header J5, the mounting holes and the fiducials",
               "belong to the instructor wherever they sit."]
     p = parked(fps)
@@ -435,18 +438,36 @@ def readme_md(fps, by, crossing):
 
 
 # ---------------------------------------------------------------- check / merge
+BASE_FILE = os.path.join(SECTIONS_DIR, "BASE_UUIDS.txt")
+
+
+def base_uuids():
+    """uuids of every routed item that was ever in the master when a split was made (so a copy can never bring back
+    something the instructor deleted afterwards)"""
+    if not os.path.exists(BASE_FILE):
+        return set()
+    return {l.strip() for l in io.open(BASE_FILE, encoding="utf-8") if l.strip() and not l.startswith("#")}
+
+
+def record_base(items):
+    u = base_uuids() | {item_uuid(it) for it in items if item_kind(it) in ("segment", "arc", "via")}
+    os.makedirs(SECTIONS_DIR, exist_ok=True)
+    io.open(BASE_FILE, "w", encoding="utf-8", newline="\n").write(
+        "# routed items (segments/arcs/vias) that were ever in the master: never taken from a section copy\n" + "\n".join(sorted(x for x in u if x)) + "\n")
+
+
 def collect(sec):
     """(inside items, outside/crossing items, moved refs, locked-but-changed count) from a section's board vs the master"""
     path = os.path.join(SECTIONS_DIR, sec, "class-board.kicad_pcb")
     text = io.open(path, encoding="utf-8").read()
     master = io.open(MASTER_PCB, encoding="utf-8").read()
-    master_uuids = {item_uuid(it) for it in top_items(master)[1]}
+    master_uuids = {item_uuid(it) for it in top_items(master)[1]} | base_uuids()
     inside_items, foreign = [], []
     for it in top_items(text)[1]:
         if item_kind(it) not in ("segment", "arc", "via"):
             continue
-        if item_uuid(it) in master_uuids:
-            continue                      # the instructor's routing (locked in the copy) - the master already has it
+        if item_uuid(it) in master_uuids or item_locked(it):
+            continue                      # the instructor's routing: the master has it, or he has deleted it since - never resurrected
         a = item_area(it)
         (inside_items if a == sec else foreign).append((a, it))
     fm, fs = footprints(master), footprints(text)
