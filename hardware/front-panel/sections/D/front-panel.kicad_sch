@@ -13014,7 +13014,7 @@
 		)
 		(uuid "55d006b7-fe56-5a13-818d-ef3ad8435039")
 	)
-	(label "TX"
+	(label "RX"
 		(at 411.48 209.55 180)
 		(effects
 			(font
@@ -13244,7 +13244,7 @@
 		)
 		(uuid "9036b419-6177-4435-b12e-7ba85add20bb")
 	)
-	(label "RX"
+	(label "TX"
 		(at 411.48 265.43 180)
 		(effects
 			(font

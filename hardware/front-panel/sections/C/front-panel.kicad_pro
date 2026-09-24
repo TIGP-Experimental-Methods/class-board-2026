@@ -65,9 +65,9 @@
           "hatch_smoothing_level": 0,
           "hatch_smoothing_value": 0.1,
           "hatch_thickness": 1.0,
-          "min_clearance": 0.3,
+          "min_clearance": 0.25,
           "min_island_area": 10.0,
-          "min_thickness": 0.25,
+          "min_thickness": 0.2,
           "pad_connection": 2,
           "remove_islands": 0,
           "thermal_relief_gap": 0.4,
@@ -886,7 +886,7 @@
         "uuid": "8e47bc66-3933-5476-97da-e27d85ee393b"
       }
     ],
-    "used_designators": "#PWR6003-6005",
+    "used_designators": "",
     "variants": []
   },
   "sheets": [
