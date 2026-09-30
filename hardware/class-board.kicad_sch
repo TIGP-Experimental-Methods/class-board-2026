@@ -2794,53 +2794,6 @@
 		)
 	)
 	(sheet
-		(at 270.51 49.53)
-		(size 88.9 16.51)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "4198837a-1c2a-56d0-94fc-14c5f2abeec5")
-		(property "Sheetname" "front_panel_link"
-			(at 270.51 48.7034 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.5 1.5)
-					(bold yes)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Sheetfile" "sheets/front_panel_link.kicad_sch"
-			(at 270.51 66.6246 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71"
-					(page "9")
-				)
-			)
-		)
-	)
-	(sheet
 		(at 43.18 73.66)
 		(size 67.31 22.86)
 		(exclude_from_sim no)

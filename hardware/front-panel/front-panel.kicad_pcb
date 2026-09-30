@@ -20484,28 +20484,6 @@
 			(justify left)
 		)
 	)
-	(gr_text "J3 = J6"
-		(at 7 83.15 0)
-		(layer "F.SilkS")
-		(uuid "c6c70b52-abca-4ab8-b452-6a7e4497bffc")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(gr_text "1,2 = +5V   3..10 = OUT1..8   11,12 = GND   relay / H-bridge"
-		(at 45.4 53.55 0)
-		(layer "F.SilkS")
-		(uuid "f0c50335-c23e-52fa-a27a-347ed58c0756")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
 	(gr_text "ISO IN 2  5-24 V"
 		(at 61.525001 81.085 0)
 		(layer "F.SilkS")
@@ -20572,28 +20550,6 @@
 			)
 		)
 	)
-	(gr_text "J2 = J7"
-		(at 173 104.4 0)
-		(layer "F.SilkS")
-		(uuid "883b9fb3-bb85-4463-a65e-16bb1d3ff123")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(gr_text "J3 = J8"
-		(at 54.375003 103.205 90)
-		(layer "F.SilkS")
-		(uuid "b9a7dbbf-b4ac-58a2-be93-f21c8dc75c53")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
 	(gr_text "+"
 		(at 56.875002 105.305 90)
 		(layer "F.SilkS")
@@ -20609,17 +20565,6 @@
 		(at 61.875002 105.305 90)
 		(layer "F.SilkS")
 		(uuid "5358d8b1-a79c-59e8-a57b-47fd8f14a10f")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(gr_text "J3 = J8"
-		(at 81.850002 103.28 90)
-		(layer "F.SilkS")
-		(uuid "87bc8db1-0efb-4894-8e3e-59ad6762314f")
 		(effects
 			(font
 				(size 1 1)
@@ -20869,17 +20814,6 @@
 			)
 		)
 	)
-	(gr_text "AUX"
-		(at 111.65 67.27 0)
-		(layer "F.SilkS")
-		(uuid "9ae960c2-b961-59ec-95e9-66d7d13f6f79")
-		(effects
-			(font
-				(size 1.2 1.2)
-				(thickness 0.2)
-			)
-		)
-	)
 	(gr_text "AI7"
 		(at 111.7 49 0)
 		(layer "F.SilkS")
@@ -20924,17 +20858,6 @@
 			)
 		)
 	)
-	(gr_text "RX"
-		(at 147.65 31.57 0)
-		(layer "F.SilkS")
-		(uuid "3e264d10-e1f9-5f63-995e-7f51e232b125")
-		(effects
-			(font
-				(size 1.2 1.2)
-				(thickness 0.2)
-			)
-		)
-	)
 	(gr_text "FAST2"
 		(at 165.75 49.3 0)
 		(layer "F.SilkS")
@@ -20968,30 +20891,6 @@
 			)
 		)
 	)
-	(gr_text "J3 pin 40"
-		(at 52.645002 103.205 90)
-		(layer "B.SilkS")
-		(uuid "e38c822c-1b6e-5ecb-b302-ece70e0525db")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-			(justify mirror)
-		)
-	)
-	(gr_text "J3 pin 40"
-		(at 80.120001 103.28 90)
-		(layer "B.SilkS")
-		(uuid "d6b61cbf-a8a7-441e-a208-2f11c63ecae0")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-			(justify mirror)
-		)
-	)
 	(gr_text "REAR / TOP EDGE"
 		(at 114.9 16.75 0)
 		(layer "B.SilkS")
@@ -21000,18 +20899,6 @@
 			(font
 				(size 1.2 1.2)
 				(thickness 0.18)
-			)
-			(justify mirror)
-		)
-	)
-	(gr_text "J3"
-		(at 78.250001 103.28 0)
-		(layer "B.Fab")
-		(uuid "aff14db3-f17f-41e6-bf4e-229363992300")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
 			)
 			(justify mirror)
 		)
@@ -36032,4 +35919,46 @@
 		)
 	)
 	(embedded_fonts no)
-)
+
+  (gr_text "J3 = J7"
+    (at 7 83.2 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "15cae2a1-a669-43b1-a59b-f94f0caf20f7")
+  )
+  (gr_text "J2 = J8"
+    (at 173 104.4 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "516562d9-2804-44ee-9684-aecc732b3634")
+  )
+  (gr_text "J1 = J6"
+    (at 70 17 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "f6353f33-5f97-42f6-bb12-2994bb68c314")
+  )
+  (gr_text "1,2 = +5V   3..9 = OUT1..7   10 = spare   11,12 = GND   relay / H-bridge"
+    (at 45.4 53.5 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "2daff9c9-5167-48f3-9de8-1c45e55e3541")
+  )
+  (gr_text "TX"
+    (at 111.7 67.3 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "4e389ae5-246c-415d-a993-75188cb6320a")
+  )
+  (gr_text "AUX"
+    (at 147.7 31.6 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "b5bda9df-773c-40b5-9050-471ec4f111fd")
+  )
+  (gr_text "RX"
+    (at 147.7 49 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "78b94b80-31b7-49b2-b35c-3a9eb0f6f05d")
+  ))
