@@ -2,9 +2,10 @@
 //   {block, key, op, threshold, action}
 // evaluated against every status broadcast (20 Hz). When a rule goes from
 // false to true it fires its action once:
-//   action "relay:N:on" / "relay:N:off"  -> b4 relay N
-//   action "notify"                       -> {"type":"alarm",...} to all clients
-// When the rule goes back to false, a relay action is NOT undone (the user
+//   action "module:N:on" / "module:N:off" -> b4 module output N
+//   action "notify"                        -> {"type":"alarm",...} to all clients
+// When the rule goes back to false, a module action is NOT undone (the user
+
 // decides); notify is armed again.
 //
 // The engine is itself a Block named "alarms" so the normal message protocol

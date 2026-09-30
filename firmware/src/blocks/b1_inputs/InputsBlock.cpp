@@ -10,7 +10,7 @@ void InputsBlock::begin() {
   // the driver keeps state and the readings below are synthesised.
   spibus::begin();
   adc.begin();
-  for (int i = 0; i < kChannels; i++) range_[i] = adc.range(i);
+  for (int i = 0; i < kChannels; i++) range_[i] = adc.range(kAinOfAi[i]);
 }
 
 void InputsBlock::loop() {
@@ -35,7 +35,10 @@ bool InputsBlock::readAll(uint32_t lock_ms) {
   // frame (drivers/Ads8688.h). The driver flips the top bit so the code is signed.
   spibus::Guard g(lock_ms);
   if (!g.ok) return false;
-  for (int i = 0; i < kChannels; i++) volts_[i] = adc.toVolts(i, adc.readManual(i));
+  for (int i = 0; i < kChannels; i++) {
+    const uint8_t ch = kAinOfAi[i];
+    volts_[i] = adc.toVolts(ch, adc.readManual(ch));
+  }
 #endif
   return true;
 }
@@ -61,7 +64,7 @@ bool InputsBlock::handle(JsonObjectConst cmd, JsonObject reply) {
     {
       spibus::Guard g(50);
       if (!g.ok) { reply["error"] = "SPI bus busy (nmr capture running)"; return false; }
-      adc.setRange(ch - 1, range);   // program register 0x05 + ch-1
+      adc.setRange(kAinOfAi[ch - 1], range);   // program register 0x05 + ADC channel
     }
     reply["ch"] = ch;
     reply["range"] = range;
@@ -77,5 +80,6 @@ void InputsBlock::status(JsonObject out) {
     key[2] = '1' + i;
     out[key] = volts_[i];
   }
-  out["range"] = range_[0];   // range of ch1 (the panel shows one selector)
+  out["range"] = range_[0];   // range of AI1 (the panel shows one selector)
+
 }

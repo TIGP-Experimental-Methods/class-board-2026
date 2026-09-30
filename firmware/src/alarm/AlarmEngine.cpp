@@ -31,15 +31,15 @@ void AlarmEngine::fire(Rule& r, float v) {
   Serial.printf("[alarm] rule %d: %s.%s %s %.3f (value %.3f) -> %s\n",
                 r.id, r.block, r.key, r.op, r.threshold, v, r.action);
 
-  // "relay:N:on" / "relay:N:off" -> send {"cmd":"relay","args":{"n":N,"on":..}} to b4
-  if (strncmp(r.action, "relay:", 6) == 0) {
-    int n = atoi(r.action + 6);
-    const char* colon = strchr(r.action + 6, ':');
+  // "module:N:on" / "module:N:off" -> send {"cmd":"module","args":{"n":N,"on":..}} to b4
+  if (strncmp(r.action, "module:", 7) == 0) {
+    int n = atoi(r.action + 7);
+    const char* colon = strchr(r.action + 7, ':');
     bool on = colon && strcmp(colon + 1, "on") == 0;
     Block* b4 = reg_.find("b4");
     if (b4) {
       JsonDocument cmd, reply;
-      cmd["cmd"] = "relay";
+      cmd["cmd"] = "module";
       cmd["args"]["n"] = n;
       cmd["args"]["on"] = on;
       b4->handle(cmd.as<JsonObjectConst>(), reply.to<JsonObject>());
@@ -72,7 +72,8 @@ bool AlarmEngine::handle(JsonObjectConst cmd, JsonObject reply) {
     return true;
   }
   if (strcmp(c, "add") == 0) {
-    // {"block":"b1","key":"ai1","op":"gt","threshold":9.0,"action":"relay:1:off"}
+    // {"block":"b1","key":"ai1","op":"gt","threshold":9.0,"action":"module:1:off"}
+
     if (!a["block"].is<const char*>() || !a["key"].is<const char*>() || !a["threshold"].is<float>()) {
       reply["error"] = "need block, key, threshold";
       return false;

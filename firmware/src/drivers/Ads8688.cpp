@@ -101,8 +101,10 @@ void Ads8688::begin() {
   }
   present_ = ok;        // every range register echoed back what we wrote
 
-  // Auto-scan defaults to the two NMR channels; b1 never uses auto mode.
-  programWrite(kRegAutoSeq, 0xC0);
+  // Auto-scan defaults to the two NMR channels (AI7, AI8 = AIN_3, AIN_2, mask
+  // 0x0C); b1 never uses auto mode.
+  programWrite(kRegAutoSeq, static_cast<uint8_t>((1u << kAinOfAi[6]) | (1u << kAinOfAi[7])));
+
 #endif
 }
 

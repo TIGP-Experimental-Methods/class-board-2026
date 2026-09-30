@@ -4,7 +4,7 @@
 // Rules that keep the system simple:
 //   * All block code runs from loop() on the main task. No locks needed.
 //   * A block never talks to another block directly; the phone / Python
-//     client orchestrates, and the alarm engine can trigger relays.
+//     client orchestrates, and the alarm engine can switch module outputs.
 //   * Under -DSIM=1 the block fakes its hardware so the whole app works on
 //     a bare dev board. Real-hardware code goes in #ifndef SIM branches.
 #pragma once

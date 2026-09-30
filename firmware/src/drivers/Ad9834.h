@@ -18,8 +18,11 @@
 // Control-register bits: B28 (13), HLB (12), FSEL (11), PSEL (10), PIN/SW (9),
 // RESET (8), SLEEP1 (7), SLEEP12 (6), OPBITEN (5), SIGN/PIB (4), DIV2 (3), MODE (1).
 // We keep B28 = 1 (a frequency word is two consecutive 14-bit writes) and
-// PIN/SW = 1 (FSELECT and PSELECT come from the pins, so the sequencer can flip
-// the pulse phase with one GPIO write instead of an SPI frame).
+// PIN/SW = 0: RESET, SLEEP and the FREQ/PHASE register selects are all bits of
+// the control register. The board ties the RESET and SLEEP pins low (R817 /
+// R818) and FSELECT to ground, so with PIN/SW = 1 the reset and sleep bits
+// would do nothing. PSELECT is wired to GPIO42 (DDS_PSEL), but in this mode the
+// pin is ignored; it is held low. A phase change is one control-word write.
 //
 // Frequency resolution: delta f = MCLK / 2^28 = 50 MHz / 2^28 = 0.186 Hz, which
 // at an 89.4 kHz Larmor frequency is about 2 ppm - far finer than the line width.
@@ -37,13 +40,15 @@ class Ad9834 {
   double actualPhase(uint8_t reg) const { return reg < 2 ? phaseDeg_[reg] : 0.0; }
 
   void setReset(bool on);                    // 1 = output parked at midscale
-  void selectPhase(bool p1);                 // drives PIN_DDS_PSEL
+  void selectPhase(bool p1);                 // PSEL bit: 0 = PHASE0, 1 = PHASE1
   bool phaseSelected() const { return psel_; }
   void sleep(bool on);                       // SLEEP1 + SLEEP12: stop the output
 
  private:
+  uint16_t control() const;                  // the control word for the current state
   void writeWord(uint16_t word);
   void writeControl();
+
 
   uint32_t mclk_ = 50000000;
   uint32_t freqWord_ = 0;

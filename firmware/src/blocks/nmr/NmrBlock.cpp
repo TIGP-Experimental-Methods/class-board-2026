@@ -68,7 +68,7 @@ void NmrBlock::begin() {
 
   // The DDS master clock has to exist before the DDS is worth talking to.
   clockgen.setClk0(50000000);
-  dds.begin(50000000);                 // also sets PIN_DDS_PSEL low (PHASE0)
+  dds.begin(50000000);                 // PHASE0 selected, RESET bit set
 
   // If the flags ever get bodged onto the spare expander lines, those two lines
   // have to become inputs; with EXP_BIT_IFLAG at -1 this does nothing at all.
