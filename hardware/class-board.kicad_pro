@@ -65,10 +65,10 @@
           "hatch_smoothing_level": 0,
           "hatch_smoothing_value": 0.1,
           "hatch_thickness": 1.0,
-          "min_clearance": 0.25,
+          "min_clearance": 0.3,
           "min_island_area": 10.0,
-          "min_thickness": 0.15,
-          "pad_connection": 1,
+          "min_thickness": 0.2,
+          "pad_connection": 2,
           "remove_islands": 0,
           "thermal_relief_gap": 0.4,
           "thermal_relief_spoke_width": 0.4
@@ -891,7 +891,7 @@
         "uuid": "21416d14-3056-576f-bbf8-3b43eaeb7e71"
       }
     ],
-    "used_designators": "",
+    "used_designators": "R951-958",
     "variants": []
   },
   "sheets": [
@@ -918,10 +918,6 @@
     [
       "2562e949-1e58-5048-8406-1b1b4a27bc6f",
       "b5_dio_trig"
-    ],
-    [
-      "4198837a-1c2a-56d0-94fc-14c5f2abeec5",
-      "front_panel_link"
     ],
     [
       "27fece37-25e5-55f8-9b4c-3407e1c1ba01",

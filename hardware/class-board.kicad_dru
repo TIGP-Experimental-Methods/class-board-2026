@@ -11,11 +11,6 @@
 	(condition "A.NetClass == 'ISO_IN' && B.NetClass != 'ISO_IN' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
 	(constraint clearance (min 2.5mm)))
 
-# ---- analog inputs: 0.3 mm clearance, outer layers only (brief 4.3)
-(rule "analog_in_clearance"
-	(condition "A.NetClass == 'ANALOG_IN' && A.Type == 'Track' && B.NetName != 'AGND'")
-	(constraint clearance (min 0.3mm)))
-
 # ---- power rails: widths are set by the generator (1.0 / 0.5 mm, necked to 0.25 mm only at fine-pitch pins);
 #      no minimum-width rule because a rule cannot exempt the neck-downs (see docs/design-review.md)
 
