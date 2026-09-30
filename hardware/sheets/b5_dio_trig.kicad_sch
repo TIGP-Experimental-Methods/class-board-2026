@@ -4843,17 +4843,6 @@
 	)
 	(wire
 		(pts
-			(xy 237.49 91.44)
-			(xy 237.49 71.12)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "03e6865f-b1a1-5dbd-bd48-8882e8ca094c")
-	)
-	(wire
-		(pts
 			(xy 231.14 340.36)
 			(xy 238.76 340.36)
 		)
@@ -4920,28 +4909,6 @@
 	)
 	(wire
 		(pts
-			(xy 264.16 132.08)
-			(xy 271.78 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0a96d018-2558-5b5e-8c4d-d6c365141582")
-	)
-	(wire
-		(pts
-			(xy 264.16 121.92)
-			(xy 271.78 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0b9905a4-0368-5a18-a882-8bd7308534c7")
-	)
-	(wire
-		(pts
 			(xy 251.46 327.66)
 			(xy 261.62 327.66)
 		)
@@ -4950,17 +4917,6 @@
 			(type default)
 		)
 		(uuid "0bd7c3b8-e4ff-45ef-aa7b-ee3f4c749d15")
-	)
-	(wire
-		(pts
-			(xy 237.49 71.12)
-			(xy 256.54 71.12)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0e1a48e6-d974-5731-84f2-705f61c090bb")
 	)
 	(wire
 		(pts
@@ -5008,17 +4964,6 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 101.6)
-			(xy 240.03 101.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "111570de-ef6a-572d-88c8-46712fe261e5")
-	)
-	(wire
-		(pts
 			(xy 238.76 322.58)
 			(xy 231.14 322.58)
 		)
@@ -5049,17 +4994,6 @@
 			(type default)
 		)
 		(uuid "13ae0121-4006-5e2e-b436-bc4d005e24cf")
-	)
-	(wire
-		(pts
-			(xy 264.16 71.12)
-			(xy 271.78 71.12)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "146cff16-d3c3-57ed-b3e8-efdf4b3c3053")
 	)
 	(wire
 		(pts
@@ -5137,17 +5071,6 @@
 			(type default)
 		)
 		(uuid "1e8bc3f8-f311-55f9-af4d-c8569e357334")
-	)
-	(wire
-		(pts
-			(xy 240.03 111.76)
-			(xy 256.54 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1f34714b-877d-5b79-961e-6d47e8cb4bb9")
 	)
 	(wire
 		(pts
@@ -5371,17 +5294,6 @@
 	)
 	(wire
 		(pts
-			(xy 264.16 91.44)
-			(xy 271.78 91.44)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "39f6fcba-2bae-5ec2-b560-5916ea3713a5")
-	)
-	(wire
-		(pts
 			(xy 429.26 92.71)
 			(xy 429.26 87.63)
 		)
@@ -5448,17 +5360,6 @@
 	)
 	(wire
 		(pts
-			(xy 234.95 88.9)
-			(xy 234.95 60.96)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "472b5ae4-6556-5dbb-ad04-055dd3d9cd58")
-	)
-	(wire
-		(pts
 			(xy 359.41 102.87)
 			(xy 369.57 102.87)
 		)
@@ -5489,17 +5390,6 @@
 			(type default)
 		)
 		(uuid "4a07acdf-bf19-49dd-bf85-c5846335b5b2")
-	)
-	(wire
-		(pts
-			(xy 240.03 93.98)
-			(xy 240.03 81.28)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4ae5e3ed-94c7-5bfd-84b0-cb0c24f61130")
 	)
 	(wire
 		(pts
@@ -5558,17 +5448,6 @@
 	)
 	(wire
 		(pts
-			(xy 240.03 81.28)
-			(xy 256.54 81.28)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5ca9288a-531c-5e11-8d2c-4f670baf89f1")
-	)
-	(wire
-		(pts
 			(xy 346.71 125.73)
 			(xy 339.09 125.73)
 		)
@@ -5588,17 +5467,6 @@
 			(type default)
 		)
 		(uuid "5eba5d57-95fa-4cb1-a60f-0af6ba7f1bdd")
-	)
-	(wire
-		(pts
-			(xy 231.14 91.44)
-			(xy 237.49 91.44)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5fd9b062-7b09-59dc-9abf-1e713d6dc426")
 	)
 	(wire
 		(pts
@@ -5679,17 +5547,6 @@
 	)
 	(wire
 		(pts
-			(xy 264.16 111.76)
-			(xy 271.78 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "67583504-8cca-5027-9fa9-f6055d3f4ec4")
-	)
-	(wire
-		(pts
 			(xy 346.71 85.09)
 			(xy 339.09 85.09)
 		)
@@ -5764,17 +5621,6 @@
 			(type default)
 		)
 		(uuid "6c82fafa-39ea-4133-a9c9-a4e86f745abb")
-	)
-	(wire
-		(pts
-			(xy 242.57 91.44)
-			(xy 256.54 91.44)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6d64fd24-af06-5a4b-8b25-e89fb8030dad")
 	)
 	(wire
 		(pts
@@ -5866,17 +5712,6 @@
 	)
 	(wire
 		(pts
-			(xy 264.16 60.96)
-			(xy 271.78 60.96)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7b37b541-468a-5bf1-bf38-81391a8ca39d")
-	)
-	(wire
-		(pts
 			(xy 77.47 113.03)
 			(xy 85.09 113.03)
 		)
@@ -5910,17 +5745,6 @@
 	)
 	(wire
 		(pts
-			(xy 242.57 101.6)
-			(xy 256.54 101.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "802c7eb3-e2f7-5274-a7fb-8a57b404c03d")
-	)
-	(wire
-		(pts
 			(xy 77.47 107.95)
 			(xy 85.09 107.95)
 		)
@@ -5940,17 +5764,6 @@
 			(type default)
 		)
 		(uuid "824511d7-618e-54ec-96b5-3ba22af9e60f")
-	)
-	(wire
-		(pts
-			(xy 237.49 104.14)
-			(xy 237.49 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "826a8b37-5086-5207-9689-ed9e2d407b1a")
 	)
 	(wire
 		(pts
@@ -6009,17 +5822,6 @@
 	)
 	(wire
 		(pts
-			(xy 234.95 132.08)
-			(xy 256.54 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "88a44427-ecfb-5465-9300-cbd2d875cb1e")
-	)
-	(wire
-		(pts
 			(xy 346.71 80.01)
 			(xy 339.09 80.01)
 		)
@@ -6028,17 +5830,6 @@
 			(type default)
 		)
 		(uuid "8b963a07-2b4f-4b4a-8794-719afc62e38f")
-	)
-	(wire
-		(pts
-			(xy 264.16 101.6)
-			(xy 271.78 101.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8da62bc9-e160-584c-85e6-dd13a7c0eacd")
 	)
 	(wire
 		(pts
@@ -6072,17 +5863,6 @@
 			(type default)
 		)
 		(uuid "928cf864-63f6-40c3-90c0-e171108f57dd")
-	)
-	(wire
-		(pts
-			(xy 234.95 60.96)
-			(xy 256.54 60.96)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "94623afa-0b98-5208-892d-1658c9e79626")
 	)
 	(wire
 		(pts
@@ -6240,17 +6020,6 @@
 	)
 	(wire
 		(pts
-			(xy 242.57 96.52)
-			(xy 242.57 91.44)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a3b7ef1e-3c84-5543-83f8-dac3af3fed5c")
-	)
-	(wire
-		(pts
 			(xy 101.6 226.06)
 			(xy 105.41 226.06)
 		)
@@ -6281,17 +6050,6 @@
 			(type default)
 		)
 		(uuid "a6d4a2bf-6473-5991-8e02-d8a9166d2208")
-	)
-	(wire
-		(pts
-			(xy 231.14 88.9)
-			(xy 234.95 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "abe2d121-2368-5a17-b8a0-aea88b6a5bb4")
 	)
 	(wire
 		(pts
@@ -6405,17 +6163,6 @@
 	)
 	(wire
 		(pts
-			(xy 264.16 81.28)
-			(xy 271.78 81.28)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b83d3f49-38a3-5133-9b2e-839ed357ccf5")
-	)
-	(wire
-		(pts
 			(xy 346.71 110.49)
 			(xy 339.09 110.49)
 		)
@@ -6526,17 +6273,6 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 96.52)
-			(xy 242.57 96.52)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ca329dc6-d1b4-5ae2-84dd-3772e0eb4dca")
-	)
-	(wire
-		(pts
 			(xy 359.41 110.49)
 			(xy 369.57 110.49)
 		)
@@ -6545,17 +6281,6 @@
 			(type default)
 		)
 		(uuid "cb23e358-9530-4cb1-b8d8-b3930f6ea8e3")
-	)
-	(wire
-		(pts
-			(xy 234.95 106.68)
-			(xy 234.95 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cc4636e2-7f07-5830-af5a-69363a23b438")
 	)
 	(wire
 		(pts
@@ -6636,17 +6361,6 @@
 	)
 	(wire
 		(pts
-			(xy 242.57 99.06)
-			(xy 242.57 101.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d3867426-4348-5a13-b063-251482059623")
-	)
-	(wire
-		(pts
 			(xy 251.46 330.2)
 			(xy 261.62 330.2)
 		)
@@ -6688,17 +6402,6 @@
 			(type default)
 		)
 		(uuid "d5f6ac09-a1e4-544b-93b0-0c585e86c729")
-	)
-	(wire
-		(pts
-			(xy 231.14 104.14)
-			(xy 237.49 104.14)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d64d8215-4e08-5442-be78-0dea87804249")
 	)
 	(wire
 		(pts
@@ -6845,17 +6548,6 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 99.06)
-			(xy 242.57 99.06)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ebaa352c-c236-557c-bdd9-c1000731a190")
-	)
-	(wire
-		(pts
 			(xy 346.71 90.17)
 			(xy 339.09 90.17)
 		)
@@ -6867,17 +6559,6 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 106.68)
-			(xy 234.95 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ed49a34e-4255-51a4-ab53-bbd60cb5d2f7")
-	)
-	(wire
-		(pts
 			(xy 77.47 100.33)
 			(xy 85.09 100.33)
 		)
@@ -6886,28 +6567,6 @@
 			(type default)
 		)
 		(uuid "ed877aff-fbcf-51dc-8778-a21b133d49e3")
-	)
-	(wire
-		(pts
-			(xy 237.49 121.92)
-			(xy 256.54 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "eecf40c8-17fc-5550-8916-01cf64d6dd60")
-	)
-	(wire
-		(pts
-			(xy 240.03 101.6)
-			(xy 240.03 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f3d45807-876b-57ca-b6cd-0922f16a417b")
 	)
 	(wire
 		(pts
@@ -6974,17 +6633,6 @@
 			(type default)
 		)
 		(uuid "fc453071-b75a-5e90-95e2-be843843386f")
-	)
-	(wire
-		(pts
-			(xy 231.14 93.98)
-			(xy 240.03 93.98)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fd4b0f2f-535a-5b47-84f4-0fac61d4376e")
 	)
 	(wire
 		(pts
@@ -7155,6 +6803,174 @@
 			(xy 195.58 144.78)
 		)
 		(uuid "ce056137-63e9-4461-9b6c-58abeefb1795")
+	)
+	(wire
+		(pts
+			(xy 231.14 88.9)
+			(xy 233.68 88.9)
+		)
+		(uuid "192b7b23-1bb1-4981-ae75-2c3c3b1af86b")
+	)
+	(wire
+		(pts
+			(xy 231.14 91.44)
+			(xy 233.68 91.44)
+		)
+		(uuid "a4dfe3d0-ad44-4101-a291-025d961da0c3")
+	)
+	(wire
+		(pts
+			(xy 231.14 93.98)
+			(xy 233.68 93.98)
+		)
+		(uuid "ca745643-bdcf-409f-b02f-b43c38978c31")
+	)
+	(wire
+		(pts
+			(xy 231.14 96.52)
+			(xy 233.68 96.52)
+		)
+		(uuid "eaf610e8-aece-4653-b0ec-3c43bdea9b12")
+	)
+	(wire
+		(pts
+			(xy 231.14 99.06)
+			(xy 233.68 99.06)
+		)
+		(uuid "ad54196c-6a4d-431e-9793-0d063b905c33")
+	)
+	(wire
+		(pts
+			(xy 231.14 101.6)
+			(xy 233.68 101.6)
+		)
+		(uuid "ac3bc915-6300-4c58-97d9-ca344e21b542")
+	)
+	(wire
+		(pts
+			(xy 231.14 104.14)
+			(xy 233.68 104.14)
+		)
+		(uuid "d5075ac4-80ae-46b8-9bfe-47d816951cce")
+	)
+	(wire
+		(pts
+			(xy 231.14 106.68)
+			(xy 233.68 106.68)
+		)
+		(uuid "835b61d8-c49b-4cf5-ac1f-dd28d294b3b5")
+	)
+	(wire
+		(pts
+			(xy 248.92 63.5)
+			(xy 246.38 63.5)
+		)
+		(uuid "da0aee45-9cc1-4439-b25e-2802594bfca4")
+	)
+	(wire
+		(pts
+			(xy 248.92 66.04)
+			(xy 246.38 66.04)
+		)
+		(uuid "5a2359bc-e21a-4038-9d15-8863547bd69b")
+	)
+	(wire
+		(pts
+			(xy 248.92 68.58)
+			(xy 246.38 68.58)
+		)
+		(uuid "f73a32db-4ba1-4bc1-8499-e039361bbcbd")
+	)
+	(wire
+		(pts
+			(xy 248.92 71.12)
+			(xy 246.38 71.12)
+		)
+		(uuid "909cc41d-cf2e-4944-a388-a33059bb2015")
+	)
+	(wire
+		(pts
+			(xy 248.92 83.82)
+			(xy 246.38 83.82)
+		)
+		(uuid "7dc1c3ed-c1cb-4c28-83b0-44b79041e964")
+	)
+	(wire
+		(pts
+			(xy 248.92 86.36)
+			(xy 246.38 86.36)
+		)
+		(uuid "0029be74-0dc6-4f9c-a724-ba18fa9b5ce4")
+	)
+	(wire
+		(pts
+			(xy 248.92 88.9)
+			(xy 246.38 88.9)
+		)
+		(uuid "c64962ec-2d29-43a2-bc88-934d1c1f104f")
+	)
+	(wire
+		(pts
+			(xy 248.92 91.44)
+			(xy 246.38 91.44)
+		)
+		(uuid "7eb2ca79-deb2-425d-a415-5ed81b817362")
+	)
+	(wire
+		(pts
+			(xy 259.08 63.5)
+			(xy 261.62 63.5)
+		)
+		(uuid "24a44b87-8031-4a6c-9642-bd1a41c08b9a")
+	)
+	(wire
+		(pts
+			(xy 259.08 66.04)
+			(xy 261.62 66.04)
+		)
+		(uuid "686be6b4-9a6c-498d-97ce-916b48c5ac58")
+	)
+	(wire
+		(pts
+			(xy 259.08 68.58)
+			(xy 261.62 68.58)
+		)
+		(uuid "7e35271d-96dc-443a-9261-99223498e46d")
+	)
+	(wire
+		(pts
+			(xy 259.08 71.12)
+			(xy 261.62 71.12)
+		)
+		(uuid "0851151f-bba4-4a11-9db5-d78e2a45e467")
+	)
+	(wire
+		(pts
+			(xy 259.08 83.82)
+			(xy 261.62 83.82)
+		)
+		(uuid "31dbd854-9686-4209-9ccd-f9c216daaf89")
+	)
+	(wire
+		(pts
+			(xy 259.08 86.36)
+			(xy 261.62 86.36)
+		)
+		(uuid "aa5a981c-14b2-428c-995b-71f6d28ae902")
+	)
+	(wire
+		(pts
+			(xy 259.08 88.9)
+			(xy 261.62 88.9)
+		)
+		(uuid "7af3655b-5ede-4f0c-ac62-d33c5c238c40")
+	)
+	(wire
+		(pts
+			(xy 259.08 91.44)
+			(xy 261.62 91.44)
+		)
+		(uuid "0752868d-9c29-4351-bd5d-ea4144814c74")
 	)
 	(text "U505 TCA9535 (TSSOP-24, address 0x20, A0 = A1 = A2 = GND): the I2C port expander that replaced 12 direct GPIO in v0.7 — P00..P07 = DIO1..8 into the"
 		(at 20.47 373.1 0)
@@ -7785,15 +7601,15 @@
 		)
 		(uuid "ffa3c152-8302-41df-943a-c477ffe5a6cc")
 	)
-	(label "TTL5"
-		(at 271.78 101.6 0)
+	(text "2026-10-01: RN521/RN522 (two 4 x 10k arrays 0603x4, C29718) pull DIO1-8 (74AHCT541 U501 inputs) low until the firmware configures the TCA9535, so TTL1-8 are defined at power-up."
+		(at 154.94 167.64 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify left bottom)
 		)
-		(uuid "0610d2e0-cfc7-4cb7-85e9-ebb1a5880d26")
+		(uuid "a4f68e49-6b84-4233-82c6-17c8d59e7774")
 	)
 	(label "DIO3"
 		(at 205.74 93.98 180)
@@ -7835,16 +7651,6 @@
 		)
 		(uuid "1d9539b2-5861-41d8-8c91-17f655fbd47b")
 	)
-	(label "TTL7"
-		(at 271.78 121.92 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "2b8babf5-06b3-4ec0-828b-1bcd8f54c96e")
-	)
 	(label "DIO1"
 		(at 85.09 82.55 0)
 		(effects
@@ -7874,16 +7680,6 @@
 			(justify right bottom)
 		)
 		(uuid "46411890-35aa-4116-a080-b9d99327cfe4")
-	)
-	(label "TTL1"
-		(at 271.78 60.96 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "470de50a-f6ad-49b5-92ee-70534f66959e")
 	)
 	(label "MOD5"
 		(at 231.14 332.74 180)
@@ -7985,16 +7781,6 @@
 		)
 		(uuid "67f80833-030a-4840-b81d-df9d8d6ae9fa")
 	)
-	(label "TTL3"
-		(at 271.78 81.28 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "6ba9e596-e1ad-4b15-811b-82121c098301")
-	)
 	(label "FASTTTL1"
 		(at 339.09 128.27 180)
 		(effects
@@ -8075,16 +7861,6 @@
 		)
 		(uuid "9bf4ee1a-6203-408e-8a3a-e82dc7faa391")
 	)
-	(label "TTL6"
-		(at 271.78 111.76 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "9c112b7a-9f82-48de-a296-280e46d1c128")
-	)
 	(label "DIO5"
 		(at 85.09 92.71 0)
 		(effects
@@ -8094,16 +7870,6 @@
 			(justify left bottom)
 		)
 		(uuid "9d136e9a-0917-429e-93ff-d47c90abbd59")
-	)
-	(label "TTL4"
-		(at 271.78 91.44 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "9f06be48-2e2c-4413-b859-d17cffc5ffad")
 	)
 	(label "DIO6"
 		(at 85.09 95.25 0)
@@ -8154,16 +7920,6 @@
 			(justify left bottom)
 		)
 		(uuid "a988af08-c87a-47ae-b8a4-87407613822f")
-	)
-	(label "TTL2"
-		(at 271.78 71.12 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "acdc952a-ac9c-4043-966d-ca77e7cd0dab")
 	)
 	(label "TTL1"
 		(at 339.09 97.79 180)
@@ -8244,16 +8000,6 @@
 			(justify left bottom)
 		)
 		(uuid "c88c1b00-0361-4fd0-ae88-cda733a2c7f1")
-	)
-	(label "TTL8"
-		(at 271.78 132.08 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "d3f79455-e0f8-4861-8e22-29aac2d5b763")
 	)
 	(label "DIO2"
 		(at 205.74 91.44 180)
@@ -8394,6 +8140,246 @@
 			(justify left bottom)
 		)
 		(uuid "43fafc45-9b4d-408e-b317-0b3ee90037ee")
+	)
+	(label "TTL1_Y"
+		(at 233.68 88.9 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "bedb37cf-e614-488a-b144-8f149d359c46")
+	)
+	(label "TTL2_Y"
+		(at 233.68 91.44 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "01f27550-f8c9-417a-891a-209c6765ec0d")
+	)
+	(label "TTL3_Y"
+		(at 233.68 93.98 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "4c2dcd67-7e7b-4073-9531-21ae5684538c")
+	)
+	(label "TTL4_Y"
+		(at 233.68 96.52 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "11f1dcd6-6ac4-435a-af79-ed4a7e418fca")
+	)
+	(label "TTL5_Y"
+		(at 233.68 99.06 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "a13bc78b-8b88-46ea-a490-e693a7fd9a4a")
+	)
+	(label "TTL6_Y"
+		(at 233.68 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "284bb453-b0b8-4fb9-836f-7661a1567cdd")
+	)
+	(label "TTL7_Y"
+		(at 233.68 104.14 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "ea6af07f-7193-4c31-92da-12eb6f309cb4")
+	)
+	(label "TTL8_Y"
+		(at 233.68 106.68 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "412ea1fc-3819-4311-a563-da18ee5db8a8")
+	)
+	(label "TTL1_Y"
+		(at 246.38 63.5 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "38ae6214-9260-4746-b44f-850cc55fce23")
+	)
+	(label "TTL2_Y"
+		(at 246.38 66.04 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "9ca1d141-0bb8-4f6e-b1e9-b299c82613db")
+	)
+	(label "TTL3_Y"
+		(at 246.38 68.58 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "ceb819c9-dfa5-4b18-8210-0f49f5954524")
+	)
+	(label "TTL4_Y"
+		(at 246.38 71.12 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "22d62a24-540f-4a53-b0ad-55cecbf65f36")
+	)
+	(label "TTL5_Y"
+		(at 246.38 83.82 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "81bb7fdd-49a6-44ae-ac13-0d3f597e6cd5")
+	)
+	(label "TTL6_Y"
+		(at 246.38 86.36 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "c2adfd8a-5f9d-414b-96ea-9ab1a7b73f66")
+	)
+	(label "TTL7_Y"
+		(at 246.38 88.9 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "d3cb2ca2-2a29-4e68-8623-b4205ac22cdb")
+	)
+	(label "TTL8_Y"
+		(at 246.38 91.44 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "560382ab-0194-41ab-a216-9ace460a2020")
+	)
+	(label "TTL1"
+		(at 261.62 63.5 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "03b33cec-ada8-430f-ae36-726f182a41eb")
+	)
+	(label "TTL2"
+		(at 261.62 66.04 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "398d2f2e-0004-4b12-bbcb-9082b70b71bb")
+	)
+	(label "TTL3"
+		(at 261.62 68.58 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "611f336f-1f37-4d72-a04b-93d316a87802")
+	)
+	(label "TTL4"
+		(at 261.62 71.12 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "cb0befd8-d4b4-4b6d-8d40-51d130787dc1")
+	)
+	(label "TTL5"
+		(at 261.62 83.82 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "604d307a-75dd-4726-a35d-789e3a8e9701")
+	)
+	(label "TTL6"
+		(at 261.62 86.36 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "05fc7768-402c-4853-9ba5-b8551e3dd444")
+	)
+	(label "TTL7"
+		(at 261.62 88.9 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "3a4877d0-21b4-46d5-81ed-6ced756ae843")
+	)
+	(label "TTL8"
+		(at 261.62 91.44 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "8c8ed59c-e739-4fb1-ac52-c89e52033aca")
 	)
 	(global_label "I2C_SCL"
 		(shape bidirectional)
@@ -8586,10 +8572,10 @@
 		)
 		(uuid "df8964af-d6c5-4851-b38a-e6078020eb96")
 	)
-  (text "2026-10-01: RN521/RN522 (two 4 x 10k arrays 0603x4, C29718) pull DIO1-8 (74AHCT541 U501 inputs) low until the firmware configures the TCA9535, so TTL1-8 are defined at power-up."
-    (at 154.94 167.64 0)
+  (text "2026-10-01: R501-R508 replaced by RN501/RN502 (two 4 x 1k arrays 0603x4, C20197): U501 Y1-Y8 (labels TTL1_Y..TTL8_Y) -> 1k -> TTL1..TTL8 -> panel link J8."
+    (at 243.84 58.42 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid "a4f68e49-6b84-4233-82c6-17c8d59e7774")
+    (uuid "43502f06-06c7-4cd4-98d5-36fdaaad7f51")
   )
 	(symbol
 		(lib_id "class_board:PWR_GND")
@@ -9254,143 +9240,6 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
 					(reference "J7")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:R0603_1k")
-		(at 260.35 121.92 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced)
-		(uuid "1d726caa-20ce-5779-b0ff-21407fea291c")
-		(property "Reference" "R507"
-			(at 256.54 118.62 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "1k"
-			(at 256.54 126.22 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 260.35 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 260.35 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 260.35 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 260.35 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 260.35 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0603WAF1001T5E"
-			(at 260.35 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 260.35 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B5"
-			(at 260.35 121.92 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "03bbfc93-dc7e-5329-bdaf-0dd871d0b995")
-		)
-		(pin "2"
-			(uuid "2a5b4c0f-8565-591c-bc27-cdc3666c4087")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "R507")
 					(unit 1)
 				)
 			)
@@ -10468,143 +10317,6 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
 					(reference "U503")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:R0603_1k")
-		(at 260.35 91.44 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced)
-		(uuid "43a31b8c-17a1-5aa4-87b5-8a489e47577a")
-		(property "Reference" "R504"
-			(at 256.54 88.14 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "1k"
-			(at 256.54 95.74 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 260.35 91.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 260.35 91.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 260.35 91.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 260.35 91.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 260.35 91.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0603WAF1001T5E"
-			(at 260.35 91.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 260.35 91.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B5"
-			(at 260.35 91.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "5e83ccb7-2d8c-5b01-8e6b-8fe63e4dfc29")
-		)
-		(pin "2"
-			(uuid "0fdaa713-3dff-581e-8e93-ac041378b1c6")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "R504")
 					(unit 1)
 				)
 			)
@@ -11887,143 +11599,6 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:R0603_1k")
-		(at 260.35 111.76 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced)
-		(uuid "8384ff2b-73bf-5354-896e-2117b0c50f3e")
-		(property "Reference" "R506"
-			(at 256.54 108.46 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "1k"
-			(at 256.54 116.06 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 260.35 111.76 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 260.35 111.76 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 260.35 111.76 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 260.35 111.76 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 260.35 111.76 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0603WAF1001T5E"
-			(at 260.35 111.76 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 260.35 111.76 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B5"
-			(at 260.35 111.76 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "80f0d175-a04c-5bd7-aa47-afd124edcd6c")
-		)
-		(pin "2"
-			(uuid "d4a71b6c-c995-57fa-8d6e-06eab24c1b0b")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "R506")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "class_board:PWR_GND")
 		(at 205.74 119.38 0)
 		(unit 1)
@@ -12477,143 +12052,6 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:R0603_1k")
-		(at 260.35 81.28 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced)
-		(uuid "9e8d12b6-be89-5a96-84d6-1e438745410e")
-		(property "Reference" "R503"
-			(at 256.54 77.98 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "1k"
-			(at 256.54 85.58 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 260.35 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 260.35 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 260.35 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 260.35 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 260.35 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0603WAF1001T5E"
-			(at 260.35 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 260.35 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B5"
-			(at 260.35 81.28 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "75b2359e-5512-53ae-a89c-70007a281146")
-		)
-		(pin "2"
-			(uuid "651cedab-8c06-554e-a523-0c1dc92fb7ba")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "R503")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "class_board:PWR_GND")
 		(at 430.53 123.19 0)
 		(unit 1)
@@ -12772,143 +12210,6 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:R0603_1k")
-		(at 260.35 132.08 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced)
-		(uuid "a2fe94f3-7583-5667-b40f-e685021e8812")
-		(property "Reference" "R508"
-			(at 256.54 128.78 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "1k"
-			(at 256.54 136.38 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 260.35 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 260.35 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 260.35 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 260.35 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 260.35 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0603WAF1001T5E"
-			(at 260.35 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 260.35 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B5"
-			(at 260.35 132.08 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "721392f6-69d4-5b61-934e-38da1044f0ae")
-		)
-		(pin "2"
-			(uuid "8f2e677c-0b27-5d3a-a225-652783bf4f8e")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "R508")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "class_board:PWR_p3V3")
 		(at 490.22 99.06 0)
 		(unit 1)
@@ -12982,280 +12283,6 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
 					(reference "#PWR5016")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:R0603_1k")
-		(at 260.35 60.96 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced)
-		(uuid "b43a4833-463b-5a63-adb6-483606b5e6f8")
-		(property "Reference" "R501"
-			(at 256.54 57.66 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "1k"
-			(at 256.54 65.26 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 260.35 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 260.35 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 260.35 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 260.35 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 260.35 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0603WAF1001T5E"
-			(at 260.35 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 260.35 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B5"
-			(at 260.35 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "8de87780-9ca6-5de0-bbe3-09e8de062d98")
-		)
-		(pin "2"
-			(uuid "80b42195-ad6e-5028-b4df-a4e73f329339")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "R501")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:R0603_1k")
-		(at 260.35 101.6 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced)
-		(uuid "b9908240-22a9-5f47-bb39-d07396299dd5")
-		(property "Reference" "R505"
-			(at 256.54 98.3 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "1k"
-			(at 256.54 105.9 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0603WAF1001T5E"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B5"
-			(at 260.35 101.6 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "4711c8c5-f54f-51a9-8618-afb6c26e78d6")
-		)
-		(pin "2"
-			(uuid "b07f413c-a6ed-5cac-a737-56187f33d857")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "R505")
 					(unit 1)
 				)
 			)
@@ -13815,143 +12842,6 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
 					(reference "J8")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:R0603_1k")
-		(at 260.35 71.12 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced)
-		(uuid "e0ae5642-0e99-5396-aa3e-731a681c139c")
-		(property "Reference" "R502"
-			(at 256.54 67.82 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "1k"
-			(at 256.54 75.42 270)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 260.35 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C21190.html"
-			(at 260.35 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 1k 1% 0603 100 mW (Uniroyal 0603WAF1001T5E)"
-			(at 260.35 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C21190"
-			(at 260.35 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 260.35 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "0603WAF1001T5E"
-			(at 260.35 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 260.35 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B5"
-			(at 260.35 71.12 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(body_style 1)
-		(in_pos_files yes)
-		(pin "1"
-			(uuid "05d987b1-4355-592b-b815-96da3883638e")
-		)
-		(pin "2"
-			(uuid "23eaf8c2-c2f7-53b5-b0b7-21910d98eecd")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "R502")
 					(unit 1)
 				)
 			)
@@ -14677,15 +13567,6 @@
 				)
 			)
 		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "RN521")
-					(unit 1)
-				)
-			)
-		)
-	
 		(property "Block" "B5"
 			(at 162.56 152.4 0)
 			(hide yes)
@@ -14703,7 +13584,16 @@
 					(size 1.27 1.27)
 				)
 			)
-		))
+		)
+		(instances
+			(project "class-board"
+				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
+					(reference "RN521")
+					(unit 1)
+				)
+			)
+		)
+	)
 	(symbol
 		(lib_id "Device:R_Pack04")
 		(at 193.04 152.4 0)
@@ -14755,15 +13645,6 @@
 				)
 			)
 		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
-					(reference "RN522")
-					(unit 1)
-				)
-			)
-		)
-	
 		(property "Block" "B5"
 			(at 193.04 152.4 0)
 			(hide yes)
@@ -14781,7 +13662,16 @@
 					(size 1.27 1.27)
 				)
 			)
-		))
+		)
+		(instances
+			(project "class-board"
+				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
+					(reference "RN522")
+					(unit 1)
+				)
+			)
+		)
+	)
 	(symbol
 		(lib_id "class_board:PWR_GND")
 		(at 167.64 160.02 0)
@@ -14904,6 +13794,162 @@
 			)
 		)
 	)
+	(symbol
+		(lib_id "Device:R_Pack04")
+		(at 254 66.04 90)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "8588fd00-cebb-4bcc-9a3b-eb17c6716e8a")
+		(property "Reference" "RN501"
+			(at 254 73.66 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 254 60.96 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0603"
+			(at 254 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 254 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "4 x 1k resistor array 0603x4 (UNI-ROYAL 4D03WGJ0102T5E) - series resistors TTL1-4 (74AHCT541 U501 Y1-Y4 -> panel link)"
+			(at 254 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "class-board"
+				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
+					(reference "RN501")
+					(unit 1)
+				)
+			)
+		)
+	
+		(property "Block" "B5"
+			(at 254 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C20197"
+			(at 254 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		))
+	(symbol
+		(lib_id "Device:R_Pack04")
+		(at 254 86.36 90)
+		(unit 1)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5fe4e42b-7ec5-411f-81f9-55669c1b8c76")
+		(property "Reference" "RN502"
+			(at 254 93.98 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1k"
+			(at 254 81.28 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_Array_Convex_4x0603"
+			(at 254 86.36 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 254 86.36 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "4 x 1k resistor array 0603x4 (UNI-ROYAL 4D03WGJ0102T5E) - series resistors TTL5-8 (74AHCT541 U501 Y5-Y8 -> panel link)"
+			(at 254 86.36 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(instances
+			(project "class-board"
+				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/2562e949-1e58-5048-8406-1b1b4a27bc6f"
+					(reference "RN502")
+					(unit 1)
+				)
+			)
+		)
+	
+		(property "Block" "B5"
+			(at 254 86.36 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C20197"
+			(at 254 86.36 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		))
 	(polyline
 		(pts
 			(xy 338.69 382.66)
