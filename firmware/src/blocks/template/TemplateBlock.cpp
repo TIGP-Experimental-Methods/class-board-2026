@@ -52,7 +52,7 @@ void TemplateBlock::status(JsonObject out) {
 
 // --- Alarm hook -----------------------------------------------------------
 // Alarm rules are data, not code: add one from the "Alarms" panel or with
-//   instrument alarms add --block template --key value --op gt --threshold 5 --action relay:1:on
+//   instrument alarms add --block template --key value --op gt --threshold 5 --action module:1:on
 // which sends {"block":"alarms","cmd":"add","args":{...}}. Each block owner
 // adds one rule that makes sense for their block and shows it at the demo
-// (e.g. B1: "ai1 > 9 V -> relay 1 off", B2: "v3v3 < 3.0 -> notify").
+// (e.g. B1: "ai1 > 9 V -> module 1 off", B2: "v3v3 < 3.0 -> notify").

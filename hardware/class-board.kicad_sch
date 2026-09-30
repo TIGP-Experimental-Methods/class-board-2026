@@ -2794,53 +2794,6 @@
 		)
 	)
 	(sheet
-		(at 270.51 49.53)
-		(size 88.9 16.51)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "4198837a-1c2a-56d0-94fc-14c5f2abeec5")
-		(property "Sheetname" "front_panel_link"
-			(at 270.51 48.7034 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.5 1.5)
-					(bold yes)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Sheetfile" "sheets/front_panel_link.kicad_sch"
-			(at 270.51 66.6246 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71"
-					(page "9")
-				)
-			)
-		)
-	)
-	(sheet
 		(at 43.18 73.66)
 		(size 67.31 22.86)
 		(exclude_from_sim no)
@@ -2880,83 +2833,83 @@
 		)
 		(pin "CS_ADC" input
 			(at 110.49 88.9 0)
-			(uuid "237832d0-4690-476d-8a80-c8d7a75bc04c")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify right)
 			)
+			(uuid "237832d0-4690-476d-8a80-c8d7a75bc04c")
 		)
 		(pin "AO1" input
 			(at 110.49 91.44 0)
-			(uuid "8b5d453b-f402-4fd5-b19e-caa54875a56b")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify right)
 			)
+			(uuid "8b5d453b-f402-4fd5-b19e-caa54875a56b")
 		)
 		(pin "AO2" input
 			(at 110.49 93.98 0)
-			(uuid "176dc38e-e50c-43e9-98ec-a71d89c37e54")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify right)
 			)
+			(uuid "176dc38e-e50c-43e9-98ec-a71d89c37e54")
 		)
-		(pin "AUX" output
+		(pin "RX" output
 			(at 43.18 86.36 180)
-			(uuid "a1de2c40-64e4-4a91-9978-1d4b17ec5a55")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
+			(uuid "a1de2c40-64e4-4a91-9978-1d4b17ec5a55")
 		)
 		(pin "COND_OUT1" input
 			(at 43.18 78.74 180)
-			(uuid "94c76230-8563-4583-8339-b77e08f723e6")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
+			(uuid "94c76230-8563-4583-8339-b77e08f723e6")
 		)
 		(pin "COND_OUT2" input
 			(at 43.18 81.28 180)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
 			(uuid "24d1c9f3-63f5-4dfb-b553-86ee84c485c9")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
 		)
-		(pin "RX" output
+		(pin "AUX" output
 			(at 43.18 83.82 180)
-			(uuid "e82b0778-d857-4956-b737-8cf80940e432")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
+			(uuid "e82b0778-d857-4956-b737-8cf80940e432")
 		)
 		(pin "TX" input
 			(at 43.18 76.2 180)
-			(uuid "c94b6b41-de13-45ea-b063-ec96db23ddf3")
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
 			)
+			(uuid "c94b6b41-de13-45ea-b063-ec96db23ddf3")
 		)
 		(instances
 			(project "class-board"

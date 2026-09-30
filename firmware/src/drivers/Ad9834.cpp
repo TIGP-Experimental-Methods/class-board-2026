@@ -15,9 +15,7 @@ Ad9834 dds;
 namespace {
 // Control-register bit positions, datasheet table "Control Register Bits".
 constexpr uint16_t kB28    = 1u << 13;
-constexpr uint16_t kFsel   = 1u << 11;
 constexpr uint16_t kPsel   = 1u << 10;
-constexpr uint16_t kPinSw  = 1u << 9;
 constexpr uint16_t kReset  = 1u << 8;
 constexpr uint16_t kSleep1 = 1u << 7;
 constexpr uint16_t kSleep12 = 1u << 6;
@@ -48,15 +46,17 @@ void Ad9834::writeWord(uint16_t word) {
 #endif
 }
 
-void Ad9834::writeControl() {
-  uint16_t c = kB28 | kPinSw;          // 28-bit frequency writes, pin-controlled select
+// PIN/SW (bit 9) = 0 and FSEL (bit 11) = 0: every function is register-controlled
+// and FREQ0 is the only frequency register in use.
+uint16_t Ad9834::control() const {
+  uint16_t c = kB28;                   // 28-bit frequency writes
+  if (psel_) c |= kPsel;
   if (reset_) c |= kReset;
   if (sleep_) c |= (kSleep1 | kSleep12);
-  // FSEL and PSEL are pin-controlled (PIN/SW = 1), so these bits are ignored.
-  // They are cleared anyway so a reader of a register dump is not misled.
-  c &= static_cast<uint16_t>(~(kFsel | kPsel));
-  writeWord(c);
+  return c;
 }
+
+void Ad9834::writeControl() { writeWord(control()); }
 
 void Ad9834::begin(uint32_t mclk_hz) {
   mclk_ = mclk_hz ? mclk_hz : 50000000;
@@ -70,8 +70,8 @@ void Ad9834::begin(uint32_t mclk_hz) {
 #ifndef SIM
   pinMode(PIN_DDS_FSYNC, OUTPUT);
   digitalWrite(PIN_DDS_FSYNC, HIGH);   // idle high: no frame in progress
+  digitalWrite(PIN_DDS_PSEL, LOW);     // ignored with PIN/SW = 0; held at a defined level
   pinMode(PIN_DDS_PSEL, OUTPUT);
-  digitalWrite(PIN_DDS_PSEL, LOW);     // PHASE0
   spibus::begin();
 #endif
 
@@ -99,10 +99,7 @@ void Ad9834::setFrequency(double hz) {
   SPI.beginTransaction(SPISettings(kSpiHz, MSBFIRST, SPI_MODE2));
   // B28 = 1 means the next two writes to FREQ0 are its low then its high 14 bits.
   // The control word has to come first, in the same transaction.
-  uint16_t c = kB28 | kPinSw;
-  if (reset_) c |= kReset;
-  if (sleep_) c |= (kSleep1 | kSleep12);
-  frame(c);
+  frame(control());
   frame(static_cast<uint16_t>(0x4000 | (freqWord_ & 0x3FFF)));
   frame(static_cast<uint16_t>(0x4000 | ((freqWord_ >> 14) & 0x3FFF)));
   SPI.endTransaction();
@@ -129,10 +126,9 @@ void Ad9834::setReset(bool on) {
 
 void Ad9834::selectPhase(bool p1) {
   psel_ = p1;
-#ifndef SIM
-  digitalWrite(PIN_DDS_PSEL, p1 ? HIGH : LOW);
-#endif
+  writeControl();
 }
+
 
 void Ad9834::sleep(bool on) {
   sleep_ = on;

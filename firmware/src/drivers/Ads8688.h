@@ -39,6 +39,8 @@ class Ads8688 {
  public:
   void begin();
 
+  // `ch` is always the ADC channel (AIN_0..AIN_7), never the panel input number;
+  // pins.h kAinOfAi[] converts AI1..AI8 to it.
   bool setRange(uint8_t ch, uint8_t code);   // ch 0..7
   uint8_t range(uint8_t ch) const { return ch < 8 ? range_[ch] : 0; }
 
@@ -60,9 +62,11 @@ class Ads8688 {
  private:
   bool programWrite(uint8_t addr, uint8_t data);
 
-  // Reset value of the range registers is 0 (+-10.24 V). Channels 7 and 8 carry
-  // the NMR I and Q baseband, which the receiver scales to fit +-5.12 V.
-  uint8_t range_[8] = {0, 0, 0, 0, 0, 0, 1, 1};
+  // Reset value of the range registers is 0 (+-10.24 V). AIN_3 and AIN_2 (panel
+  // AI7 and AI8) carry the NMR I and Q baseband, which the receiver scales to fit
+  // +-5.12 V.
+  uint8_t range_[8] = {0, 0, 1, 1, 0, 0, 0, 0};
+
   bool present_ = false;
 };
 

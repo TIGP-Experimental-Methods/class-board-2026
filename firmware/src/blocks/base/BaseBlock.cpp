@@ -12,7 +12,7 @@ void BaseBlock::begin() {
   showLed();
 
   // The shared buses and the two I2C chips every section relies on (NMR-FIRMWARE.md
-  // section 4): the SPI lock, the TCA9535 expander (DIO, relays, the quadrature clear)
+  // section 4): the SPI lock, the TCA9535 expander (DIO, module outputs, the quadrature clear)
   // and the Si5351A clock generator. On a bare dev board neither chip answers;
   // present() stays false and the blocks that need them degrade quietly.
   spibus::begin();
