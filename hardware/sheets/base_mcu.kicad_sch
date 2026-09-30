@@ -1215,146 +1215,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "class_board:PWR_AGND"
-			(power global)
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 0)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom no)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "#PWR"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "AGND"
-				(at 0 -3.81 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Power symbol: AGND"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "PWR_AGND_0_1"
-				(polyline
-					(pts
-						(xy -1.27 -1.27) (xy 1.27 -1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.762 -1.905) (xy 0.762 -1.905)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.254 -2.54) (xy 0.254 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 0) (xy 0 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "PWR_AGND_1_1"
-				(pin power_in line
-					(at 0 0 270)
-					(length 0)
-					(name "AGND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "class_board:PWR_FLAG"
 			(power global)
 			(pin_numbers
@@ -2786,18 +2646,6 @@
 		)
 		(uuid "761c1454-33c9-5468-af40-d53717413f2a")
 	)
-	(text "The ONLY AGND-GND join (net tie NT1, copper only)."
-		(exclude_from_sim no)
-		(at 300 240 0)
-		(effects
-			(font
-				(size 1.3 1.3)
-				(bold yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "7bcefafc-4c35-52a1-abd3-bcad30bca4a3")
-	)
 	(text "41 / 42"
 		(exclude_from_sim no)
 		(at 14.8 70.3808 0)
@@ -3184,18 +3032,6 @@
 			(justify left bottom)
 		)
 		(uuid "d49ce8f9-ff87-5200-a92c-8f0f45278ac4")
-	)
-	(text "Placed at the B1/BASE boundary."
-		(exclude_from_sim no)
-		(at 300 243.5 0)
-		(effects
-			(font
-				(size 1.3 1.3)
-				(bold yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "d8b6ef60-5282-5c59-9414-70bfb989dc90")
 	)
 	(text "C_SW"
 		(exclude_from_sim no)
@@ -3613,16 +3449,6 @@
 	)
 	(wire
 		(pts
-			(xy 320.04 224.79) (xy 320.04 229.87)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "174f01f4-bf8b-5f54-babf-2fc3e18672d8")
-	)
-	(wire
-		(pts
 			(xy 262.89 72.39) (xy 262.89 69.85)
 		)
 		(stroke
@@ -3680,16 +3506,6 @@
 			(type default)
 		)
 		(uuid "3147e5e2-8617-5199-b63b-e451688ad3e3")
-	)
-	(wire
-		(pts
-			(xy 340.36 224.79) (xy 340.36 229.87)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "373fbab8-99a4-59cb-bfb4-d1ca2338747d")
 	)
 	(wire
 		(pts
@@ -3993,36 +3809,6 @@
 	)
 	(wire
 		(pts
-			(xy 275.59 224.79) (xy 285.75 224.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9ca9158b-c095-5b18-9c42-82d95d3336a4")
-	)
-	(wire
-		(pts
-			(xy 335.28 224.79) (xy 340.36 224.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9ff446f5-140d-46a8-b277-92f3a634cf3a")
-	)
-	(wire
-		(pts
-			(xy 285.75 224.79) (xy 285.75 227.33)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a2cafccc-cbf9-5d20-91be-65793b53b346")
-	)
-	(wire
-		(pts
 			(xy 85.09 163.83) (xy 85.09 156.21)
 		)
 		(stroke
@@ -4030,16 +3816,6 @@
 			(type default)
 		)
 		(uuid "a523a325-20ad-5ce6-a4f8-f33d00f02e9a")
-	)
-	(wire
-		(pts
-			(xy 327.66 224.79) (xy 320.04 224.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a58a2b06-bb4e-5ca1-86d2-5eeb896fa461")
 	)
 	(polyline
 		(pts
@@ -4180,16 +3956,6 @@
 			(type default)
 		)
 		(uuid "c5415c9d-5ca1-5cf9-a3a6-11cd304aa718")
-	)
-	(wire
-		(pts
-			(xy 275.59 224.79) (xy 275.59 222.25)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cca17b5c-5c60-5337-aba1-ee23d98080c6")
 	)
 	(wire
 		(pts
@@ -4909,85 +4675,6 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
-		(at 285.75 227.33 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "0cd867df-d87d-5b68-ad92-23a186ce5470")
-		(property "Reference" "#PWR0023"
-			(at 283.21 224.028 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "AGND"
-			(at 285.75 231.14 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 285.75 227.33 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 285.75 227.33 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol: AGND"
-			(at 285.75 227.33 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "bb9988f3-f86e-597b-8ddd-fbd8252ee589")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/0a09ce84-79ab-518f-b4b4-c928b96ca5c7"
-					(reference "#PWR0023")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "class_board:PWR_GND")
 		(at 222.25 118.11 0)
 		(unit 1)
@@ -5522,85 +5209,6 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/0a09ce84-79ab-518f-b4b4-c928b96ca5c7"
 					(reference "#PWR0005")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:PWR_FLAG")
-		(at 275.59 222.25 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "423e7dc1-3bff-5cfe-8afb-52e414e1c8a7")
-		(property "Reference" "#PWR0022"
-			(at 273.05 218.948 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "PWR_FLAG"
-			(at 275.59 218.948 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 275.59 222.25 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 275.59 222.25 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power flag: marks a net as driven (grounds without a power_out pin)"
-			(at 275.59 222.25 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "2f261667-b924-50fb-8cac-c1f794bc83ae")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/0a09ce84-79ab-518f-b4b4-c928b96ca5c7"
-					(reference "#PWR0022")
 					(unit 1)
 				)
 			)
@@ -6663,10 +6271,10 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "9d45c9f5-4445-5d14-bfd0-99c10a59eeae")
 		(property "Reference" "J1"
@@ -6860,10 +6468,10 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "b019b8da-f64a-5a1b-8c19-ece73d8116dc")
 		(property "Reference" "J2"
@@ -7931,210 +7539,6 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:R0603_100")
-		(at 331.47 224.79 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "e78a439a-b36c-4f38-ba32-c2a2c8a874bb")
-		(property "Reference" "R719"
-			(at 331.47 221.742 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "0"
-			(at 335.534 223.266 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder"
-			(at 331.47 224.79 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" "https://www.lcsc.com/product-detail/C22775.html"
-			(at 331.47 224.79 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor 100 1% 0805 0 mW (Uniroyal)"
-			(at 331.47 224.79 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "LCSC" "C17477"
-			(at 331.47 224.79 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "JLC_CLASS" "Basic"
-			(at 331.47 224.79 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "UNI-ROYAL"
-			(at 331.47 224.79 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "NMR_RX"
-			(at 331.47 224.79 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "8f14d3e3-00ba-42d2-b97a-9f5dabb83e25")
-		)
-		(pin "2"
-			(uuid "50ccb818-8e71-4a76-9937-066ed680212b")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/0a09ce84-79ab-518f-b4b4-c928b96ca5c7"
-					(reference "R719")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:PWR_AGND")
-		(at 320.04 229.87 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "ee442854-d701-5cee-b363-70b0535096d8")
-		(property "Reference" "#PWR0018"
-			(at 317.5 226.568 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "AGND"
-			(at 320.04 233.68 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 320.04 229.87 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 320.04 229.87 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol: AGND"
-			(at 320.04 229.87 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "ffe1054b-0144-5104-b86f-47dd5a083182")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/0a09ce84-79ab-518f-b4b4-c928b96ca5c7"
-					(reference "#PWR0018")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "class_board:PWR_p5V_RAW")
 		(at 209.55 247.65 0)
 		(unit 1)
@@ -8208,85 +7612,6 @@
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/0a09ce84-79ab-518f-b4b4-c928b96ca5c7"
 					(reference "#PWR0026")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "class_board:PWR_GND")
-		(at 340.36 229.87 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "fe880b45-93d8-5de6-b3a5-1188752ddbc2")
-		(property "Reference" "#PWR0019"
-			(at 337.82 226.568 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "GND"
-			(at 340.36 233.68 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 340.36 229.87 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 340.36 229.87 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol: GND"
-			(at 340.36 229.87 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "981591c3-bd4c-5729-a01f-321f7d166325")
-		)
-		(instances
-			(project "class-board"
-				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/0a09ce84-79ab-518f-b4b4-c928b96ca5c7"
-					(reference "#PWR0019")
 					(unit 1)
 				)
 			)

@@ -2242,146 +2242,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "class_board:PWR_AGND"
-			(power global)
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 0)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom no)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "#PWR"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "AGND"
-				(at 0 -3.81 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Power symbol: AGND"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "PWR_AGND_0_1"
-				(polyline
-					(pts
-						(xy -1.27 -1.27) (xy 1.27 -1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.762 -1.905) (xy 0.762 -1.905)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.254 -2.54) (xy 0.254 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 0) (xy 0 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "PWR_AGND_1_1"
-				(pin power_in line
-					(at 0 0 270)
-					(length 0)
-					(name "AGND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "class_board:PWR_FLAG"
 			(power global)
 			(pin_numbers
@@ -7475,7 +7335,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 373.38 118.11 0)
 		(unit 1)
 		(body_style 1)
@@ -7487,7 +7347,7 @@
 		(fields_autoplaced yes)
 		(uuid "17e61bf8-16b9-59ad-b022-826e0c21700f")
 		(property "Reference" "#PWR1061"
-			(at 370.84 114.808 0)
+			(at 373.38 118.11 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7495,11 +7355,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 373.38 121.92 0)
+		(property "Value" "GND"
+			(at 373.38 123.19 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7530,7 +7389,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 373.38 118.11 0)
 			(hide yes)
 			(show_name no)
@@ -7554,7 +7413,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 317.5 223.52 0)
 		(unit 1)
 		(body_style 1)
@@ -7566,7 +7425,7 @@
 		(fields_autoplaced yes)
 		(uuid "1b309787-aaf0-58c2-bf33-75e2da79b874")
 		(property "Reference" "#PWR1053"
-			(at 314.96 220.218 0)
+			(at 317.5 223.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7574,11 +7433,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 317.5 227.33 0)
+		(property "Value" "GND"
+			(at 317.5 228.6 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7609,7 +7467,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 317.5 223.52 0)
 			(hide yes)
 			(show_name no)
@@ -8366,7 +8224,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 297.18 166.37 0)
 		(unit 1)
 		(body_style 1)
@@ -8378,7 +8236,7 @@
 		(fields_autoplaced yes)
 		(uuid "30735db9-0a9c-5539-9525-1e58b3e05735")
 		(property "Reference" "#PWR1038"
-			(at 294.64 163.068 0)
+			(at 297.18 166.37 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8386,11 +8244,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 297.18 170.18 0)
+		(property "Value" "GND"
+			(at 297.18 171.45 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8421,7 +8278,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 297.18 166.37 0)
 			(hide yes)
 			(show_name no)
@@ -8740,7 +8597,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 307.34 223.52 0)
 		(unit 1)
 		(body_style 1)
@@ -8752,7 +8609,7 @@
 		(fields_autoplaced yes)
 		(uuid "3a842659-9d0b-5ec6-b503-79dba53055d1")
 		(property "Reference" "#PWR1052"
-			(at 304.8 220.218 0)
+			(at 307.34 223.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8760,11 +8617,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 307.34 227.33 0)
+		(property "Value" "GND"
+			(at 307.34 228.6 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8795,7 +8651,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 307.34 223.52 0)
 			(hide yes)
 			(show_name no)
@@ -8819,7 +8675,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 363.22 118.11 0)
 		(unit 1)
 		(body_style 1)
@@ -8831,7 +8687,7 @@
 		(fields_autoplaced yes)
 		(uuid "3b4c3bb7-339d-5a09-a3aa-117604e212f8")
 		(property "Reference" "#PWR1060"
-			(at 360.68 114.808 0)
+			(at 363.22 118.11 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8839,11 +8695,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 363.22 121.92 0)
+		(property "Value" "GND"
+			(at 363.22 123.19 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8874,7 +8729,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 363.22 118.11 0)
 			(hide yes)
 			(show_name no)
@@ -9352,7 +9207,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 337.82 118.11 0)
 		(unit 1)
 		(body_style 1)
@@ -9364,7 +9219,7 @@
 		(fields_autoplaced yes)
 		(uuid "4a10c0a5-4034-5eb8-adb2-d29e90763ad9")
 		(property "Reference" "#PWR1058"
-			(at 335.28 114.808 0)
+			(at 337.82 118.11 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9372,11 +9227,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 337.82 121.92 0)
+		(property "Value" "GND"
+			(at 337.82 123.19 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9407,7 +9261,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 337.82 118.11 0)
 			(hide yes)
 			(show_name no)
@@ -9659,7 +9513,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 297.18 223.52 0)
 		(unit 1)
 		(body_style 1)
@@ -9671,7 +9525,7 @@
 		(fields_autoplaced yes)
 		(uuid "4fe4b496-52b1-589a-8b9e-c53d23a47f63")
 		(property "Reference" "#PWR1051"
-			(at 294.64 220.218 0)
+			(at 297.18 223.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9679,11 +9533,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 297.18 227.33 0)
+		(property "Value" "GND"
+			(at 297.18 228.6 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9714,7 +9567,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 297.18 223.52 0)
 			(hide yes)
 			(show_name no)
@@ -10792,7 +10645,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 337.82 177.8 0)
 		(unit 1)
 		(body_style 1)
@@ -10804,7 +10657,7 @@
 		(fields_autoplaced yes)
 		(uuid "636ea74e-a933-57a9-88c0-316399a3942b")
 		(property "Reference" "#PWR1043"
-			(at 335.28 174.498 0)
+			(at 337.82 177.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10812,11 +10665,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 337.82 181.61 0)
+		(property "Value" "GND"
+			(at 337.82 182.88 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10847,7 +10699,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 337.82 177.8 0)
 			(hide yes)
 			(show_name no)
@@ -12239,7 +12091,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 327.66 223.52 0)
 		(unit 1)
 		(body_style 1)
@@ -12251,7 +12103,7 @@
 		(fields_autoplaced yes)
 		(uuid "8447121e-d362-5f42-9d4d-3fc4f784e1c5")
 		(property "Reference" "#PWR1054"
-			(at 325.12 220.218 0)
+			(at 327.66 223.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12259,11 +12111,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 327.66 227.33 0)
+		(property "Value" "GND"
+			(at 327.66 228.6 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -12294,7 +12145,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 327.66 223.52 0)
 			(hide yes)
 			(show_name no)
@@ -12910,7 +12761,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 337.82 234.95 0)
 		(unit 1)
 		(body_style 1)
@@ -12922,7 +12773,7 @@
 		(fields_autoplaced yes)
 		(uuid "93cfc2d5-ef70-5c21-a05b-a4c3797591ab")
 		(property "Reference" "#PWR1056"
-			(at 335.28 231.648 0)
+			(at 337.82 234.95 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12930,11 +12781,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 337.82 238.76 0)
+		(property "Value" "GND"
+			(at 337.82 240.03 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -12965,7 +12815,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 337.82 234.95 0)
 			(hide yes)
 			(show_name no)
@@ -13480,7 +13330,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 287.02 223.52 0)
 		(unit 1)
 		(body_style 1)
@@ -13492,7 +13342,7 @@
 		(fields_autoplaced yes)
 		(uuid "98f55af7-7374-5afe-be36-38f1cf408dc4")
 		(property "Reference" "#PWR1050"
-			(at 284.48 220.218 0)
+			(at 287.02 223.52 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -13500,11 +13350,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 287.02 227.33 0)
+		(property "Value" "GND"
+			(at 287.02 228.6 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13535,7 +13384,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 287.02 223.52 0)
 			(hide yes)
 			(show_name no)
@@ -14265,7 +14114,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 252.73 158.75 0)
 		(unit 1)
 		(body_style 1)
@@ -14277,7 +14126,7 @@
 		(fields_autoplaced yes)
 		(uuid "a7cc4a26-767c-54f0-9601-6a6663313f28")
 		(property "Reference" "#PWR1035"
-			(at 250.19 155.448 0)
+			(at 252.73 158.75 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14285,11 +14134,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 252.73 162.56 0)
+		(property "Value" "GND"
+			(at 252.73 163.83 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14320,7 +14168,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 252.73 158.75 0)
 			(hide yes)
 			(show_name no)
@@ -14596,7 +14444,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:TestPoint")
+		(lib_id "class_board:PWR_GND")
 		(at 115.57 240.03 0)
 		(unit 1)
 		(body_style 1)
@@ -14607,29 +14455,28 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ad913ee6-774b-5040-9910-897d8d964762")
-		(property "Reference" "TP206"
-			(at 114.3 235.204 0)
+		(property "Reference" "#PWR206"
+			(at 115.57 240.03 0)
+			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 114.3 240.792 0)
+		(property "Value" "GND"
+			(at 115.57 245.11 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left top)
 			)
 		)
-		(property "Footprint" "class_board:TestPoint_Pad_D1.5mm"
+		(property "Footprint" ""
 			(at 115.57 240.03 0)
 			(hide yes)
 			(show_name no)
@@ -14651,18 +14498,7 @@
 				)
 			)
 		)
-		(property "Description" "Test point pad 1.5 mm"
-			(at 115.57 240.03 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Block" "B2"
+		(property "Description" "Power symbol: GND"
 			(at 115.57 240.03 0)
 			(hide yes)
 			(show_name no)
@@ -14679,7 +14515,7 @@
 		(instances
 			(project "class-board"
 				(path "/21416d14-3056-576f-bbf8-3b43eaeb7e71/d5630740-bb99-510a-af06-d2fe7228f1c6"
-					(reference "TP206")
+					(reference "#PWR206")
 					(unit 1)
 				)
 			)
@@ -15267,7 +15103,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 317.5 166.37 0)
 		(unit 1)
 		(body_style 1)
@@ -15279,7 +15115,7 @@
 		(fields_autoplaced yes)
 		(uuid "b9114997-6fbf-5c2b-b438-b821ef9b9814")
 		(property "Reference" "#PWR1040"
-			(at 314.96 163.068 0)
+			(at 317.5 166.37 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -15287,11 +15123,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 317.5 170.18 0)
+		(property "Value" "GND"
+			(at 317.5 171.45 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -15322,7 +15157,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 317.5 166.37 0)
 			(hide yes)
 			(show_name no)
@@ -15346,7 +15181,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 115.57 242.57 0)
 		(unit 1)
 		(body_style 1)
@@ -15358,7 +15193,7 @@
 		(fields_autoplaced yes)
 		(uuid "bde32a01-c231-5ff4-b1f6-442c32f90ca5")
 		(property "Reference" "#PWR1068"
-			(at 113.03 239.268 0)
+			(at 115.57 242.57 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -15366,11 +15201,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 115.57 246.38 0)
+		(property "Value" "GND"
+			(at 115.57 247.65 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -15401,7 +15235,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 115.57 242.57 0)
 			(hide yes)
 			(show_name no)
@@ -15504,7 +15338,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 350.52 118.11 0)
 		(unit 1)
 		(body_style 1)
@@ -15516,7 +15350,7 @@
 		(fields_autoplaced yes)
 		(uuid "c278c5dd-3a5a-5660-b715-3952769f63de")
 		(property "Reference" "#PWR1059"
-			(at 347.98 114.808 0)
+			(at 350.52 118.11 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -15524,11 +15358,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 350.52 121.92 0)
+		(property "Value" "GND"
+			(at 350.52 123.19 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -15559,7 +15392,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 350.52 118.11 0)
 			(hide yes)
 			(show_name no)
@@ -15662,7 +15495,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 252.73 200.66 180)
 		(unit 1)
 		(body_style 1)
@@ -15674,7 +15507,7 @@
 		(fields_autoplaced yes)
 		(uuid "c8fe305c-7fcf-5844-b035-1f746d73d8ba")
 		(property "Reference" "#PWR1048"
-			(at 250.19 197.358 0)
+			(at 252.73 200.66 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -15682,11 +15515,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 252.73 197.358 0)
+		(property "Value" "GND"
+			(at 252.73 195.58 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -15717,7 +15549,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 252.73 200.66 0)
 			(hide yes)
 			(show_name no)
@@ -15957,7 +15789,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 327.66 166.37 0)
 		(unit 1)
 		(body_style 1)
@@ -15969,7 +15801,7 @@
 		(fields_autoplaced yes)
 		(uuid "d1f1cd42-8436-5907-9512-487737aa74a0")
 		(property "Reference" "#PWR1041"
-			(at 325.12 163.068 0)
+			(at 327.66 166.37 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -15977,11 +15809,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 327.66 170.18 0)
+		(property "Value" "GND"
+			(at 327.66 171.45 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -16012,7 +15843,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 327.66 166.37 0)
 			(hide yes)
 			(show_name no)
@@ -17562,7 +17393,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 287.02 166.37 0)
 		(unit 1)
 		(body_style 1)
@@ -17574,7 +17405,7 @@
 		(fields_autoplaced yes)
 		(uuid "edf9056d-19b8-5685-8bd8-a145c6bcd5eb")
 		(property "Reference" "#PWR1037"
-			(at 284.48 163.068 0)
+			(at 287.02 166.37 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17582,11 +17413,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 287.02 170.18 0)
+		(property "Value" "GND"
+			(at 287.02 171.45 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -17617,7 +17447,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 287.02 166.37 0)
 			(hide yes)
 			(show_name no)
@@ -18585,7 +18415,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_AGND")
+		(lib_id "class_board:PWR_GND")
 		(at 307.34 166.37 0)
 		(unit 1)
 		(body_style 1)
@@ -18597,7 +18427,7 @@
 		(fields_autoplaced yes)
 		(uuid "fa422675-e6b2-5e73-97ce-5fda01608129")
 		(property "Reference" "#PWR1039"
-			(at 304.8 163.068 0)
+			(at 307.34 166.37 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18605,11 +18435,10 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left bottom)
 			)
 		)
-		(property "Value" "AGND"
-			(at 307.34 170.18 0)
+		(property "Value" "GND"
+			(at 307.34 171.45 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -18640,7 +18469,7 @@
 				)
 			)
 		)
-		(property "Description" "Power symbol: AGND"
+		(property "Description" "Power symbol: GND"
 			(at 307.34 166.37 0)
 			(hide yes)
 			(show_name no)
