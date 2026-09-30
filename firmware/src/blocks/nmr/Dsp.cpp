@@ -39,19 +39,22 @@ uint32_t dcStart(uint32_t n, uint32_t t_acq_ms) {
   return n - n / 10;                      // the last tenth
 }
 
-void decimate(const int16_t* rawIq, uint32_t nOut, uint32_t decim,
+void decimate(const int16_t* raw, bool qFirst, uint32_t nOut, uint32_t decim,
               float dcI, float dcQ, float voltsPerCodeI, float voltsPerCodeQ,
               float* outIq) {
-  if (!rawIq || !outIq || decim == 0) return;
+  if (!raw || !outIq || decim == 0) return;
   const float inv = 1.0f / static_cast<float>(decim);
+  const uint32_t oi = qFirst ? 1 : 0;     // position of I within a raw pair
+  const uint32_t oq = 1 - oi;
   for (uint32_t k = 0; k < nOut; k++) {
-    const int16_t* p = rawIq + (size_t)k * decim * 2;
+    const int16_t* p = raw + (size_t)k * decim * 2;
     float si = 0.0f;
     float sq = 0.0f;
     for (uint32_t j = 0; j < decim; j++) {
-      si += static_cast<float>(p[2 * j]);
-      sq += static_cast<float>(p[2 * j + 1]);
+      si += static_cast<float>(p[2 * j + oi]);
+      sq += static_cast<float>(p[2 * j + oq]);
     }
+
     outIq[2 * k]     = (si * inv - dcI) * voltsPerCodeI;
     outIq[2 * k + 1] = (sq * inv - dcQ) * voltsPerCodeQ;
   }

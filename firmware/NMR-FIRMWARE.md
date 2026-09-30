@@ -7,8 +7,8 @@ Design authority: the course repo notes `2026-09-13-v07-nmr-circuits.md` (§9 fi
 disagree, fix the code; when this file and the schematic disagree, the schematic wins — then fix this file.
 
 Demo regime: proton NMR in water at **B0 ≈ 2.1 mT, f_Larmor ≈ 89.4 kHz**, thermal polarization, free
-induction decay (FID) after a 90° pulse, heterodyne I/Q receiver, IF ≈ 5.4 kHz into ADS8688 channels 7 (I)
-and 8 (Q). Earth's-field NMR (≈ 2 kHz, with the polarizer coil) is the stretch goal on the same code path.
+induction decay (FID) after a 90° pulse, heterodyne I/Q receiver, IF ≈ 5.4 kHz into panel inputs AI7 (I)
+and AI8 (Q), which are ADS8688 channels AIN_3 and AIN_2. Earth's-field NMR (≈ 2 kHz, with the polarizer coil) is the stretch goal on the same code path.
 
 ## 1. GPIO map v0.7 (`include/pins.h`)
 
@@ -18,17 +18,17 @@ and 8 (Q). Earth's-field NMR (≈ 2 kHz, with the polarizer coil) is the stretch
 | 10 | `PIN_CS_ADC` | CS_ADC | ADS8688 /CS | A |
 | 5 | `PIN_CS_DAC` | CS_DAC | DAC8563 /SYNC (via 74HCT125) | B |
 | 1 / 2 | `PIN_I2C_SDA/SCL` | I2C_* | 400 kHz; OLED 0x3C, TCA9535 0x20, Si5351A 0x60 | base |
-| 16 / 17 | `PIN_OPTO_IN[0..1]` | OPTO_IN1/2 | 6N137 outputs, active LOW (front panel) | C |
-| 18 / 21 | `PIN_FAST_OUT[0..1]` | FAST_OUT1/2 | 74HCT125 → terminals | B |
+| 16 / 17 | `PIN_OPTO_IN[0..1]` | OPTO_IN1/2 | 6N137 outputs, active LOW (front panel; 1 k pull-ups on the panel, `INPUT_PULLUP` in firmware) | C |
+| 21 / 18 | `PIN_FAST_OUT[0..1]` | FAST_OUT1/2 | 74HCT125 → terminals | B |
 | 38 / 39 | `PIN_TRIG_IO`, `PIN_TRIG_DIR` | TRIG_IO/DIR | 74LVC1T45; DIR 1 = output to the SMA | B |
 | 41 | `PIN_DDS_FSYNC` | DDS_FSYNC | AD9834 frame sync (its SPI chip select, active low) | B |
-| 42 | `PIN_DDS_PSEL` | DDS_PSEL | AD9834 phase-register select (0 = PHASE0, 1 = PHASE1) | B |
+| 42 | `PIN_DDS_PSEL` | DDS_PSEL | AD9834 PSELECT pin; ignored with PIN/SW = 0 (phase select by the PSEL bit), held low | B |
 | 40 | `PIN_TX_EN` | TX_EN | OPA564 enable = transmit gate (10 k pull-down; 1 = transmit) | B |
 | 8 | `PIN_RX_BLANK` | RX_BLANK | DG419 receiver blanking: **0 = blanked (default, pull-down), 1 = receive** | A |
 | 9 / 14 | `PIN_HB_IN1`, `PIN_HB_IN2` | HB_IN1/2 | DRV8871 H-bridge inputs (10 k pull-downs; 0/0 = coast) | C |
 | 47 | `PIN_FET_GATE` | FET_GATE | UCC27517 → AOD4184A polarizer switch (1 = polarizer coil on) | C |
-| 4 / 6 / 7 / 15 | `PIN_EXP[0..3]` | GPIO4/6/7/15 | free, on the 2×10 expansion header | base |
-| 43 / 44 | — | GPIO43/44 | header; LED_WIFI/ACT via JP1/JP2; not driven by firmware | base |
+| 4 / 6 / 7 / 15 | — | — | not connected | — |
+| 43 / 44 | — | GPIO43/44 | UART0; panel LED_WIFI/ACT via R717/R718; not driven by firmware | base |
 | 19 / 20 | — | USB_DN/DP | native USB | base |
 | 48 | `PIN_RGB_LED` | — | WS2812 on the dev board | — |
 | 0/45/46, 3, 35–37 | — | — | never used (strapping, unused, PSRAM) | — |
@@ -37,16 +37,21 @@ TCA9535 I²C expander (address 0x20, A0 = A1 = A2 = GND): **P0.0–P0.7 = DIO1�
 **P1.0–P1.3 = MODULE_OUT1–4** (2026-09-17: the former RLY_IN1–4, same ports — the first four of the seven
 MODULE OUT lines that reach the front panel's module header through a second 74AHCT541 at 5 V; active high,
 10 k pull-downs keep them off at boot), **P1.4 = /CLR of
-the 74HC74 Johnson counter** (10 k pull-up; pulse low to reset the quadrature LO to state 00), **P1.5–P1.7 = MODULE_OUT5–7** (2026-09-17: P1.4 is the counter clear, so the expander has seven ports for the module
+the 74HC74 Johnson counter** (net EXP_P14, TP501, R706 10 k pull-up; pulse low to reset the quadrature LO to state 00), **P1.5–P1.7 = MODULE_OUT5–7** (2026-09-17: P1.4 is the counter clear, so the expander has seven ports for the module
 header; the header's eighth signal pin is a **reserved spare**, tied low — it always reads low). All 16 lines are outputs; the expander powers up with every port as an input, so `begin()` writes
-the output registers first (all zero except P1.4 = 1), then the configuration registers.
+the output registers first (all zero except P1.4 = 1), then the configuration registers. In firmware the
+module-output bit map is `EXP_BIT_MOD[7] = {0, 1, 2, 3, 5, 6, 7}` (`pins.h`).
+
+Front-panel input AI n is wired to ADS8688 channel `kAinOfAi[n-1]` (`pins.h`): AI1→AIN_1, AI2→AIN_0,
+AI3→AIN_7, AI4→AIN_6, AI5→AIN_5, AI6→AIN_4, AI7→AIN_3, AI8→AIN_2. Every panel-input number (b1 `ch`,
+status `ai1…ai8`) goes through this table; driver calls take the ADC channel.
 
 I²C addresses: TCA9535 0x20 · Si5351A 0x60 · SSD1306 OLED 0x3C.
 
 Other NMR nets read by the firmware: **I_FLAG** and **T_FLAG** from the OPA564 (push-pull, 0/3.3 V, active
 high = current limit / thermal). Look up their pins in `hardware/sheets/nmr_tx.kicad_sch` (search the
-net names); if they are on the expander spare lines P1.5/P1.6, read them through the TCA9535 (configure those
-two as inputs); if they are on test points only, report them as "not connected" in status and skip.
+net names). In v0.7 they reach test points only, so the firmware reports them as "not connected"
+(`EXP_BIT_IFLAG` / `EXP_BIT_TFLAG` = −1; the expander has no spare line left for them).
 
 ## 2. Shared drivers (`firmware/src/drivers/`)
 
@@ -103,12 +108,12 @@ Sequence for an LO change (circuits note §9.2): `setClk1(4*f_lo)` → `resetPll
 ```cpp
 class Ad9834 {
  public:
-  void begin(uint32_t mclk_hz = 50000000);   // FSYNC high, PSEL low, RESET bit set
+  void begin(uint32_t mclk_hz = 50000000);   // FSYNC high, PSEL bit 0, RESET bit set
   void setFrequency(double hz);              // B28 = 1, FREQ0 as two 14-bit words; Δf = MCLK / 2^28
   double actualFrequency() const;
   void setPhase(uint8_t reg, double deg);    // PHASE0 / PHASE1, 12-bit
   void setReset(bool on);                    // control-register RESET bit: 1 = output at midscale, phase cleared
-  void selectPhase(bool p1);                 // drives PIN_DDS_PSEL (hardware PSELECT: control bit PIN/SW = 1)
+  void selectPhase(bool p1);                 // PSEL bit in the control word (PIN/SW = 0)
   void sleep(bool on);                       // SLEEP1/SLEEP12 bits; output stops (used when the console is idle)
 };
 extern Ad9834 dds;
@@ -117,6 +122,9 @@ SPI: mode 2 (CPOL = 1, CPHA = 0), MSB first, 16-bit frames, FSYNC low for each f
 Control-register bits: B28 (13), HLB (12), FSEL (11), PSEL (10), PIN/SW (9), RESET (8), SLEEP1 (7), SLEEP12 (6),
 OPBITEN (5), SIGN/PIB (4), DIV2 (3), MODE (1). Frequency words: FREQ0 = 0x4000 | bits, PHASE0 = 0xC000 | bits,
 PHASE1 = 0xE000 | bits. The carrier free-runs; TX_EN gates the power stage, the DDS is never gated.
+PIN/SW = 0: the board ties the RESET and SLEEP pins low (R817/R818) and FSELECT to ground, so RESET, SLEEP
+and the phase select are register bits; the PSELECT pin (GPIO42) is ignored and held low. Reset during a
+write: set the RESET bit, write FREQ0 and the PHASE registers, clear the RESET bit.
 
 ### 2.5 `Ads8688.h` — 8-channel 16-bit ADC (datasheet §8.5 command and program registers)
 ```cpp
@@ -136,11 +144,13 @@ extern Ads8688 adc;
 `burst()` runs on the caller's task (the NMR sequencer task on core 1) with the SPI lock held. Pace it with
 `esp_timer_get_time()` so the sample interval is `1e6 / rate_hz` µs per scan of all channels in the mask; if the
 loop cannot keep up, report the achieved rate rather than fail. Target: 2 channels at 100 kS/s each (default);
-try 250 kS/s and report what the hardware reaches. Ranges: AIN7/8 default ±5.12 V (code 1).
+try 250 kS/s and report what the hardware reaches. Ranges: AI7/AI8 (AIN_3/AIN_2) default ±5.12 V (code 1).
+The auto scan returns channels in ascending order, so the NMR mask 0x0C gives Q (AIN_2) before I (AIN_3)
+in each pair; the sequencer and `dsp::decimate` read the pairs that way round.
 
 ## 3. The `nmr` block (`firmware/src/blocks/nmr/NmrBlock.{h,cpp}` + `Sequencer.{h,cpp}` + `Dsp.{h,cpp}`)
 
-`name()` = `"nmr"`. Registered in `main.cpp` after `b5`. The block owns the pins TX_EN, RX_BLANK, DDS_PSEL and,
+`name()` = `"nmr"`. Registered in `main.cpp` after `b5`. The block owns the pins TX_EN, RX_BLANK and,
 during a scan with a polarize step, FET_GATE and HB_IN1/2 (otherwise `b4` drives those from its own commands).
 
 ### 3.1 Commands (`PROTOCOL.md` §7)
@@ -168,7 +178,7 @@ on for this long before the pulse, then off and `t_polarize_settle_ms` 5 before 
 
 ### 3.2 Timing of one scan (circuits note §9.3) — on a FreeRTOS task pinned to core 1, priority high
 1. (optional) polarize: FET_GATE = 1 (+ H-bridge) for `polarize_ms`; FET_GATE = 0; wait `t_polarize_settle_ms`.
-2. `DDS_PSEL` = the pulse phase for this scan (PHASE0/PHASE1 preloaded; for 90°/270° reload PHASE1 before
+2. PSEL bit = the pulse phase for this scan (PHASE0/PHASE1 preloaded; for 90°/270° reload PHASE1 before
    the scan; `dds.setReset(false)` and the carrier free-runs).
 3. RX_BLANK = 0 (blanked), wait `t_blank_pre_us`.
 4. TX_EN = 1 for `t90_us`; TX_EN = 0. (`echo`: wait `tau_us`, TX_EN = 1 for `t180_us` with +90° phase, TX_EN = 0.)
@@ -221,9 +231,10 @@ disagreements, and the code is the authority for them.
 
 * **Phase registers.** The scan-set preparation is exactly as §3.2 says (RESET → frequency → PHASE0 = 0,
   PHASE1 = 180 → RESET off), but each scan then loads PHASE0 = the pulse phase of that scan and
-  PHASE1 = that phase + 90°, and selects PHASE0 with the PSEL pin. For a free induction decay that is
+  PHASE1 = that phase + 90°, and selects PHASE0 with the PSEL bit. For a free induction decay that is
   the same thing as §3.2; for an echo it is what lets the refocusing pulse be 90° out of phase with
-  one pin change instead of an SPI frame in the middle of a sequence.
+  one control-word write (about 2 µs, during `tau_us` while the transmitter is off) instead of
+  reloading a phase register in the middle of a sequence.
 * **Memory.** The capture buffer is grown on demand at `config` rather than allocated for the absolute
   maximum at `begin()`: 2 channels × 4000 ms × 250 kS/s really is 4 MB, and holding that plus the
   outgoing record permanently would be 6 of the board's 8 MB. `config` refuses what does not fit
@@ -235,7 +246,8 @@ disagreements, and the code is the authority for them.
 ## 4. Changes to existing blocks (drivers agent)
 - `b5`: DIO1–8 through `expander.writePort(0, mask)`; `PIN_DIO[]` removed from `pins.h`. Fast outputs and TRIG
   unchanged. If the expander is absent, `dio` commands return `error:"expander not present"`.
-- `b4`: module outputs through `expander.writeBit(1, n-1, on)` (`module {n, on}`, `module_all {on}` — the former
+- `b4`: module outputs through `expander.writeBit(1, EXP_BIT_MOD[n-1], on)` (`module {n:1..7, on}`, `module_all {on}` — the former
+
   `relay` commands, renamed with the hardware); new commands `hbridge {mode: off|fwd|rev|brake}` (HB_IN1/2
   = 0/0, 1/0, 0/1, 1/1) and `polarizer {on}` (FET_GATE); status adds `hbridge`, `polarizer`. Both refuse with
   `error:"nmr scan running"` while `nmr` is running (a global `nmr_busy()` in `blocks/nmr/NmrBlock.h` — the

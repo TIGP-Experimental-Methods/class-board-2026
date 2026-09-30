@@ -16,13 +16,16 @@
 
 namespace {
 
-// The receiver's two baseband outputs. ADS8688 channels are numbered 1..8 on
-// the schematic and 0..7 in the driver: channel 7 (I) is index 6, channel 8 (Q)
-// is index 7. The auto scan returns them in ascending order, so the capture
-// buffer is I, Q, I, Q, ... which is exactly what the DSP wants.
-constexpr uint8_t kChI = 6;
-constexpr uint8_t kChQ = 7;
+// The receiver's two baseband outputs, on panel inputs AI7 (I) and AI8 (Q),
+// which are ADC channels AIN_3 and AIN_2 (pins.h kAinOfAi). The auto scan
+// returns them in ascending channel order, so the capture buffer is Q, I, Q,
+// I, ...: kIOff / kQOff say where each one sits in a pair.
+constexpr uint8_t kChI = kAinOfAi[6];
+constexpr uint8_t kChQ = kAinOfAi[7];
 constexpr uint8_t kChMask = (1u << kChI) | (1u << kChQ);
+constexpr bool kQFirst = kChQ < kChI;
+constexpr uint32_t kIOff = kQFirst ? 1 : 0;
+constexpr uint32_t kQOff = 1 - kIOff;
 
 // Memory. The board has 8 MB of PSRAM and the WebSocket queues its outgoing
 // frames in the same pool (the Arduino build sends every allocation over 4 kB
@@ -403,9 +406,11 @@ bool Sequencer::runOneScan(uint32_t index, float phaseDeg) {
   }
 
   // 2. The phase of this scan's pulse. PHASE0 carries it and PHASE1 carries it
-  //    plus 90 degrees, so the refocusing pulse of an echo is one pin change
-  //    away - no SPI frame in the middle of a sequence. Written before the
-  //    receiver is blanked, because SPI takes time that the timing cannot spare.
+  //    plus 90 degrees, so the refocusing pulse of an echo is one control-word
+  //    write away (the PSEL bit, about 2 us of SPI, sent during tau while the
+  //    transmitter is off). Written before the receiver is blanked, because the
+  //    phase-register writes take time that the timing cannot spare.
+
   dds.setPhase(0, static_cast<double>(phaseDeg));
   dds.setPhase(1, static_cast<double>(phaseDeg) + 90.0);
   dds.selectPhase(false);
@@ -503,8 +508,8 @@ void Sequencer::processScan(uint32_t index, float phaseDeg) {
   // DC offset from the quiet tail of the record (section 3.3).
   const uint32_t from = dsp::dcStart(nRaw_, cfg_.t_acq_ms);
   const uint32_t nDc = nRaw_ - from;
-  const float dcI = dsp::meanI16(raw_ + static_cast<size_t>(from) * 2, nDc, 2);
-  const float dcQ = dsp::meanI16(raw_ + static_cast<size_t>(from) * 2 + 1, nDc, 2);
+  const float dcI = dsp::meanI16(raw_ + static_cast<size_t>(from) * 2 + kIOff, nDc, 2);
+  const float dcQ = dsp::meanI16(raw_ + static_cast<size_t>(from) * 2 + kQOff, nDc, 2);
 
   // CYCLOPS: the record is rotated back by the pulse phase, so the signal from
   // every scan lands on top of itself and everything that ignored the pulse
@@ -517,7 +522,7 @@ void Sequencer::processScan(uint32_t index, float phaseDeg) {
   if (frameLock_) xSemaphoreTake(frameLock_, portMAX_DELAY);
   for (uint32_t done = 0; done < nDec_; done += kChunk) {
     const uint32_t m = (nDec_ - done < kChunk) ? (nDec_ - done) : kChunk;
-    dsp::decimate(raw_ + static_cast<size_t>(done) * cfg_.decim * 2, m, cfg_.decim,
+    dsp::decimate(raw_ + static_cast<size_t>(done) * cfg_.decim * 2, kQFirst, m, cfg_.decim,
                   dcI, dcQ, vI, vQ, chunk);
     dsp::rotate(chunk, m, rot);
     dsp::accumulateMean(acc + static_cast<size_t>(done) * 2, chunk, m, index);
@@ -657,8 +662,8 @@ void Sequencer::simBurst(uint32_t nRaw, float phaseDeg, uint32_t index) {
     if (ci_code < -32768.0f) ci_code = -32768.0f;
     if (cq_code > 32767.0f) cq_code = 32767.0f;
     if (cq_code < -32768.0f) cq_code = -32768.0f;
-    raw_[2 * k] = static_cast<int16_t>(lroundf(ci_code));
-    raw_[2 * k + 1] = static_cast<int16_t>(lroundf(cq_code));
+    raw_[2 * k + kIOff] = static_cast<int16_t>(lroundf(ci_code));
+    raw_[2 * k + kQOff] = static_cast<int16_t>(lroundf(cq_code));
 
     // Step the phasors on. They drift off the unit circle after a few thousand
     // multiplications, so both are pulled back now and then - cheaper than a

@@ -63,7 +63,7 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | | `counter_reset` | — | `{counter:0}` |
 | | `info` | — | `{fw, chip, mac, ip, sim, expander, clockgen}` (the last two: did the TCA9535 / Si5351A answer on I²C) |
 | `b1` | `read_all` | — | `{ai:[8 volts]}` |
-| | `set_range` | `{ch:1..8, range:0..6}` | `{ch, range}` |
+| | `set_range` | `{ch:1..8, range:0..6}` (`ch` = panel input AI1…AI8) | `{ch, range}` |
 | `b2` | `rails` | — | `{v5_raw, v3v3, v12p, v12n, v5a, measured}` |
 | `b3` | `set_dc` | `{ch:1..2, volts}` | `{ch, mode}` |
 | | `sine` | `{ch, freq, amp, offset}` | `{ch, mode}` |
@@ -115,7 +115,8 @@ The 20 Hz `status` broadcast is the slow channel. Fast data uses **binary WebSoc
 
 The `nmr` block runs a pulsed nuclear-magnetic-resonance experiment on the class board: it transmits a
 burst at `f_tx`, blanks the receiver while the coil rings down, then samples the heterodyne receiver's
-I and Q outputs (ADS8688 channels 7 and 8) and averages over scans. The receiver mixes the signal down
+I and Q outputs (panel inputs AI7 and AI8, ADS8688 channels AIN_3 and AIN_2) and averages over scans.
+ The receiver mixes the signal down
 against a local oscillator at `f_lo`, so what the app and the Python client see is a complex record at
 the intermediate frequency **IF = f_tx − f_lo** (positive = the line is above the local oscillator).
 Demo regime: protons in water at about 2.1 mT, Larmor ≈ 89.4 kHz, IF ≈ 5.4 kHz.

@@ -14,11 +14,13 @@ static const char* hbName(int m) {
 }
 
 void SwitchingBlock::begin() {
-  // Relays: nothing to configure here any more. The expander comes up with
-  // P1.0..P1.3 low (BaseBlock::begin() writes the output registers before the
-  // direction registers) and the gate pull-downs hold them off until then.
+  // Module outputs: nothing to configure here. The expander comes up with
+  // MOD1..MOD7 low (BaseBlock::begin() writes the output registers before the
+  // direction registers) and the panel pull-downs hold them low until then.
 #ifndef SIM
-  for (int i = 0; i < 2; i++) pinMode(PIN_OPTO_IN[i], INPUT);   // 1 k pull-up on the board
+  // The 1 k pull-ups are on the front panel; the internal pull-up keeps the
+  // inputs defined when the panel is unplugged.
+  for (int i = 0; i < 2; i++) pinMode(PIN_OPTO_IN[i], INPUT_PULLUP);
   // Both power outputs start off and stay off until someone asks. Drive them low
   // before making them outputs so the pin cannot glitch high on the way.
   digitalWrite(PIN_HB_IN1, LOW);
@@ -48,10 +50,10 @@ void SwitchingBlock::loop() {
 #endif
 }
 
-void SwitchingBlock::setRelay(int idx, bool on) {
-  relay_[idx] = on;
-  // Expander P1.0..P1.3, active high into the AO3400A gate.
-  expander.writeBit(EXP_PORT_CTRL, static_cast<uint8_t>(EXP_BIT_RLY1 + idx), on);
+void SwitchingBlock::setModule(int idx, bool on) {
+  module_[idx] = on;
+  // Expander port 1, active high (MOD5..MOD7 skip P1.4, the counter clear).
+  expander.writeBit(EXP_PORT_CTRL, EXP_BIT_MOD[idx], on);
 }
 
 void SwitchingBlock::setHbridge(HbMode mode) {
@@ -79,18 +81,26 @@ bool SwitchingBlock::handle(JsonObjectConst cmd, JsonObject reply) {
   const char* c = cmd["cmd"] | "";
   JsonObjectConst a = argsOf(cmd);
 
-  if (strcmp(c, "relay") == 0) {          // {"n":1..4,"on":true}
+  if (strcmp(c, "module") == 0) {         // {"n":1..7,"on":true}
     if (!expander.present()) { reply["error"] = "expander not present"; return false; }
     int n = a["n"] | 0;
-    if (n < 1 || n > 4) { reply["error"] = "n must be 1..4"; return false; }
-    setRelay(n - 1, a["on"] | false);
-    reply["n"] = n; reply["on"] = relay_[n - 1];
+    if (n < 1 || n > kModuleOutputs) { reply["error"] = "n must be 1..7"; return false; }
+    setModule(n - 1, a["on"] | false);
+    reply["n"] = n; reply["on"] = module_[n - 1];
     return true;
   }
-  if (strcmp(c, "relay_all") == 0) {      // {"on":false}
+  if (strcmp(c, "module_all") == 0) {     // {"on":false}
     if (!expander.present()) { reply["error"] = "expander not present"; return false; }
-    for (int i = 0; i < 4; i++) setRelay(i, a["on"] | false);
-    reply["on"] = a["on"] | false;
+    const bool on = a["on"] | false;
+    // One port write for all seven, so the outputs change together.
+    uint8_t v = expander.cached(EXP_PORT_CTRL);
+    for (int i = 0; i < kModuleOutputs; i++) {
+      module_[i] = on;
+      const uint8_t bit = static_cast<uint8_t>(1u << EXP_BIT_MOD[i]);
+      v = on ? static_cast<uint8_t>(v | bit) : static_cast<uint8_t>(v & ~bit);
+    }
+    expander.writePort(EXP_PORT_CTRL, v);
+    reply["on"] = on;
     return true;
   }
   if (strcmp(c, "opto_reset") == 0) {
@@ -121,8 +131,12 @@ bool SwitchingBlock::handle(JsonObjectConst cmd, JsonObject reply) {
 }
 
 void SwitchingBlock::status(JsonObject out) {
-  out["relay1"] = relay_[0]; out["relay2"] = relay_[1];
-  out["relay3"] = relay_[2]; out["relay4"] = relay_[3];
+  char key[8] = "module1";
+  for (int i = 0; i < kModuleOutputs; i++) {
+    key[6] = static_cast<char>('1' + i);
+    out[key] = module_[i];
+  }
+
   out["opto1"] = optoCount_[0]; out["opto2"] = optoCount_[1];
   out["opto1_level"] = optoLevel_[0]; out["opto2_level"] = optoLevel_[1];
   out["hbridge"] = hbName(hb_);

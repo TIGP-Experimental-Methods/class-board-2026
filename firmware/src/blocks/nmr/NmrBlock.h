@@ -6,7 +6,8 @@
 // signal of a few microvolts in the coil, which decays away in a fraction of a
 // second. The receiver mixes that against a local oscillator at f_lo, so what
 // comes out is a complex signal at the difference frequency (about 5.4 kHz)
-// which the ADS8688 samples on channels 7 (I) and 8 (Q). Repeat, average, and
+// which the ADS8688 samples on panel inputs AI7 (I) and AI8 (Q) - ADC channels
+// AIN_3 and AIN_2. Repeat, average, and
 // the line appears out of the noise.
 //
 // This block is the thin part: it validates commands, keeps the settings, and

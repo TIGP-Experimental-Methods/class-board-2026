@@ -9,16 +9,16 @@
 //
 // What the sixteen lines do on this board (pins.h):
 //   P0.0..P0.7  DIO1..DIO8 into the 74AHCT541 buffer (b5)
-//   P1.0..P1.3  RLY_IN1..4, the relay gates, active high (b4)
-//   P1.4        /CLR of the 74HC74 Johnson counter that makes the quadrature LO
-//   P1.5..P1.7  spare, on test points TP502..TP504
+//   P1.0..P1.3  MOD1..MOD4, module outputs to the front-panel header, active high (b4)
+//   P1.4        EXP_P14 = /CLR of the 74HC74 Johnson counter that makes the quadrature LO
+//   P1.5..P1.7  MOD5..MOD7, module outputs (b4)
 //
 // Order matters in begin(). The part resets with every port configured as an
 // input, so the pins float at whatever the board's pull resistors say. If we
 // configured the ports first and wrote the output registers second, the reset
-// value of the output registers (0xFF) would drive all four relays on and pull
-// /CLR low for the length of one I2C write. So: write the outputs, then the
-// configuration.
+// value of the output registers (0xFF) would drive every DIO and module output
+// high for the length of one I2C write, and a module with a relay on it would
+// click. So: write the whole port values first, then the configuration.
 //
 // On a bare dev board there is no expander and nothing acknowledges at 0x20.
 // begin() then returns false, present() stays false and every write is a quiet
@@ -36,7 +36,7 @@ class Tca9535 {
   uint8_t cached(uint8_t port) const;
 
   // Bits set in `mask` become inputs on that port. Used only if a bring-up bodge
-  // brings the OPA564 flags to the spare P1 lines (see EXP_BIT_IFLAG in pins.h).
+  // brings the OPA564 flags to a port-1 line (see EXP_BIT_IFLAG in pins.h).
   bool setInputs(uint8_t port, uint8_t mask);
   bool readPort(uint8_t port, uint8_t& value);
 
@@ -58,7 +58,8 @@ class Tca9535 {
 
   uint8_t addr_ = 0x20;
   bool present_ = false;
-  uint8_t out_[2] = {0x00, 0x10};   // all DIO low; relays off; /CLR released (P1.4 = 1)
+  uint8_t out_[2] = {0x00, 0x10};   // all DIO low; module outputs off; /CLR released (P1.4 = 1)
+
   uint8_t cfg_[2] = {0x00, 0x00};   // every line an output
 };
 

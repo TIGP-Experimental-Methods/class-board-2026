@@ -4269,6 +4269,11 @@
 		)
 		(uuid "6bf2257e-1037-4f06-bef5-1db822a1c534")
 	)
+  (text "2026-10-01: U302 (74HCT125) and C308 now run from +5VA, the DAC8563 supply, so the DAC logic inputs are never driven above AVDD or before AVDD is present."
+    (at 44.45 80.01 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid "6082529e-9e46-4309-8308-81e5b88a065b")
+  )
 	(symbol
 		(lib_id "class_board:C0603_1uF")
 		(at 187.96 115.57 0)
@@ -6731,7 +6736,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_p5V_RAW")
+		(lib_id "class_board:PWR_p5VA")
 		(at 101.6 69.85 0)
 		(unit 1)
 		(body_style 1)
@@ -6754,7 +6759,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "+5V_RAW"
+		(property "Value" "+5VA"
 			(at 101.6 66.548 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9001,7 +9006,7 @@
 		)
 	)
 	(symbol
-		(lib_id "class_board:PWR_p5V_RAW")
+		(lib_id "class_board:PWR_p5VA")
 		(at 78.74 82.55 0)
 		(unit 1)
 		(body_style 1)
@@ -9024,7 +9029,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "+5V_RAW"
+		(property "Value" "+5VA"
 			(at 78.74 79.248 0)
 			(show_name no)
 			(do_not_autoplace no)
