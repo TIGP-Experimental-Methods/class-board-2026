@@ -180,15 +180,8 @@
 		(uuid "dddc7686-f0a0-48d3-a42d-88160cd7f56e")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/SC-70-6_L2.0-W1.3-P0.65-LS2.1-BL.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/SC-70-6_L2.0-W1.3-P0.65-LS2.1-BL.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

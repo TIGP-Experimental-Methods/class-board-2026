@@ -88,13 +88,11 @@
 	(pad "" np_thru_hole circle (at 12 25.23) (size 2.4 2.4) (drill 2.4) (layers "*.Cu" "*.Mask"))
 	(embedded_fonts no)
 	(model "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x04_P2.54mm_Vertical.step"
-		(offset (xyz -3.81 0 0))
-		(scale (xyz 1 1 1))
-		(rotate (xyz 0 0 90))
-	)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/OLED-0.96in-4P-module.wrl"
-		(offset (xyz 0 0 0))
-		(scale (xyz 1 1 1))
-		(rotate (xyz 0 0 0))
-	)
+    (offset (xyz -3.81 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 90)))
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/OLED-0.96in-4P-module.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

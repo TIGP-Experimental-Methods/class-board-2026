@@ -275,15 +275,8 @@
 		(uuid "75fed793-1806-4266-865a-f50849b15d66")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/USB-C-SMD_TYPE-C-6PIN-2MD-073.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/USB-C-SMD_TYPE-C-6PIN-2MD-073.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

@@ -354,15 +354,8 @@
 		(uuid "db69aab4-216b-46a7-9ce8-0ba25a23f922")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/CONN-TH_10P-P2.54_KF128-2.54-10P.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/CONN-TH_10P-P2.54_KF128-2.54-10P.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

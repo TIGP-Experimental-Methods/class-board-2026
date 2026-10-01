@@ -303,15 +303,8 @@
 		(uuid "93c479b0-102b-465b-907f-93e860a9525d")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/HSOP-20_L12.9-W7.5-P1.27-BL-EP-A.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/HSOP-20_L12.9-W7.5-P1.27-BL-EP-A.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

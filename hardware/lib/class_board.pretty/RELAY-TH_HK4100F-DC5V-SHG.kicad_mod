@@ -348,15 +348,8 @@
 		(uuid "3806f99a-2881-4cff-a3d9-39fe9b714037")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/RELAY-TH_HK4100F-L15.5-W10.5-H11.8.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/RELAY-TH_HK4100F-L15.5-W10.5-H11.8.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

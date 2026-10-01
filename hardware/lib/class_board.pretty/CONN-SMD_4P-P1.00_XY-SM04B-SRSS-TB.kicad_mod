@@ -191,15 +191,8 @@
 		(uuid "bc3dfcb6-021b-4222-abf1-a1268daf191a")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/CONN-SMD_4P-P1.00_XY-SM04B-SRSS-TB.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/CONN-SMD_4P-P1.00_XY-SM04B-SRSS-TB.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

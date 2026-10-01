@@ -214,15 +214,8 @@
 		(uuid "30756e6c-ee24-4865-97e9-6337c72afdee")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/SOP-8_L9.8-W6.6-H4.3-LS10.2-P2.54.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 270)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/SOP-8_L9.8-W6.6-H4.3-LS10.2-P2.54.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 270)))
 )
