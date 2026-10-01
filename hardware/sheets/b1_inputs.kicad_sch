@@ -8250,10 +8250,10 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "151866c6-9f58-4252-b18a-c41426b2b45e")
 		(property "Reference" "J6"
 			(at 147.32 100.838 0)
