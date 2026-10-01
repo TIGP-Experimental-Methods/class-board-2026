@@ -48,3 +48,7 @@ hardware/scripts/__pycache__/
 hardware/class-board-merged.*
 hardware/front-panel/front-panel-merged.*
 hardware/scratchpad/
+
+# kicad-cli STEP export of the whole board (30 MB, regenerate with release.py)
+hardware/.step
+hardware/*.step
