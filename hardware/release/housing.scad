@@ -1,5 +1,6 @@
 // housing.scad — a printed housing for the TIGP class board (main board + front panel)
-// Reference version, Workshop 3 (Lecture 3: CAD for AI experimentalists). OpenSCAD 2021.01, plain language, no library.
+// Reference version, Workshop 3: getting things made. OpenSCAD 2021.01, plain language, no library.
+// Produced from workbook/housing-spec-card.md; copy it next to your own file and change the numbers in the Customizer.
 //
 // How to read this file (top to bottom):
 //   1. Variables: every dimension has a name; the comments after them make Customizer sliders / drop-downs.
@@ -12,7 +13,7 @@
 // The instrument lies flat: the FRONT PANEL FACES UP (+z), the main board is under it, the dev board hangs below.
 
 /* [Which part] */
-part = "all";          // [all, base, cover, coupon, section]
+part = "all";          // [all, base, cover, cover2d, coupon, section]
 
 /* [Walls and clearances] */
 wall      = 2;         // [1.6:0.2:3]   wall and floor thickness
@@ -71,8 +72,8 @@ corners = [[x0 + wall, yy0 + wall], [x0 + outer_x - wall - corner_block, yy0 + w
 
 // ---------- the boards, from KiCad (kicad-cli pcb export stl, connectors only) ----------
 // KiCad's y axis points down, so the exported mesh has y in -115..-15; mirror([0,1,0]) puts it at +15..+115.
-module main_board() {        // component side faces +z in the export; here it must face the panel (+z): keep as is
-  translate([0, 0, z_main_top - board_t]) mirror([0, 1, 0]) import("class-board.stl");
+module main_board() {        // the link sockets J6-J8 are on the back copper: turn the board over (mirror z) so they face the
+  translate([0, 0, z_main_top]) mirror([0, 1, 0]) mirror([0, 0, 1]) import("class-board.stl");   // panel; the dev board hangs below
 }
 module front_panel() {       // outer face (F.Cu) is +z in the export: faces up, as wanted; mirror in x = the link mating
   translate([board_x, 0, z_panel_bot]) mirror([1, 0, 0]) mirror([0, 1, 0]) import("front-panel.stl");
@@ -110,11 +111,11 @@ module base() {
     // stand-off screws: from under the floor, through the boss, through the board, into the stand-off
     for (h = holes) translate([h[0], h[1], z_base_bot - 1]) { m3_hole(50); cylinder(d = 6.5, h = 1 + wall + 2); }  // counterbore for the head
     // rear-edge openings (main board, y = 15 edge): USB-C J201, DC jack J202, terminals J901/J903/J905
-    rear_opening(18.0, 10, 4.5, z_main_top);              // USB-C: 10 x 4.5, flush with the board surface
-    rear_opening(32.5, 10, 12, z_main_top);               // DC jack body 9 x 11
-    rear_opening(49.9, 12, 12, z_main_top);               // KF301 2P: wire entry
-    rear_opening(64.3, 12, 12, z_main_top);
-    rear_opening(79.9, 17, 12, z_main_top);               // KF301 3P
+    rear_opening(18.0, 10, 4.5, z_main_bot);              // USB-C: 10 x 4.5, on the connector side (below the board)
+    rear_opening(32.5, 10, 12, z_main_bot);               // DC jack body 9 x 11
+    rear_opening(49.9, 12, 12, z_main_bot);               // KF301 2P: wire entry
+    rear_opening(64.3, 12, 12, z_main_bot);
+    rear_opening(79.9, 17, 12, z_main_bot);               // KF301 3P
     // panel-edge wire slot (y = 115 edge): the panel's screw terminals take wires from the side
     translate([55, y0 + board_y + clear_xy - 1, 0]) cube([100, wall + 2, z_cover_bot + 1]);
     // embossed label is added, not cut: see below
@@ -123,9 +124,9 @@ module base() {
   translate([x0 + outer_x/2, yy0 + outer_y, z_floor + 6]) rotate([90, 0, 0]) mirror([0,0,1])
     linear_extrude(0.6) text(text_label, size = 8, halign = "center", font = "Liberation Sans:style=Bold");
 }
-// an opening in the -y (rear) wall centred at x, width w, height h, from the given board surface upwards
-module rear_opening(x, w, h, z_from) {
-  translate([x - w/2, yy0 - 1, z_from]) cube([w, wall + 2, h]);
+// an opening in the -y (rear) wall centred at x, width w, height h, hanging down from the main board's connector side
+module rear_opening(x, w, h, z_board) {
+  translate([x - w/2, yy0 - 1, z_board - h]) cube([w, wall + 2, h]);
 }
 
 // ---------- the front cover: a plate over the panel ----------
@@ -174,6 +175,7 @@ if (part == "all")     { boards(); base(); color("sandybrown") cover(); }
 if (part == "base")    { base(); }
 if (part == "cover")   { cover(); }
 if (part == "coupon")  { coupon(); }
+if (part == "cover2d") { projection(cut = true) translate([0, 0, -(z_cover_bot + cover_t/2)]) cover(); }   // 2D: File > Export > DXF for the laser cutter
 if (part == "section") { boards(); difference() { union() { base(); color("sandybrown") cover(); } translate([90, -50, -100]) cube([200, 300, 200]); } }
 
 // ---------- the numbers you would otherwise measure ----------
@@ -182,3 +184,4 @@ echo(str("inner clearance to the board edge: ", clear_xy, " mm; floor to dev boa
 echo(str("cover underside at ", z_cover_bot, " mm above the panel face (OLED top ", oled_top, ")"));
 echo(str("wall ", wall, " mm; holes +", fit, " mm; SMA hole ", sma_hole, " mm; M3 clearance ", screw_d + fit, " mm"));
 echo(str("nut pocket across flats ", nut_af + fit, " mm, depth ", nut_t, " mm"));
+echo(str("boards: main board z ", z_main_bot, "..", z_main_top, ", panel z ", z_panel_bot, "..0; dev board down to ", z_main_bot - devboard_h, "; floor at ", z_floor));
