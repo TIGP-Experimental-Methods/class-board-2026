@@ -31,9 +31,11 @@ hangs below; mirror x on the panel is the link mating: panel x = 180 − main x.
 **Parts.** (1) A **base**: a tray with a floor and four walls, rounded vertical corners (3 mm), a 0.5 mm chamfer at the
 bed, four bosses under the main board's mounting holes so that one M3 screw from below the floor passes through each boss
 and the board into the stand-off; four **corner blocks** 8 × 8 mm with an **M3 nut pocket** each (hexagon 5.8 mm across
-flats, 2.5 mm deep, open to the inside so the nut slides in) for the cover screws. (2) A **cover**: a flat plate that lies
-over the panel, its underside 14.0 mm above the panel face (resting on the OLED module, 13.8 mm), with holes for the four
-cover screws and the four stand-off screws and these cutouts: 10 mm holes for the 16 SMA plugs; the OLED window; 2.5 mm
+flats, 2.5 mm deep, open to the inside so the nut slides in) for the cover screws. (2) A **cover** over the panel at **two
+heights**: around the 16 SMA jacks it sits low, its underside 2 mm above the panel face on the jacks' hexagonal bases, with
+6.7 mm holes through which the 6.35 mm threaded barrels (2 mm to 9.8 mm above the panel face) protrude so that the plug
+nuts screw on; over the OLED it is raised, its underside 14.0 mm above the panel face (resting on the OLED module,
+13.8 mm); with holes for the four cover screws and the four stand-off screws and these cutouts: the OLED window; 2.5 mm
 holes for the three LEDs; an opening for the Qwiic cable; an opening for the module header's plug (23 × 11 mm); openings
 for the four screw terminals on the panel's far edge (their bodies pass through). (3) A **test coupon**: 60 × 20 × 4 mm
 with holes 3.0, 3.2, 3.4, 3.6 mm, one M3 nut pocket and a wall of my wall thickness. Rear wall openings on the main
@@ -50,6 +52,8 @@ steeper than 45°, so the base prints open side up and the cover face down witho
 shown: `all` with the boards transparent, `section` cuts the model in half, `cover2d` is `projection(cut = true)` through
 the cover for a DXF. Modules `base()`, `cover()`, `coupon()`. `echo()` lines print the outer size, the clearances, the
 wall, the hole sizes and the nut pocket size.
+
+**Design notes (think these through, and ask me about them, before any code is written).** Leave space around every connector for its plug and the hand that turns it. The cover needs **two heights**: the OLED module stands 13.8 mm above the panel face, but an SMA jack only 9.8 mm, and its threaded barrel (6.35 mm, from 2 mm to 9.8 mm above the panel face) must come through the cover or no plug nut can be screwed on; so the cover sits low around the SMAs and is raised over the OLED. The panel's silkscreen is hidden under the cover, so **label the connectors on the front**: for example a printed plate with the label text as cutouts and a white sheet, or a white printed sheet, behind it. **Screw and stand-off lengths set every height**: choose them with the cover, and check them in the section view. Heights above the panel face, measured from the panel mesh: SMA 9.8 mm · module header 9.1 · TTL strip 8.8 · OLED 13.8 · TX terminal 14.1 · Qwiic 4.3 · LEDs 1.0.
 
 **Make it yours:** _(one change: a vent pattern, an embossed name on a wall, feet, a window, an acrylic lid instead of the
 printed cover…)_

@@ -215,7 +215,7 @@ Check that the binary exists at that path before writing the file (the plugin fo
 
 ## Step 11 — OpenSCAD and Bambu Studio (the preparation for Workshop 3)
 
-Purpose: the housing (Project 3b) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows). **The tutor installs both** (`/tutor L3` runs this step when either is missing), the student approves each command; a student may also install them by hand from the links. First make sure the class repository is up to date (`git pull` on `main`, or the tutor's self-update has done it), so `hardware/release/` holds `class-board.stl`, `front-panel.stl` and `housing.scad`.
+Purpose: the housing (Project 3b) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows). **The tutor installs OpenSCAD, its BOSL2 library and Bambu Studio** (`/tutor L3` runs this step when any is missing), the student approves each command; a student may also install them by hand from the links. First make sure the class repository is up to date (`git pull` on `main`, or the tutor's self-update has done it), so `hardware/release/` holds `class-board.stl`, `front-panel.stl` and `housing.scad`.
 
 **11a — OpenSCAD 2021.01 (the stable release).** Install the stable release, version 2021.01, not a development snapshot.
 
@@ -226,6 +226,16 @@ Purpose: the housing (Project 3b) is written in OpenSCAD (the free program in wh
 | Linux | `sudo apt install openscad` or `sudo dnf install openscad` (check that it is 2021.01) |
 
 Open OpenSCAD once; on the welcome screen choose *New*. Turn on *Design → Automatic Reload and Preview* (the preview redraws whenever the file is saved, also when Claude saves it) and *Window → Customizer* (the panel that turns the variables at the top of a file into sliders). ✔ *Help → About OpenSCAD* shows 2021.01; where OpenSCAD is on the PATH (usually only on Linux), `openscad --version` prints `OpenSCAD version 2021.01`. Then open `hardware/release/housing.scad` from the class repository and press F5. ✔ The preview shows the housing with the two boards transparent inside it, and the console shows the echoed numbers with no `Can't open import file` warning.
+
+**BOSL2**, the OpenSCAD library for rounded boxes, screw and insert holes and real threads (`include <BOSL2/std.scad>`), is cloned into OpenSCAD's library folder (the agent runs it; the student approves):
+
+| OS | Command |
+|---|---|
+| Windows | `git clone --depth 1 https://github.com/BelfrySCAD/BOSL2 "$env:USERPROFILE\Documents\OpenSCAD\libraries\BOSL2"` (PowerShell; in cmd `"%USERPROFILE%\Documents\OpenSCAD\libraries\BOSL2"`) |
+| macOS | `git clone --depth 1 https://github.com/BelfrySCAD/BOSL2 ~/Documents/OpenSCAD/libraries/BOSL2` |
+| Linux | `git clone --depth 1 https://github.com/BelfrySCAD/BOSL2 ~/.local/share/OpenSCAD/libraries/BOSL2` |
+
+✔ *File → Show Library Folder* opens a folder that contains `BOSL2`; a new file with the two lines `include <BOSL2/std.scad>` and `cuboid([20, 20, 10], rounding = 3);` previews a rounded block with no `Can't open library` warning.
 
 **11b — Bambu Studio.**
 
@@ -262,7 +272,7 @@ Print this block at the end, filled in. On a failure, stop at that step, fill in
 - ✔/✘/not installed LCSC suite
 - ✔/✘/not installed KiCad Routing Tools <version>
 - ✔/✘/not installed kicad-happy
-- ✔/✘/deferred OpenSCAD <version> (`openscad --version`, or *Help → About*); `housing.scad` previews
+- ✔/✘/deferred OpenSCAD <version> (`openscad --version`, or *Help → About*); `housing.scad` previews; BOSL2 in the library folder
 - ✔/✘/deferred Bambu Studio <version>; P1S, 0.4 mm nozzle selected
 
 **toolchain OK** — or — **First failure:** Step <n>: `<command>` → `<exact error>`
