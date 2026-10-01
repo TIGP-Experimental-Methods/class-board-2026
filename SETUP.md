@@ -215,19 +215,29 @@ Check that the binary exists at that path before writing the file (the plugin fo
 
 ## Step 11 — OpenSCAD and Bambu Studio (the preparation for Workshop 3)
 
-Purpose: the housing (Project 3b) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows), so both must be installed and opened once before Workshop 3. Offer this step; the student may defer it until before Workshop 3.
+Purpose: the housing (Project 3b) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows). **The tutor installs both** (`/tutor L3` runs this step when either is missing), the student approves each command; a student may also install them by hand from the links. First make sure the class repository is up to date (`git pull` on `main`, or the tutor's self-update has done it), so `hardware/release/` holds `class-board.stl`, `front-panel.stl` and `housing.scad`.
 
-**11a — OpenSCAD 2021.01 (the stable release).** Install the stable release, version 2021.01, from https://openscad.org/downloads.html — not a development snapshot.
+**11a — OpenSCAD 2021.01 (the stable release).** Install the stable release, version 2021.01, not a development snapshot.
 
-| OS | Install |
+| OS | Install (the agent runs it; the student approves) |
 |---|---|
-| Windows | **manual:** the student downloads the 64-bit Windows installer from the page above and runs it |
-| macOS | **manual:** the student downloads the `.dmg` from the page above and drags OpenSCAD to *Applications* |
-| Linux | `sudo apt install openscad` or `sudo dnf install openscad` (the distribution package; check that it is 2021.01) |
+| Windows | `winget install --id OpenSCAD.OpenSCAD -e --source winget` (if winget cannot find the package, the student downloads the 64-bit installer from https://openscad.org/downloads.html) |
+| macOS | `brew install --cask openscad` (or the `.dmg` from the same page, dragged to *Applications*) |
+| Linux | `sudo apt install openscad` or `sudo dnf install openscad` (check that it is 2021.01) |
 
 Open OpenSCAD once; on the welcome screen choose *New*. Turn on *Design → Automatic Reload and Preview* (the preview redraws whenever the file is saved, also when Claude saves it) and *Window → Customizer* (the panel that turns the variables at the top of a file into sliders). ✔ *Help → About OpenSCAD* shows 2021.01; where OpenSCAD is on the PATH (usually only on Linux), `openscad --version` prints `OpenSCAD version 2021.01`. Then open `hardware/release/housing.scad` from the class repository and press F5. ✔ The preview shows the housing with the two boards transparent inside it, and the console shows the echoed numbers with no `Can't open import file` warning.
 
-**11b — Bambu Studio.** **Manual:** the student downloads Bambu Studio for their OS from https://bambulab.com/en/download/studio and installs it. Open it once; in the first-start wizard choose the printer **Bambu Lab P1S** with the **0.4 mm nozzle**. ✔ Bambu Studio opens with the P1S plate (256 × 256 mm) shown; *File → Import* of an STL lays the part on the plate.
+**11b — Bambu Studio.**
+
+| OS | Install (the agent runs it; the student approves) |
+|---|---|
+| Windows | `winget install --id Bambulab.Bambustudio -e --source winget` (else the installer from https://bambulab.com/en/download/studio) |
+| macOS | `brew install --cask bambu-studio` (else the `.dmg` from the same page) |
+| Linux | the AppImage from the same page |
+
+Open it once; in the first-start wizard choose the printer **Bambu Lab P1S** with the **0.4 mm nozzle**. ✔ Bambu Studio opens with the P1S plate (256 × 256 mm) shown; *File → Import* of an STL lays the part on the plate.
+
+**11c — other CAD programs (optional).** A student who already designs in another program may draw the housing there, as long as it fits the boards (`hardware/release/*.step`) and the files reach the cutoff: **FreeCAD 1.1** (free, open source, full GUI CAD with sketches, assemblies and drawings; https://www.freecad.org/downloads.php; `winget install --id FreeCAD.FreeCAD -e` / `brew install --cask freecad`), **CadQuery** (Python, exact geometry, STEP in and out; https://cadquery.readthedocs.io/; `pip install cadquery` in a Python 3.10–3.13 environment, viewer CQ-editor or the OCP CAD Viewer extension of VS Code) and **build123d** (Python, the same kernel, a cleaner style; https://build123d.readthedocs.io/; `pip install build123d`, viewer OCP CAD Viewer), or Onshape / SolidWorks if the student already uses them. Do not install these unless the student asks.
 
 If deferred, write *deferred* in the report.
 

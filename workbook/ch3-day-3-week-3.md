@@ -4,7 +4,7 @@
 
 **The CAD route.** Nobody learns a CAD program (computer-aided design: the program a part is drawn in) today. Claude Code writes the geometry; you specify, look, check the numbers, slice and decide. The geometry is written in **OpenSCAD 2021.01** (the free program in which a part is a short text file of shapes: the AI writes it, you read it and change the numbers) and prepared for the printer in **Bambu Studio** (the slicer: the program that turns a 3D model into the layers and paths the printer follows). A design in another CAD program you already use is welcome too, if it fits the boards and meets the deadline.
 
-**Prerequisites:** your zone merged (E9/E10 done); dev board and USB-C cable; **OpenSCAD and Bambu Studio installed and opened once** ([SETUP.md](../SETUP.md) Step 11); the class repository up to date (Source Control → *Sync Changes*). Optional background: [chapter B](chB-how-the-software-works.md).
+**Prerequisites:** your zone merged (E9/E10 done); dev board and USB-C cable; **OpenSCAD and Bambu Studio installed and opened once** ([SETUP.md](../SETUP.md) Step 11; run `/tutor L3` and the tutor installs them for you); another CAD program you already use is fine too (FreeCAD, CadQuery, build123d, Onshape, SolidWorks; Step 11c); the class repository up to date (Source Control → *Sync Changes*). Optional background: [chapter B](chB-how-the-software-works.md).
 
 **The deadline.** Housing files for 3D printing and/or laser cutting go to the workshop on **Fri 9 Oct, 2 pm — a hard cutoff.**
 
@@ -13,7 +13,7 @@
 ## Part A — In class
 
 ### A.1 Setup check — OpenSCAD and Bambu Studio open
-OpenSCAD (*Help → About* shows 2021.01) and Bambu Studio open; the class repository up to date, so `hardware/release/` holds `class-board.stl`, `front-panel.stl` and `housing.scad`; the dev board on a port (`pio device list`). `/tutor L3` finds the first failure.
+OpenSCAD (*Help → About* shows 2021.01) and Bambu Studio open; the class repository up to date, so `hardware/release/` holds `class-board.stl`, `front-panel.stl` and `housing.scad`; the dev board on a port (`pio device list`). `/tutor L3` finds the first failure and installs OpenSCAD or Bambu Studio if they are missing (you approve each command).
 
 ### A.2 Introduction — where we are
 The merged board in 3D; order status; what the presentation and demonstration (chapter 4) will ask of you — you build towards it from today.
