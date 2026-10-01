@@ -2,7 +2,9 @@
 
 Copy everything between the lines into your Claude Code prompt, change what you want changed (the **Make it yours** line
 at least), and end with the last sentence as it stands. The reference file `hardware/release/housing.scad` was produced
-from this card; if your own run stalls, copy that file into your folder and change its numbers in OpenSCAD's Customizer.
+from this card; if your own run stalls, copy
+that file into your folder, change its two `import("...")` lines to the paths below (`../../../../hardware/release/...`),
+and change its numbers in OpenSCAD's Customizer.
 
 ---
 
