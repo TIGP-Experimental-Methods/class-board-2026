@@ -177,15 +177,8 @@
 		(uuid "b1182ef6-ca7e-40bf-8238-bcad27139d05")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/F1812_L4.5-W3.2-H1.0.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/F1812_L4.5-W3.2-H1.0.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

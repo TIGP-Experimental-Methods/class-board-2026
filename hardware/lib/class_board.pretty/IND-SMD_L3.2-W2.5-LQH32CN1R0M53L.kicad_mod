@@ -226,15 +226,8 @@
 		(uuid "dccc42fc-b9b3-4243-8923-fea0d2ef7f63")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/IND-SMD_L3.2-W2.5-LQH32CN1R0M53L.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/IND-SMD_L3.2-W2.5-LQH32CN1R0M53L.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

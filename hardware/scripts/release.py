@@ -142,7 +142,11 @@ def export_board(name, board, rel):
         except Exception as e:  # pragma: no cover
             print("  (png render skipped: %s)" % e)
     # STEP
-    r = subprocess.run([KICAD_CLI, "pcb", "export", "step", "--subst-models", "--force", "-o", os.path.join(out, board["project"] + ".step"), pcb], capture_output=True, text=True)
+    # 3D models of the project libraries are addressed as ${TIGP_BOARD_LIB}/...; pass the variable so the export
+    # does not depend on the KiCad preferences of whoever runs this (STEP siblings of the .wrl files are used)
+    r = subprocess.run([KICAD_CLI, "pcb", "export", "step", "--subst-models", "--force",
+                        "--define-var", "TIGP_BOARD_LIB=" + os.path.join(HW, "lib").replace(os.sep, "/"),
+                        "-o", os.path.join(out, board["project"] + ".step"), pcb], capture_output=True, text=True)
     step_ok = r.returncode == 0 and os.path.exists(os.path.join(out, board["project"] + ".step"))
     step_note = (r.stdout + r.stderr)[-1500:]
     # ERC / DRC on the exact release revision

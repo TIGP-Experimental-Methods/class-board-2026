@@ -174,15 +174,8 @@
 		(uuid "1152d25d-9d5b-4373-beef-d634b6983709")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/SMA-TH_5P-L6.5-W6.5-H9.8_BWSMA-KE-Z001.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/SMA-TH_5P-L6.5-W6.5-H9.8_BWSMA-KE-Z001.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

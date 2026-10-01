@@ -323,15 +323,8 @@
 		(uuid "8acadc7b-8256-4c6d-b7ea-4aa9656ab481")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/HDR-TH_20P-P2.54-V-M-R2-C10-S2.54-1.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/HDR-TH_20P-P2.54-V-M-R2-C10-S2.54-1.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

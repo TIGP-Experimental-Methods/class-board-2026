@@ -176,15 +176,8 @@
 		(uuid "e9eac500-218e-4437-8016-b5f406e12ae4")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/CAP-TH_BD22.0-P10.00-D0.8-FD.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/CAP-TH_BD22.0-P10.00-D0.8-FD.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

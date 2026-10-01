@@ -178,15 +178,8 @@
 		(uuid "dc4deca3-5fca-4383-bc82-3e2e88a065bd")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/OSC-SMD_4P-L3.2-W2.5-H1.0.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(model "${TIGP_BOARD_LIB}/class_board.3dshapes/OSC-SMD_4P-L3.2-W2.5-H1.0.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0)))
 )

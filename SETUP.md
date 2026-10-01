@@ -170,6 +170,8 @@ Purpose: the class board is designed in KiCad (the free program we draw the sche
 
 Start KiCad once and accept the default library tables when asked.
 
+Then tell KiCad where the class board's 3D models are, so the 3D viewer shows the parts (the circuit works without this; only the picture is affected). KiCad → *Preferences → Configure Paths…* → add a row: name `TIGP_BOARD_LIB`, path = the `hardware/lib` folder inside the student's clone of this repository (for example `C:\Users\<user>\class-board-2026\hardware\lib`). A *path variable* is a name KiCad replaces by that folder wherever the project files use it.
+
 ✔ KiCad starts and *Help → About KiCad* shows version 10.x (on Linux `kicad-cli version` also works; on Windows and macOS `kicad-cli` is not on the PATH, so do not use it as the check). If deferred, write *deferred* in the report.
 
 ## Step 10 — KiCad extras (optional; from Workshop 2 onwards; needs Step 9)

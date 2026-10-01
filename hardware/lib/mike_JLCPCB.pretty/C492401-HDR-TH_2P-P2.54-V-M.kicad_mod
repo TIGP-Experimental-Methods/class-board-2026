@@ -187,15 +187,8 @@
 		(uuid "f12b3912-2490-4ff5-8c11-fb2a54ba6ab4")
 	)
 	(embedded_fonts no)
-	(model "${KIPRJMOD}/lib/class_board.3dshapes/C492401-HDR-TH_2P-P2.54-V-M.step"
-		(offset
-			(xyz 1.25 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz -0 -0 -0)
-		)
-	)
+	(model "${KICAD10_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.step"
+    (offset (xyz -1.27 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 90)))
 )
