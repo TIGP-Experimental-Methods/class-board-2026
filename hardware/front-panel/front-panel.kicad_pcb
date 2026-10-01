@@ -821,7 +821,7 @@
 			(uuid "632e6331-a5f9-4cb2-9288-f77a5cb110ed")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/lib/class_board.3dshapes/SOD-123F_L2.7-W1.6-LS3.8-RD.wrl"
+		(model "${TIGP_BOARD_LIB}/class_board.3dshapes/SOD-123F_L2.7-W1.6-LS3.8-RD.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -2424,7 +2424,7 @@
 				(pins)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr exclude_from_bom)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_circle
 			(center 0 0)
@@ -2807,7 +2807,7 @@
 				(pins)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr exclude_from_bom)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_circle
 			(center 0 0)
@@ -2927,7 +2927,7 @@
 				(pins)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr exclude_from_bom)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_circle
 			(center 0 0)
@@ -4553,7 +4553,7 @@
 				(pins)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr exclude_from_bom)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_circle
 			(center 0 0)
@@ -9229,7 +9229,7 @@
 			(uuid "e22cae18-9422-59d8-aedd-3e7a54e7c2e7")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/lib/class_board.3dshapes/CONN-SMD_BM04B-SRSS-TB.wrl"
+		(model "${TIGP_BOARD_LIB}/class_board.3dshapes/CONN-SMD_BM04B-SRSS-TB.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -13279,7 +13279,7 @@
 			(uuid "6a69a507-7089-5ba5-8740-4f37312c5c3f")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/lib/class_board.3dshapes/LED0805-RD.wrl"
+		(model "${TIGP_BOARD_LIB}/class_board.3dshapes/LED0805-RD.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -14970,7 +14970,7 @@
 			(uuid "d2f9373d-f680-43d4-a4b0-8de38e8fd259")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/lib/class_board.3dshapes/CONN-TH_P5.00_KF301-5.0-2P.wrl"
+		(model "${TIGP_BOARD_LIB}/class_board.3dshapes/CONN-TH_P5.00_KF301-5.0-2P.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -16302,7 +16302,7 @@
 			(uuid "985e7f73-0475-5c64-be4c-56106a468851")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/lib/class_board.3dshapes/CONN-TH_P5.00_KF301-5.0-2P.wrl"
+		(model "${TIGP_BOARD_LIB}/class_board.3dshapes/CONN-TH_P5.00_KF301-5.0-2P.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -17895,7 +17895,7 @@
 			(uuid "d9054b1b-95f2-5737-805b-9be74bbc9dc1")
 		)
 		(embedded_fonts no)
-		(model "${KIPRJMOD}/lib/class_board.3dshapes/SMA-TH_5P-L6.5-W6.5-H9.8_BWSMA-KE-Z001.wrl"
+		(model "${TIGP_BOARD_LIB}/class_board.3dshapes/SMA-TH_5P-L6.5-W6.5-H9.8_BWSMA-KE-Z001.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -18501,7 +18501,7 @@
 				)
 			)
 		)
-		(attr through_hole exclude_from_pos_files exclude_from_bom)
+		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -1.38 1.38)
@@ -19177,7 +19177,7 @@
 				)
 			)
 		)
-		(attr through_hole exclude_from_pos_files exclude_from_bom)
+		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -1.38 -49.64)
@@ -19853,7 +19853,7 @@
 				)
 			)
 		)
-		(attr through_hole exclude_from_pos_files exclude_from_bom)
+		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start 3.92 1.38)
