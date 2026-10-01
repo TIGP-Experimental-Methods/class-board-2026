@@ -215,7 +215,7 @@ Check that the binary exists at that path before writing the file (the plugin fo
 
 ## Step 11 — OpenSCAD and Bambu Studio (the preparation for Workshop 3)
 
-Purpose: the housing (Project 3) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows). **The tutor installs OpenSCAD, its BOSL2 library and Bambu Studio** (`/tutor L3` runs this step when any is missing), the student approves each command; a student may also install them by hand from the links. First make sure the class repository is up to date (`git pull` on `main`, or the tutor's self-update has done it), so `hardware/release/` holds `class-board.stl`, `front-panel.stl` and `housing.scad`.
+Purpose: the housing (Project 3) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows). **The tutor installs OpenSCAD, its BOSL2 library and Bambu Studio** (`/tutor L3` runs this step when any is missing), the student approves each command; a student may also install them by hand from the links. First make sure the class repository is up to date (`git pull` on `main`, or the tutor's self-update has done it), so `hardware/release/` holds the two board models, `class-board.stl` and `front-panel.stl`.
 
 **11a — OpenSCAD 2021.01 (the stable release).** Install the stable release, version 2021.01, not a development snapshot.
 
@@ -225,7 +225,7 @@ Purpose: the housing (Project 3) is written in OpenSCAD (the free program in whi
 | macOS | `brew install --cask openscad` (or the `.dmg` from the same page, dragged to *Applications*) |
 | Linux | `sudo apt install openscad` or `sudo dnf install openscad` (check that it is 2021.01) |
 
-Open OpenSCAD once; on the welcome screen choose *New*. Turn on *Design → Automatic Reload and Preview* (the preview redraws whenever the file is saved, also when Claude saves it) and *Window → Customizer* (the panel that turns the variables at the top of a file into sliders). ✔ *Help → About OpenSCAD* shows 2021.01; where OpenSCAD is on the PATH (usually only on Linux), `openscad --version` prints `OpenSCAD version 2021.01`. Then open `hardware/release/housing.scad` from the class repository and press F5. ✔ The preview shows the housing with the two boards transparent inside it, and the console shows the echoed numbers with no `Can't open import file` warning.
+Open OpenSCAD once; on the welcome screen choose *New*. Turn on *Design → Automatic Reload and Preview* (the preview redraws whenever the file is saved, also when Claude saves it) and *Window → Customizer* (the panel that turns the variables at the top of a file into sliders). ✔ *Help → About OpenSCAD* shows 2021.01; where OpenSCAD is on the PATH (usually only on Linux), `openscad --version` prints `OpenSCAD version 2021.01`. Then look at the boards one at a time. Create your folder `docs/students/<name>/housing/` in the class repository and save the new file there as `boards.scad`; type the single line `import("../../../../hardware/release/front-panel.stl");`, save, press F5. ✔ The front panel board appears — the 16 SMA jacks, the OLED socket, the LEDs, the terminals along one edge; drag to rotate it, scroll to zoom. Change the file name in that line to `class-board.stl` and save: the main board appears, with its link sockets, the dev-board sockets and the rear-edge connectors. The console shows no `Can't open import file` warning (the path is relative to the `.scad` file, which is why the file is saved first).
 
 **BOSL2**, the OpenSCAD library for rounded boxes, screw and insert holes and real threads (`include <BOSL2/std.scad>`), is cloned into OpenSCAD's library folder (the agent runs it; the student approves):
 
@@ -272,7 +272,7 @@ Print this block at the end, filled in. On a failure, stop at that step, fill in
 - ✔/✘/not installed LCSC suite
 - ✔/✘/not installed KiCad Routing Tools <version>
 - ✔/✘/not installed kicad-happy
-- ✔/✘/deferred OpenSCAD <version> (`openscad --version`, or *Help → About*); `housing.scad` previews; BOSL2 in the library folder
+- ✔/✘/deferred OpenSCAD <version> (`openscad --version`, or *Help → About*); each board mesh imports and previews on its own; BOSL2 in the library folder
 - ✔/✘/deferred Bambu Studio <version>; P1S, 0.4 mm nozzle selected
 
 **toolchain OK** — or — **First failure:** Step <n>: `<command>` → `<exact error>`
