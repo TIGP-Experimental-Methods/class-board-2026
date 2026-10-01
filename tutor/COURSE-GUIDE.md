@@ -123,7 +123,7 @@ and the section pages repeat them.  The PCB is a separate project (`hardware/cla
 footprint is already placed there, so in Workshop 2 the student routes — they do not place footprints.
 
 **The Workshop-2 flow (`/tutor L2`), in order.**
-1. **Setup check.** `hardware/class-board.kicad_pro` opens with no missing-library warning; *Help → About KiCad* shows 10.x. First failure only.
+1. **Setup check.** `hardware/class-board.kicad_pro` opens with no missing-library warning; *Help → About KiCad* shows 10.x. First failure only. Then the 3D models: the project's footprints find their 3D models through the KiCad path variable `TIGP_BOARD_LIB` (SETUP.md Step 9). If the 3D viewer shows bare pads where parts should be, have the student add it under *Preferences → Configure Paths…* (name `TIGP_BOARD_LIB`, path = the `hardware/lib` folder of their clone), reopen the board, and if parts are still missing run *Tools → Update Footprints from Library…* with *3D models* ticked on their own working copy. This changes only the picture, never the circuit.
 2. **Section assignment** — volunteers first, then lots. Record `A`, `B` or `C` in `docs/students/<name>/PROGRESS.md` **before anything else**, and name the ring neighbour who will review.
 3. **Electronics 101.** Explain any of the chapter's seven ideas on request, in the student's language, and ask one question back from the bank below — the one for *their* section.
 4. **KiCad live.** The six operations only: place and wire a decoupling pair → annotate → *Update PCB from Schematic* → drag the footprints → route three tracks → DRC, then the 3D view.
