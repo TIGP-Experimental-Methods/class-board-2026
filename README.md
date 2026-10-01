@@ -82,7 +82,7 @@ The rules: a driver talks only to its own hardware; all driver code runs from `l
 
 ## The housing (Workshop 3, Project 3b)
 
-`hardware/release/` holds the two board meshes (`class-board.stl`, `front-panel.stl`, exported from KiCad with only the connectors, LEDs and the OLED) and the instructor's reference `housing.scad` for OpenSCAD 2021.01. You start from the specification card, [workbook/housing-spec-card.md](workbook/housing-spec-card.md), and work in `docs/students/<name>/housing/`; [chapter 3](workbook/ch3-day-3-week-3.md) §A.6 has the steps, and [SETUP.md](SETUP.md) Step 11 installs OpenSCAD and Bambu Studio.
+`hardware/release/` holds the two board models (`class-board.stl`, `front-panel.stl` meshes and the STEP files, exported from the final KiCad boards with `kicad-cli`, keeping the connectors, LEDs and modules) and the instructor's reference `housing.scad` for OpenSCAD 2021.01 (a backup). You design your own housing from the [housing brief](workbook/housing-brief.md) with Claude Code and work in `docs/students/<name>/housing/`; [chapter 3](workbook/ch3-day-3-week-3.md) §A.6 has the steps, and [SETUP.md](SETUP.md) Step 11 installs OpenSCAD and Bambu Studio.
 
 ## Add an alarm rule
 

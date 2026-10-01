@@ -1,10 +1,11 @@
-# The housing specification card (Project 3b)
+# An example housing specification (Project 3b) — a backup, not the starting point
 
-Copy everything between the lines into your Claude Code prompt, change what you want changed (the **Make it yours** line
-at least), and end with the last sentence as it stands. The reference file `hardware/release/housing.scad` was produced
-from this card; if your own run stalls, copy
-that file into your folder, change its two `import("...")` lines to the paths below (`../../../../hardware/release/...`),
-and change its numbers in OpenSCAD's Customizer.
+Write your own specification from the [housing brief](housing-brief.md) first; that is the exercise. This page is the
+instructor's example, kept for two cases: you are stuck after a real attempt, or you want to see what a complete
+specification looks like. The reference file `hardware/release/housing.scad` was produced from it (its cover is one plate
+at 14 mm, before the two-height rule below; a copy used as a fallback needs the low region around the SMAs). To use the
+reference file: copy it into your folder, change its two `import("...")` lines to the paths below
+(`../../../../hardware/release/...`), and change its numbers in OpenSCAD's Customizer.
 
 ---
 
