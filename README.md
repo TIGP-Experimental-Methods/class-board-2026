@@ -80,6 +80,10 @@ It finds `instrument.local`, then `192.168.4.1`; `--host 10.0.0.42` overrides.
 
 The rules: a driver talks only to its own hardware; all driver code runs from `loop()` (no tasks, no locks); every status key you show in the panel is one your `status()` emits.
 
+## The housing (Workshop 3, Project 3b)
+
+`hardware/release/` holds the two board meshes (`class-board.stl`, `front-panel.stl`, exported from KiCad with only the connectors, LEDs and the OLED) and the instructor's reference `housing.scad` for OpenSCAD 2021.01. You start from the specification card, [workbook/housing-spec-card.md](workbook/housing-spec-card.md), and work in `docs/students/<name>/housing/`; [chapter 3](workbook/ch3-day-3-week-3.md) §A.6 has the steps, and [SETUP.md](SETUP.md) Step 11 installs OpenSCAD and Bambu Studio.
+
 ## Add an alarm rule
 
 Rules are data: `{block, key, op, threshold, action}`, evaluated 20× per second on the same status the app sees; they fire once when the condition becomes true.

@@ -117,7 +117,13 @@ Every tooling term in this workbook is explained the first time it appears in a 
 | **BOM** | the bill of materials, the parts list |
 | **Gerbers** | the manufacturing files sent to the factory |
 | **STL / STEP** | 3D file formats (for printing / for CAD exchange) |
-| **Onshape** | the browser CAD program for the housing |
+| **OpenSCAD** | the free program in which a part is a short text file of shapes; the AI writes it, you read it and change the numbers (Workshop 3, the housing) |
+| **Customizer** | OpenSCAD's panel (*Window → Customizer*) that turns the variables at the top of a file into sliders and drop-downs, so you change a number without touching the code |
+| **3MF** | a 3D print format like STL that also carries colours and print settings |
+| **DXF** | the 2D drawing format laser cutters read; one file per plate |
+| **kerf** | the width of material the laser (or the water-jet) burns away along a cut; about 0.2 mm on the laser |
+| **nut pocket** | a hexagonal hole in a printed part that holds a nut so a screw can pull into it: the class's printed thread (M3: 5.8 mm across flats, 2.5 mm deep) |
+| **slicer / Bambu Studio** | the program that turns a 3D model into the layers and paths the printer follows; Bambu Studio is the slicer for the class P1S printers |
 | **ring reviewer** | the classmate who reviews your pull request (A reviews B, B reviews C, C reviews A) |
 
 ## C.0b The AI method in one screen
@@ -189,7 +195,7 @@ Source Control is the branching icon in the left bar. Changed files are marked *
 | open a pull request | push the branch; GitHub offers *Compare & pull request* |
 | is this file ignored? (the secrets check) | ask Claude to run `git check-ignore -v firmware/include/secrets.h` — it must print the rule; nothing printed means the file is NOT ignored |
 
-Rules: every project is its own public repository under your own GitHub account — push at every milestone (plan reviewed, first working version, deployed, project page written). `main` in the class repository is protected — your work there goes on your branch (`w1-<name>`, later `<section>-<name>`, `<section>-fw-<name>` — `a-`, `b-` or `c-` for your section); one pull request per deliverable; the pull request description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. With an agent: commit before it starts · ask it to commit as it goes · review the diff, not the file · never let it rewrite history — say no to force-push and reset. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then e-mail the instructor (C.7).
+Rules: every project is its own public repository under your own GitHub account — push at every milestone (plan reviewed, first working version, deployed, project page written). `main` in the class repository is protected — your work there goes on your branch (`w1-<name>`, later `<section>-<name>`, `<section>-fw-<name>` — `a-`, `b-` or `c-` for your section); one pull request per deliverable; the pull request description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. With an agent: commit before it starts · ask it to commit as it goes · review the diff, not the file · never let it rewrite history — say no to force-push and reset. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then e-mail the instructor (C.8).
 
 ## C.2 PlatformIO
 ```sh
@@ -258,7 +264,23 @@ Status (20 Hz): `{"type":"status","t":ms,"blocks":{"base":{…},"b1":{…}}}` �
 Alarm rule: `{block, key, op: gt|lt|ge|le|eq|ne, threshold, action: notify | module:<n>:on|off}`.
 Scope: `stream {ch, rate_hz, chunk}` (rolling; `rate_hz: 0` stops) · `capture {ch, rate_hz, n, trig:{level, edge, pre}}` (one binary frame). Full list: `firmware/PROTOCOL.md`.
 
-## C.6 The four log lines (`PROGRESS.md`, every session)
+## C.6 OpenSCAD — the seven ideas
+The whole language is shapes, moves and combinations; everything else is a convenience. Details: workbook ch. 3 §A.4.
+
+| Idea | In code |
+|---|---|
+| 1 shapes, moved, combined | `translate([95, 55, 40]) cylinder(d = 20, h = 30, $fn = 48);` |
+| 2 extrude a 2D sketch; `offset(r)` rounds the corners | `linear_extrude(height = 40) offset(r = 3) offset(delta = -3) square([190, 110]);` |
+| 3 cut: `difference()` keeps the first shape, removes the rest | `difference() { cube([190, 110, 40]); translate([2, 2, 2]) cube([186, 106, 40]); }` |
+| 4 revolve a half-profile (x ≥ 0) | `rotate_extrude($fn = 64) polygon([[1.6, 0], [5, 0], [5, 11], [1.6, 11]]);` |
+| 5 holes: a cylinder subtracted, repeated; +0.3 mm; `$fn` | `for (x = [75.65 : 18 : 165.65]) translate([x, 25.67, -1]) cylinder(d = 6.5 + 0.3, h = 5, $fn = 48);` |
+| 6 what it lacks: nut pocket, `hull()` for rounding, `text()`, `projection(cut = true)` for a DXF; BOSL2 for later | `cylinder(d = 5.8 / cos(30), h = 2.5, $fn = 6);` · `linear_extrude(0.6) text("TIGP", size = 8);` |
+| 7 variables with Customizer comments, modules, the part switch, `%` transparent, `#` highlighted, `echo()` | `wall = 2; // [1.6:0.2:3]` · `if (part == "cover") cover();` · `echo("wall", wall);` |
+
+**Out:** F5 preview · F6 render · *File → Export* — STL (or 3MF) per part; DXF from the 2D `cover2d` projection.
+**The three console messages:** `Can't open import file` — the mesh path is wrong, the board is missing · `Current top level object is empty` — the `part` switch matched nothing · `Ignoring unknown variable` — a typo; the shape silently vanishes.
+
+## C.7 The four log lines (`PROGRESS.md`, every session)
 ```markdown
 ## 2026-09-11 — Workshop 1 (class)
 - Done: pendulum simulator from SPEC.md, app at https://alice.github.io/pendulum-sim/app/, project page drafted; class firmware flashed, phone controls the LED
@@ -267,5 +289,5 @@ Scope: `stream {ch, rate_hz, chunk}` (rolling; `rate_hz: 0` stops) · `capture {
 - Gotchas: first plan animated the swing instead of integrating it — rejected; first flash needed BOOT+RST, new COM port
 ```
 
-## C.7 Who to ask
+## C.8 Who to ask
 Tutor on your screen (`/tutor <chapter>`) → stuck: ask the tutor for the fix → still stuck: **e-mail the instructor** with a screenshot → from Workshop 2, your ring reviewer for anything about your section of the board.

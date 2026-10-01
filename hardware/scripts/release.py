@@ -4,7 +4,9 @@ Outputs under hardware/release/<rev>/{main-board,front-panel}/:
   gerbers/*.gbr + *.drl (bottom-left aux origin), <board>-bom.csv, <board>-cpl.csv (JLC columns),
   <board>.pdf (schematic, all sheets), <board>-<layer>.svg + .png (readable layout), <board>.step,
   reports/{erc,drc}.json + summary.txt, hashes.txt (SHA-256 of every file in the folder).
-Also hardware/release/<rev>/schematics/<block>.pdf (per-block PDFs of the main board).
+Also hardware/release/<rev>/schematics/<sheet>.pdf (one PDF per sheet the root schematic references).
+The netlist is exported fresh from the schematic at every run; hand-soldered parts (Assembly = hand)
+go to <board>-hand-solder.csv and never into the JLC BOM/CPL.
 
 Usage: python release.py <rev>   (e.g. python release.py revA)
 """
@@ -13,6 +15,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -22,12 +25,11 @@ import netlist  # noqa: E402
 
 HW = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 KICAD_CLI = os.environ.get("KICAD_CLI", "C:/Program Files/KiCad/10.0/bin/kicad-cli.exe")
-BOARDS = {
-    "main-board": dict(dir=HW, project="class-board", layers="F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts",
-                       sheets=["base_mcu", "b2_power", "b1_inputs", "b3_outputs", "b4_switching", "b5_dio_trig", "opt_conditioning", "front_panel_link"],
-                       views=["F.Cu", "In1.Cu", "In2.Cu", "B.Cu", "F.SilkS", "B.SilkS"]),
-    "front-panel": dict(dir=os.path.join(HW, "front-panel"), project="front-panel", layers="F.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts",
-                        sheets=[], views=["F.Cu", "B.Cu", "F.SilkS", "B.SilkS"]),
+LAYERS4 = "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"
+VIEWS4 = ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu", "F.SilkS", "B.SilkS"]
+BOARDS = {  # both boards are 4-layer (180 x 100 mm)
+    "main-board": dict(dir=HW, project="class-board", layers=LAYERS4, views=VIEWS4),
+    "front-panel": dict(dir=os.path.join(HW, "front-panel"), project="front-panel", layers=LAYERS4, views=VIEWS4),
 }
 
 
@@ -40,11 +42,27 @@ def run(args, **k):
     return r.stdout
 
 
+def sub_sheets(board):
+    """Names of the sheet files the root schematic references (never a hard-coded list)."""
+    root = open(os.path.join(board["dir"], board["project"] + ".kicad_sch"), encoding="utf-8").read()
+    return sorted(set(re.findall(r'\(property "Sheetfile" "(?:sheets/)?([^"/]+)\.kicad_sch"', root)))
+
+
+def export_netlist(board, out_dir):
+    """Fresh KiCad XML netlist of the schematic as it is now (never a cached copy)."""
+    path = os.path.join(out_dir, "_netlist.xml")
+    run([KICAD_CLI, "sch", "export", "netlist", "--format", "kicadxml", "-o", path,
+         os.path.join(board["dir"], board["project"] + ".kicad_sch")])
+    return path
+
+
 def bom_cpl(board, out_dir, name):
     """BOM (Comment, Designator, Footprint, LCSC Part #) and CPL (Designator, Mid X, Mid Y, Layer, Rotation) for
     populated parts only; positions from kicad-cli pos export (aux origin = bottom-left, y up, mm)."""
     pcb = os.path.join(board["dir"], board["project"] + ".kicad_pcb")
-    comps, nets, pad_net = netlist.read(os.path.join(board["dir"], ".netlist.xml"))
+    net_xml = export_netlist(board, out_dir)
+    comps, nets, pad_net = netlist.read(net_xml)
+    os.remove(net_xml)
     pos_csv = os.path.join(out_dir, "_pos.csv")
     run([KICAD_CLI, "pcb", "export", "pos", "--format", "csv", "--units", "mm", "--side", "both", "--use-drill-file-origin",
          "--exclude-dnp", "-o", pos_csv, pcb])
@@ -58,8 +76,9 @@ def bom_cpl(board, out_dir, name):
     skipped = []
     hand = []
     for ref, c in sorted(comps.items(), key=lambda kv: (kv[0][0], int("".join(ch for ch in kv[0][1:] if ch.isdigit()) or 0))):
-        if c.fields.get("Assembly", "").lower() == "hand" and not c.dnp:
-            # bought separately and soldered by the instructor: never in the JLC BOM or CPL
+        if c.fields.get("Assembly", "").lower() == "hand":
+            # bought separately and soldered by hand (Decision #73: such parts are also DNP and excluded
+            # from the BOM in the schematic): never in the JLC BOM or CPL, always on the hand list
             hand.append([ref, c.value, c.footprint.split(":")[-1], c.fields.get("MPN", ""),
                          c.fields.get("Purchase", "") or c.fields.get("LCSC", "")])
             continue
@@ -104,12 +123,13 @@ def export_board(name, board, rel):
          "--excellon-units", "mm", "--generate-map", "--map-format", "gerberx2", "-o", os.path.join(out, "gerbers") + os.sep, pcb])
     # BOM / CPL
     n_lines, n_parts, skipped, hand = bom_cpl(board, out, board["project"])
-    # schematic PDF (whole hierarchy) and per-block PDFs
+    # schematic PDF (whole hierarchy) and one PDF per referenced sheet
     run([KICAD_CLI, "sch", "export", "pdf", "-o", os.path.join(out, board["project"] + ".pdf"), sch])
-    if board["sheets"]:
+    sheets = sub_sheets(board)
+    if sheets:
         sdir = os.path.join(rel, "schematics")
         os.makedirs(sdir, exist_ok=True)
-        for sh in board["sheets"]:
+        for sh in sheets:
             run([KICAD_CLI, "sch", "export", "pdf", "-o", os.path.join(sdir, sh + ".pdf"), os.path.join(board["dir"], "sheets", sh + ".kicad_sch")])
     # readable layout exports
     for lay in board["views"]:
@@ -122,7 +142,11 @@ def export_board(name, board, rel):
         except Exception as e:  # pragma: no cover
             print("  (png render skipped: %s)" % e)
     # STEP
-    r = subprocess.run([KICAD_CLI, "pcb", "export", "step", "--subst-models", "--force", "-o", os.path.join(out, board["project"] + ".step"), pcb], capture_output=True, text=True)
+    # 3D models of the project libraries are addressed as ${TIGP_BOARD_LIB}/...; pass the variable so the export
+    # does not depend on the KiCad preferences of whoever runs this (STEP siblings of the .wrl files are used)
+    r = subprocess.run([KICAD_CLI, "pcb", "export", "step", "--subst-models", "--force",
+                        "--define-var", "TIGP_BOARD_LIB=" + os.path.join(HW, "lib").replace(os.sep, "/"),
+                        "-o", os.path.join(out, board["project"] + ".step"), pcb], capture_output=True, text=True)
     step_ok = r.returncode == 0 and os.path.exists(os.path.join(out, board["project"] + ".step"))
     step_note = (r.stdout + r.stderr)[-1500:]
     # ERC / DRC on the exact release revision
@@ -135,18 +159,12 @@ def export_board(name, board, rel):
     drc_err = [v for v in drc["violations"] if v["severity"] == "error"]
     drc_warn = [v for v in drc["violations"] if v["severity"] == "warning"]
     unconn = drc.get("unconnected_items", [])
-    # angle audit
-    aud = subprocess.run([sys.executable, os.path.join(HW, "..", "tools", "pcb", "audit_angles.py"), pcb], capture_output=True, text=True)
-    try:
-        audit = json.loads(aud.stdout)
-    except Exception:
-        audit = {"ok": False, "error": aud.stdout[-500:] + aud.stderr[-500:]}
     # copy the editable design too (opens without external libraries: project-local lib tables)
     for f in glob.glob(os.path.join(board["dir"], board["project"] + ".kicad_*")) + glob.glob(os.path.join(board["dir"], "*-lib-table")):
         shutil.copy(f, out)
-    if board["sheets"]:
+    if sheets:
         os.makedirs(os.path.join(out, "sheets"), exist_ok=True)
-        for sh in board["sheets"]:
+        for sh in sheets:
             shutil.copy(os.path.join(board["dir"], "sheets", sh + ".kicad_sch"), os.path.join(out, "sheets"))
     from collections import Counter
     summary = [
@@ -156,7 +174,6 @@ def export_board(name, board, rel):
         "DRC errors: %d   warnings: %d   unconnected items: %d" % (len(drc_err), len(drc_warn), len(unconn)),
         "DRC warning types: %s" % dict(Counter(v["type"] for v in drc_warn)),
         "DRC error types: %s" % dict(Counter(v["type"] for v in drc_err)),
-        "track angle audit (0/45/90 only): ok=%s segments=%s vias=%s" % (audit.get("ok"), audit.get("segments"), audit.get("vias")),
         "BOM lines: %d   CPL parts: %d   skipped (DNP / not in BOM / missing): %d" % (n_lines, n_parts, len(skipped)),
         "hand-soldered parts (Assembly = hand, own CSV, NOT in the JLC BOM/CPL): %d  %s" % (len(hand), [h[0] for h in hand]),
         "skipped: %s" % skipped,
@@ -165,7 +182,7 @@ def export_board(name, board, rel):
     with open(os.path.join(out, "reports", "summary.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(summary) + "\n")
     print("\n".join("  " + s for s in summary))
-    return dict(erc=erc_n, drc_err=len(drc_err), drc_warn=len(drc_warn), unconnected=len(unconn), audit_ok=audit.get("ok"), step_ok=step_ok, skipped=skipped)
+    return dict(erc=erc_n, drc_err=len(drc_err), drc_warn=len(drc_warn), unconnected=len(unconn), step_ok=step_ok, skipped=skipped)
 
 
 def write_hashes(rel):
