@@ -213,6 +213,24 @@ Check that the binary exists at that path before writing the file (the plugin fo
 
 **10g — Report.** Add the five lines below to the final report. None of 10b–10f blocks the class: on any failure, write *not installed* and move on.
 
+## Step 11 — OpenSCAD and Bambu Studio (the preparation for Workshop 3)
+
+Purpose: the housing (Project 3b) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows), so both must be installed and opened once before Workshop 3. Offer this step; the student may defer it until before Workshop 3.
+
+**11a — OpenSCAD 2021.01 (the stable release).** Install the stable release, version 2021.01, from https://openscad.org/downloads.html — not a development snapshot.
+
+| OS | Install |
+|---|---|
+| Windows | **manual:** the student downloads the 64-bit Windows installer from the page above and runs it |
+| macOS | **manual:** the student downloads the `.dmg` from the page above and drags OpenSCAD to *Applications* |
+| Linux | `sudo apt install openscad` or `sudo dnf install openscad` (the distribution package; check that it is 2021.01) |
+
+Open OpenSCAD once; on the welcome screen choose *New*. Turn on *Design → Automatic Reload and Preview* (the preview redraws whenever the file is saved, also when Claude saves it) and *Window → Customizer* (the panel that turns the variables at the top of a file into sliders). ✔ *Help → About OpenSCAD* shows 2021.01; where OpenSCAD is on the PATH (usually only on Linux), `openscad --version` prints `OpenSCAD version 2021.01`. Then open `hardware/release/housing.scad` from the class repository and press F5. ✔ The preview shows the housing with the two boards transparent inside it, and the console shows the echoed numbers with no `Can't open import file` warning.
+
+**11b — Bambu Studio.** **Manual:** the student downloads Bambu Studio for their OS from https://bambulab.com/en/download/studio and installs it. Open it once; in the first-start wizard choose the printer **Bambu Lab P1S** with the **0.4 mm nozzle**. ✔ Bambu Studio opens with the P1S plate (256 × 256 mm) shown; *File → Import* of an STL lays the part on the plate.
+
+If deferred, write *deferred* in the report.
+
 ## Final report
 
 Print this block at the end, filled in. On a failure, stop at that step, fill in the lines completed so far, and put the exact command and error under *First failure*. The student e-mails the whole block to the instructor (s.p.bennetts@g.iams.sinica.edu.tw) if a failure could not be fixed.
@@ -234,6 +252,8 @@ Print this block at the end, filled in. On a failure, stop at that step, fill in
 - ✔/✘/not installed LCSC suite
 - ✔/✘/not installed KiCad Routing Tools <version>
 - ✔/✘/not installed kicad-happy
+- ✔/✘/deferred OpenSCAD <version> (`openscad --version`, or *Help → About*); `housing.scad` previews
+- ✔/✘/deferred Bambu Studio <version>; P1S, 0.4 mm nozzle selected
 
 **toolchain OK** — or — **First failure:** Step <n>: `<command>` → `<exact error>`
 ```
