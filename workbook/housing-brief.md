@@ -1,4 +1,4 @@
-# The housing brief (Project 3b)
+# The housing brief (Project 3: the housing)
 
 You design the housing yourself, with Claude Code, from this page. There is no template to fill in: write your own
 specification in your own words, end it with *"Ask me your questions before writing any code"*, answer the questions,

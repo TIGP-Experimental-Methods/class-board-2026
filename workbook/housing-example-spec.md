@@ -1,4 +1,4 @@
-# An example housing specification (Project 3b) — a backup, not the starting point
+# An example housing specification (Project 3: the housing) — a backup, not the starting point
 
 Write your own specification from the [housing brief](housing-brief.md) first; that is the exercise. This page is the
 instructor's example, kept for two cases: you are stuck after a real attempt, or you want to see what a complete

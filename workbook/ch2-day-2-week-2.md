@@ -48,10 +48,10 @@ Seven ideas, each pointed at a page of the schematic PDF. [Chapter A](chA-electr
 
 **Optional tools, for playing at home** (SETUP.md Step 10; the tutor installs them with you): **Konnect**, an MCP server (a plug that gives Claude hands inside KiCad) that lets the tutor read and edit a schematic, run ERC and DRC and drive the **Freerouting** autorouter; and the **LCSC suite**, a KiCad plugin that searches the JLCPCB parts library from inside KiCad — stock, price, Basic or Extended — and imports a part's symbol, footprint and 3D model; **KiCad Routing Tools**, a second router that also optimises placement; and **kicad-happy**, review skills that let a fresh Claude session review your schematic or board. Play with them on your own gapped project, on your own branch; everything that enters the shared board is a track you can explain.
 
-### A.5 Project 3a — Turning our ESP32 into a real piece of lab equipment
+### A.5 The class board — Turning our ESP32 into a real piece of lab equipment
 We build the skeleton of the class board together; each of you adds one section — the missing parts of your section's schematic, then the copper of your zone (the outlined region of the board that is yours). The instructor's rails, connectors and dev-board socket are already there.
 
-#### 3a.1 (E6) — schematic gaps
+#### A.5.1 (E6) — schematic gaps
 - [ ] New branch `<section>-<name>`, for example `a-mei` (VS Code: click the branch name bottom-left → *Create new branch…*; a branch is your own line of work inside the repository — the project folder whose complete history git keeps).
 - [ ] Open your gapped sheets. Each one is a small KiCad project of its own in `hardware/student/` — open the `.kicad_pro` that sits next to the sheet, not the main project. **Section A:** `b1_inputs_gapped`, `nmr_rx_gapped` · **Section B:** `b3_outputs_gapped`, `b5_dio_trig_gapped`, `nmr_tx_gapped` · **Section C:** the gapped copy of the front-panel sheet (`hardware/docs/student-deletions.md` names it).
 - [ ] Put the full PDF pages for your section next to them. Three or four *items* were deleted from each sheet — a decoupling pair, one repeated channel, one connector — and an item can be several parts. Every reference designator, value and footprint is listed in `hardware/docs/student-deletions.md` and repeated on your section page. For each: `A` (add symbol — a part's drawing in the schematic) → search the **project library** `class_board` (the set of symbols and footprints for our parts) → place → wire (`W`) → set the value (`V`) and check the **footprint field** (`E`) says the right package (0603, SOT-23, …).
@@ -62,18 +62,18 @@ We build the skeleton of the class board together; each of you adds one section 
 
 #### Break
 
-#### 3a.2 (E7, start) — route your zone
+#### A.5.2 (E7, start) — route your zone
 - [ ] Open `hardware/class-board.kicad_pro` and its PCB. Every footprint of the board is already placed, the parts you put back included — the reference designators did not change — so your work here is copper, not placement. If *Update PCB from Schematic* does drop a stray footprint, drag it inside your rule area (`ZONE_A`, `ZONE_B` or `ZONE_C`), decoupling capacitors **next to the pin they serve**.
 - [ ] Route (`X`): signals on F.Cu (top), long or crossing ones on B.Cu (bottom) via `V`; **both inner layers are unbroken ground planes and carry no tracks at all** — the design rule check rejects any track you draw there. Track widths come from the net classes (a net is a set of pins that are connected together; a net class sets the rules for a group of them — do not change them).
 - [ ] Signals that leave the instrument go to the **front panel**, not to the edge of the board: route them to the link headers the instructor has placed (they are on the bottom side, where the panel plugs in). Only the power, external-supply and coil terminals sit on the rear edge.
 - [ ] Run `Inspect → DRC` often. Read every message with the tutor; the two classics are *wrong layer* and *unconnected net*.
 - ✔ *You should see:* a good part of the zone routed; DRC shows only unrouted-net items for the rest.
 
-#### 3a.3 — pull request and peer review, live (watch)
+#### A.5.3 — pull request and peer review, live (watch)
 The instructor opens a pull request (PR — a request to merge a branch into the shared project; someone reviews it first, comments, and approves) from a student branch, requests the ring reviewer (A reviews B, B reviews C, C reviews A), writes one comment against the checklist, shows *Request changes* vs *Approve*.
 
 ### A.6 Firmware/software — making our instrument useful and friendly
-The board is the shared baseline; what it *does* is yours. From Workshop 3 you write your section's driver and its phone panel, and the app you built in Project 2 grows into the instrument's front end. **Can you adapt it to solve a problem in your current research?** — a logger for a slow drift, an alarm that reaches your phone, a sweep that runs overnight. Start thinking about it now; the tutor will ask.
+The board is the shared baseline; what it *does* is yours. In Workshop 3 you start Project 3, your instrument: you write the firmware drivers and phone panels it needs — the section you worked on today is the natural place to start — and the app you built in Project 2 grows into the instrument's front end. **Can you adapt it to solve a problem in your current research?** — a logger for a slow drift, an alarm that reaches your phone, a sweep that runs overnight. Start thinking about it now; the tutor will ask.
 
 ### A.7 What must be finished for the cutoff
 Read your section page (E3), finish the routing (E7), fetch your one part from the JLCPCB parts library (E8), open your pull request (E9), review your neighbour's (E10) — Part B below. **Gerbers go to the factory Mon 28 Sep, 2 pm — hard cutoff.** Your section must be merged before it. Be creative, stay inside your zone.

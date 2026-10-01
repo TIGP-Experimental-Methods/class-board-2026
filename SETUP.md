@@ -215,7 +215,7 @@ Check that the binary exists at that path before writing the file (the plugin fo
 
 ## Step 11 — OpenSCAD and Bambu Studio (the preparation for Workshop 3)
 
-Purpose: the housing (Project 3b) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows). **The tutor installs OpenSCAD, its BOSL2 library and Bambu Studio** (`/tutor L3` runs this step when any is missing), the student approves each command; a student may also install them by hand from the links. First make sure the class repository is up to date (`git pull` on `main`, or the tutor's self-update has done it), so `hardware/release/` holds `class-board.stl`, `front-panel.stl` and `housing.scad`.
+Purpose: the housing (Project 3) is written in OpenSCAD (the free program in which a part is a short text file of shapes: the AI writes it, the student reads it and changes the numbers) and prepared for the printer in Bambu Studio (the slicer: the program that turns a 3D model into the layers and paths the printer follows). **The tutor installs OpenSCAD, its BOSL2 library and Bambu Studio** (`/tutor L3` runs this step when any is missing), the student approves each command; a student may also install them by hand from the links. First make sure the class repository is up to date (`git pull` on `main`, or the tutor's self-update has done it), so `hardware/release/` holds `class-board.stl`, `front-panel.stl` and `housing.scad`.
 
 **11a — OpenSCAD 2021.01 (the stable release).** Install the stable release, version 2021.01, not a development snapshot.
 
