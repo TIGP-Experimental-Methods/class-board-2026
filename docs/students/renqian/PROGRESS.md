@@ -8,7 +8,7 @@
 ## Hard dates
 
 - **Mon 28 Sep, 2 pm** — Gerbers go to JLCPCB. My section must be **merged** by then.
-- Fri 9 Oct, 2 pm — housing (Project 3b).
+- Fri 9 Oct, 2 pm — the housing (Project 3).
 
 ## My work folder
 
