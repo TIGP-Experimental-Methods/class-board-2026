@@ -7992,10 +7992,10 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "2e50ea12-3005-4592-a457-18acec46cef7")
 		(property "Reference" "J12"
 			(at 165.1 236.2201 90)
@@ -10137,7 +10137,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "8f343a3e-a259-438c-bd73-b01344a87da9")
 		(property "Reference" "J13"
 			(at 247.65 264.922 0)
