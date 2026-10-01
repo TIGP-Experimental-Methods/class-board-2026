@@ -1,11 +1,10 @@
 # The housing brief (Project 3: the housing)
 
-You design the housing yourself, with Claude Code, from this page. There is no template to fill in: write your own
-specification in your own words, end it with *"Ask me your questions before writing any code"*, answer the questions,
-and let Claude write `housing.scad` in your folder `docs/students/<name>/housing/`. Then look at it, check the numbers,
-slice it, print the test coupon, and make it yours. If you are stuck after a real attempt, or want to see one, the
-instructor's [example specification](housing-example-spec.md) and the reference file `hardware/release/housing.scad`
-made from it are in the class repository; they are a backup, not the starting point.
+You design the housing yourself, with Claude Code, from this page. There is no template to fill in and no example
+housing to copy. Look at each board on its own first (below); then write your own specification in your own words,
+end it with *"Ask me your questions before writing any code"*, answer the questions, and let Claude write
+`housing.scad` in your folder `docs/students/<name>/housing/`. Then look at it, check the numbers, slice it, print the
+test coupon, and make it yours.
 
 ## What the housing holds
 
@@ -30,13 +29,20 @@ Every dimension comes from the board models, none from a ruler. They are in `har
 | `class-board.stl`, `front-panel.stl` | the two boards as light triangle meshes: the board body plus the connectors, LEDs and the OLED socket, nothing else, so OpenSCAD previews them in under a second | from the final KiCad board files with `kicad-cli pcb export stl --subst-models --component-filter "J*,D*"` (J = every connector, D = diodes and LEDs), converted to binary STL |
 | `class-board.step`, `front-panel.step` | the same boards as exact STEP geometry for any CAD program, without the small passives and chips | `kicad-cli pcb export step --subst-models --component-filter ...` (connectors, power modules, relays, switches, crystals, fuses, transformers, LEDs; the panel: connectors and LEDs) |
 
+**Open them one at a time before you write anything.** In your folder `docs/students/<name>/housing/`, a file
+`boards.scad` with one line — `import("../../../../hardware/release/front-panel.stl");` — then F5 in OpenSCAD: the
+front panel appears; drag to rotate, scroll to zoom; find the 16 SMA jacks, the OLED socket, the three LEDs and the
+terminals along one edge. Change the file name to `class-board.stl` and save: the main board, with the three link
+sockets, the dev-board sockets and the rear-edge connectors. The path is relative to the `.scad` file, so save the file
+first; `Can't open import file` in the console means the path is wrong.
+
 Facts about the models you will need: they are in **KiCad's frame**, whose y axis points **down**, so the boards lie at
 x 0…180 and y −115…−15 with the board's top surface at z = 1.6 mm; the two boards mate with **panel x = 180 − main x**
 (the panel is turned over onto the main board); the main board's link sockets are on its back, so in the housing it is
 turned over (sockets up, dev board down). Heights above the panel's outer face, measured from the panel mesh: SMA jacks
 9.8 mm (hexagonal base 0–2 mm, then the 6.35 mm threaded barrel) · module header 9.1 · TTL strip 8.8 · OLED module 13.8 ·
-TX terminal 14.1 · Qwiic 4.3 · LEDs 1.0. Connector positions can be read from the meshes; the example specification lists
-them for checking.
+TX terminal 14.1 · Qwiic 4.3 · LEDs 1.0. Connector positions can be read from the meshes; the list at the end of this page
+is for checking what Claude read.
 
 ## Rules for a part that prints
 
@@ -69,3 +75,12 @@ In `docs/students/<name>/housing/`: `housing.scad`; the STL of each printed part
 `coupon.stl`); the DXF of any laser-cut plate; a screenshot `housing.png`; committed from Source Control. The class
 prints and cuts everything together after the cutoff. A design in another CAD program you already use is welcome if it
 fits the boards and meets the deadline.
+
+## Connector positions, for checking what Claude read from the meshes
+
+KiCad frame, mm. Main board, rear edge y = 15: USB-C J201 x 18.0 · DC jack J202 x 32.5 · terminals J901 x 49.9,
+J903 x 64.3, J905 x 79.9 (3-pole). Mounting holes (4, 19) (176, 19) (4, 111) (176, 111) on both boards. Panel (its
+own frame; in the housing x → 180 − x): SMA columns 75.65 + 18 n (n = 0…5), rows 25.67 and 43.67 (six each) and
+61.67 (four: n = 0…3) · OLED J30 (151.05, 74.92) · LEDs x 116.5, y 86.95 / 89.90 / 92.85 · Qwiic J33 (121.05,
+77.75) · module header J40 (40.1, 107.05) · TTL strip J31 (144.1, 111.0) · TX terminal J32 (110.85, 109.35) ·
+isolated inputs J411 (86.85, 110.68), J412 (59.38, 110.61).
