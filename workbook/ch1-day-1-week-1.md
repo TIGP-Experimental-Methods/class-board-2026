@@ -181,7 +181,7 @@ pio run -d firmware -e esp32s3-sim -t uploadfs
 
 *What you should see:* from the phone or the computer you change the LED's colour, and live values from the board update on the page. Write what you saw into `PROGRESS.md`. **From here on, everything is software** — if something later does not work, the hardware is not the reason.
 
-The same firmware is the base for Projects 3a and 3b, and `firmware/PROTOCOL.md` describes every message it understands — Claude can read both while it builds yours.
+The same firmware is the base for Project 3, your instrument, and `firmware/PROTOCOL.md` describes every message it understands — Claude can read both while it builds yours.
 
 ### Step 2 — Your own app, by the AI method
 
