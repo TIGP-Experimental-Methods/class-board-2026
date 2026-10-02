@@ -30,6 +30,7 @@
 #include "blocks/b4_switching/SwitchingBlock.h"
 #include "blocks/b5_dio_trig/DioTrigBlock.h"
 #include "blocks/nmr/NmrBlock.h"
+#include "blocks/watch/WatchBlock.h"
 #include "alarm/AlarmEngine.h"
 #include "net/WsOut.h"
 
@@ -61,6 +62,7 @@ static OutputsBlock b3;
 static SwitchingBlock b4;
 static DioTrigBlock b5;
 static NmrBlock nmr;
+static WatchBlock watch;
 static AlarmEngine alarms(registry);
 
 // ---- network -------------------------------------------------------------
@@ -235,6 +237,7 @@ void setup() {
   registry.add(&b4);
   registry.add(&b5);
   registry.add(&nmr);
+  registry.add(&watch);
   registry.add(&tpl);      // the copy-me example; remove once every block exists
   registry.add(&alarms);
   registry.beginAll();
