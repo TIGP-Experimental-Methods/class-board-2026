@@ -1,3 +1,5 @@
+// HAND-IN SNAPSHOT - do not edit here. Source: https://github.com/tojestspacja/nmr-instrument, mechanical/, commit 9bac152.
+// Regenerate with `py tools/handin.py` in that repository.
 // The NMR numbers every model in this folder shares, in one place, with where each comes from.
 // Included by housing.scad (the B0/f scale on the cover), probe.scad (the B0 pair) and
 // instrument.scad (the checks across the whole setup). Change a default here, not in a model.

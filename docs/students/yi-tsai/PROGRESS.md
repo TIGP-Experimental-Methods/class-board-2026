@@ -28,3 +28,10 @@ Local folder names do not match the repository names: `resonance-response/` is t
 - Verified: every .scad file runs with no errors or OpenSCAD warnings; STLs render as single valid solids; the simulator reproduces the coil pair's design calibration (59.7 kHz/A) under constant-current drive. Nothing printed, cut or measured yet.
 - Next: the board-side decisions that block a real scan — TX/RX on one coil (RX clamp diodes across the transmitter, scan aborts), B0 at constant current (voltage drive drifts 138 Hz/min); print the coupon; then water, a D₂O blank and frozen water.
 - Gotchas: probe.scad's "151 Hz spread" is the winding's worst points, not the linewidth — over the 50 mL tube's water the field gives about 2 Hz (18 ppm); `export_cut.py --spectrum jet` clears `cut/laser` before exporting.
+
+## 2026-10-03 — Project 3 has one home: tojestspacja/nmr-instrument
+
+- Done: the Project 3 material moved from `docs/students/yi-tsai/housing/` to https://github.com/tojestspacja/nmr-instrument (history kept with `git subtree`), site https://tojestspacja.github.io/nmr-instrument/ with the simulator at `/simulator/`. The duplicate simulator copy in `housing/sim/` is gone. This folder now holds only the course hand-in (housing.scad, base-shell/hood/coupon STL, bottom-plate.dxf, housing.png), a stamped snapshot written by `tools/handin.py` in nmr-instrument. The real boards and firmware stay here; nmr-instrument pins them in `hardware/README.md` to main @ eef00d2.
+- Verified: every OpenSCAD file runs without errors or warnings at its new path; the board meshes load from this repository beside it; the flat-part re-export and the hand-in STLs are byte-identical to before.
+- Next: design changes go to nmr-instrument, then `py tools/handin.py` refreshes this folder before the 9 Oct hand-in.
+- Gotchas: never edit the hand-in copy here; it is overwritten by the next snapshot.
