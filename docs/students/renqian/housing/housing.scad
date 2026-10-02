@@ -48,6 +48,24 @@ SMA_D   = 6.6;          // barrel + FIT; the brief's 6.35 thread is inside this
 SMA_X = [for (i = [0:5]) 75.65 + 18*i];
 SMA_ROWS = [-25.67, -43.67, -61.67];        // rows 1,2 have six; row 3 has four
 
+// The brief splits the rest in two. "Through the panel's outer face": these get a
+// hole in the top of the raised deck. All measured off front-panel.stl.
+// [ name, x0, x1, y0, y1 ]
+PANEL_TOP = [
+  ["LEDs D1-D3",   115.4, 117.5,  -93.5,  -86.3],   // 1.00 above the face
+  ["Qwiic J33",    119.2, 122.8,  -80.8,  -74.8],   // 4.32
+  ["module hdr J40", 22.3, 45.2, -113.0, -103.9],   // 9.10
+];
+
+// "along the panel's far edge ... their wires come from the side": these get a
+// notch in the far wall instead. [ name, x0, x1, z top ]
+FAR_SIDE = [
+  ["iso J412",      54.4,  66.1, 11.55],
+  ["iso J411",      81.8,  93.8, 11.55],
+  ["TX term J32",  105.6, 115.8, 15.70],
+  ["TTL strip J31", 131.4, 156.8, 10.40],
+];
+
 // KNOWN MODEL BUG 2026-10-02: J901/J903 are KF301-5.0-2P. eef00d2 fixed that
 // footprint's 3D model (offset xyz 0 0 5) but re-exported the PANEL only, so
 // class-board.stl (a4a88bc, 10-01 19:51) still reads them 5 mm high. J905 is 3P
@@ -147,6 +165,22 @@ module cover() {
     // the TX terminal pokes out of the top
     translate([(TXT[0].x+TXT[1].x)/2, (TXT[0].y+TXT[1].y)/2, HIGH_IN-1])
       cuboid([TXT[1].x-TXT[0].x + 2*FIT, TXT[1].y-TXT[0].y + 2*FIT, WALL+2], anchor=BOTTOM);
+    // "through the panel's outer face": holes in the top of the raised deck
+    for (c = PANEL_TOP)
+      translate([(c[1]+c[2])/2, (c[3]+c[4])/2, HIGH_IN-1])
+        cuboid([c[2]-c[1] + 2*FIT, c[4]-c[3] + 2*FIT, WALL+2], anchor = BOTTOM);
+
+    // "their wires come from the side": a notch in the far wall for each,
+    // from the cover's seating face up to just over the part
+    // A notch whose top would land within WALL of the raised deck leaves an
+    // unprintable sliver of wall above it (the TX terminal does: 15.70 + FIT
+    // against an inner face at HIGH_IN), so those run out through the top edge.
+    for (c = FAR_SIDE) {
+      ztop = (c[3] + FIT > HIGH_IN - WALL) ? HIGH_TOP + 1 : c[3] + FIT;
+      translate([(c[1]+c[2])/2, BY0 - GAP, (COVER_SIT - 1 + ztop)/2])
+        cuboid([c[2]-c[1] + 2*FIT, 2*WALL + 4, ztop - (COVER_SIT - 1)]);
+    }
+
     // the four screws
     for (h = HOLES) translate([h.x, h.y, COVER_SIT-1]) cylinder(d = M3_CLEAR, h = HIGH_TOP+2);
   }
