@@ -6,8 +6,16 @@
 //           a raised deck over the OLED / TX terminal end
 //   coupon  the fit test: holes 3.0-3.6, one nut pocket, a wall of my thickness
 //
-// Still to do: the remaining panel-face openings (LEDs, Qwiic, module header, TTL
-// strip, the two isolated terminals), labelling, and cover.dxf.
+// cover.dxf is PART="cover2d", the flat outline of the cover. Note what it cannot
+// be: the cover is a printed part with two heights, and a flat projection has no
+// way to carry that. Three of the four far-wall notches do not appear in it at all,
+// because the raised deck above them fills their shadow - only the TX one shows,
+// and only because it runs out through the top edge. The DXF also carries no
+// $INSUNITS, so anything importing it has to be told these are millimetres.
+// If a laser-cut plate is ever wanted, draw it as its own 2D part, not from here.
+//
+// Not done: nothing has been printed. Until coupon.stl is printed and measured,
+// M3_CLEAR, NUT_AF and FIT below are assumptions, not results.
 
 include <BOSL2/std.scad>
 $fa = 2; $fs = 0.4;
@@ -109,6 +117,29 @@ SMA_LABELS = [
   [129.65, -61.67, "TRIG"],
 ];
 
+// Names for the raised deck. Mis-wiring a terminal costs more than plugging a
+// coax into the wrong jack, so these matter at least as much as the SMA ones.
+// [ x, y, text, halign, size ]
+// The three LEDs are only 2.95 mm apart, so their names have to be smaller than
+// the rest or they run into each other.
+DECK_LABELS = [
+  [ 33.75, -101.5, "MODULE",  "center", 3.2],
+  [ 60.25, -101.5, "ISO2",    "center", 3.2],
+  [ 87.80, -101.5, "ISO1",    "center", 3.2],
+  [110.70, -101.5, "TX COIL", "center", 3.2],
+  [144.10, -104.5, "TTL",     "center", 3.2],
+  [120.00,  -86.95,"PWR",     "left",   2.2],
+  [120.00,  -89.90,"WIFI",    "left",   2.2],
+  [120.00,  -92.85,"ACT",     "left",   2.2],
+  [126.50,  -77.75,"QWIIC",   "left",   3.2],
+];
+
+// A locating lip: without it the only thing holding the cover in place sideways
+// is the four screws, and it slides about while you line the holes up. The lip
+// drops into the 3 mm gap between the board edge and the inner wall.
+LIP_H = 3;
+LIP_W = 2;
+
 MAIN_UNDER = -(BOARD_GAP + PCB_T);
 BOSS_H     = MAIN_UNDER - FLOOR_TOP;
 BOSS       = 2*(GAP + HOLE_INSET);
@@ -170,6 +201,10 @@ module cover() {
       // raised box over the OLED / TX terminal end
       translate([CTRB.x, (SPLIT_Y + OUT_Y0)/2, COVER_SIT])
         cuboid([OSIZE.x, SPLIT_Y - OUT_Y0, HIGH_TOP - COVER_SIT], anchor = BOTTOM);
+      // locating lip, hanging into the base's cavity
+      translate([CTRB.x, CTRB.y, COVER_SIT - LIP_H])
+        rect_tube(h = LIP_H, wall = LIP_W, anchor = BOTTOM,
+                  isize = [ISIZE.x - 2*FIT - 2*LIP_W, ISIZE.y - 2*FIT - 2*LIP_W]);
     }
     // hollow the raised box
     translate([CTRB.x, (SPLIT_Y + OUT_Y0)/2, COVER_SIT - 1])
@@ -196,8 +231,10 @@ module cover() {
     // against an inner face at HIGH_IN), so those run out through the top edge.
     for (c = FAR_SIDE) {
       ztop = (c[3] + FIT > HIGH_IN - WALL) ? HIGH_TOP + 1 : c[3] + FIT;
-      translate([(c[1]+c[2])/2, OUT_Y0, (COVER_SIT - 1 + ztop)/2])
-        cuboid([c[2]-c[1] + 2*FIT, 2*WALL + 4, ztop - (COVER_SIT - 1)]);
+      // deep enough to clear the locating lip as well as the wall, or the lip
+      // would stand straight across the wire's path into the terminal
+      translate([(c[1]+c[2])/2, OUT_Y0 + 4, (COVER_SIT - 1 + ztop)/2])
+        cuboid([c[2]-c[1] + 2*FIT, 2*WALL + 12, ztop - (COVER_SIT - 1)]);
     }
 
     // the panel silkscreen is hidden under the cover, so the names go on top.
@@ -206,6 +243,12 @@ module cover() {
       translate([L[0], L[1] + 6.5, LOW_TOP - ENGRAVE])
         linear_extrude(ENGRAVE + 1)
           text(L[2], size = 3.2, halign = "center", valign = "center",
+               font = "Liberation Sans:style=Bold");
+
+    for (L = DECK_LABELS)
+      translate([L[0], L[1], HIGH_TOP - ENGRAVE])
+        linear_extrude(ENGRAVE + 1)
+          text(L[2], size = L[4], halign = L[3], valign = "center",
                font = "Liberation Sans:style=Bold");
 
     // the four screws
