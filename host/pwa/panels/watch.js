@@ -76,6 +76,11 @@ export default {
           <option value="lt">&lt;</option>
         </select>
         <input type="number" id="w-thr" value="0.05" step="0.01">
+        <select id="w-act">
+          <option value="notify">toast</option>
+          <option value="push">chat</option>
+          <option value="module:1:off">module 1 off</option>
+        </select>
         <button class="btn" id="w-alarm">Add rule</button>
       </div>`;
 
@@ -108,7 +113,7 @@ export default {
         key: el.querySelector('#w-key').value,
         op: el.querySelector('#w-op').value,
         threshold: Number(el.querySelector('#w-thr').value),
-        action: 'notify',
+        action: el.querySelector('#w-act').value,
       })
         .then(r => api.toast(`alarm rule ${r.id} added`, 'info'))
         .catch(e => api.toast(e.message));
