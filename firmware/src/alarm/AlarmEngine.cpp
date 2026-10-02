@@ -1,6 +1,8 @@
 #include "AlarmEngine.h"
 #include <LittleFS.h>
 
+#include "../net/Push.h"
+
 static const char* kFile = "/alarms.json";
 
 void AlarmEngine::begin() { load(); }
@@ -44,6 +46,15 @@ void AlarmEngine::fire(Rule& r, float v) {
       cmd["args"]["on"] = on;
       b4->handle(cmd.as<JsonObjectConst>(), reply.to<JsonObject>());
     }
+  }
+
+  // "push" -> one line to the chat webhook (net/Push.h). Queued, never blocking:
+  // an HTTPS POST takes a second or two and this runs from loop().
+  if (strcmp(r.action, "push") == 0) {
+    char line[160];
+    snprintf(line, sizeof line, "ALARM rule %d: %s.%s %s %.3f (now %.3f)",
+             r.id, r.block, r.key, r.op, r.threshold, v);
+    push::send(String(line));
   }
 
   // Every firing is also announced to the clients (the PWA shows a toast).
