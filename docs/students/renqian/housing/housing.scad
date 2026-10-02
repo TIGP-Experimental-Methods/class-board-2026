@@ -188,6 +188,34 @@ module wire_slot(cx, w, z0, z1, zcap, ycen, dep) {
                  [ f, z1 + r], [-f, z1 + r], [-w/2, z1]]);
 }
 
+// Ventilation. The dev board and the power module sit in a closed 190 x 110 x 45
+// box with no way for warm air to leave. Slots go in the two ends and the far
+// wall - not the near wall, which is full of connector openings - and they keep
+// clear of the corner bosses. Same 45 degree gable as the wire slots, so they
+// need no support either.
+VENT_W     = 3;
+VENT_PITCH = 12;
+VENT_Z0    = FLOOR_TOP + 3;                     // -22.40
+VENT_Z1    = COVER_SIT - WALL - VENT_W/2;       //   0.40, so the gable closes fully
+VENT_CAP   = COVER_SIT - WALL;
+
+// y positions on the two ends, and x positions on the far wall, both chosen to
+// miss the bosses (which fill y -10..-26 and -104..-120, x -5..11 and 169..183)
+VENT_Y = [for (i = [0:5]) -35 - i*VENT_PITCH];        // -35 .. -95
+VENT_X = [for (i = [0:11])  22 + i*VENT_PITCH];       //  22 .. 154
+
+module vents() {
+  // the two ends: the slot is turned a quarter turn so it cuts through x
+  for (wx = [BX0 - GAP - WALL/2, BX1 + GAP + WALL/2])
+    for (cy = VENT_Y)
+      translate([wx, cy, 0]) rotate([0, 0, 90])
+        wire_slot(0, VENT_W, VENT_Z0, VENT_Z1, VENT_CAP, 0, 4*WALL);
+  // the far wall
+  for (cx = VENT_X)
+    wire_slot(cx, VENT_W, VENT_Z0, VENT_Z1, VENT_CAP,
+              BY0 - GAP - WALL/2, 4*WALL);
+}
+
 // =============================================================================
 module base() {
   difference() {
@@ -218,6 +246,8 @@ module base() {
       wire_slot((x0+x1)/2, x1-x0, z0, z1, COVER_SIT - WALL,
                 REAR_Y + WALL/2, 4*WALL + 20);
     }
+
+    vents();
   }
 }
 
