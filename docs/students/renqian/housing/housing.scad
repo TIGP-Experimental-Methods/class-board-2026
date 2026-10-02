@@ -33,8 +33,16 @@ FIT       = 0.3;        // brief's general clearance
 
 PAD_USB   = 3.0;        // USB-C moulded boot
 PAD_DC    = 2.5;
-PAD_TERM  = 1.0;
-TERM_SLOT = true;       // one slot for the three rear terminals - see the note below
+// Three separate terminal openings rather than one slot across all three.
+// The ribs between them are what decides this: the terminals sit 2.7 and 3.4 mm
+// apart, so the rib is 2.7 - 2*PAD_TERM and 3.4 - 2*PAD_TERM. At PAD_TERM = 1.0
+// that was 0.7 and 1.4 mm, under the 2 mm wall rule and certain to snap, which
+// is why it was one slot before. At 0.35 - which is the brief's own 0.3 rule for
+// a hole - the ribs are 2.0 and 2.7 mm, and each opening is then narrow enough
+// for a full 45 degree gable, so the flat overhang goes to zero as well. The one
+// slot had a 31.4 mm bridge across it.
+PAD_TERM  = 0.35;
+TERM_SLOT = false;
 
 // ---- from the meshes and the brief -------------------------------------------
 BX0 =    0;  BX1 =  180;
@@ -159,6 +167,27 @@ REAR = TERM_SLOT
       ["term J905 3P",  88.8, 108.0, -22.60,  -8.40, PAD_TERM, 0] ];
 REAR_Y = BY1 + GAP;
 
+// Every wire entry is a slot in a vertical wall, so its ceiling is a flat
+// overhang - 90 degrees, against the brief's 45 degree rule, and a bridge the
+// slicer will want to support. This gives each one a 45 degree gable instead.
+// Where a full gable would break through into the part above, it is capped at
+// zcap and what is left is a shorter flat top, which is still a much smaller
+// bridge than the full width. The same slope leads the wire in.
+//   cx,w     centre and width across the wall
+//   z0,z1    bottom and top of the straight part
+//   zcap     the gable may not go above this
+//   ycen,dep where the slot sits through the wall, and how deep to cut
+function gable_rise(w, z1, zcap) = min(w/2, max(0, zcap - z1));
+module wire_slot(cx, w, z0, z1, zcap, ycen, dep) {
+  r = gable_rise(w, z1, zcap);
+  f = w/2 - r;                       // half-width of whatever flat top remains
+  translate([cx, ycen + dep/2, 0])
+    rotate([90, 0, 0])
+      linear_extrude(height = dep)
+        polygon([[-w/2, z0], [w/2, z0], [w/2, z1],
+                 [ f, z1 + r], [-f, z1 + r], [-w/2, z1]]);
+}
+
 // =============================================================================
 module base() {
   difference() {
@@ -186,7 +215,8 @@ module base() {
       p = c[5]; dz = c[6];
       x0 = c[1]-p; x1 = c[2]+p;
       z0 = max(c[3]+dz-p, FLOOR_TOP); z1 = c[4]+dz+p;
-      translate([(x0+x1)/2, REAR_Y+WALL/2, (z0+z1)/2]) cuboid([x1-x0, 4*WALL+20, z1-z0]);
+      wire_slot((x0+x1)/2, x1-x0, z0, z1, COVER_SIT - WALL,
+                REAR_Y + WALL/2, 4*WALL + 20);
     }
   }
 }
@@ -233,8 +263,13 @@ module cover() {
       ztop = (c[3] + FIT > HIGH_IN - WALL) ? HIGH_TOP + 1 : c[3] + FIT;
       // deep enough to clear the locating lip as well as the wall, or the lip
       // would stand straight across the wire's path into the terminal
-      translate([(c[1]+c[2])/2, OUT_Y0 + 4, (COVER_SIT - 1 + ztop)/2])
-        cuboid([c[2]-c[1] + 2*FIT, 2*WALL + 12, ztop - (COVER_SIT - 1)]);
+      // the one that runs out through the top edge has no ceiling to slope
+      if (ztop > HIGH_TOP)
+        translate([(c[1]+c[2])/2, OUT_Y0 + 4, (COVER_SIT - 1 + ztop)/2])
+          cuboid([c[2]-c[1] + 2*FIT, 2*WALL + 12, ztop - (COVER_SIT - 1)]);
+      else
+        wire_slot((c[1]+c[2])/2, c[2]-c[1] + 2*FIT, COVER_SIT - 1, ztop,
+                  HIGH_IN - 0.5, OUT_Y0 + 4, 2*WALL + 12);
     }
 
     // the panel silkscreen is hidden under the cover, so the names go on top.
@@ -293,3 +328,15 @@ echo(str("SMA thread proud of the low deck: ", SMA_TOP - LOW_TOP, " mm"));
 echo(str("raised deck inner z ", HIGH_IN, " clears TX terminal ", TXT[2],
          " by ", HIGH_IN - TXT[2]));
 echo(str("coupon holes 3.0..3.6 step 0.1, nut pocket ", NUT_AF, " af x ", NUT_DEEP));
+echo("-- wire slots: flat ceiling left after the 45 deg gable (0 = none) --");
+for (c = REAR) {
+  p = c[5]; w = (c[2]+p) - (c[1]-p); z1 = c[4]+c[6]+p;
+  r = gable_rise(w, z1, COVER_SIT - WALL);
+  echo(str("   base  ", c[0], "  width ", w, " -> flat ", w - 2*r));
+}
+for (c = FAR_SIDE) {
+  w = c[2]-c[1] + 2*FIT; z1 = c[3] + FIT;
+  r = (z1 > HIGH_IN - WALL) ? -1 : gable_rise(w, z1, HIGH_IN - 0.5);
+  echo(str("   cover ", c[0], "  width ", w, " -> ",
+           r < 0 ? "runs out through the top edge, no ceiling" : str("flat ", w - 2*r)));
+}
