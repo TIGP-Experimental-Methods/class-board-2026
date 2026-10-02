@@ -78,3 +78,9 @@ BOOT+RST trap did not apply and every upload auto-reset).
   The `/littlefs/alarms.json does not exist` line is harmless on first boot.
 
 - Verified from the phone: (pending - student to report what they see)
+
+## 2026-10-02 — L3 (class)
+- Done: Project 3 housing designed in OpenSCAD with Claude, from scratch, in `housing/CompleteHousing.scad`: base with board bosses, corner columns, rear connector openings, dev-board USB notches and engraved labels; 2 mm top cover, separate SMA plate and OLED housing with white two-colour label inlays; laser-cut 3 mm bottom lid. All parts exported in print orientation to `housing/export/`; `housing/HANDOVER.md` written.
+- Verified: renders in OpenSCAD looked at after every change; clash test of all three board models against every part (clean); labels checked against silkscreen and copper nets; SMA plate fit checked with the plate shifted 0.5 mm in 8 directions.
+- Next: test coupon and a print of the coupon; slice in Bambu Studio; measure the DC jack axis and the OLED glass; bump the main board's dev-board socket rows from 25.0 to 25.4 mm before ordering; Project 3 website.
+- Gotchas: a Python edit with Windows' default encoding emptied the .scad file (rebuilt, verified identical against earlier STLs) — write with UTF-8 or the Edit tool; relative import paths need the file saved in its folder.
