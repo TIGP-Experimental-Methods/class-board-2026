@@ -90,6 +90,25 @@ FLOOR_TOP = Z_LOW - FLOOR_AIR;
 FLOOR_BOT = FLOOR_TOP - WALL;
 WALL_H    = COVER_SIT - FLOOR_BOT;
 
+// The cover's outer edge. These must be the OUTER faces, the same as the base's
+// footprint - taking y from the inner faces (BY0-GAP / BY1+GAP) made the cover
+// 190 x 106 against a 190 x 110 base, so it dropped inside the walls at both ends.
+OUT_Y0 = BY0 - GAP - WALL;      // -120
+OUT_Y1 = BY1 + GAP + WALL;      // -10
+
+// Panel labels, read from the MASTER front panel (the file that gets made), not
+// from the section copy - the instructor reassigned AUX / RX / TX to different
+// jacks after the sections were split. [ x, y, text ]
+ENGRAVE = 0.6;
+SMA_LABELS = [
+  [ 75.65, -25.67, "AI1"], [ 93.65, -25.67, "AI2"], [111.65, -25.67, "AI3"],
+  [129.65, -25.67, "AI4"], [147.65, -25.67, "AUX"], [165.65, -25.67, "FAST1"],
+  [ 75.65, -43.67, "AI5"], [ 93.65, -43.67, "AI6"], [111.65, -43.67, "AI7"],
+  [129.65, -43.67, "AI8"], [147.65, -43.67, "RX"],  [165.65, -43.67, "FAST2"],
+  [ 75.65, -61.67, "AO1"], [ 93.65, -61.67, "AO2"], [111.65, -61.67, "TX"],
+  [129.65, -61.67, "TRIG"],
+];
+
 MAIN_UNDER = -(BOARD_GAP + PCB_T);
 BOSS_H     = MAIN_UNDER - FLOOR_TOP;
 BOSS       = 2*(GAP + HOLE_INSET);
@@ -146,15 +165,15 @@ module cover() {
   difference() {
     union() {
       // low deck over the SMA field
-      translate([CTRB.x, (SPLIT_Y + BY1 + GAP)/2, COVER_SIT])
-        cuboid([OSIZE.x, (BY1+GAP) - SPLIT_Y, WALL], anchor = BOTTOM);
+      translate([CTRB.x, (SPLIT_Y + OUT_Y1)/2, COVER_SIT])
+        cuboid([OSIZE.x, OUT_Y1 - SPLIT_Y, WALL], anchor = BOTTOM);
       // raised box over the OLED / TX terminal end
-      translate([CTRB.x, (SPLIT_Y + BY0 - GAP)/2, COVER_SIT])
-        cuboid([OSIZE.x, SPLIT_Y - (BY0-GAP), HIGH_TOP - COVER_SIT], anchor = BOTTOM);
+      translate([CTRB.x, (SPLIT_Y + OUT_Y0)/2, COVER_SIT])
+        cuboid([OSIZE.x, SPLIT_Y - OUT_Y0, HIGH_TOP - COVER_SIT], anchor = BOTTOM);
     }
     // hollow the raised box
-    translate([CTRB.x, (SPLIT_Y + BY0 - GAP)/2, COVER_SIT - 1])
-      cuboid([OSIZE.x - 2*WALL, SPLIT_Y - (BY0-GAP) - 2*WALL, HIGH_IN - COVER_SIT + 1],
+    translate([CTRB.x, (SPLIT_Y + OUT_Y0)/2, COVER_SIT - 1])
+      cuboid([OSIZE.x - 2*WALL, SPLIT_Y - OUT_Y0 - 2*WALL, HIGH_IN - COVER_SIT + 1],
              anchor = BOTTOM);
     // SMA barrels come through the low deck
     for (r = [0:2]) for (i = [0 : (r == 2 ? 3 : 5)])
@@ -177,9 +196,17 @@ module cover() {
     // against an inner face at HIGH_IN), so those run out through the top edge.
     for (c = FAR_SIDE) {
       ztop = (c[3] + FIT > HIGH_IN - WALL) ? HIGH_TOP + 1 : c[3] + FIT;
-      translate([(c[1]+c[2])/2, BY0 - GAP, (COVER_SIT - 1 + ztop)/2])
+      translate([(c[1]+c[2])/2, OUT_Y0, (COVER_SIT - 1 + ztop)/2])
         cuboid([c[2]-c[1] + 2*FIT, 2*WALL + 4, ztop - (COVER_SIT - 1)]);
     }
+
+    // the panel silkscreen is hidden under the cover, so the names go on top.
+    // Engraved, not raised: nothing to knock off, and it prints without supports.
+    for (L = SMA_LABELS)
+      translate([L[0], L[1] + 6.5, LOW_TOP - ENGRAVE])
+        linear_extrude(ENGRAVE + 1)
+          text(L[2], size = 3.2, halign = "center", valign = "center",
+               font = "Liberation Sans:style=Bold");
 
     // the four screws
     for (h = HOLES) translate([h.x, h.y, COVER_SIT-1]) cylinder(d = M3_CLEAR, h = HIGH_TOP+2);
