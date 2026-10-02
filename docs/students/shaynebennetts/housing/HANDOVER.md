@@ -3,6 +3,10 @@
 For a Claude session picking this up cold. Written 2026-10-02 at the end of `/tutor L3`.
 Deadline for the housing files: **Fri 9 Oct 2026, 2 pm** (hard cutoff, workbook ch. 3).
 
+**Resume:** in `class-board-2026` on branch `w1-shaynebennetts`, run `/tutor HW3` (the between-workshops part of ch. 3),
+read this file and `../PROGRESS.md`, open `PrintView.scad` for the user, and run `check_housing.py` after any change.
+Everything below is committed and pushed (class repo `w1-shaynebennetts`, `class-board-instrument` `main`, wall `main`).
+
 ## What exists
 
 One parametric OpenSCAD 2021.01 model, `CompleteHousing.scad`, for the class board sandwich (front panel face up,
@@ -17,11 +21,28 @@ and one laser-cut part, all exported in print orientation to `export/`:
 | OLED housing: four walls + 2 mm top, bolted through the OLED's M2 holes | `oled` | `oled_housing.stl` | print face down, single colour |
 | Bottom lid | `lid2d` | `bottom_lid_3mm.dxf` | laser cut, 3 mm acrylic |
 
+`check_housing.py` re-runs the fit checks (see *How changes were checked*).
 Viewer files (each `include`s the main file, so they follow every change): `PrintView.scad` (all printed parts laid
 out as on the plate — the user likes this one), `CoverView.scad`, `OledView.scad`. `export/export.scad` regenerates
 every export from the command line (see its header). `housing.png` is the course screenshot. `models/` holds the
 dev-board mesh (`YD-ESP32-S3.stl`, MIT, from github.com/shkuznetsov/YD-ESP32-S3; the 20 MB STEP is git-ignored —
 re-download it from there if needed; FreeCAD 1.1 `freecadcmd` converted it).
+
+## Project 3 repository, website and wall card (created 2026-10-02)
+
+- Repository: https://github.com/shaynebennetts/class-board-instrument (public; local clone `C:\Claude\TIGP-2026-2\class-board-instrument`,
+  next to `class-board-2026`; listed in the parent folder's `.gitignore` like the other project repositories).
+- Website: https://shaynebennetts.github.io/class-board-instrument/ (GitHub Pages, `main`, `/`). `index.html` introduces the
+  board and the housing and has a **Files** section linking every OpenSCAD and production file in this folder (blob = view,
+  raw = download, on branch `w1-shaynebennetts`). **If files here are renamed or moved, those links break** — check them with curl.
+- Pictures: `images/` there, re-rendered by `tools/make_renders.sh` (`tools/render_views.scad` includes this model by a
+  relative path, so the two repositories must stay side by side; `tools/make_gif.py` builds the turntable GIF).
+- Wall card: `showcase-2026/projects/shaynebennetts--class-board-instrument.json` + `images/shaynebennetts--class-board-instrument.gif`
+  (`project` `"3"`, `live_url` empty until there is an app). Update `blurb`, `image` and `updated` as the project moves on.
+- The user wants these files public **as an example for students**. That reverses Decision #80 in `tutor/COURSE-GUIDE.md`
+  and workbook ch. 3 ("no reference housing anywhere, the tutor never writes one"); the guide still says so — the
+  instructor's to update.
+- The page says the housing is designed, not printed, and that firmware, app and measurements follow. Update it then.
 
 Two-colour printing in Bambu Studio: drag a part and its `_labels` STL in together, answer **Yes** to "load as a single
 object with multiple parts", give the labels the white filament. The pairs share one coordinate frame.
@@ -71,15 +92,20 @@ Dev board: `multmatrix` in `devboard()`, header plastic on the socket tops at z 
 4. The LED well in the cover is the only feature that needs a (small, paint-on) support.
 5. Panel silkscreen says module header pin 10 is spare, but the copper routes MODOUT8 there.
 6. Course checklist items not done: the test coupon (`coupon.stl`: holes 3.0–3.6, an M3 pocket, a wall), slicing in
-   Bambu Studio (time, grams), "make it yours" notes on the Project 3 website.
+   Bambu Studio (time, grams). E11 (drivers + panels in sim, a pull request) not started.
 7. Screws: board M3 × 6 or × 7 (never × 8 — the tips meet), lid M3 × 10, cover M3 × 8 button head, OLED M2 (~× 8, check).
 
 ## How changes were checked (repeat after any edit)
 
 - Render with `openscad.com` (no warnings) and look at the PNG.
-- Clash test: export each part as STL, then `trimesh` (`uv run --with trimesh --with numpy --with rtree`) tests every
-  vertex of the three board meshes (transformed as in `boards()`) for containment in each part.
-- Inlay test: points just inside each label must not be inside its host part (0 of ~6000).
+- `check_housing.py` in this folder runs all three checks in a few minutes and prints the expected result beside each:
+  `uv run --with trimesh --with numpy --with rtree python check_housing.py`
+  1. clash test — every vertex of the three board meshes tested for containment in each part (expected 0, except
+     OLED 4 = block-model corners and SMA 64 = base corners the plate rests on);
+  2. inlay test — points just inside each label must not be inside its host part (0);
+  3. SMA plate shifted 0.5 mm in 8 directions — no clash, 4 of 4 base corners supported, heights 14.40 / 17.60.
+  Last run 2026-10-02: all as expected. Its board transforms must stay in step with `boards()` / `devboard()`.
+- Then re-export with `export/export.scad` (header has the command line) and check the links on the project page.
 
 ## Gotchas (cost real time this session)
 
@@ -89,4 +115,10 @@ Dev board: `multmatrix` in `devboard()`, header plastic on the socket tops at z 
 - OpenSCAD top-level variables are evaluated in order: a variable used by another must be defined above it
   (module bodies are fine).
 - Relative import paths only work once the `.scad` file is saved in this folder; the user opens files from here.
+- **A relative `import()` inside an included file is resolved from the top-level file's folder**, not the included file's.
+  The view files sit next to `CompleteHousing.scad`, so they work; a file elsewhere that includes it (e.g. a render
+  script) must re-import the meshes with its own paths (see `class-board-instrument/tools/render_views.scad`).
+  `export/export.scad` is one folder down but only exports parts that import nothing.
+- The model was moved here from `class-board-2026/housing/` (absolute paths, untracked) on 2026-10-02; that empty folder
+  may still exist while an old OpenSCAD window holds it — delete it, never edit there.
 - Background bash: a bare `cat > file` without a heredoc waits for stdin forever.

@@ -9,6 +9,9 @@
 - Project 1 website: —
 - Project 2 repository: —
 - Project 2 website: —
+- Project 3 repository: https://github.com/shaynebennetts/class-board-instrument (public)
+- Project 3 website: https://shaynebennetts.github.io/class-board-instrument/ · wall card `shaynebennetts--class-board-instrument`
+- Project 3 housing: `docs/students/shaynebennetts/housing/` (read `HANDOVER.md` there first)
 
 ## 2026-09-11 — L1 (class)
 - Done: toolchain check; branch `w1-shaynebennetts` created; this file created.
