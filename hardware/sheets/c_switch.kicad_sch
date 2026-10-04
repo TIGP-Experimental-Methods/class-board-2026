@@ -10537,7 +10537,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "SMBJ20A"
+		(property "Value" "DNP-SMBJ20A"
 			(at 247.65 242.57 90)
 			(show_name no)
 			(do_not_autoplace no)
