@@ -14691,19 +14691,6 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C474881"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "048dfb64-fe0e-426d-8c5b-ea11c8b71764")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property "JLC_CLASS" "Extended"
 			(at 0 0 90)
 			(layer "F.Fab")
@@ -14752,9 +14739,28 @@
 				)
 			)
 		)
+		(property "LCSC" "C474881"
+			(at 0 0 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "9f2285e4-fc69-49d1-aa6e-ef098bac12f3")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(path "/24420e77-a2d6-565c-ac09-5eb945e0a68a")
 		(sheetname "/")
 		(sheetfile "front-panel.kicad_sch")
+		(units
+			(unit
+				(name "A")
+				(pins "1" "2")
+			)
+		)
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -16017,19 +16023,6 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C474881"
-			(at 0 0 0)
-			(unlocked yes)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "7470389a-f78e-4cce-960a-60fff0532726")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(property "JLC_CLASS" "Extended"
 			(at 0 0 90)
 			(layer "F.Fab")
@@ -16078,9 +16071,28 @@
 				)
 			)
 		)
+		(property "LCSC" "C474881"
+			(at 0 0 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "0d00e2b3-86a7-4f4c-9548-1b7fae30b4c3")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(path "/71b9f248-a964-5a5b-936d-24260c6a5452")
 		(sheetname "/")
 		(sheetfile "front-panel.kicad_sch")
+		(units
+			(unit
+				(name "A")
+				(pins "1" "2")
+			)
+		)
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line

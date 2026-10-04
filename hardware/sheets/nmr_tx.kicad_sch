@@ -10179,7 +10179,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "10k"
+		(property "Value" "DNP-10k"
 			(at 425.45 206.248 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -14765,7 +14765,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "10k"
+		(property "Value" "DNP-10k"
 			(at 438.15 206.248 0)
 			(show_name no)
 			(do_not_autoplace no)

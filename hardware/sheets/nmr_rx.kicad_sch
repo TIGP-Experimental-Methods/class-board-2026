@@ -26518,7 +26518,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "0R"
+		(property "Value" "DNP-0R"
 			(at 153.162 199.644 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -27284,7 +27284,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "0R"
+		(property "Value" "DNP-0R"
 			(at 153.162 216.154 0)
 			(show_name no)
 			(do_not_autoplace no)
