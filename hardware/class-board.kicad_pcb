@@ -4730,7 +4730,7 @@
 		(at 37.7 37.85 -90)
 		(descr "0805")
 		(property "Reference" "D204"
-			(at 4.4 -0.3 90)
+			(at -4.6 -0.1 90)
 			(layer "F.SilkS")
 			(uuid "8272ff46-b851-53ca-bfd4-380580022bd6")
 			(effects
@@ -70310,7 +70310,7 @@
 		(at 42.965 42.715 90)
 		(descr "0805")
 		(property "Reference" "D933"
-			(at -0.115 2.165 90)
+			(at -0.085 -2.165 90)
 			(layer "F.SilkS")
 			(uuid "e3e15d06-7f78-5cef-b779-f029b799ade3")
 			(effects
