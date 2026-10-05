@@ -16981,7 +16981,7 @@
 				)
 			)
 		)
-		(property "Description" "LED green 0805 (KENTO KT-0805G), pin 1 = K"
+		(property "Description" "LED green 0805 (KENTO KT-0805G), pin 1 = A, pin 2 = K (EasyEDA/JLC pad numbering of LED0805-R-RD)"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17097,7 +17097,7 @@
 						)
 					)
 				)
-				(number "1"
+				(number "2"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -17115,7 +17115,7 @@
 						)
 					)
 				)
-				(number "2"
+				(number "1"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -17181,7 +17181,7 @@
 				)
 			)
 		)
-		(property "Description" "LED red 0603 (KENTO KT-0603R), pin 1 = K"
+		(property "Description" "LED red 0603 (KENTO KT-0603R), pin 1 = A, pin 2 = K (EasyEDA/JLC pad numbering of LED-SMD_L1.6-W0.8-R-RD)"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -17297,7 +17297,7 @@
 						)
 					)
 				)
-				(number "1"
+				(number "2"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -17315,7 +17315,7 @@
 						)
 					)
 				)
-				(number "2"
+				(number "1"
 					(effects
 						(font
 							(size 1.27 1.27)
