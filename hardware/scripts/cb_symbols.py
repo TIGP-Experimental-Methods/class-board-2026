@@ -630,10 +630,15 @@ def build_library():
     add(diode("SS54", "D", "SS54", FP + "SMA_L4.4-W2.8-LS5.4-R-RD",
               "Schottky rectifier 40 V 5 A, SMA/DO-214AC (pin 1 = A, pin 2 = K - the opposite convention to the SMB TVS above)",
               fields=f("C22452", "Basic", "SS54", "MDD", DS["SS54"]), k_pin=2, a_pin=1))
-    add(diode("LED_RED_0603", "D", "RED", FP + "LED-SMD_L1.6-W0.8-R-RD", "LED red 0603 (KENTO KT-0603R), pin 1 = K", "LED",
-              fields=f("C2286", "Basic", "KT-0603R", "Hubei KENTO", DS["LEDR"])))
-    add(diode("LED_GREEN_0805", "D", "GREEN", FP + "LED0805-R-RD", "LED green 0805 (KENTO KT-0805G), pin 1 = K", "LED",
-              fields=f("C2297", "Basic", "KT-0805G", "Hubei KENTO", DS["LEDG"])))
+    # Pin numbers of a polarised two-pad part follow the EasyEDA/JLC footprint of the same LCSC number, not the
+    # datasheet: JLC mounts the part by its own library, where these two LED footprints have the cathode on pad 2
+    # (the datasheet numbers the cathode pin 1). Found 2026-10-06 after the first order; the yellow LED below agrees.
+    add(diode("LED_RED_0603", "D", "RED", FP + "LED-SMD_L1.6-W0.8-R-RD",
+              "LED red 0603 (KENTO KT-0603R), pin 1 = A, pin 2 = K (EasyEDA/JLC pad numbering)", "LED",
+              fields=f("C2286", "Basic", "KT-0603R", "Hubei KENTO", DS["LEDR"]), k_pin=2, a_pin=1))
+    add(diode("LED_GREEN_0805", "D", "GREEN", FP + "LED0805-R-RD",
+              "LED green 0805 (KENTO KT-0805G), pin 1 = A, pin 2 = K (EasyEDA/JLC pad numbering)", "LED",
+              fields=f("C2297", "Basic", "KT-0805G", "Hubei KENTO", DS["LEDG"]), k_pin=2, a_pin=1))
     add(diode("LED_YELLOW_0603", "D", "YELLOW", FP + "LED0603-RD-YELLOW", "LED yellow 0603 (XINGLIGHT XL-1608UYC-06), pin 1 = K", "LED",
               fields=f("C965802", "Extended", "XL-1608UYC-06", "XINGLIGHT", DS["LEDY"])))
 
