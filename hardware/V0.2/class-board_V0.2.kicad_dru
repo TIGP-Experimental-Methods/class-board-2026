@@ -1,0 +1,33 @@
+(version 1)
+
+# ---- inner layers are pure GND planes: no tracks there (user decision 2026-09-07, D-01)
+(rule "no_inner_tracks"
+	(layer inner)
+	(condition "A.Type == 'Track' || A.Type == 'Arc'")
+	(constraint disallow track))
+
+# ---- isolated inputs: 2.5 mm to everything that is not part of the isolated group (brief 4.3 / 7.5)
+(rule "iso_in_clearance"
+	(condition "A.NetClass == 'ISO_IN' && B.NetClass != 'ISO_IN' && !(A.Type == 'Pad' && B.Type == 'Pad' && A.memberOfFootprint(B))")
+	(constraint clearance (min 2.5mm)))
+
+# ---- power rails: widths are set by the generator (1.0 / 0.5 mm, necked to 0.25 mm only at fine-pitch pins);
+#      no minimum-width rule because a rule cannot exempt the neck-downs (see docs/design-review.md)
+
+# ---- manufacturing margins (JLC 4-layer: 0.09/0.09 mm trace/space, 0.15 mm drill, 0.2 mm hole-to-hole; ours are deliberately wider)
+(rule "hole_to_hole"
+	(constraint hole_to_hole (min 0.5mm))
+	(condition "A.Type == 'Via' || A.Type == 'Pad'"))
+(rule "annular_ring"
+	(constraint annular_width (min 0.15mm))
+	(condition "A.Type == 'Via'"))
+(rule "copper_to_edge"
+	(constraint edge_clearance (min 0.3mm)))
+
+# ---- routing areas (2026-09-21): the main board is finished by four students, one AREA each - rule areas
+#      ZONE_A..ZONE_D on the board (nothing disallowed; they mark territory).  A student routes only connections
+#      whose both ends lie inside the area; anything that crosses a boundary is the instructor's, and the
+#      instructor routes anywhere.  hardware/scripts/main_sections.py draws the areas, splits the board into
+#      hardware/sections/{A,B,C,D}/ (the instructor's routing locked) and merges the copies back by area.
+#      The former Block-field owner assertions (owner_A / owner_B / owner_INSTR) are retired: ownership is by
+#      area now, not by schematic block, and a part may sit in any area.
