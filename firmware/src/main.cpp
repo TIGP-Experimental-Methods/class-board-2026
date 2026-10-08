@@ -77,6 +77,8 @@ void wsBinaryAll(const uint8_t* data, size_t len) {
   ws.binaryAll(data, len);
 }
 
+bool wsBinaryReady() { return ws.count() > 0 && ws.availableForWriteAll(); }
+
 // Incoming WebSocket messages arrive on the async-TCP task. We queue them and
 // handle them in loop(), so all block code runs on one task and blocks never
 // need locks. (Small teaching point: concurrency is solved by not having any.)

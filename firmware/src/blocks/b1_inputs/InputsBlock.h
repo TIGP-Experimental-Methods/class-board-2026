@@ -5,9 +5,14 @@
 // channel kAinOfAi[n-1] (pins.h); `ch` in the commands and the status keys is always
 // the panel input number. AI7 and AI8 (AIN_3, AIN_2) carry the receiver I and Q
 // when J14 / J15 are fitted and start on the +-5.12 V range.
-// Commands: read_all, set_range {ch, range}   Status: ai1..ai8 (volts), range
+// The fast path - one input at kHz rates as binary frames, roll mode and a
+// triggered capture - is the Scope (Scope.h, PROTOCOL.md section 6).
+// Commands: read_all, set_range {ch, range}, stream {ch, rate_hz, chunk},
+//           capture {ch, rate_hz, n, trig:{level, edge, pre}, timeout_ms}, stop
+// Status:   ai1..ai8 (volts), range (AI1), ranges [8], scope {mode, ch, rate_hz, ...}
 #pragma once
 #include "../Block.h"
+#include "Scope.h"
 
 class InputsBlock : public Block {
  public:
@@ -20,11 +25,16 @@ class InputsBlock : public Block {
  private:
   static constexpr int kChannels = 8;
   bool readAll(uint32_t lock_ms);   // false = the SPI bus was busy
+  bool scopeCommand(const char* c, JsonObjectConst a, JsonObject reply);
 
   float volts_[kChannels] = {};     // index = panel input AI1..AI8
   // ADS8688 range codes: 0 = +-10 V (2.5*Vref), 1 = +-5 V, 2 = +-2.5 V,
   // 5 = 0..10 V, 6 = 0..5 V (datasheet, "Range Select Registers").
   uint8_t range_[kChannels] = {};   // index = panel input AI1..AI8
 
+  Scope scope_;
   uint32_t lastTick_ = 0;
+#ifdef SIM
+  uint32_t seed_ = 88172645u;
+#endif
 };

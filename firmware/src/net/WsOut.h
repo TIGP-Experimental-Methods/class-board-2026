@@ -14,3 +14,9 @@
 #include <stdint.h>
 
 void wsBinaryAll(const uint8_t* data, size_t len);
+
+// true when someone is connected and every client's send queue has room. A
+// stream that sends without asking fills the queue and pushes the 20 Hz status
+// out of it (the library drops what does not fit); asking first lets the stream
+// drop its own chunk instead.
+bool wsBinaryReady();
