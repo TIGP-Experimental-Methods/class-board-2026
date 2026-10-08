@@ -1,4 +1,4 @@
-// Ad9834 - 75 MHz DDS, U801 on the NMR TX sheet. NMR-FIRMWARE.md section 2.4.
+// Ad9834 - DDS, 50 MHz (AD9834BRUZ), U801 on the NMR TX sheet. NMR-FIRMWARE.md section 2.4.
 //
 // It makes the transmitter carrier. The carrier free-runs the whole time: what
 // turns the pulse on and off is TX_EN into the OPA564 enable pin, not the DDS.
@@ -24,6 +24,12 @@
 // would do nothing. PSELECT is wired to GPIO42 (DDS_PSEL), but in this mode the
 // pin is ignored; it is held low. A phase change is one control-word write.
 //
+// Two frequency registers, FREQ0 and FREQ1, with FSEL choosing the one that
+// drives the output. Per the datasheet, consecutive writes to the same
+// frequency register are not allowed while the output runs; alternate FREQ0 and
+// FREQ1. So a live retune loads the other register and flips FSEL in the same
+// transaction. Under RESET nothing runs and the register in use is rewritten.
+//
 // Frequency resolution: delta f = MCLK / 2^28 = 50 MHz / 2^28 = 0.186 Hz, which
 // at an 89.4 kHz Larmor frequency is about 2 ppm - far finer than the line width.
 #pragma once
@@ -32,6 +38,9 @@
 class Ad9834 {
  public:
   void begin(uint32_t mclk_hz = 50000000);
+  // Tell the driver the master clock (Si5351 CLK0) has changed. No bus traffic:
+  // the next setFrequency() uses it, and actualFrequency() is recomputed now.
+  void setMclk(uint32_t hz);
 
   void setFrequency(double hz);
   double actualFrequency() const { return actual_; }
@@ -55,6 +64,7 @@ class Ad9834 {
   double actual_ = 0;
   double phaseDeg_[2] = {0, 0};
   bool psel_ = false;
+  bool fsel_ = false;                        // false = FREQ0 drives the output, true = FREQ1
   bool reset_ = true;
   bool sleep_ = false;
 };

@@ -67,7 +67,7 @@ instrument stream base.counter --seconds 5 --csv out.csv
 instrument alarms list
 ```
 
-It finds `instrument.local`, then `192.168.4.1`; `--host 10.0.0.42` overrides.
+It talks to `192.168.4.1` (the board's own access point); on a lab network give `--host instrument-XXXX.local` (XXXX = the last four hex digits of the MAC, printed in the boot log) or the IP address.
 
 ## Add a driver (Workshop 3, exercise E11)
 

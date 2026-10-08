@@ -28,7 +28,8 @@ constexpr int PIN_CS_ADC = 10;     // ADS8688 /CS
 
 // Front-panel input AI n is wired to ADS8688 channel kAinOfAi[n-1] (AIN_0..AIN_7).
 // Every place that turns a panel input into an ADC channel goes through this table.
-// AI7 and AI8 carry the NMR receiver I and Q when J14 / J15 are fitted.
+// AI7 and AI8 carry the NMR receiver I and Q when the shunts on J14 / J15 are on
+// 2-3 (the headers are always fitted; 1-2 = the panel SMA).
 constexpr uint8_t kAinOfAi[8] = {1, 0, 7, 6, 5, 4, 3, 2};
 
 // ---- B3 Signal generation (DAC8563) --------------------------------------
@@ -41,13 +42,15 @@ constexpr int PIN_OPTO_IN[2] = {16, 17};       // OPTO_IN1, OPTO_IN2
 
 // ---- B5 Digital I/O & timing ---------------------------------------------
 // DIO1..8 are on the expander: see EXP_PORT_DIO below.
-constexpr int PIN_FAST_OUT[2] = {21, 18};      // FAST_OUT1, FAST_OUT2: MCPWM/RMT -> 74HCT125 -> terminals
+// FAST_OUT1, FAST_OUT2: LEDC/MCPWM/RMT -> 74HCT125 -> 49.9 ohm -> panel SMA jacks
+// FAST1 / FAST2. No pull resistor: undefined until the firmware sets them.
+constexpr int PIN_FAST_OUT[2] = {21, 18};
 constexpr int PIN_TRIG_IO  = 38;   // 74LVC1T45 A side
-constexpr int PIN_TRIG_DIR = 39;   // 74LVC1T45 DIR: 1 = A->B = output to the TRIG SMA
+constexpr int PIN_TRIG_DIR = 39;   // 74LVC1T45 DIR: 1 = A->B = output to the TRIG SMA; no pull resistor
 
 // ---- NMR console, section B: transmitter ---------------------------------
 constexpr int PIN_DDS_FSYNC = 41;  // AD9834 FSYNC = its SPI chip select, active low
-constexpr int PIN_DDS_PSEL  = 42;  // AD9834 PSELECT pin; ignored (PIN/SW = 0), held low
+constexpr int PIN_DDS_PSEL  = 42;  // AD9834 PSELECT pin; ignored (PIN/SW = 0), held low; no pull resistor
 constexpr int PIN_TX_EN     = 40;  // OPA564 enable = transmit gate (10 k pull-down; 1 = transmit)
 
 // ---- NMR console, section A: receiver ------------------------------------

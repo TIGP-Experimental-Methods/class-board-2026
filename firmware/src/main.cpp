@@ -3,7 +3,7 @@
 // What happens here, in order:
 //   1. Serial (native USB), LittleFS (holds the web app + alarm rules)
 //   2. WiFi: join the network from include/secrets.h, else open our own AP
-//   3. mDNS "instrument.local", OTA (ArduinoOTA), HTTP server for the PWA,
+//   3. mDNS "instrument-XXXX.local", OTA (ArduinoOTA), HTTP server for the PWA,
 //      WebSocket at /ws for commands + the 20 Hz status broadcast
 //   4. Register the blocks; loop() runs them and the broadcast.
 //
@@ -190,6 +190,13 @@ static void startWiFi() {
 static void startServer() {
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
+
+  // A firing alarm rule goes to every client as {"type":"alarm",...} (the engine
+  // formats it). The engine runs inside broadcastStatus(), on this task, so the
+  // socket can be fed directly.
+  alarms.onNotify([](const String& msg) {
+    if (ws.count() > 0) ws.textAll(msg);
+  });
 
   // Plain-JSON info for scripts that do not want a WebSocket.
   server.on("/api/info", HTTP_GET, [](AsyncWebServerRequest* req) {

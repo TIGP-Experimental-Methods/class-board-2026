@@ -15,6 +15,7 @@ Ad9834 dds;
 namespace {
 // Control-register bit positions, datasheet table "Control Register Bits".
 constexpr uint16_t kB28    = 1u << 13;
+constexpr uint16_t kFsel   = 1u << 11;
 constexpr uint16_t kPsel   = 1u << 10;
 constexpr uint16_t kReset  = 1u << 8;
 constexpr uint16_t kSleep1 = 1u << 7;
@@ -46,10 +47,10 @@ void Ad9834::writeWord(uint16_t word) {
 #endif
 }
 
-// PIN/SW (bit 9) = 0 and FSEL (bit 11) = 0: every function is register-controlled
-// and FREQ0 is the only frequency register in use.
+// PIN/SW (bit 9) = 0: every function is register-controlled, including FSEL.
 uint16_t Ad9834::control() const {
   uint16_t c = kB28;                   // 28-bit frequency writes
+  if (fsel_) c |= kFsel;
   if (psel_) c |= kPsel;
   if (reset_) c |= kReset;
   if (sleep_) c |= (kSleep1 | kSleep12);
@@ -63,6 +64,7 @@ void Ad9834::begin(uint32_t mclk_hz) {
   reset_ = true;
   sleep_ = false;
   psel_ = false;
+  fsel_ = false;
   phaseDeg_[0] = phaseDeg_[1] = 0;
   freqWord_ = 0;
   actual_ = 0;
@@ -82,6 +84,12 @@ void Ad9834::begin(uint32_t mclk_hz) {
   setPhase(1, 90.0);
 }
 
+void Ad9834::setMclk(uint32_t hz) {
+  if (hz == 0) return;
+  mclk_ = hz;
+  actual_ = static_cast<double>(freqWord_) * mclk_ / 268435456.0;
+}
+
 void Ad9834::setFrequency(double hz) {
   if (hz < 0) hz = 0;
   const double maxHz = mclk_ * 0.5;
@@ -90,20 +98,32 @@ void Ad9834::setFrequency(double hz) {
   // delta f = MCLK / 2^28, so word = round(hz * 2^28 / MCLK).
   double w = hz * 268435456.0 / static_cast<double>(mclk_);
   if (w > 268435455.0) w = 268435455.0;
-  freqWord_ = static_cast<uint32_t>(llround(w));
-  actual_ = static_cast<double>(freqWord_) * mclk_ / 268435456.0;
+  const uint32_t word = static_cast<uint32_t>(llround(w));
 
+  // Under RESET the register in use is rewritten; while the output runs the
+  // other one is loaded and FSEL flips to it afterwards (header comment).
+  const bool live = !reset_;
+  const bool target = live ? !fsel_ : fsel_;
 #ifndef SIM
   spibus::Guard g;
-  if (!g.ok) return;
+  if (!g.ok) return;                   // nothing written: the state below stays true
+  const uint16_t prefix = target ? 0x8000 : 0x4000;   // FREQ1 : FREQ0
   SPI.beginTransaction(SPISettings(kSpiHz, MSBFIRST, SPI_MODE2));
-  // B28 = 1 means the next two writes to FREQ0 are its low then its high 14 bits.
-  // The control word has to come first, in the same transaction.
+  // B28 = 1 means the next two writes to the register are its low then its high
+  // 14 bits. The control word (still selecting the old register) comes first, in
+  // the same transaction.
   frame(control());
-  frame(static_cast<uint16_t>(0x4000 | (freqWord_ & 0x3FFF)));
-  frame(static_cast<uint16_t>(0x4000 | ((freqWord_ >> 14) & 0x3FFF)));
+  frame(static_cast<uint16_t>(prefix | (word & 0x3FFF)));
+  frame(static_cast<uint16_t>(prefix | ((word >> 14) & 0x3FFF)));
+  if (live) {
+    fsel_ = target;
+    frame(control());                  // switch the output to the new register
+  }
   SPI.endTransaction();
 #endif
+  fsel_ = target;
+  freqWord_ = word;
+  actual_ = static_cast<double>(word) * mclk_ / 268435456.0;
 }
 
 void Ad9834::setPhase(uint8_t reg, double deg) {

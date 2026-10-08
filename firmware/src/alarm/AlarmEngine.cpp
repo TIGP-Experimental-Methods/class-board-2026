@@ -19,9 +19,14 @@ void AlarmEngine::evaluate(JsonObjectConst blocks) {
   for (Rule& r : rules_) {
     if (!r.used) continue;
     JsonVariantConst v = blocks[r.block][r.key];
-    if (!v.is<float>()) continue;          // key missing or not numeric: skip
-    bool now = compare(r, v.as<float>());
-    if (now && !r.active) fire(r, v.as<float>());   // rising edge only
+    // ArduinoJson does not count a boolean as a number, so switch states
+    // (b4.module1, b4.polarizer, b5.trig ...) are mapped to 1 / 0 here.
+    float x;
+    if (v.is<bool>()) x = v.as<bool>() ? 1.0f : 0.0f;
+    else if (v.is<float>()) x = v.as<float>();
+    else continue;                         // key missing or not numeric: skip
+    bool now = compare(r, x);
+    if (now && !r.active) fire(r, x);      // rising edge only
     r.active = now;
   }
 }

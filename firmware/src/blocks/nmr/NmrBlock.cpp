@@ -199,8 +199,11 @@ bool NmrBlock::handle(JsonObjectConst cmd, JsonObject reply) {
     const double hz = a["hz"] | 0.0;
     if (clk != 0 && clk != 1) { reply["error"] = "clk must be 0 or 1"; return false; }
     if (hz < 2500.0 || hz > 200000000.0) { reply["error"] = "hz must be 2500..200000000"; return false; }
+    // CLK0 is the DDS master clock; the fitted AD9834BRUZ is a 50 MHz part.
+    if (clk == 0 && hz > 50e6) { reply["error"] = "CLK0 above 50 MHz (AD9834BRUZ limit)"; return false; }
     if (clk == 0) {
-      clockgen.setClk0(static_cast<uint32_t>(hz));
+      // CLK0 is the DDS master clock: the driver's frequency arithmetic follows it.
+      if (clockgen.setClk0(static_cast<uint32_t>(hz))) dds.setMclk(static_cast<uint32_t>(lround(clockgen.actualClk0())));
       reply["hz_actual"] = clockgen.actualClk0();
     } else {
       clockgen.setClk1(hz);

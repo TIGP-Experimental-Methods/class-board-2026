@@ -28,6 +28,15 @@ void begin() {
   if (gStarted) return;
   gStarted = true;
 #ifndef SIM
+  // All three chip selects high before the first clock edge. None has a pull-up
+  // on the board and GPIO5 floats at reset: the DAC's /SYNC (through the
+  // always-enabled 74HCT125) would otherwise take ADC traffic as a DAC command.
+  // Level first, then output, so no pin glitches low on the way.
+  const int cs[] = {PIN_CS_ADC, PIN_CS_DAC, PIN_DDS_FSYNC};
+  for (int pin : cs) {
+    digitalWrite(pin, HIGH);
+    pinMode(pin, OUTPUT);
+  }
   SPI.begin(PIN_SPI_SCLK, PIN_SPI_MISO, PIN_SPI_MOSI);
 #endif
 }

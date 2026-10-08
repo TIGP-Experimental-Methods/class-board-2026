@@ -292,10 +292,19 @@ void Sequencer::fail(const char* message) {
 // Hardware
 // ---------------------------------------------------------------------------
 void Sequencer::prepareHardware() {
+#ifndef SIM
+  // The coils first: b4 may have left the polarizer or the H-bridge on, and a
+  // scan must never start with either (the polarize step switches them itself).
+  digitalWrite(PIN_FET_GATE, LOW);
+  digitalWrite(PIN_HB_IN1, LOW);
+  digitalWrite(PIN_HB_IN2, LOW);
+#endif
   // The DDS master clock. Every transmit frequency is a fraction of it, so it
   // is programmed at the start of every scan set rather than trusted to have
-  // survived whatever else has been going on.
+  // survived whatever else has been going on (an `nmr clock` command, say), and
+  // the DDS driver is told, so its frequency words are worked out from it.
   clockgen.setClk0(50000000);
+  dds.setMclk(static_cast<uint32_t>(lround(clockgen.actualClk0())));
   setLo(cfg_.f_lo_hz);
 
   // Park the phase accumulator while the frequency and phase registers are

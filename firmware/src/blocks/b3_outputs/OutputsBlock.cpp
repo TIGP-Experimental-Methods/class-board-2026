@@ -8,13 +8,34 @@
 
 static const char* modeName(int m) { return m == 0 ? "off" : (m == 1 ? "dc" : "sine"); }
 
+#ifndef SIM
+// One DAC8563 frame (datasheet SLAS719E section 8.5): 24 bits while /SYNC is
+// low, MSB first, latched on the falling SCLK edge (mode 1). First byte
+// X X C2 C1 C0 A2 A1 A0, then 16 data bits. SCLK and DIN pass through two gates
+// of the 74HCT125 whose relative skew is not specified, hence 8 MHz and not the
+// ADC's 17. /LDAC is grounded, so every write updates the output at once.
+// The caller holds the SPI lock.
+static void dacFrame(uint8_t cmdAddr, uint16_t data) {
+  SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE1));
+  digitalWrite(PIN_CS_DAC, LOW);
+  SPI.transfer(cmdAddr);
+  SPI.transfer16(data);
+  digitalWrite(PIN_CS_DAC, HIGH);
+  SPI.endTransaction();
+}
+#endif
+
 void OutputsBlock::begin() {
 #ifndef SIM
-  pinMode(PIN_CS_DAC, OUTPUT);
-  digitalWrite(PIN_CS_DAC, HIGH);
-  spibus::begin();   // the shared SPI2 bus (drivers/SpiBus.h); one lock for ADC, DAC and DDS
-  // TODO(B3): DAC8563 init - enable the internal 2.5 V reference and set
-  // both channels to mid-scale (= 0 V after the +-10 V stage).
+  // The shared SPI2 bus (drivers/SpiBus.h): one lock for ADC, DAC and DDS. Its
+  // begin() has already driven /SYNC (PIN_CS_DAC) high.
+  spibus::begin();
+  // The DAC keeps its registers through an ESP32 reset and powers up with the
+  // reference off (its output undefined), so both are set on every start.
+  spibus::Guard g;
+  if (!g.ok) return;
+  dacFrame(0x38, 0x0001);   // internal 2.5 V reference on; this also sets gain 2
+  dacFrame(0x1F, 0x8000);   // write and update both channels: mid-scale = 0 V on AO
 #endif
 }
 
@@ -36,17 +57,21 @@ void OutputsBlock::loop() {
   }
 }
 
-void OutputsBlock::writeDac(int ch, float volts) {
+void OutputsBlock::writeDac(int ch, float volts) {   // ch 0 = AO1, 1 = AO2
   volts = constrain(volts, -10.0f, 10.0f);
+#ifdef SIM
   (void)ch;
-#ifndef SIM
+#else
   // Every DAC frame goes out under the SPI lock; if the NMR capture holds the bus
   // this update is skipped and the next loop() pass catches up.
   spibus::Guard g(0);
   if (!g.ok) return;
-  // TODO(B3): the stage gives AO = 4 * (DAC - VREF), VREF = 2.5 V,
-  // so DAC volts = 2.5 + AO/4, code = DAC_volts / 5.0 * 65535.
-  // 24-bit SPI frame: command 0x18 | ch (write and update), then the code.
+  // The OPA2192 stage (10 k / 40.2 k, referenced to the DAC's own 2.5 V) gives
+  // AO = 4.02 * (V_DAC - 2.5 V), and V_DAC = 5 V * code / 65536, so
+  // AO = 10.05 V * (code - 32768) / 32768.
+  long code = lroundf(32768.0f + volts * 32768.0f / 10.05f);
+  code = constrain(code, 0L, 65535L);
+  dacFrame(static_cast<uint8_t>(0x18 | ch), static_cast<uint16_t>(code));   // C = 011: write and update DAC ch
 #endif
 }
 

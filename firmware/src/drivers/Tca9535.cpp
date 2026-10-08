@@ -1,6 +1,8 @@
 #include "Tca9535.h"
 
 #include <Arduino.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 #include "../../include/pins.h"
 
@@ -9,6 +11,26 @@
 #endif
 
 Tca9535 expander;
+
+namespace {
+// The cache lock (header comment). Recursive because pulseJohnsonClear() and
+// writeBit() take it and then call writePort(), which takes it again. It waits
+// as long as it must: a holder only ever does a few I2C writes, and a skipped
+// expander write would leave an output wrong.
+SemaphoreHandle_t gLock = nullptr;
+
+struct CacheLock {
+  CacheLock() {
+    if (!gLock) gLock = xSemaphoreCreateRecursiveMutex();
+    if (gLock) xSemaphoreTakeRecursive(gLock, portMAX_DELAY);
+  }
+  ~CacheLock() {
+    if (gLock) xSemaphoreGiveRecursive(gLock);
+  }
+  CacheLock(const CacheLock&) = delete;
+  CacheLock& operator=(const CacheLock&) = delete;
+};
+}  // namespace
 
 #ifndef SIM
 namespace {
@@ -84,19 +106,21 @@ bool Tca9535::begin(uint8_t addr) {
 
 bool Tca9535::writePort(uint8_t port, uint8_t value) {
   if (port > 1) return false;
+  CacheLock lock;
   out_[port] = value;
   return write8(static_cast<uint8_t>(kRegOutput + port), value);
 }
 
+bool Tca9535::writeMasked(uint8_t port, uint8_t mask, uint8_t value) {
+  if (port > 1) return false;
+  CacheLock lock;
+  return writePort(port, static_cast<uint8_t>((out_[port] & ~mask) | (value & mask)));
+}
+
 bool Tca9535::writeBit(uint8_t port, uint8_t bit, bool level) {
-  if (port > 1 || bit > 7) return false;
-  uint8_t v = out_[port];
-  if (level) {
-    v = static_cast<uint8_t>(v | (1u << bit));
-  } else {
-    v = static_cast<uint8_t>(v & ~(1u << bit));
-  }
-  return writePort(port, v);
+  if (bit > 7) return false;
+  const uint8_t m = static_cast<uint8_t>(1u << bit);
+  return writeMasked(port, m, level ? m : 0);
 }
 
 uint8_t Tca9535::cached(uint8_t port) const {
@@ -116,6 +140,7 @@ bool Tca9535::readPort(uint8_t port, uint8_t& value) {
 
 bool Tca9535::pulseJohnsonClear() {
   if (!present_) return false;
+  CacheLock lock;   // both writes as one: no other write lands between low and high
   bool ok = writeBit(EXP_PORT_CTRL, EXP_BIT_JCLR, false);
   ok = writeBit(EXP_PORT_CTRL, EXP_BIT_JCLR, true) && ok;
   return ok;

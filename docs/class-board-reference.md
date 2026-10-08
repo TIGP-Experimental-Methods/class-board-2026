@@ -37,10 +37,10 @@
 | Capability | Front-panel connector | Hardware | Firmware block |
 |---|---|---|---|
 | 8 analog inputs, 16 bit, ±10.24 V down to ±2.56 V, about 15 kHz bandwidth, up to 500 kS/s in total | SMA AI1–AI8 | ADS8688 (SPI) | `b1` |
-| 2 analog outputs, 16 bit, ±10 V, 50 Ω source | SMA AO1, AO2 | DAC8563 (SPI) + OPA2192 | `b3` (stub) |
+| 2 analog outputs, 16 bit, ±10 V, 50 Ω source | SMA AO1, AO2 | DAC8563 (SPI) + OPA2192 | `b3` |
 | 8 TTL outputs, 5 V through 1 kΩ | screw strip TTL1–8 | TCA9535 (I²C) + 74AHCT541 | `b5` |
 | 7 module outputs, 5 V TTL through 47 Ω, for relay or H-bridge modules | 2×6 header OUT1–7 (+5 V, GND) | TCA9535 + 74AHCT541 | `b4` |
-| 2 fast outputs, 5 V, from GPIO (PWM, RMT, clock) | SMA FAST1, FAST2 | 74HCT125 | `b5` (stub) |
+| 2 fast outputs, 5 V, from GPIO (PWM, RMT, clock) | SMA FAST1, FAST2 | 74HCT125 | `b5` |
 | 1 trigger line, in or out, 5 V | SMA TRIG | 74LVC1T45 | `b5` |
 | 2 isolated inputs, 5–24 V | screw terminals ISO IN 1, 2 | 6N137 optocouplers | `b4` |
 | OLED 128×64 and a Qwiic socket on the I²C bus | OLED socket, Qwiic | SSD1306 module (I²C 0x3C) | none yet |
@@ -262,7 +262,7 @@ On J7 and J8 the signals are on the **odd** pins and the even pins are GND; on J
 
 Each subsection gives the signal path with the fitted values, the numbers an app needs, the chip's protocol as it must be used on this board, a minimal Arduino snippet with the constants of `pins.h`, the state of the reference firmware, and the traps. Three start-up rules apply to every sketch:
 
-- **Drive every SPI chip select high before the first SPI transfer:** `PIN_CS_ADC`, `PIN_CS_DAC`, `PIN_DDS_FSYNC` have no pull-up on the board and float at reset. In particular the DAC's /SYNC floats while the ADC is being configured, and the DAC can swallow ADC traffic as a command (section 10).
+- **Drive every SPI chip select high before the first SPI transfer:** `PIN_CS_ADC`, `PIN_CS_DAC`, `PIN_DDS_FSYNC` have no pull-up on the board and float at reset. In particular the DAC's /SYNC would float while the ADC is being configured and the DAC could swallow ADC traffic as a command; the class firmware does this in `spibus::begin()`.
 - **Start I²C with explicit pins before any library touches `Wire`:** `Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000)`. This Arduino core's ESP32-S3 defaults are SDA = GPIO8 and SCL = GPIO9, which on this board are the receiver blanking and the H-bridge input. A bare `Wire.begin()` would toggle the H-bridge.
 - **The chips keep their state through an ESP32 reset.** The TCA9535, DAC8563 and ADS8688 are reset only by a power cycle. `setup()` rewrites every output and register every time.
 
@@ -330,7 +330,7 @@ void setup() {
 }
 ```
 
-**Class firmware.** Driver `drivers/Ads8688.{h,cpp}`, instance `adc`, started by `b1`: `setRange(ch, code)`, `readManual(ch)` (caller holds the SPI lock), `toVolts(ch, raw)`, `burst(mask, buf, n, rate_hz, &achieved)` (auto scan, caller holds the lock; used by the NMR sequencer). Block `b1`: commands `read_all`, `set_range {ch 1..8, range}`; status `ai1…ai8` in volts. **State: implemented from the datasheet, never run on a board.** Known bug: `set_range` accepts codes 3 and 4, which the chip does not have, and reports them as set.
+**Class firmware.** Driver `drivers/Ads8688.{h,cpp}`, instance `adc`, started by `b1`: `setRange(ch, code)`, `readManual(ch)` (caller holds the SPI lock), `toVolts(ch, raw)`, `burst(mask, buf, n, rate_hz, &achieved)` (auto scan, caller holds the lock; used by the NMR sequencer). Block `b1`: commands `read_all`, `set_range {ch 1..8, range}`; status `ai1…ai8` in volts. **State: implemented from the datasheet, never run on a board.** `set_range` accepts only codes 0, 1, 2, 5, 6 and stores a range after the chip confirmed it.
 
 **Traps.** The panel-to-channel table; the one-frame delay of a manual read; complete frames only; the straight-binary code (the class driver flips the top bit into a signed `int16_t`); an open input reads +2 V; with J14/J15 on 2-3 the AI7/AI8 jacks are disconnected.
 
@@ -375,9 +375,9 @@ void setAO(int ao, float volts) {                         // ao = 1 or 2
 // in setup(), after SPI.begin() and the chip selects: dacFrame(0x38, 0x0001); dacFrame(0x1F, 0x8000);
 ```
 
-**Class firmware.** No driver class. Block `b3` (`blocks/b3_outputs/OutputsBlock.cpp`) has the command layer `set_dc {ch, volts}`, `sine {ch, freq, amp, offset}`, `off {ch}` and status `ao1, ao2, mode1, mode2`, but **the DAC initialisation and the SPI frame are TODO stubs**: on real hardware the status reports voltages that are not produced. The comment in that file uses gain 4 and 65535; the board gives 4.02 and 65536. The `sine` command updates once per millisecond, so anything above a few hundred hertz is aliased.
+**Class firmware.** No driver class; block `b3` (`blocks/b3_outputs/OutputsBlock.cpp`) does it: `begin()` enables the reference and writes mid-scale, `writeDac()` sends the frame above at 8 MHz under the SPI lock (written 2026-10-08, not yet run on a board). Commands `set_dc {ch, volts}`, `sine {ch, freq, amp, offset}`, `off {ch}`; status `ao1, ao2, mode1, mode2`. The `sine` command updates once per millisecond, so anything above a few hundred hertz is aliased.
 
-**Traps.** Enable the reference first and write mid-scale to both channels in every `setup()`. The buffered SCLK/DIN reach the DAC during every ADC and DDS transfer; the DAC ignores them only while /SYNC is high, so /SYNC must be high before the first ADC transfer (section 10).
+**Traps.** Enable the reference first and write mid-scale to both channels in every `setup()`. The buffered SCLK/DIN reach the DAC during every ADC and DDS transfer; the DAC ignores them only while /SYNC is high, which is why `spibus::begin()` drives /SYNC high before the first transfer.
 
 ### 8.3 TTL outputs TTL1–8 and module outputs OUT1–7 (TCA9535 + 74AHCT541)
 
@@ -414,7 +414,7 @@ void ttl(int n, bool level)    { bitWrite(out0, n - 1, level);            expWri
 void module(int n, bool on)    { bitWrite(out1, EXP_BIT_MOD[n - 1], on);  expWrite(0x03, out1); }
 ```
 
-**Class firmware.** Driver `drivers/Tca9535.{h,cpp}`, instance `expander`, started by `base`: `writePort`, `writeBit`, `cached`, `readPort`, `present`, `pulseJohnsonClear`. Block `b5`: `dio {n 1..8, level}`, `dio_mask {mask}`; status `dio`, `dio1…dio8`. Block `b4`: `module {n 1..7, on}`, `module_all {on}`; status `module1…module7`. Both answer `"expander not present"` on a bare dev board in the real build. **State: implemented, never run on a board.** The output cache is written from two tasks without a lock (the NMR sequencer pulses the counter clear); a lost update is possible.
+**Class firmware.** Driver `drivers/Tca9535.{h,cpp}`, instance `expander`, started by `base`: `writePort`, `writeBit`, `writeMasked`, `cached`, `readPort`, `present`, `pulseJohnsonClear`. Block `b5`: `dio {n 1..8, level}`, `dio_mask {mask}`; status `dio`, `dio1…dio8`. Block `b4`: `module {n 1..7, on}`, `module_all {on}`; status `module1…module7`. Both answer `"expander not present"` on a bare dev board in the real build. **State: implemented, never run on a board.** The output cache is guarded by a mutex, because the NMR sequencer pulses the counter clear from its own task.
 
 ### 8.4 Fast outputs FAST1, FAST2 (GPIO → 74HCT125 → SMA)
 
@@ -428,7 +428,7 @@ Any signal the ESP32 can put on a GPIO: LEDC PWM, MCPWM, RMT pulse trains, a clo
 ledcSetup(0, 1000 /*Hz*/, 8 /*bit*/); ledcAttachPin(PIN_FAST_OUT[0], 0); ledcWrite(0, 128);   // 1 kHz square wave on FAST1
 ```
 
-**Class firmware.** Block `b5`: `fast_out {n 1..2, freq_hz}` stores and reports the frequency; **the real branch is a TODO stub** (the pins are never configured).
+**Class firmware.** Block `b5`: `fast_out {n 1..2, freq_hz}` drives the pin with the LEDC peripheral at 50 % duty (channels 2 and 4 from the 40 MHz crystal clock: about 3 Hz to 20 MHz; 0 = off, pin low; the reply carries the frequency actually set). Written 2026-10-08, not yet run on a board.
 
 ### 8.5 TRIG, in or out (74LVC1T45)
 
@@ -451,7 +451,7 @@ void trigOut(bool level) { pinMode(PIN_TRIG_IO, INPUT_PULLDOWN); digitalWrite(PI
 void trigIn()            { pinMode(PIN_TRIG_IO, INPUT); digitalWrite(PIN_TRIG_DIR, LOW); }
 ```
 
-**Class firmware.** Block `b5`: `trig_dir {out}`, `trig {level}` (only when out); status `trig_dir`, `trig`. Implemented, never run; the input-to-output switch makes GPIO38 an output before raising DIR, which briefly puts two drivers on one line (section 10).
+**Class firmware.** Block `b5`: `trig_dir {out}`, `trig {level}` (only when out); status `trig_dir`, `trig`. Implemented in the order above (an output starts low); never run on a board.
 
 ### 8.6 Isolated inputs ISO IN 1, 2 (6N137)
 
@@ -476,7 +476,7 @@ void isoBegin() { pinMode(PIN_OPTO_IN[0], INPUT_PULLUP); attachInterrupt(PIN_OPT
 bool iso1Present() { return digitalRead(PIN_OPTO_IN[0]) == LOW; }
 ```
 
-**Class firmware.** Block `b4`: status `opto1`, `opto2` (falling-edge counts), `opto1_level`, `opto2_level`; command `opto_reset`. Polled at 10 Hz in `loop()`, so pulse trains above about 5 Hz are under-counted; the interrupt counter is a TODO.
+**Class firmware.** Block `b4`: status `opto1`, `opto2` (falling-edge counts), `opto1_level`, `opto2_level`; command `opto_reset`. Falling edges are counted by the ESP32's hardware pulse counter (1 µs glitch filter, read at 10 Hz) and the levels are polled (2026-10-08, not yet run on a board).
 
 ### 8.7 OLED and Qwiic (I²C)
 
@@ -552,7 +552,7 @@ TX_EN = GPIO40 → OPA564 enable (10 k pull-down: off at reset); 1 = transmit, o
 | Flags | the OPA564's current-limit and thermal flags end on unfitted pull-ups and reach no GPIO; the firmware reports them as `null`. Thermal shutdown is silent |
 | Idle current | 39 mA at TX_EN = 1 (about 0.9 W at 24 V) against 5 mA shut down: keep TX_EN low between pulses |
 
-**AD9834 protocol (datasheet, "Programming the AD9834").** 16-bit words, MSB first, FSYNC low per word, data clocked on the falling SCLK edge with SCLK high when FSYNC falls = **SPI mode 2**, 10 MHz. PIN/SW = 0 on this board (the RESET and SLEEP pins are strapped low, FSELECT to ground), so reset, sleep, frequency select and phase select are **register bits**. Control word (DB15:14 = 00): B28 (bit 13) = 1 for two-word frequency writes · FSEL (11) · PSEL (10) · PIN/SW (9) = 0 · RESET (8) · SLEEP1 (7) · SLEEP12 (6) · OPBITEN, SIGN/PIB, DIV2, MODE = 0. FREQ0 = `0x4000 | 14 bits` written LSBs then MSBs; FREQ1 = `0x8000 | …`; PHASE0 = `0xC000 | 12 bits`, PHASE1 = `0xE000 | 12 bits` (0.088° per step). f = MCLK × word / 2²⁸. Start-up: control `0x2100` (B28 + RESET), FREQ0 low word, FREQ0 high word, PHASE0, PHASE1, control `0x2000` (RESET off: the carrier runs). Phase switch during a sequence: one control word, `0x2000` (PHASE0) or `0x2400` (PHASE1). RESET zeroes the phase accumulator and parks the output at midscale without clearing the registers; SLEEP1 + SLEEP12 (`0x20C0`) stops the clock and powers the DAC down for an idle console. The carrier is never gated at the DDS; TX_EN gates the power stage, so the phase reference survives between pulses. **Consecutive 28-bit writes to the same frequency register are not allowed** while the output runs: for a live retune write the other register and flip FSEL (the class firmware always rewrites FREQ0, which is harmless only under RESET or SLEEP).
+**AD9834 protocol (datasheet, "Programming the AD9834").** 16-bit words, MSB first, FSYNC low per word, data clocked on the falling SCLK edge with SCLK high when FSYNC falls = **SPI mode 2**, 10 MHz. PIN/SW = 0 on this board (the RESET and SLEEP pins are strapped low, FSELECT to ground), so reset, sleep, frequency select and phase select are **register bits**. Control word (DB15:14 = 00): B28 (bit 13) = 1 for two-word frequency writes · FSEL (11) · PSEL (10) · PIN/SW (9) = 0 · RESET (8) · SLEEP1 (7) · SLEEP12 (6) · OPBITEN, SIGN/PIB, DIV2, MODE = 0. FREQ0 = `0x4000 | 14 bits` written LSBs then MSBs; FREQ1 = `0x8000 | …`; PHASE0 = `0xC000 | 12 bits`, PHASE1 = `0xE000 | 12 bits` (0.088° per step). f = MCLK × word / 2²⁸. Start-up: control `0x2100` (B28 + RESET), FREQ0 low word, FREQ0 high word, PHASE0, PHASE1, control `0x2000` (RESET off: the carrier runs). Phase switch during a sequence: one control word, `0x2000` (PHASE0) or `0x2400` (PHASE1). RESET zeroes the phase accumulator and parks the output at midscale without clearing the registers; SLEEP1 + SLEEP12 (`0x20C0`) stops the clock and powers the DAC down for an idle console. The carrier is never gated at the DDS; TX_EN gates the power stage, so the phase reference survives between pulses. **Consecutive 28-bit writes to the same frequency register are not allowed** while the output runs: for a live retune write the other register and flip FSEL (the class driver does this; under RESET it rewrites the register in use).
 
 ```cpp
 static void ddsWord(uint16_t w) { digitalWrite(PIN_DDS_FSYNC, LOW); SPI.transfer16(w); digitalWrite(PIN_DDS_FSYNC, HIGH); }
@@ -577,7 +577,7 @@ void txPulse(uint32_t t_us, uint32_t dead_us) {            // RX blanked first; 
 
 **OPA564 rules.** Supply order USB first (VDIG = +3V3), then +VEXT; the reverse damages the part. E/S has an internal 100 kΩ pull-up against the board's 10 kΩ pull-down, so an undriven GPIO40 means shut down. Use the follower setting (J10 open) only into a resistive dummy load, not into a tuned coil (input differential at turn-off not determined).
 
-**Class firmware.** Driver `Ad9834` (`begin`, `setFrequency`, `setPhase`, `setReset`, `selectPhase`, `sleep`); block `nmr`: `config`, `start`, `abort`, `pulse {t_us}`, `clock {clk, hz}`, `dds {hz, phase0_deg, phase1_deg, psel, on}`, `blank`, `get_record`; the sequencer runs on a core-1 task (section 9). State: compiles in both builds, **never run on a board**. The `clock` command does not refuse CLK0 above 50 MHz.
+**Class firmware.** Driver `Ad9834` (`begin`, `setFrequency`, `setPhase`, `setReset`, `selectPhase`, `sleep`); block `nmr`: `config`, `start`, `abort`, `pulse {t_us}`, `clock {clk, hz}`, `dds {hz, phase0_deg, phase1_deg, psel, on}`, `blank`, `get_record`; the sequencer runs on a core-1 task (section 9). State: compiles in both builds, **never run on a board**. `clock` refuses CLK0 above 50 MHz.
 
 ### 8.10 Coil switches: field-cycling H-bridge and the polarizer (rear terminals)
 
@@ -597,7 +597,7 @@ Flyback fitted: SS54 freewheel diode from COIL to +VCOIL (τ = L/R, about 2.6 ms
 
 DRV8871: current regulated at 2.0 A by chopping (not a fault); overcurrent at 3.7 A retries after 3 ms; undervoltage below 6.1 V and thermal shutdown recover silently, **no fault pin**; at the 2 A trip point it dissipates about 2.3 W. 3.3 V logic is fine (V_IH 1.5 V). Transitions need no detour through coast (220 ns dead time is built in). Keep +VEXT ≥ 6.5 V or it sits in undervoltage lockout.
 
-Polarizer: FET_GATE = 1 → coil on (UCC27517 IN− is grounded, so OUT follows IN+; a floating input gives OUT low). J12 1-2 is allowed only with +VEXT ≤ 18 V (driver supply and gate rating), so **at the 24 V supply J12 is on 2-3**; J12 open = no drive, coil stays off. The FET is 40 V / 13 A; +VCOIL ≤ 24 V, **no fuse**: the coil supply must limit the current. After switching off, wait at least 5 τ (about 13 ms for the reference coil) before the pulse; the class default of 5 ms leaves about 15 % of the current. To measure the coil current, replace R933 (0 Ω, 2512) by a 10 mΩ shunt and read ISENSE_COIL at J13 with an AI input on ±2.56 V.
+Polarizer: FET_GATE = 1 → coil on (UCC27517 IN− is grounded, so OUT follows IN+; a floating input gives OUT low). J12 1-2 is allowed only with +VEXT ≤ 18 V (driver supply and gate rating), so **at the 24 V supply J12 is on 2-3**; J12 open = no drive, coil stays off. The FET is 40 V / 13 A; +VCOIL ≤ 24 V, **no fuse**: the coil supply must limit the current. After switching off, wait at least 5 τ (about 13 ms for the reference coil) before the pulse; the class default is 15 ms. To measure the coil current, replace R933 (0 Ω, 2512) by a 10 mΩ shunt and read ISENSE_COIL at J13 with an AI input on ±2.56 V.
 
 ```cpp
 void coilBegin() { for (int p : {PIN_HB_IN1, PIN_HB_IN2, PIN_FET_GATE}) { digitalWrite(p, LOW); pinMode(p, OUTPUT); } }
@@ -608,7 +608,7 @@ bool polarize(uint32_t ms) {                                // bounded: never re
 }
 ```
 
-**Class firmware.** Block `b4`: `hbridge {mode off|fwd|rev|brake}`, `polarizer {on}`, both refused with `"nmr scan running"` during a scan; status `hbridge`, `polarizer`. **`polarizer {on:true}` has no time limit**: a dropped WebSocket leaves the coil on until reset. The NMR sequencer's own polarize step is bounded at 10 s and turns the coil off before the pulse; after every scan set it drives FET_GATE and HB_IN1/2 low without telling `b4`, whose status can then be stale.
+**Class firmware.** Block `b4`: `hbridge {mode off|fwd|rev|brake}`, `polarizer {on}`, both refused with `"nmr scan running"` during a scan; status `hbridge`, `polarizer`. `polarizer {on, ms}` switches the coil on for at most `ms` (default and maximum 10 s) and `loop()` switches it off at the deadline; status `hbridge` and `polarizer` are read back from the pins, so they stay right after the NMR sequencer drives them low at the end of a scan. The sequencer's own polarize step is bounded at 10 s and turns the coil off before the pulse.
 
 ### 8.11 Indicators
 
@@ -660,8 +660,8 @@ The class repository's `firmware/` is the reference and the fallback. It is the 
 
 | Instance | Started by | Public methods |
 |---|---|---|
-| `spibus` (namespace) | `base` | `begin()`, `lock(ms)`, `unlock()`, `Guard g(ms)` with `g.ok`. A recursive FreeRTOS mutex around SPI2. Every SPI transaction sits inside a Guard; periodic readers use `Guard g(0)` and skip the pass when the bus is busy; the NMR capture holds it for the whole burst |
-| `Tca9535 expander` | `base` | `begin(addr)`, `writePort(port, v)`, `writeBit(port, bit, level)`, `cached(port)`, `setInputs(port, mask)`, `readPort(port, v)`, `present()`, `pulseJohnsonClear()` |
+| `spibus` (namespace) | `base` | `begin()` (also drives the three chip selects high before the first transfer), `lock(ms)`, `unlock()`, `Guard g(ms)` with `g.ok`. A recursive FreeRTOS mutex around SPI2. Every SPI transaction sits inside a Guard; periodic readers use `Guard g(0)` and skip the pass when the bus is busy; the NMR capture holds it for the whole burst |
+| `Tca9535 expander` | `base` | `begin(addr)`, `writePort(port, v)`, `writeBit(port, bit, level)`, `writeMasked(port, mask, v)`, `cached(port)`, `setInputs(port, mask)`, `readPort(port, v)`, `present()`, `pulseJohnsonClear()` |
 | `Si5351 clockgen` | `base` | `begin(addr, xtal_hz)`, `setClk0(hz)`, `setClk1(hz)`, `actualClk0()`, `actualClk1()`, `enable(clk, on)`, `resetPllB()`, `present()` |
 | `Ad9834 dds` | `nmr` | `begin(mclk_hz)`, `setFrequency(hz)`, `actualFrequency()`, `setPhase(reg, deg)`, `setReset(on)`, `selectPhase(p1)`, `sleep(on)`; takes the SPI lock itself (mode 2, 10 MHz) |
 | `Ads8688 adc` | `b1` | `begin()`, `setRange(ch, code)`, `range(ch)`, `readManual(ch)`, `toVolts(ch, raw)`, `burst(mask, out, n, rate_hz, &achieved)`, `present()`; mode 1, 17 MHz requested (16 MHz actual); `readManual` and `burst` require the caller to hold the lock |
@@ -678,6 +678,7 @@ One WebSocket at `ws://<host>/ws`. Text frames are JSON; binary frames carry rec
 {"id": 7, "ok": false, "error": "expander not present"}
 {"type": "hello", "fw": "0.1.0", "sim": true, "blocks": ["base","b1","b2","b3","b4","b5","nmr","template","alarms"]}   ← on connect
 {"type": "status", "t": 123456, "blocks": {"base": {...}, "b1": {"ai1": 3.91, ...}, ...}}   ← every 50 ms to everyone
+{"type": "alarm", "t": 123456, "rule": 2, "block": "b1", "key": "ai1", "value": 9.4, "action": "module:1:off"}   ← when a rule fires (a boolean key counts as 1/0)
 ```
 
 Replies have no `type`; broadcasts do. Numeric top-level status keys are what the app's chart plots and what alarm rules test. `GET /api/info` returns `{fw, sim, mac, blocks}` for scripts without a WebSocket.
@@ -685,18 +686,18 @@ Replies have no `type`; broadcasts do. Numeric top-level status keys are what th
 | Block | Commands | Status keys |
 |---|---|---|
 | `base` | `led {r,g,b}` · `brightness {value}` · `counter_reset` · `info` | `counter, temp_c, uptime_s, rssi, heap_free, clients` (stations on the access point), `led{}` |
-| `b1` | `read_all` · `set_range {ch 1..8, range}` | `ai1…ai8`, `range` |
+| `b1` | `read_all` · `set_range {ch 1..8, range 0|1|2|5|6}` | `ai1…ai8`, `range` |
 | `b2` | `rails` | `v5_raw, v3v3, v12p, v12n, v5a, measured` (constants; nothing is measurable) |
-| `b3` | `set_dc {ch, volts}` · `sine {ch, freq, amp, offset}` · `off {ch}` | `ao1, ao2, mode1, mode2` (stub below the command layer) |
-| `b4` | `module {n 1..7, on}` · `module_all {on}` · `opto_reset` · `hbridge {mode}` · `polarizer {on}` | `module1…module7, opto1, opto2, opto1_level, opto2_level, hbridge, polarizer` |
-| `b5` | `dio {n, level}` · `dio_mask {mask}` · `trig_dir {out}` · `trig {level}` · `fast_out {n, freq_hz}` (stub) | `dio, dio1…dio8, trig_dir, trig, fast1_hz, fast2_hz` |
+| `b3` | `set_dc {ch, volts}` · `sine {ch, freq, amp, offset}` · `off {ch}` | `ao1, ao2, mode1, mode2` |
+| `b4` | `module {n 1..7, on}` · `module_all {on}` · `opto_reset` · `hbridge {mode}` · `polarizer {on, ms ≤ 10000}` | `module1…module7, opto1, opto2, opto1_level, opto2_level, hbridge, polarizer` |
+| `b5` | `dio {n, level}` · `dio_mask {mask}` · `trig_dir {out}` · `trig {level}` · `fast_out {n, freq_hz}` (LEDC, about 3 Hz–20 MHz, 0 = off) | `dio, dio1…dio8, trig_dir, trig, fast1_hz, fast2_hz` |
 | `nmr` | `config {…}` · `start` · `abort` · `pulse {t_us}` · `clock {clk, hz}` · `dds {hz, phase0_deg, phase1_deg, psel, on}` · `blank {receive}` · `get_record` · `sim_larmor {hz}` (SIM) | `state, scan, n_avg, f_tx_hz, f_lo_hz, if_hz, rate_hz, peak_hz, larmor_hz, peak_amp, snr_db, i_flag, t_flag, error, sim` |
 | `alarms` | `list` · `add {block, key, op, threshold, action}` · `remove {id}` · `clear` | `rules, active` |
 | `template` | `set_value {value}` | `value, setpoint` |
 
 Binary frame, 28-byte little-endian header then payload: `uint8 kind, uint8 block_id, uint8 ch, uint8 bits, uint32 t_ms, uint32 rate_hz, uint32 n, int32 trig_index, float32 volts_per_lsb, float32 offset_v`. Only **kind 3** exists today: the averaged NMR record, `n` pairs of float32 I, Q in volts at the ADC input, `rate_hz` = the decimated rate, `trig_index` = scans averaged so far, `offset_v` = the IF in hertz. The streaming and capture frames (kinds 1 and 2) of `PROTOCOL.md` §6 are specified, not implemented. The Python client `host/instrument.py` (`pip install -e host/`) and the web app `host/pwa/` speak this protocol and work as test clients for any firmware that keeps it.
 
-NMR `config` settings and limits: `f_tx_hz` (default 89400), `f_lo_hz` (84000), `sequence` fid|echo, `t90_us` 417, `t180_us` 834, `tau_us`, `t_blank_pre_us` 20, `t_dead_us` 1000, `t_acq_start_us` 1200, `t_acq_ms` 2000 (≤ 4000), `rate_hz` 100000 (≤ 250000 per channel), `decim` 4 (the decimated rate must exceed twice the IF), `n_avg` 1..256, `cyclops`, `t_repeat_ms` 3000, `polarize_ms` ≤ 10000, `t_polarize_settle_ms` 5, `hb_mode`. A scan: phase registers loaded · RX blanked · TX_EN high for t90 · dead time · RX open · ADC burst of AIN_3 and AIN_2 into PSRAM · RX blanked · DC offset, decimation, CYCLOPS rotation, running mean · one kind-3 frame to every client.
+NMR `config` settings and limits: `f_tx_hz` (default 89400), `f_lo_hz` (84000), `sequence` fid|echo, `t90_us` 417, `t180_us` 834, `tau_us`, `t_blank_pre_us` 20, `t_dead_us` 1000, `t_acq_start_us` 1200, `t_acq_ms` 2000 (≤ 4000), `rate_hz` 100000 (≤ 250000 per channel), `decim` 4 (the decimated rate must exceed twice the IF), `n_avg` 1..256, `cyclops`, `t_repeat_ms` 3000, `polarize_ms` ≤ 10000, `t_polarize_settle_ms` 15, `hb_mode`. A scan: phase registers loaded · RX blanked · TX_EN high for t90 · dead time · RX open · ADC burst of AIN_3 and AIN_2 into PSRAM · RX blanked · DC offset, decimation, CYCLOPS rotation, running mean · one kind-3 frame to every client.
 
 ### 9.5 What has run and what has not
 
@@ -705,7 +706,7 @@ NMR `config` settings and limits: `f_tx_hz` (default 89400), `f_lo_hz` (84000), 
 | WiFi, mDNS, HTTP, WebSocket, status broadcast, `base`, the web app, `instrument.py` | ran on 2026-09-07 (the pre-v0.7 build; those code paths are unchanged) | never (no board yet) |
 | Alarm rules and their persistence | ran pre-v0.7 | never |
 | `b1` ADC, `b4` modules and coil switches, `b5` DIO and TRIG, the drivers, the `nmr` block, binary frames | compile; no record of a run on any board | never: register sequences from the datasheets, unmeasured |
-| `b3` DAC, `b5` fast outputs, opto interrupt counter | command layer only | **stubs** |
+| `b3` DAC, `b5` fast outputs, opto interrupts, polarizer deadline, pin read-back, alarm broadcast, boolean rules, DDS retune | compile; SIM exercises the command layer | written 2026-10-08, never run |
 
 The class repository's `CLAUDE.md` says the same: every `#ifndef SIM` branch is a hypothesis until `hardware/docs/bring-up.md` records a measurement.
 
@@ -728,7 +729,7 @@ firmware/src/alarm/                     if you want alarm rules
 
 Add `firmware/.pio/`, `firmware/include/secrets.h` and `firmware/data/` to `.gitignore`; register only the blocks you copied, `base` first; keep `host/pwa/` next to `firmware/` or change the path in `scripts/copy_pwa.py`.
 
-**Keep as they are:** `pins.h` with `kAinOfAi` and `EXP_BIT_MOD`; the drivers and the SPI-lock discipline; the expander's outputs-before-configuration start; the safe-level-then-`pinMode` order for the five console pins; RX_BLANK low by default and TX_EN low except in a pulse; the CLK1 → PLLB reset → counter clear order; `wsBinaryAll` from the main task only; no `delay()` in a block (long timing belongs on a task like the sequencer, which never touches the network); the `#ifdef SIM` branches so you can build on a bare dev board until the boards arrive. **Yours to replace:** the protocol, the block names, the app, the WiFi logic and the LED colours. If you keep the class protocol, the class web app and `instrument.py` are ready-made test clients.
+**Keep as they are:** `pins.h` with `kAinOfAi` and `EXP_BIT_MOD`; the drivers and the SPI-lock discipline; the expander's outputs-before-configuration start; the safe-level-then-`pinMode` order for the five console pins; RX_BLANK low by default and TX_EN low except in a pulse; the CLK1 → PLLB reset → counter clear order; `wsBinaryAll` from the main task only; no `delay()` in a block (long timing belongs on a task like the sequencer, which never touches the network); the `#ifdef SIM` branches so you can build on a bare dev board until the boards arrive. **Yours to replace:** the protocol, the block names, the app, the WiFi logic and the LED colours. If you keep the class protocol, the class web app and `instrument.py` are ready-made test clients. The class firmware's state is that of 2026-10-08: everything compiles, the SIM build runs on a bare dev board, and no `#ifndef SIM` branch has been measured.
 
 ---
 
@@ -736,28 +737,26 @@ Add `firmware/.pio/`, `firmware/include/secrets.h` and `firmware/data/` to `.git
 
 Found while writing this document by comparing the code with the datasheets and the netlist. None has been fixed yet.
 
-**Reference firmware and app**
+**Reference firmware and app.** The defects found on 2026-10-08 were fixed the same day in the class repository (both builds compile; none of it has run on a board): the `alarm` broadcast is sent and boolean keys count as 1/0; the Section C panel speaks `module`, with H-bridge and polarizer controls, and alarm actions are `module:N:on|off`; the DAC8563 is implemented (reference on, mid-scale, write-and-update at 8 MHz); the fast outputs run on LEDC; the opto inputs are counted by the hardware pulse counter; the three SPI chip selects are driven high in `spibus::begin()` before any transfer (the DAC start-up race); `trig_dir` raises DIR before making GPIO38 an output; `set_range` accepts only real codes; `b4 polarizer` has a deadline of at most 10 s and `b4` status reads back the pins; the expander cache has a mutex; `clock` refuses CLK0 above 50 MHz; `Ad9834::setFrequency` alternates FREQ0/FREQ1; the polarize settle default is 15 ms; `instrument.py` defaults to 192.168.4.1 and has `alarms clear`. Still open:
 
-1. **The `alarm` broadcast is never sent**: `main.cpp` never installs the engine's notify callback, so a `notify` action shows nothing in the app.
-2. **The Section C panel (`host/pwa/panels/b4.js`) sends `relay`/`relay_all` and reads `relay1..4`**; the firmware has `module`/`module_all`/`module1..7`. Every button on that tab fails with "unknown cmd"; no controls exist for the H-bridge or the polarizer. The alarm actions `relay:N:on|off` offered by `alarms.js`, `b1.js` and `instrument.py` are ignored by the engine (only `module:` acts). Alarm rules on boolean keys never fire (ArduinoJson does not count a boolean as a number).
-3. **DAC8563 and fast outputs are stubs** (sections 8.2, 8.4); the opto inputs are polled at 10 Hz (8.6).
-4. **Start-up race on the DAC chip select**: GPIO5 is driven high only in `b3`'s `begin()`, after `b1` has clocked about 280 SPI cycles into the ADC with the DAC's /SYNC floating. Drive GPIO5, GPIO10 and GPIO41 high before the first SPI transfer (for example in `spibus::begin()`), or add a 10 kΩ pull-up to CS_DAC in the next revision.
-5. `trig_dir` makes GPIO38 an output before raising DIR (two drivers on one line for a moment); `set_range` accepts the non-existent range codes 3 and 4; `b4 polarizer` has no time limit; the NMR sequencer's ADC burst busy-waits on core 1 and starves the main loop (no status, no `abort`) for `t_acq_ms`; after a scan the sequencer drives FET_GATE and HB_IN1/2 low without updating `b4`'s status; the expander cache is shared by two tasks without a lock.
-6. `Ad9834::setFrequency` always rewrites FREQ0 (forbidden for consecutive writes while the output runs; harmless under RESET, as the sequencer uses it); `nmr clock` accepts CLK0 above the AD9834's 50 MHz; the `Ad9834.h` comment says 75 MHz.
-7. **Scan-to-scan phase**: the DDS and the LO share the Si5351 crystal, but each scan starts after a `vTaskDelay` on the ESP32's own clock, so the IF phase of each record is effectively random (period 185 µs at 5.4 kHz). The firmware averages the complex records directly, which attenuates the signal along with the noise and defeats CYCLOPS. Remedies to choose from: estimate and remove each scan's phase from its own data before averaging, re-establish a common time origin in hardware each scan, or average magnitude spectra. A design decision and a bench test are needed.
-8. Documentation: `PROTOCOL.md` and `instrument.py` say `instrument.local` (the name is `instrument-XXXX.local`); the block list in `PROTOCOL.md` omits `nmr`; `NMR-FIRMWARE.md` §2.5 describes an ADC driver that differs from the code; workbook chapter B presents the Scope tab and streaming as existing; `hardware/README.md` describes the September design.
+1. **The NMR sequencer's ADC burst busy-waits on core 1** at priority 5 for the whole record, so the main loop sends no status and handles no command, not even `abort`, for `t_acq_ms` (2 s by default). SIM does not reproduce it. Needs timer-paced sampling or a yield budget, after the achieved rate has been measured.
+2. **Scan-to-scan phase**: the DDS and the LO share the Si5351 crystal, but each scan starts after a `vTaskDelay` on the ESP32's own clock, so the IF phase of each record is effectively random (period 185 µs at 5.4 kHz). The firmware averages the complex records directly, which attenuates the signal along with the noise and defeats CYCLOPS. Remedies to choose from: estimate and remove each scan's phase from its own data before averaging, re-establish a common time origin in hardware each scan, or average magnitude spectra. A design decision and a bench test are needed.
+3. The AsyncTCP task (priority 10, any core) and the Arduino event task (core 1) can preempt the sequencer: pulse-timing jitter is possible and unmeasured.
+4. OTA is enabled with no password and no upload environment.
+5. `sine` is updated once per millisecond and aliases above a few hundred hertz.
+6. `hardware/README.md` describes the September design (it carries a superseded notice); the notes inside the schematic files are stale (list below).
 
 **Hardware, as ordered**
 
-9. **The two LM66100s do not OR the 5 V inputs** (chip-enable on ground = always on, no reverse-current blocking): one 5 V source at a time. Next revision: each chip-enable to the other input, or to the output.
-10. **J3 must always carry a shunt** (no feedback otherwise); the schematic note that R712 is permanent is wrong. J11 and J12 likewise need a shunt to do anything.
-11. Receiver gains differ from the design notes: stage 2 is 10.1 (not 11), the difference amplifiers give 10 (not 20), so the ADC sees about half the designed amplitude. No loss of sensitivity; adjust expectations and the SIM.
-12. The transmitter at gain 25 clips below about 16–17.5 V of +VEXT (clean at the 24 V supply); the DDS level is about 0.6 V pp (the design note's 3.18 mA uses a 1.20 V reference, the datasheet's formula 1.15 V).
-13. TRIG_DIR, DDS_PSEL and FAST_OUT1/2 have no pull resistors: undefined from reset until the firmware runs. A pull-down on TRIG_DIR would make "input" the hardware default.
-14. The OPA564's current-limit and thermal flags reach no GPIO (the pull-ups R811/R812 are unfitted and there is no spare expander line); thermal shutdown is invisible to the firmware.
-15. Panel LEDs WIFI and ACT sit on UART0 (8.11). The J905 legend is printed in the reverse order of its pins (6.1). J901 has no +/− marks. J411 has no "ISO IN 1" legend.
-16. A reversed supply on J901 forward-biases the TVS and blows the 5 A fuse. The ±12 V rails cannot sink current, so several overdriven AI inputs raise them. FAST and TRIG into 50 Ω exceed their drivers' ratings. MOD outputs are not short-proof.
-17. Not determined until measured: the ADC rate the burst reaches; whether +5VA lets AO reach +10 V; the isolated inputs' exact threshold; the FAST outputs' usable frequency; whether the dev board has a blocking diode on its 5 V pin and series resistors on GPIO43/44.
+7. **The two LM66100s do not OR the 5 V inputs** (chip-enable on ground = always on, no reverse-current blocking): one 5 V source at a time. Next revision: each chip-enable to the other input, or to the output.
+8. **J3 must always carry a shunt** (no feedback otherwise); the schematic note that R712 is permanent is wrong. J11 and J12 likewise need a shunt to do anything.
+9. Receiver gains differ from the design notes: stage 2 is 10.1 (not 11), the difference amplifiers give 10 (not 20), so the ADC sees about half the designed amplitude. No loss of sensitivity; adjust expectations and the SIM.
+10. The transmitter at gain 25 clips below about 16–17.5 V of +VEXT (clean at the 24 V supply); the DDS level is about 0.6 V pp (the design note's 3.18 mA uses a 1.20 V reference, the datasheet's formula 1.15 V).
+11. TRIG_DIR, DDS_PSEL and FAST_OUT1/2 have no pull resistors: undefined from reset until the firmware runs. A pull-down on TRIG_DIR would make "input" the hardware default.
+12. The OPA564's current-limit and thermal flags reach no GPIO (the pull-ups R811/R812 are unfitted and there is no spare expander line); thermal shutdown is invisible to the firmware.
+13. Panel LEDs WIFI and ACT sit on UART0 (8.11). The J905 legend is printed in the reverse order of its pins (6.1). J901 has no +/− marks. J411 has no "ISO IN 1" legend.
+14. A reversed supply on J901 forward-biases the TVS and blows the 5 A fuse. The ±12 V rails cannot sink current, so several overdriven AI inputs raise them. FAST and TRIG into 50 Ω exceed their drivers' ratings. MOD outputs are not short-proof.
+15. Not determined until measured: the ADC rate the burst reaches; whether +5VA lets AO reach +10 V; the isolated inputs' exact threshold; the FAST outputs' usable frequency; whether the dev board has a blocking diode on its 5 V pin and series resistors on GPIO43/44.
 
 **Stale text an assistant will meet** (ignore it): in the `.kicad_sch` notes and `hardware/README.md`, the AGND net and net tie NT1, an expansion header J5, Qwiic J4, solder jumpers JP1/JP2/JP101/JP102/JP70x/JP802/JP904, resistor arrays RN521/RN522, 17 SMA with a spare and TP1, module outputs on J8 pins 19–33, OPTO_IN on J8 pins 35/37, TX on link pins 19/21 or J6.32, link pins 37–40 = RX/AGND/TX/AGND, a pairwise pad swap on the panel headers, the D-19 channel map (AI1→AIN_6), the OPA564 flags on TCA9535 P1.5/P1.6, "PIN/SW = 1", the 6N137 on +3V3, a main-board TX terminal, an AD9834 with 75 MHz (the fitted BRUZ grade is a 50 MHz part). The main PCB also has a copper zone named `AGND_B` that is on the TX net.
 

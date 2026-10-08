@@ -1,6 +1,6 @@
 # Message protocol (JSON over WebSocket)
 
-One WebSocket at `ws://<board>/ws` (`instrument-XXXX.local`, XXXX = the last four hex digits of the MAC as printed in the boot log, or `192.168.4.1` on the board's own access point). All messages are UTF-8 JSON text frames. Three message kinds flow over it.
+One WebSocket at `ws://<board>/ws` (`instrument-XXXX.local`, XXXX = the last four hex digits of the MAC as printed in the boot log, or `192.168.4.1` on the board's own access point; there is no plain `instrument.local`). All messages are UTF-8 JSON text frames. Three message kinds flow over it.
 
 ## 1. Request → reply (client to board)
 
@@ -42,9 +42,9 @@ Requests are handled in the firmware's `loop()`, in order, one at a time.
             "b4": {"module1": false, "opto1": 17, "...": 0}}}
 ```
 
-Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what the live chart can plot and what alarm rules can test. Nested objects (`base.led`) are for display only.
+Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what the live chart can plot. Alarm rules can test numeric and true/false top-level keys (`true` counts as 1, `false` as 0). Nested objects (`base.led`) are for display only.
 
-**`alarm`** — when a rule fires (rising edge).
+**`alarm`** — sent to every client each time a rule fires (on the rising edge of its condition). `value` is the value the rule tested, a true/false key as 1 or 0.
 
 ```json
 {"type": "alarm", "t": 123456, "rule": 2, "block": "b1", "key": "ai1", "value": 9.4, "action": "module:1:off"}
@@ -63,39 +63,47 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | | `counter_reset` | — | `{counter:0}` |
 | | `info` | — | `{fw, chip, mac, ip, sim, expander, clockgen}` (the last two: did the TCA9535 / Si5351A answer on I²C) |
 | `b1` | `read_all` | — | `{ai:[8 volts]}` |
-| | `set_range` | `{ch:1..8, range:0..6}` (`ch` = panel input AI1…AI8) | `{ch, range}` |
+| | `set_range` | `{ch:1..8, range}` (`ch` = panel input AI1…AI8; `range` 0 = ±10.24 V, 1 = ±5.12 V, 2 = ±2.56 V, 5 = 0–10.24 V, 6 = 0–5.12 V; any other code → `error:"range code not on this ADC"`) | `{ch, range}` |
 | `b2` | `rails` | — | `{v5_raw, v3v3, v12p, v12n, v5a, measured}` |
-| `b3` | `set_dc` | `{ch:1..2, volts}` | `{ch, mode}` |
+| `b3` | `set_dc` | `{ch:1..2, volts}` (−10 .. +10) | `{ch, mode}` |
 | | `sine` | `{ch, freq, amp, offset}` | `{ch, mode}` |
 | | `off` | `{ch}` | `{ch, mode}` |
 | `b4` | `module` | `{n:1..7, on}` | `{n, on}` |
 | | `module_all` | `{on}` | `{on}` |
 | | `opto_reset` | — | `{}` |
 | | `hbridge` | `{mode: off\|fwd\|rev\|brake}` (DRV8871 field-cycling bridge; refused while an NMR scan runs) | `{mode}` |
-| | `polarizer` | `{on}` (AOD4184A polarizer switch; refused while an NMR scan runs) | `{on}` |
+| | `polarizer` | `{on, ms}` (AOD4184A polarizer switch; `on:true` switches the coil on for at most `ms` milliseconds, default 10000, maximum 10000, then it switches itself off; `on:false` switches it off at once; refused while an NMR scan runs) | `{on, ms}` |
 | `b5` | `dio` | `{n:1..8, level}` | `{mask}` |
 | | `dio_mask` | `{mask:0..255}` | `{mask}` |
 | | `trig_dir` | `{out}` | `{out}` |
 | | `trig` | `{level}` (only when `out`) | `{level}` |
-| | `fast_out` | `{n:1..2, freq_hz}` (0 = off) | `{n, freq_hz}` |
-| `nmr` | `config` `start` `abort` `pulse` `clock` `dds` `blank` `get_record` | see §7 | see §7 |
+| | `fast_out` | `{n:1..2, freq_hz}` (about 3 Hz .. 20 MHz, square wave at 50 % duty; the LEDC divider cannot go lower and 1-2 Hz is refused; 0 = off, pin low) | `{n, freq_hz}` (the frequency actually achieved) |
+| `nmr` | `config` `start` `abort` `pulse` `clock` `dds` `blank` `get_record` `sim_larmor` | see §7 | see §7 |
 | `template` | `set_value` | `{value}` | `{setpoint}` |
 | `alarms` | `list` | — | `{rules:[...]}` |
 | | `add` | `{block, key, op, threshold, action}` | the new rule incl. `id` |
 | | `remove` | `{id}` | `{removed}` |
 | | `clear` | — | `{}` |
 
-Alarm rule fields: `op` ∈ `gt lt ge le eq ne`; `action` = `notify` or `module:<n>:on` / `module:<n>:off` (a module output on the front panel; renamed from `relay:<n>:...` on 2026-09-17). Rules fire once per rising edge and are saved to `/alarms.json` on the board.
+**`b3` output scale.** AO = 10.05 V × (code − 32768) / 32768 for the 16-bit DAC8563 code: range ±10.05 V, 307 µV per step; `volts` is clamped to ±10 V. The `sine` waveform is recomputed in `loop()` about once per millisecond, so above a few hundred hertz it is aliased.
+
+**`b5` fast outputs** use the ESP32-S3's LEDC peripheral (its hardware PWM generator), so the square wave runs without the processor. The LEDC divides a fixed clock, so at high frequencies only some values are reachable; the result and the status report the frequency actually achieved.
+
+Alarm rule fields: `key` = a numeric or true/false top-level status key (true = 1, false = 0); `op` ∈ `gt lt ge le eq ne`; `threshold` a number; `action` = `notify` or `module:<n>:on` / `module:<n>:off` (n = 1..7, a module output on the front panel). A rule fires once per rising edge of its condition; every firing runs the action and sends the `alarm` broadcast (§2). Rules are saved to `/alarms.json` on the board.
 
 ## 5. Status keys per block
 
-`base`: counter, temp_c, uptime_s, rssi, heap_free, clients, led{r,g,b,brightness} ·
-`b1`: ai1…ai8, range · `b2`: v5_raw, v3v3, v12p, v12n, v5a, measured ·
+`base`: counter, temp_c, uptime_s, rssi, heap_free, clients (the number of stations connected to the board's own access point, 0 when the board has joined a network; not the number of app connections), led{r,g,b,brightness} ·
+`b1`: ai1…ai8, range (the range code of AI1) · `b2`: v5_raw, v3v3, v12p, v12n, v5a, measured ·
 `b3`: ao1, ao2, mode1, mode2 · `b4`: module1…module7, opto1, opto2, opto1_level, opto2_level, hbridge, polarizer (the H-bridge and polarizer are on the main board and are the instructor's hardware) ·
-`b5`: dio, dio1…dio8, trig_dir, trig, fast1_hz, fast2_hz · `template`: value, setpoint · `alarms`: rules, active ·
+`b5`: dio, dio1…dio8, trig_dir, trig, fast1_hz, fast2_hz (achieved frequencies on hardware; the requested value in the SIM build) · `template`: value, setpoint · `alarms`: rules, active ·
 `nmr`: see §7
 
-## 6. Streaming and capture (Decision #26, 2026-09-06 — specified, not yet implemented)
+`b4` in detail: `module1`…`module7` are true/false, the outputs as last written. `opto1`, `opto2` count the falling edges of the two isolated inputs (counted by the hardware pulse counter (1 µs glitch filter), so short pulses are not missed) since start-up or the last `opto_reset`; `opto1_level`, `opto2_level` are the input levels, polled (the 6N137 output is active low: `false` means current flows in the isolated input). `hbridge` (`off`, `fwd`, `rev`, `brake`) and `polarizer` (true/false) reflect the real pin levels on hardware, so they also show when the NMR sequencer or the polarizer timer has switched a coil off.
+
+## 6. Streaming and capture (Decision #26, 2026-09-06 — specified, not implemented)
+
+**Not implemented.** No block has a `stream` or `capture` command, the firmware sends no kind-1 or kind-2 frame, the app has no Scope tab, and `instrument.py` has no `scope` or `capture` command (its `stream` command logs one status key at 20 Hz). The only binary frame the firmware sends today is the NMR record, kind 3 (§7.4), which uses the header layout below. The rest of this section is the plan.
 
 The 20 Hz `status` broadcast is the slow channel. Fast data uses **binary WebSocket frames** on the same socket, in two modes that every real oscilloscope has:
 
@@ -107,7 +115,7 @@ The 20 Hz `status` broadcast is the slow channel. Fast data uses **binary WebSoc
 
 **Sources and realistic limits:** the dev board's internal ADC (`base`, 12-bit, noisy, GPIO 1–10) sustains a few kS/s rolling and ~80 kS/s burst via ADC continuous/DMA; the class board's ADS8688 (`b1`, 16-bit, ±10 V) gives tens of kS/s per channel rolling and up to 500 kS/s aggregate in burst. Rolling streams are capped by the WiFi link (budget ≈ 200 kB/s → ≈ 100 kS/s of int16 total across all clients); the board refuses `rate_hz` above the cap with `ok:false`.
 
-**Where it lives:** the sampler + frame encoder are instructor-owned in `base` (dev-board ADC, so it works from Workshop 1 in sim and on the bare board); `b1` reuses the encoder with the ADS8688 (block owner extends it in E11). The PWA gets a **Scope** tab: roll / single / auto-trigger, timebase, cursor, "download CSV" of the visible buffer (Web Share on phones). `instrument.py` gets `scope` (stream to CSV/NumPy) and `capture`.
+**Where it would live:** the sampler + frame encoder are instructor-owned in `base` (dev-board ADC, so it works from Workshop 1 in sim and on the bare board); `b1` reuses the encoder with the ADS8688 (block owner extends it in E11). The PWA would get a **Scope** tab: roll / single / auto-trigger, timebase, cursor, "download CSV" of the visible buffer (Web Share on phones). `instrument.py` would get `scope` (stream to CSV/NumPy) and `capture`.
 
 **Same socket, no extra ports:** text frames stay JSON as above; the app tells them apart by frame type (`typeof data === "string"`).
 
@@ -129,7 +137,7 @@ Demo regime: protons in water at about 2.1 mT, Larmor ≈ 89.4 kHz, IF ≈ 5.4 k
 | `start` | — | `{state:"running", n_avg}` — the scan set runs in the background |
 | `abort` | — | `{state:"idle"}` |
 | `pulse` | `{t_us}` 1–5000 | `{t_us}` — one transmit gate without acquisition, for a scope check |
-| `clock` | `{clk:0..1, hz}` | `{clk, hz_actual}` — low-level Si5351 test |
+| `clock` | `{clk:0..1, hz}` (2500 Hz .. 200 MHz; CLK0, the DDS master clock, is refused above 50 MHz) | `{clk, hz_actual}` — low-level Si5351 test |
 | `dds` | `{hz, phase0_deg, phase1_deg, psel, on}` | the values programmed (`on`, default true, wakes the carrier) |
 | `blank` | `{receive:bool}` | `{receive}` — manual receiver blanking for bench tests |
 | `get_record` | — | `{n, rate_hz, scan}` — and the last averaged record is resent as a binary frame (§7.4) |
@@ -160,7 +168,7 @@ nothing at all.
 | `cyclops` | true | the pulse phase steps 0/90/180/270 across scans and the record is rotated back before averaging |
 | `t_repeat_ms` | 3000 | 0 .. 600000 |
 | `polarize_ms` | 0 | 0 .. 10000 |
-| `t_polarize_settle_ms` | 5 | 0 .. 1000 |
+| `t_polarize_settle_ms` | 15 | 0 .. 1000 |
 | `hb_mode` | `"off"` | `"off"` / `"fwd"` / `"rev"`, during the polarize step |
 
 Two more rules are about the record itself, and both come back as `ok:false` with the reason:
@@ -175,8 +183,9 @@ Two more rules are about the record itself, and both come back as `ok:false` wit
   131 072 complex samples (a 1 MB frame: *"record too long to send — raise decim or shorten
   t_acq_ms"*). The defaults use 800 kB and 400 kB of the board's 8 MB.
 
-`config`, `start`, `pulse`, `clock`, `dds`, `blank` and `sim_larmor` are all refused with
-`error:"scan running"` while a scan set is in progress; `abort` and `get_record` are not.
+While a scan set is in progress, `config`, `pulse`, `clock`, `dds`, `blank` and `sim_larmor` are refused
+with `error:"scan running"` and `start` with `error:"scan already running"`; `abort` and `get_record` are
+not refused.
 
 ### 7.3 Status keys
 

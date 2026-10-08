@@ -24,6 +24,11 @@
 // begin() then returns false, present() stays false and every write is a quiet
 // no-op that still updates the cached value, so the app and the status panel
 // behave exactly as they will on real hardware.
+//
+// Two tasks write the output cache: the main task (b4 module outputs, b5 DIO)
+// and the NMR sequencer task (the counter clear). Every read-modify-write of the
+// cache and its I2C write therefore runs under one recursive mutex (the same
+// pattern as drivers/SpiBus.h), or one task's update could undo the other's.
 #pragma once
 #include <stdint.h>
 
@@ -33,6 +38,9 @@ class Tca9535 {
 
   bool writePort(uint8_t port, uint8_t value);              // port 0 or 1
   bool writeBit(uint8_t port, uint8_t bit, bool level);     // read-modify-write on the cache
+  // Set the bits in `mask` to the matching bits of `value` in one write, so
+  // several outputs change together.
+  bool writeMasked(uint8_t port, uint8_t mask, uint8_t value);
   uint8_t cached(uint8_t port) const;
 
   // Bits set in `mask` become inputs on that port. Used only if a bring-up bodge

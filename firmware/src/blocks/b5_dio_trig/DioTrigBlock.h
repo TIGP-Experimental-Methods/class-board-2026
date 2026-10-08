@@ -20,10 +20,10 @@ class DioTrigBlock : public Block {
 
  private:
   void writeDio();
-  void setFast(int idx, float hz);
+  bool setFast(int idx, float hz);   // false = the LEDC cannot make that frequency
 
   uint8_t mask_ = 0;        // bit n-1 = DIO n
   bool trigOut_ = false;    // TRIG_DIR
   bool trigLevel_ = false;  // driven level (output) or read level (input)
-  float fastHz_[2] = {};
+  float fastHz_[2] = {};    // the frequency really produced (SIM: as requested)
 };

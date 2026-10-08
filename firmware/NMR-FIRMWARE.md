@@ -130,21 +130,27 @@ write: set the RESET bit, write FREQ0 and the PHASE registers, clear the RESET b
 ```cpp
 class Ads8688 {
  public:
-  void begin();                              // /RST and /PD are pulled high on the board; NO_OP, AUTO_RST
-  bool setRange(uint8_t ch /*0..7*/, uint8_t code);   // program register 0x05 + ch; codes as in InputsBlock.h
+  // The one RST/PD pin is pulled up on the board (R102). Two NO_OP frames, then the eight range registers (their
+  // echoes set present()), then AUTO_SEQ_EN = AIN_3 | AIN_2. No AUTO_RST here: burst() sends it.
+  void begin();
+  bool setRange(uint8_t ch /*0..7*/, uint8_t code);   // program register 0x05 + ch; codes 0, 1, 2, 5, 6 only
   int16_t readManual(uint8_t ch);            // MAN_CH_n (0xC000 + n*0x0400) then a NO_OP frame returns the data
   float toVolts(uint8_t ch, int16_t raw) const;
-  // Burst: AUTO_RST scan over the channels in `mask` (bit n = channel n), one 32-bit frame per conversion,
-  // as fast as the loop allows; fills `out` interleaved in channel order; returns samples per channel achieved.
-  // Uses spi_device_polling_transmit on a dedicated device handle at 17 MHz (SPI mode 1: CPOL 0, CPHA 1).
+  // Burst: writes AUTO_SEQ_EN = mask, sends AUTO_RST (its frame carries the previous conversion and is
+  // discarded), then one 32-bit NO_OP frame per conversion; fills `out` interleaved in ascending channel
+  // order. Arduino SPI.transfer32 inside one SPI transaction, 17 MHz requested (16 MHz actual), SPI mode 1
+  // (CPOL 0, CPHA 1), /CS driven through the GPIO set/clear registers. Returns n_per_channel (the count
+  // requested) and reports the rate it reached in *achieved_hz.
   uint32_t burst(uint8_t mask, int16_t* out, uint32_t n_per_channel, uint32_t rate_hz, uint32_t* achieved_hz);
+  bool present() const;
 };
 extern Ads8688 adc;
 ```
-`burst()` runs on the caller's task (the NMR sequencer task on core 1) with the SPI lock held. Pace it with
-`esp_timer_get_time()` so the sample interval is `1e6 / rate_hz` µs per scan of all channels in the mask; if the
-loop cannot keep up, report the achieved rate rather than fail. Target: 2 channels at 100 kS/s each (default);
-try 250 kS/s and report what the hardware reaches. Ranges: AI7/AI8 (AIN_3/AIN_2) default ±5.12 V (code 1).
+`burst()` runs on the caller's task (the NMR sequencer task on core 1) with the SPI lock held. It is paced
+with `esp_timer_get_time()` to `1e6 / rate_hz` µs per scan of all channels in the mask: gaps under 1.5 ms are
+busy-waited, longer ones yield with `vTaskDelay`. If the loop cannot keep up it free-runs, and `*achieved_hz`
+(samples per channel per second, from the elapsed time) says what it reached. Target: 2 channels at 100 kS/s
+each (default); try 250 kS/s and report what the hardware reaches. Ranges: AI7/AI8 (AIN_3/AIN_2) default ±5.12 V (code 1).
 The auto scan returns channels in ascending order, so the NMR mask 0x0C gives Q (AIN_2) before I (AIN_3)
 in each pair; the sequencer and `dsp::decimate` read the pairs that way round.
 
@@ -160,10 +166,10 @@ during a scan with a polarize step, FET_GATE and HB_IN1/2 (otherwise `b4` drives
 | `start` | — | `{state:"running", n_avg}` — runs the scan set in the background |
 | `abort` | — | `{state:"idle"}` |
 | `pulse` | `{t_us}` (1..5000) | `{t_us}` — one TX gate without acquisition, for a scope check |
-| `clock` | `{clk:0..1, hz}` | `{clk, hz_actual}` — low-level Si5351 test |
-| `dds` | `{hz, phase0_deg, phase1_deg, psel}` | the values programmed |
+| `clock` | `{clk:0..1, hz}` (CLK0 refused above 50 MHz) | `{clk, hz_actual}` — low-level Si5351 test |
+| `dds` | `{hz, phase0_deg, phase1_deg, psel, on}` | the values programmed (`on`, default true, wakes the carrier) |
 | `blank` | `{receive:bool}` | `{receive}` — manual RX_BLANK for bench tests |
-| `get_record` | — | `{n, rate_hz}` and the last averaged record is resent as a binary frame |
+| `get_record` | — | `{n, rate_hz, scan}` and the last averaged record is resent as a binary frame |
 | `sim_larmor` | `{hz}` (SIM only) | `{hz}` — the simulated Larmor frequency |
 
 Settings (defaults): `f_tx_hz` 89400 · `f_lo_hz` 84000 (IF = f_tx − f_lo = 5400 Hz; the sign of the IF tells the
@@ -173,21 +179,23 @@ app which side of the LO the line is on) · `sequence` `"fid"` or `"echo"` · `t
 `t_acq_ms` 2000 (record length; max 4000) · `rate_hz` 100000 per channel · `decim` 4 (the decimated rate `rate_hz / decim` must exceed 2 x |IF| or the line folds over: 25 kS/s for a 5.4 kHz IF; `config` rejects a `decim` that breaks this) · `n_avg` 1 (1..256) ·
 `cyclops` true (pulse phase 0/90/180/270 cycled across scans, receiver record rotated back before averaging) ·
 `t_repeat_ms` 3000 (time between scans; ≥ 3 × T1 ≈ 3 s for water) · `polarize_ms` 0 (Earth's field: FET_GATE
-on for this long before the pulse, then off and `t_polarize_settle_ms` 5 before the pulse) · `hb_mode` `"off"`
+on for this long before the pulse, then off and `t_polarize_settle_ms` 15 before the pulse) · `hb_mode` `"off"`
 (`"fwd"`, `"rev"`: HB_IN1/2 during the polarize step for field cycling).
 
 ### 3.2 Timing of one scan (circuits note §9.3) — on a FreeRTOS task pinned to core 1, priority high
 1. (optional) polarize: FET_GATE = 1 (+ H-bridge) for `polarize_ms`; FET_GATE = 0; wait `t_polarize_settle_ms`.
-2. PSEL bit = the pulse phase for this scan (PHASE0/PHASE1 preloaded; for 90°/270° reload PHASE1 before
-   the scan; `dds.setReset(false)` and the carrier free-runs).
+2. The pulse phase for this scan: as built, PHASE0 = the pulse phase and PHASE1 = that phase + 90° are
+   loaded and PHASE0 is selected (§3.7); the carrier free-runs.
 3. RX_BLANK = 0 (blanked), wait `t_blank_pre_us`.
-4. TX_EN = 1 for `t90_us`; TX_EN = 0. (`echo`: wait `tau_us`, TX_EN = 1 for `t180_us` with +90° phase, TX_EN = 0.)
+4. TX_EN = 1 for `t90_us`; TX_EN = 0. (`echo`: wait `tau_us`, then select PHASE1 (+90°) with one control-word
+   write, TX_EN = 1 for `t180_us`, TX_EN = 0; the write lengthens the spacing, §3.7.)
 5. wait `t_dead_us`; RX_BLANK = 1.
 6. at `t_acq_start_us` after the last pulse end: `adc.burst(mask ch7|ch8, buf, n, rate_hz, &achieved)` with the
    SPI lock held; `n = t_acq_ms * rate_hz / 1000` per channel, buffer in PSRAM (`heap_caps_malloc(..., MALLOC_CAP_SPIRAM)`).
-7. RX_BLANK = 0 (blanked between scans keeps the LNA quiet). Read I_FLAG / T_FLAG: a current-limit flag during
-   the pulse → abort the scan set with `error:"current limit — check the coil and the gain jumper"`; a thermal
-   flag → `error:"thermal — duty cycle too high"`. Never keep pulsing on a flag.
+7. RX_BLANK = 0 (blanked between scans keeps the LNA quiet). Read I_FLAG / T_FLAG once, after the acquisition
+   (not during the pulse): a current-limit flag → abort the scan set with `error:"current limit - check the coil
+   and the gain jumper"`; a thermal flag → `error:"thermal - duty cycle too high"`. Never keep pulsing on a flag.
+   On v0.7 the flags are not connected (`EXP_BIT_IFLAG` / `EXP_BIT_TFLAG` = −1), so this step reads nothing.
 8. Processing on the same task (§3.3), then post the averaged record to the main task; wait `t_repeat_ms`.
 Timing uses `esp_timer_get_time()` busy-waits inside a `portDISABLE_INTERRUPTS()`-free critical region no
 longer than the pulse itself; interrupts stay on (WiFi runs on core 0). Microsecond jitter is acceptable: the
@@ -219,10 +227,10 @@ task, the sequencer posts a "record ready" flag and the main task serialises the
 
 ### 3.6 SIM behaviour
 Under `-DSIM=1` the sequencer runs the same state machine with the same delays (so the app and the timing are
-exercised on a bare dev board) and `Ads8688::burst` is replaced by a synthesiser: an FID
+exercised on a bare dev board) and its own synthesiser `Sequencer::simBurst` takes the place of the ADC burst: an FID
 `A·exp(−t/T2*)·exp(j·2π·(f_larmor_sim − f_lo)·t + j·φ_pulse)` with A = 20 µV × LNA gain 1000 × mixer gain (≈ 0.9)
-≈ 18 mV at the ADC, T2* = 0.4 s, white noise 3 mV rms, a 50 Hz hum line at 2 mV, `f_larmor_sim` = 89 400 Hz
-(settable by `sim_larmor`). Averaging must visibly improve the SNR in the app.
+≈ 18 mV at the ADC, T2* = 0.4 s, white noise 3 mV rms, a 50 Hz hum line at 2 mV with a different phase every
+scan, DC offsets of +5 mV (I) and −4 mV (Q), `f_larmor_sim` = 89 400 Hz (settable by `sim_larmor`). Averaging must visibly improve the SNR in the app.
 
 ### 3.7 As built (2026-09-13)
 
@@ -233,8 +241,10 @@ disagreements, and the code is the authority for them.
   PHASE1 = 180 → RESET off), but each scan then loads PHASE0 = the pulse phase of that scan and
   PHASE1 = that phase + 90°, and selects PHASE0 with the PSEL bit. For a free induction decay that is
   the same thing as §3.2; for an echo it is what lets the refocusing pulse be 90° out of phase with
-  one control-word write (about 2 µs, during `tau_us` while the transmitter is off) instead of
-  reloading a phase register in the middle of a sequence.
+  one control-word write instead of reloading a phase register in the middle of a sequence. The write
+  is made **after** `tau_us` has elapsed and before TX_EN rises, so it lengthens the pulse spacing by
+  the time of one SPI write under the lock (a few microseconds). `tau_us` is measured edge to edge,
+  from the end of the 90° pulse to that write, not centre to centre.
 * **Memory.** The capture buffer is grown on demand at `config` rather than allocated for the absolute
   maximum at `begin()`: 2 channels × 4000 ms × 250 kS/s really is 4 MB, and holding that plus the
   outgoing record permanently would be 6 of the board's 8 MB. `config` refuses what does not fit
@@ -243,18 +253,34 @@ disagreements, and the code is the authority for them.
 * **`dds` takes an `on` argument** (default true) so a bench test can stop the carrier again; the idle
   console keeps the DDS asleep.
 
+### 3.8 Scan-to-scan phase (open problem, 2026-10-08)
+
+The complex running mean of §3.3 assumes that every scan's record starts at the same IF phase. As built it
+does not. The carrier (AD9834, clocked by Si5351 CLK0) and the local oscillator (Si5351 CLK1) free-run for the
+whole scan set from the same crystal, so the IF reference is coherent with the Si5351 and its phase advances
+continuously at f_tx − f_lo. The scans are not: they are spaced by `vTaskDelay` (`t_repeat_ms`, the polarize
+step) and the pulse starts on a busy-wait, neither tied to the IF. Each pulse therefore lands at an effectively
+random point of the IF cycle (185 µs at 5.4 kHz), and the record of each scan starts with a random phase.
+Averaging such records attenuates the signal instead of the noise, and the CYCLOPS rotation by the pulse
+phase loses its meaning. The SIM build synthesises every record with the same starting phase and does not
+show this.
+
+Remedies, none chosen yet: estimate each scan's phase before averaging (from the first samples or the
+spectral peak) and rotate it to zero, which needs enough signal in one scan; give every scan a hardware time
+origin tied to the IF, so the pulse always starts at the same IF phase; or average magnitudes instead of
+complex records, which keeps the line but gives up part of the averaging gain and the CYCLOPS cancellation.
+They await a decision and a bench test.
+
 ## 4. Changes to existing blocks (drivers agent)
 - `b5`: DIO1–8 through `expander.writePort(0, mask)`; `PIN_DIO[]` removed from `pins.h`. Fast outputs and TRIG
   unchanged. If the expander is absent, `dio` commands return `error:"expander not present"`.
-- `b4`: module outputs through `expander.writeBit(1, EXP_BIT_MOD[n-1], on)` (`module {n:1..7, on}`, `module_all {on}` — the former
-
-  `relay` commands, renamed with the hardware); new commands `hbridge {mode: off|fwd|rev|brake}` (HB_IN1/2
-  = 0/0, 1/0, 0/1, 1/1) and `polarizer {on}` (FET_GATE); status adds `hbridge`, `polarizer`. Both refuse with
-  `error:"nmr scan running"` while `nmr` is running (a global `nmr_busy()` in `blocks/nmr/NmrBlock.h` — the
-  drivers agent adds a small header `blocks/Busy.h` with `extern volatile bool g_nmrBusy;` so it compiles before
-  the nmr block exists).
+- `b4`: module outputs through `expander.writeBit(1, EXP_BIT_MOD[n-1], on)` (`module {n:1..7, on}`, `module_all {on}`);
+  new commands `hbridge {mode: off|fwd|rev|brake}` (HB_IN1/2
+  = 0/0, 1/0, 0/1, 1/1) and `polarizer {on, ms}` (FET_GATE, switched off again after at most `ms`, ≤ 10 000 ms);
+  status adds `hbridge`, `polarizer`. Both refuse with `error:"nmr scan running"` while `nmr` is running
+  (`nmr_busy()` and `g_nmrBusy` live in `blocks/Busy.h`, so `b4` does not include the nmr block).
 - `b1`: real ADS8688 reads through `adc.readManual` under the SPI lock; `set_range` through `adc.setRange`.
-- `b3`: DAC8563 writes take the SPI lock (existing TODOs stay as they are otherwise).
+- `b3`: DAC8563 frames are real SPI transfers under the SPI lock (AO = 10.05 V × (code − 32768)/32768).
 - `base`: `expander.begin()`, `clockgen.begin()`, `spibus::begin()` in `BaseBlock::begin()`; `info` adds
   `expander` and `clockgen` presence.
 
@@ -268,7 +294,7 @@ disagreements, and the code is the authority for them.
   stacks at 400 px; touch targets ≥ 44 px; the canvases redraw on resize.
 - `instrument.py`: `nmr_config(**kw)`, `nmr_start()`, `nmr_wait(timeout_s)` (polls status), `nmr_record()`
   (returns rate, numpy complex array, n_avg) and `nmr_spectrum()` (numpy FFT, Hz relative to the LO); a
-  `python instrument.py nmr --n-avg 8 --csv fid.csv` sub-command. ruff clean (E501 = 120 as configured in pyproject).
+  `python instrument.py nmr --n-avg 8 --csv fid.csv` sub-command. ruff clean (line length 140 as configured in `host/pyproject.toml`).
 
 ## 6. Build and verification
 `pio run -d firmware -e esp32s3-sim` and `pio run -d firmware -e esp32s3` must both compile warning-free for the

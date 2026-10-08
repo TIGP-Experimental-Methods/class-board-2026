@@ -2,7 +2,7 @@
 // DC-DC modules -> +-12 V, 78L05 -> +5VA. Rail LEDs and test points.
 // Commands: rails    Status: v5_raw, v3v3, v12p, v12n, v5a, measured
 //
-// NOTE: board v0.6 has no rail sensing wired to the MCU, so on real hardware
+// NOTE: board v0.7 has no rail sensing wired to the MCU, so on real hardware
 // this block reports the nominal design values with measured=false. If the
 // instructor adds a sense path (e.g. ADS8688 ch7/8 or an ESP ADC pin), fill
 // in the #ifndef SIM branch in the .cpp.

@@ -88,7 +88,7 @@ void Ads8688::begin() {
     present_ = false;
     return;
   }
-  // /RST and /PD are tied high on the board, so the part is already out of reset.
+  // The one RST/PD pin is pulled up on the board (R102), so the part is already out of reset.
   // Two NO_OP frames flush whatever state a warm restart left in its shift register.
   SPI.beginTransaction(SPISettings(kSpiHz, MSBFIRST, SPI_MODE1));
   csLow(); SPI.transfer32(static_cast<uint32_t>(kCmdNoOp) << 16); csHigh();
@@ -111,14 +111,15 @@ void Ads8688::begin() {
 bool Ads8688::setRange(uint8_t ch, uint8_t code) {
   if (ch > 7) return false;
   if (code > 6 || code == 3 || code == 4) return false;   // undefined codes
-  range_[ch] = code;
-#ifdef SIM
-  return true;
-#else
+#ifndef SIM
+  // The stored range is what toVolts() scales by, so it changes only once the
+  // chip has echoed the new code back.
   spibus::Guard g;
   if (!g.ok) return false;
-  return programWrite(static_cast<uint8_t>(kRegRange0 + ch), code);
+  if (!programWrite(static_cast<uint8_t>(kRegRange0 + ch), code)) return false;
 #endif
+  range_[ch] = code;
+  return true;
 }
 
 int16_t Ads8688::readManual(uint8_t ch) {

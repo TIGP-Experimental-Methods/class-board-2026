@@ -4,6 +4,7 @@ let els = {};
 let apiRef;
 let lastBlocks = {};
 let timer = null;
+const MODULES = [1, 2, 3, 4, 5, 6, 7];   // b4 module outputs an action can switch
 
 async function refresh() {
   // Stop polling once the user has switched to another tab (the table is gone).
@@ -29,7 +30,8 @@ export default {
     apiRef = api;
     el.innerHTML = `
       <h2>Alarms</h2>
-      <p class="help">When <em>block.key op threshold</em> becomes true, do the action once.</p>
+      <p class="help">When <em>block.key op threshold</em> becomes true, do the action once.
+        A true/false key compares as 1/0 (for example <code>b4.polarizer eq 1</code>).</p>
       <div class="row">
         <select id="key"></select>
         <select id="op">
@@ -40,10 +42,7 @@ export default {
       <div class="row">
         <select id="action">
           <option value="notify">notify</option>
-          <option value="relay:1:on">relay 1 on</option><option value="relay:1:off">relay 1 off</option>
-          <option value="relay:2:on">relay 2 on</option><option value="relay:2:off">relay 2 off</option>
-          <option value="relay:3:on">relay 3 on</option><option value="relay:3:off">relay 3 off</option>
-          <option value="relay:4:on">relay 4 on</option><option value="relay:4:off">relay 4 off</option>
+          ${MODULES.map(n => `<option value="module:${n}:on">module ${n} on</option><option value="module:${n}:off">module ${n} off</option>`).join('')}
         </select>
         <button class="btn primary" id="add">Add rule</button>
         <button class="btn" id="notif">Allow notifications</button>
@@ -72,9 +71,13 @@ export default {
   },
 };
 
+// Numeric and true/false top-level status keys; the engine compares true/false as 1/0.
 function fillKeys() {
-  const keys = [];
+  const opts = [];
   for (const [b, st] of Object.entries(lastBlocks))
-    for (const [k, v] of Object.entries(st)) if (typeof v === 'number' || typeof v === 'boolean') keys.push(`${b}.${k}`);
-  els.key.innerHTML = keys.map(k => `<option>${k}</option>`).join('');
+    for (const [k, v] of Object.entries(st)) {
+      if (typeof v === 'number') opts.push(`<option value="${b}.${k}">${b}.${k}</option>`);
+      else if (typeof v === 'boolean') opts.push(`<option value="${b}.${k}">${b}.${k} (true/false = 1/0)</option>`);
+    }
+  els.key.innerHTML = opts.join('');
 }

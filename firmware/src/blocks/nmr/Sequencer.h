@@ -48,7 +48,7 @@ struct NmrConfig {
   bool cyclops = true;            // step the pulse phase 0/90/180/270 and rotate back
   uint32_t t_repeat_ms = 3000;    // between scans; at least 3 x T1
   uint32_t polarize_ms = 0;       // Earth's-field option: prepolarizing coil on
-  uint32_t t_polarize_settle_ms = 5;
+  uint32_t t_polarize_settle_ms = 15;  // >= 5 time constants of the reference coil's freewheel decay (tau ~ 2.6 ms)
   uint8_t hb_mode = 0;            // 0 off, 1 forward, 2 reverse (during polarize)
   double sim_larmor_hz = 89400.0; // simulation build only
 };

@@ -14,8 +14,8 @@ import alarms from './panels/alarms.js';
 
 const PANELS = [base, b1, b2, b3, b4, b5, nmr, template, alarms];
 
-// Binary frames (fast data: scope captures, NMR records) share the WebSocket
-// with the JSON text messages. Header layout: PROTOCOL.md section 6.
+// Binary frames (fast data) share the WebSocket with the JSON text messages.
+// Header layout: PROTOCOL.md section 6.
 const BINARY_HEADER_BYTES = 28;
 
 // ---------------------------------------------------------------------------
@@ -58,7 +58,8 @@ const api = (() => {
 
   // Unpack the 28-byte little-endian header and hand panels the fields plus the
   // rest of the frame as a DataView; each panel picks the `kind` it cares about
-  // (1 = stream chunk, 2 = capture, 3 = NMR record).
+  // (3 = NMR record, the only kind the firmware sends today; 1 = stream chunk and
+  // 2 = capture are specified in PROTOCOL.md section 6, not implemented).
   function onBinary(data) {
     if (!(data instanceof ArrayBuffer)) {                   // a browser that ignored binaryType
       if (data && typeof data.arrayBuffer === 'function') data.arrayBuffer().then(onBinary);

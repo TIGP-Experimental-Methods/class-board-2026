@@ -6,16 +6,18 @@ Mirrors the WebSocket protocol in firmware/PROTOCOL.md one-to-one:
     instrument send base led --args '{"r":0,"g":255,"b":0}'
     instrument stream base.counter --seconds 5 --csv out.csv
     instrument alarms list
-    instrument alarms add --block b1 --key ai1 --op gt --threshold 9 --action relay:1:off
+    instrument alarms add --block b1 --key ai1 --op gt --threshold 9 --action module:1:off
     instrument alarms remove 3
+    instrument alarms clear
     instrument nmr --n-avg 8 --csv fid.csv
 
 numpy is imported inside the NMR functions only, so every other command still
 works on a machine without numpy installed.
 
-The board is found at instrument.local (mDNS), falling back to 192.168.4.1 (its own access point).
-On a shared network pass --host instrument-XXXX.local (XXXX = the four hex digits in the
-access-point name). Override with --host.
+Without --host the client talks to 192.168.4.1, the board on its own access point.
+When the board has joined a shared network, pass --host instrument-XXXX.local, where XXXX
+is the last four hex digits of its MAC address (the same four as in its access-point name
+and the boot log); mDNS resolves that name on the local network.
 """
 
 from __future__ import annotations
@@ -37,7 +39,7 @@ app = typer.Typer(help=__doc__, no_args_is_help=True)
 alarms_app = typer.Typer(help="Manage alarm rules on the board.")
 app.add_typer(alarms_app, name="alarms")
 
-DEFAULT_HOSTS = ("instrument.local", "192.168.4.1")
+DEFAULT_HOST = "192.168.4.1"  # the board's own access point
 
 # Binary frame header, little-endian, PROTOCOL.md section 6 (and section 7 for the
 # NMR record): kind, block_id, ch, bits, t_ms, rate_hz, n, trig_index,
@@ -60,16 +62,14 @@ def parse_frame_header(data: bytes) -> dict | None:
 # Connection
 # --------------------------------------------------------------------------
 def discover(host: str | None) -> str:
-    """Return the first host that resolves (mDNS or the AP address)."""
-    candidates = [host] if host else list(DEFAULT_HOSTS)
-    for h in candidates:
-        try:
-            socket.getaddrinfo(h, 80, proto=socket.IPPROTO_TCP)
-            return h
-        except socket.gaierror:
-            continue
-    typer.echo(f"cannot resolve {' or '.join(candidates)}; use --host", err=True)
-    raise typer.Exit(2)
+    """Return the host to talk to: --host if given (it must resolve), else the access-point address."""
+    h = host or DEFAULT_HOST
+    try:
+        socket.getaddrinfo(h, 80, proto=socket.IPPROTO_TCP)
+    except socket.gaierror:
+        typer.echo(f"cannot resolve {h}; check the name (instrument-XXXX.local) or use the IP address", err=True)
+        raise typer.Exit(2) from None
+    return h
 
 
 class Client:
@@ -143,6 +143,8 @@ def run(coro):
     except (TimeoutError, OSError, websockets.WebSocketException) as e:
         typer.echo(f"connection failed: {e}", err=True)
         raise typer.Exit(1) from None
+    except typer.Exit:  # a deliberate exit (e.g. from discover); typer.Exit is a RuntimeError
+        raise
     except RuntimeError as e:
         typer.echo(f"error: {e}", err=True)
         raise typer.Exit(1) from None
@@ -152,8 +154,8 @@ HostOpt = typer.Option(
     None,
     "--host",
     "-H",
-    help="board hostname or IP, e.g. instrument-639C.local on a shared network or 192.168.4.1 "
-    "on the board's own access point (default: instrument.local, then 192.168.4.1)",
+    help="board hostname or IP address: instrument-XXXX.local on a shared network (XXXX = the last four hex digits "
+    "of the MAC, as in the access-point name), default 192.168.4.1 (the board's own access point)",
 )
 
 
@@ -390,9 +392,9 @@ def alarms_list(host: str | None = HostOpt):
 def alarms_add(
     block: str = typer.Option(...),
     key: str = typer.Option(...),
-    op: str = typer.Option("gt", help="gt lt ge le eq ne"),
+    op: str = typer.Option("gt", help="gt lt ge le eq ne (a true/false key compares as 1/0)"),
     threshold: float = typer.Option(...),
-    action: str = typer.Option("notify", help="notify | relay:<n>:on | relay:<n>:off"),
+    action: str = typer.Option("notify", help="notify | module:<n>:on | module:<n>:off (n = 1..7)"),
     host: str | None = HostOpt,
 ):
     """Add an alarm rule."""
@@ -413,6 +415,18 @@ def alarms_remove(rule_id: int = typer.Argument(..., help="rule id from `alarms 
         async with Client(discover(host)) as c:
             await c.send("alarms", "remove", {"id": rule_id})
             typer.echo(f"removed rule #{rule_id}")
+
+    run(go())
+
+
+@alarms_app.command("clear")
+def alarms_clear(host: str | None = HostOpt):
+    """Remove every alarm rule."""
+
+    async def go():
+        async with Client(discover(host)) as c:
+            await c.send("alarms", "clear")
+            typer.echo("removed all rules")
 
     run(go())
 

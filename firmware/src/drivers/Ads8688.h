@@ -30,8 +30,10 @@
 // way. Keeping one signed type everywhere is what lets the NMR capture buffer be
 // a plain int16_t array.
 //
-// SPI: mode 1 (CPOL 0, CPHA 1), MSB first, 17 MHz. The datasheet allows 17 MHz
-// with the internal reference, which is the limit that matters here.
+// SPI: mode 1 (CPOL 0, CPHA 1), MSB first, 17 MHz requested (16 MHz actual). The
+// 17 MHz limit comes from the conversion time: the 16th falling SCLK edge must
+// come after the internal conversion (t_CONV <= 850 ns). The board ties the one
+// RST/PD pin high through a pull-up (R102); only the software RST command resets.
 #pragma once
 #include <stdint.h>
 

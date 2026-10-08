@@ -8,18 +8,18 @@ export default {
   render(el, api) {
     el.innerHTML = `
       <h2>B1 Precision inputs</h2>
-      <p class="help">ADS8688, 8 × ±10 V, 16 bit. Pick <code>b1.ai1</code> in the chart to see the waveform.</p>
+      <p class="help">ADS8688, 8 inputs, 16 bit, up to ±10.24 V. Pick <code>b1.ai1</code> in the chart to see the waveform.</p>
       <div class="grid" id="ai"></div>
       <h3>Range (ch 1)</h3>
       <div class="row">
         <select id="range">
-          <option value="0">±10 V</option><option value="1">±5 V</option><option value="2">±2.5 V</option>
-          <option value="5">0–10 V</option><option value="6">0–5 V</option>
+          <option value="0">±10.24 V</option><option value="1">±5.12 V</option><option value="2">±2.56 V</option>
+          <option value="5">0–10.24 V</option><option value="6">0–5.12 V</option>
         </select>
         <button class="btn" id="read">read_all</button>
       </div>
       <h3>Alarm</h3>
-      <div class="row"><button class="btn" id="alarm">ai1 &gt; 3.5 V → relay 1 on</button></div>`;
+      <div class="row"><button class="btn" id="alarm">ai1 &gt; 3.5 V → module 1 on</button></div>`;
 
     els.ai = el.querySelector('#ai');
     els.ai.innerHTML = Array.from({ length: 8 }, (_, i) =>
@@ -30,7 +30,7 @@ export default {
     el.querySelector('#read').onclick = () =>
       api.send('b1', 'read_all').then(r => api.toast('ai = ' + r.ai.map(v => v.toFixed(2)).join(', '), 'info'));
     el.querySelector('#alarm').onclick = () =>
-      api.addAlarm({ block: 'b1', key: 'ai1', op: 'gt', threshold: 3.5, action: 'relay:1:on' })
+      api.addAlarm({ block: 'b1', key: 'ai1', op: 'gt', threshold: 3.5, action: 'module:1:on' })
         .then(r => api.toast(`alarm rule ${r.id} added`, 'info')).catch(e => api.toast(e.message));
   },
 

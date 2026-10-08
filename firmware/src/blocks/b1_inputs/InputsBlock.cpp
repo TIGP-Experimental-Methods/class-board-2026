@@ -53,19 +53,26 @@ bool InputsBlock::handle(JsonObjectConst cmd, JsonObject reply) {
     for (int i = 0; i < kChannels; i++) ai.add(volts_[i]);
     return true;
   }
-  if (strcmp(c, "set_range") == 0) {     // {"ch":1..8,"range":0..6}
+  if (strcmp(c, "set_range") == 0) {     // {"ch":1..8,"range":0|1|2|5|6}
     int ch = a["ch"] | 0;
     int range = a["range"] | -1;
-    if (ch < 1 || ch > kChannels || range < 0 || range > 6) {
-      reply["error"] = "ch 1..8, range 0..6";
+    if (ch < 1 || ch > kChannels) { reply["error"] = "ch must be 1..8"; return false; }
+    // The ADS8688 has five ranges; codes 3 and 4 do not exist on it.
+    if (range != 0 && range != 1 && range != 2 && range != 5 && range != 6) {
+      reply["error"] = "range code not on this ADC";
       return false;
     }
-    range_[ch - 1] = range;
     {
+      // The stored range changes only once the chip has taken it, so the status
+      // never reports a range the ADC is not on.
       spibus::Guard g(50);
       if (!g.ok) { reply["error"] = "SPI bus busy (nmr capture running)"; return false; }
-      adc.setRange(kAinOfAi[ch - 1], range);   // program register 0x05 + ADC channel
+      if (!adc.setRange(kAinOfAi[ch - 1], range)) {   // program register 0x05 + ADC channel
+        reply["error"] = "ADC did not take the range";
+        return false;
+      }
     }
+    range_[ch - 1] = range;
     reply["ch"] = ch;
     reply["range"] = range;
     return true;

@@ -25,6 +25,6 @@ export default {
 
   onStatus(st) {
     kv.innerHTML = RAILS.map(([k, label]) => `<span>${label}</span><span>${(st[k] ?? 0).toFixed(3)} V</span>`).join('');
-    this._note.textContent = st.measured ? '' : 'Board v0.6 has no rail sensing: these are nominal design values.';
+    this._note.textContent = st.measured ? '' : 'Board v0.7 has no rail sensing: these are nominal design values.';
   },
 };

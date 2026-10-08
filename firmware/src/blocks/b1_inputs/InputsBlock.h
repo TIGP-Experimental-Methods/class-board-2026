@@ -4,7 +4,7 @@
 // so every transfer takes the SPI lock (drivers/SpiBus.h). Panel input AIn is ADC
 // channel kAinOfAi[n-1] (pins.h); `ch` in the commands and the status keys is always
 // the panel input number. AI7 and AI8 (AIN_3, AIN_2) carry the receiver I and Q
-// when J14 / J15 are fitted and start on the +-5.12 V range.
+// when the J14 / J15 shunts are on 2-3, and start on the +-5.12 V range.
 // Commands: read_all, set_range {ch, range}   Status: ai1..ai8 (volts), range
 #pragma once
 #include "../Block.h"

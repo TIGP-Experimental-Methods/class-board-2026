@@ -12,10 +12,16 @@
 // up to 13 A through the polarizer FET. The NMR sequencer owns both during a
 // scan, so both commands refuse while a scan is running (blocks/Busy.h).
 //
+// The polarizer is never left on: polarizer {on:true, ms} switches it off again
+// after ms milliseconds (default and maximum 10000), whatever happens to the
+// client that asked.
+//
 // Commands: module {n, on}, module_all {on}, opto_reset,
-//           hbridge {mode: off|fwd|rev|brake}, polarizer {on}
-// Status:   module1..module7 (0/1), opto1, opto2 (edge counts), opto1_level,
-//           opto2_level, hbridge (string), polarizer (0/1)
+//           hbridge {mode: off|fwd|rev|brake}, polarizer {on, ms}
+// Status:   module1..module7 (true/false), opto1, opto2 (falling-edge counts,
+//           by the hardware pulse counter), opto1_level, opto2_level, hbridge (string),
+//           polarizer (true/false); on the board hbridge and polarizer are read
+//           from the pins, because the NMR sequencer also drives them.
 // The alarm engine's "module" action calls handle() with cmd "module".
 #pragma once
 #include "../../../include/pins.h"
@@ -36,13 +42,16 @@ class SwitchingBlock : public Block {
 
   void setModule(int idx, bool on);
   void setHbridge(HbMode mode);
-  void setPolarizer(bool on);
+  void setPolarizer(bool on, uint32_t ms);
+
+  static constexpr uint32_t kPolarizerMaxMs = 10000;   // the sequencer's bound too
 
   bool module_[kModuleOutputs] = {};
 
-  uint32_t optoCount_[2] = {};
+  uint32_t optoCount_[2] = {};    // falling edges (real build: from the pulse counters)
   bool optoLevel_[2] = {};
   HbMode hb_ = HB_OFF;
   bool polarizer_ = false;
+  uint32_t polarizerOffAt_ = 0;   // millis() at which loop() switches the coil off
   uint32_t lastTick_ = 0;
 };
