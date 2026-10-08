@@ -10,6 +10,11 @@
 // (IF = f_tx - f_lo), so a positive peak in the spectrum means the line sits
 // above the local oscillator. The Larmor frequency is f_lo + peak.
 //
+// Phase reference: when Si5351 CLK2 is wired to a panel input (the rework of
+// 2026-10-08 uses AI1), the board measures every scan's IF phase from it and
+// lines the scans up before averaging. Without it, averaging several scans
+// cancels part of the signal (firmware/NMR-FIRMWARE.md sections 3.8 and 3.9).
+//
 // A panel is a plain object: { id, title, render(container, api), onStatus(st) }.
 let els = {};
 let api = null;
@@ -32,6 +37,7 @@ const DEFAULTS = {
   n_avg: 1,
   cyclops: true,
   polarize_ms: 0,
+  ref_ch: 1, // CLK2 wired to AI1 on every board (the 2026-10-08 rework)
 };
 
 const MAX_FFT = 16384; // the longest transform we are willing to do on a phone
@@ -76,6 +82,10 @@ export default {
         <label>record length (ms)<input type="number" id="t-acq" step="10" min="10" max="4000"></label>
         <label>scans to average<input type="number" id="n-avg" step="1" min="1" max="256"></label>
         <label>polarize (ms)<input type="number" id="polarize" step="10" min="0"></label>
+        <label>phase reference<select id="ref-ch">
+          <option value="0">none</option><option value="1">AI1</option><option value="2">AI2</option>
+          <option value="3">AI3</option><option value="4">AI4</option><option value="5">AI5</option>
+          <option value="6">AI6</option></select></label>
         <label class="check"><input type="checkbox" id="cyclops"> CYCLOPS phase cycling</label>
       </div>
       <div class="row">
@@ -113,6 +123,7 @@ export default {
       tAcq: el.querySelector('#t-acq'),
       nAvg: el.querySelector('#n-avg'),
       polarize: el.querySelector('#polarize'),
+      refCh: el.querySelector('#ref-ch'),
       cyclops: el.querySelector('#cyclops'),
       ifNow: el.querySelector('#if-now'),
       prog: el.querySelector('#prog'),
@@ -132,12 +143,13 @@ export default {
     els.tAcq.value = saved.t_acq_ms;
     els.nAvg.value = saved.n_avg;
     els.polarize.value = saved.polarize_ms;
+    els.refCh.value = String(saved.ref_ch ?? DEFAULTS.ref_ch);
     els.cyclops.checked = !!saved.cyclops;
     els.pulseUs.value = saved.t90_us;
     showIf();
 
     const err = (e) => api.toast(e.message);
-    for (const input of [els.fTx, els.fLo]) input.oninput = showIf;
+    for (const input of [els.fTx, els.fLo]) input.oninput = () => showIf();
 
     el.querySelector('#apply').onclick = () => sendConfig().catch(err);
     el.querySelector('#start').onclick = () =>
@@ -174,8 +186,13 @@ export default {
     if (st.n_avg) parts.push(`scan ${st.scan ?? 0} / ${st.n_avg}`);
     if (st.rate_hz) parts.push(`${(st.rate_hz / 1000).toFixed(1)} kS/s`);
     if (typeof st.snr_db === 'number' && isFinite(st.snr_db)) parts.push(`SNR ${st.snr_db.toFixed(1)} dB (board)`);
+    if (typeof st.ref_phase_deg === 'number' && typeof st.ref_amp === 'number') {
+      const refClass = st.ref_amp < 0.2 ? 'bad' : '';
+      parts.push(`<span class="${refClass}">ref AI${st.ref_ch} ${st.ref_phase_deg.toFixed(1)}&deg; ${st.ref_amp.toFixed(2)} V</span>`);
+    }
     if (st.i_flag) parts.push('<span class="bad">CURRENT LIMIT</span>');
     if (st.t_flag) parts.push('<span class="bad">THERMAL</span>');
+    if (st.tx_clip_warning) parts.push('<span class="warn">+VEXT &lt; 16 V: gain-25 output clips</span>');
     if (st.sim) parts.push('<span class="warn">SIM</span>');
     if (st.error) parts.push(`<span class="bad">${escapeHtml(String(st.error))}</span>`);
     els.prog.innerHTML = parts.join(' &middot; ');
@@ -195,6 +212,7 @@ function formSettings() {
     n_avg: Number(els.nAvg.value),
     polarize_ms: Number(els.polarize.value),
     cyclops: els.cyclops.checked,
+    ref_ch: Number(els.refCh.value),
   };
 }
 
@@ -206,10 +224,11 @@ function sendConfig() {
     // A private window may refuse to store anything; the settings still apply.
   }
   return api.send('nmr', 'config', s).then((r) => {
-    // The board replies with what it really programmed; show that.
+    // The board replies with what it really programmed (f_lo snapped to the
+    // 0.37 Hz lattice, the IF exact); show that.
     if (typeof r.f_tx_actual_hz === 'number') els.fTx.value = Math.round(r.f_tx_actual_hz);
     if (typeof r.f_lo_actual_hz === 'number') els.fLo.value = Math.round(r.f_lo_actual_hz);
-    showIf();
+    showIf(r.if_hz);
     return r;
   });
 }
@@ -222,8 +241,9 @@ function loadSettings() {
   }
 }
 
-function showIf() {
-  const hz = Number(els.fTx.value) - Number(els.fLo.value);
+// The IF the board reported when there is one, else what the form says.
+function showIf(boardHz) {
+  const hz = typeof boardHz === 'number' ? boardHz : Number(els.fTx.value) - Number(els.fLo.value);
   els.ifNow.textContent = `IF = ${(hz / 1000).toFixed(3)} kHz`;
 }
 

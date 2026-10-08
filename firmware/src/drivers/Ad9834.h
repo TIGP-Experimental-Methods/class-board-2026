@@ -44,6 +44,7 @@ class Ad9834 {
 
   void setFrequency(double hz);
   double actualFrequency() const { return actual_; }
+  uint32_t frequencyWord() const { return freqWord_; }   // f = word x MCLK / 2^28: the lattice W
 
   void setPhase(uint8_t reg, double deg);    // reg 0 = PHASE0, 1 = PHASE1; 12-bit
   double actualPhase(uint8_t reg) const { return reg < 2 ? phaseDeg_[reg] : 0.0; }

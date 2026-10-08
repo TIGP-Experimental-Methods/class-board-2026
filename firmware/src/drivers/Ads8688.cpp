@@ -174,7 +174,7 @@ uint32_t Ads8688::burst(uint8_t mask, int16_t* out, uint32_t n_per_channel,
   }
 
   // Pace to whole scans of the mask. A period of zero means "as fast as it goes".
-  const int64_t period_us = rate_hz ? (1000000 + rate_hz / 2) / rate_hz : 0;
+  const int64_t period_us = periodUs(rate_hz);
 
 #ifndef SIM
   if (!present_) return 0;

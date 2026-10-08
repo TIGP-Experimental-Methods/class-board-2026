@@ -43,9 +43,6 @@ class Tca9535 {
   bool writeMasked(uint8_t port, uint8_t mask, uint8_t value);
   uint8_t cached(uint8_t port) const;
 
-  // Bits set in `mask` become inputs on that port. Used only if a bring-up bodge
-  // brings the OPA564 flags to a port-1 line (see EXP_BIT_IFLAG in pins.h).
-  bool setInputs(uint8_t port, uint8_t mask);
   bool readPort(uint8_t port, uint8_t& value);
 
   bool present() const { return present_; }

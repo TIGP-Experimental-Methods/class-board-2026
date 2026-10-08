@@ -21,6 +21,7 @@ constexpr uint8_t kRegPllA       = 26;
 constexpr uint8_t kRegPllB       = 34;
 constexpr uint8_t kRegMs0        = 42;
 constexpr uint8_t kRegMs1        = 50;
+constexpr uint8_t kRegMs2        = 58;
 constexpr uint8_t kRegPllReset   = 177;
 constexpr uint8_t kRegXtalLoad   = 183;
 
@@ -30,10 +31,21 @@ constexpr uint8_t kRegXtalLoad   = 183;
 constexpr double kVcoMin = 600.0e6;
 constexpr double kVcoMax = 900.0e6;
 
-// Fractional denominator. 2^20 - 1 is the largest the part accepts and gives a
-// step of 25 MHz / 1048575 at the PLL, which is well under a millihertz once the
-// output divider has had its say.
+// Fractional denominators. 2^20 - 1 is the largest the part accepts and is
+// what the CLK0 fallback uses. The LO uses 2^19: a power of two is what puts
+// f_LO exactly on the DDS lattice (header comment), and its step at the PLL,
+// 48 Hz, is still a few hundredths of a hertz at the LO.
 constexpr uint32_t kDenom = 1048575;
+constexpr uint32_t kDenomLo = 1u << 19;
+
+uint64_t gcd64(uint64_t a, uint64_t b) {
+  while (b) {
+    const uint64_t t = a % b;
+    a = b;
+    b = t;
+  }
+  return a;
+}
 
 #ifndef SIM
 void ensureWire() {
@@ -96,7 +108,8 @@ bool Si5351::begin(uint8_t addr, uint32_t xtal_hz) {
   addr_ = addr;
   xtal_ = xtal_hz ? xtal_hz : 25000000;
   oeb_ = 0xFF;
-  clk0Actual_ = clk1Actual_ = 0;
+  pllaMul_ = 0;
+  clk0Actual_ = clk1Actual_ = clk2Actual_ = 0;
 
 #ifdef SIM
   // Same rule as the expander: simulated means present, so the NMR panel can be
@@ -144,7 +157,7 @@ bool Si5351::setClk0(uint32_t hz) {
   }
 
   uint32_t bestDiv = 0, bestMul = 0;
-  for (uint32_t d = 6; d <= 1800; d += 2) {
+  for (uint32_t d = 6; d <= kMsMax; d += 2) {
     const uint64_t pll = static_cast<uint64_t>(hz) * d;
     if (pll < static_cast<uint64_t>(kVcoMin)) continue;
     if (pll > static_cast<uint64_t>(kVcoMax)) break;
@@ -159,13 +172,15 @@ bool Si5351::setClk0(uint32_t hz) {
     ok = writeDivider(kRegMs0, encode(bestDiv, 0, 1), 0) && ok;
     // MS0_INT = 1: integer output divider, PLLA source, 8 mA drive.
     ok = write8(kRegClkCtrl0, 0x4F) && ok;
+    pllaMul_ = bestMul;
     clk0Actual_ = static_cast<double>(xtal_) * bestMul / bestDiv;
   } else {
+    pllaMul_ = 0;                     // fractional PLLA: CLK2 cannot be made exact
     uint8_t rExp = 0;
     double fms = hz;
     while (fms < 1.0e6 && rExp < 7) { rExp++; fms *= 2.0; }
     uint32_t d = static_cast<uint32_t>(kVcoMax / fms);
-    if (d > 900) d = 900;
+    if (d > kMsMax) d = kMsMax;
     d &= ~1u;
     if (d < 8) d = 8;
     const double pll = fms * d;
@@ -189,11 +204,16 @@ bool Si5351::setClk0(uint32_t hz) {
 // 84 kHz asks for 336 kHz here - far below what a multisynth alone can reach from
 // a 600 MHz VCO, which is what the R divider after it is for. Strategy:
 //   1. double R until the multisynth output is above 1 MHz (a comfortable range),
-//   2. pick the largest even whole multisynth divider that keeps the PLL at or
-//      below 900 MHz (that also keeps it above 675 MHz, so always in spec),
-//   3. put the whole of the remainder into the fractional PLL feedback divider.
+//   2. pick the largest even whole multisynth divider, a multiple of 32 / R, that
+//      keeps the PLL at or below 900 MHz and above 600 MHz; the multiple of 32
+//      is what makes a lattice frequency exact (header comment). At the top of
+//      the `clock` command's range no such divider exists and any even one is
+//      taken: exactness does not matter there,
+//   3. put the whole of the remainder into the fractional PLL feedback divider,
+//      over 2^19.
 // An integer, even output divider with a fractional PLL is the low-spur choice
 // AN619 recommends, and it is the phase relationship at the counter that matters.
+// For 336 000.3 Hz (f_LO = 84 000.08 Hz): R = 4, MS1 = 664, PLLB = 892.4 MHz.
 bool Si5351::setClk1(double hz) {
   if (!(hz > 0.0)) {
     clk1Actual_ = 0;
@@ -204,37 +224,86 @@ bool Si5351::setClk1(double hz) {
   double fms = hz;
   while (fms < 1.0e6 && rExp < 7) { rExp++; fms *= 2.0; }
 
-  uint32_t d = static_cast<uint32_t>(kVcoMax / fms);
-  if (d > 900) d = 900;                 // fractional multisynths stop at 900
-  d &= ~1u;                             // even: required for integer mode
-  if (d < 8) d = 8;
+  const uint32_t gran = (32u >> rExp) > 2u ? (32u >> rExp) : 2u;
+  uint32_t d = static_cast<uint32_t>(kVcoMax / fms) / gran * gran;
+  if (d > kMsMax) d = kMsMax / gran * gran;
+  if (d < 8 || fms * d < kVcoMin) {
+    d = static_cast<uint32_t>(kVcoMax / fms) & ~1u;   // off the lattice: any even divider
+    if (d > kMsMax) d = kMsMax;
+    if (d < 8) d = 8;
+  }
 
-  double pll = fms * d;
+  const double pll = fms * d;
   if (pll < kVcoMin || pll > kVcoMax) {
-    // Only reachable for an out-of-range request (below ~4.6 kHz or above
-    // 112 MHz). Clamp rather than write nonsense into the part.
+    // Only reachable for an out-of-range request (below about 2.6 kHz or above
+    // 112 MHz; the lowest CLK1 is 600 MHz / (1800 x 128)). Refuse rather than write nonsense into the part.
     clk1Actual_ = 0;
     return false;
   }
 
   const uint32_t a = static_cast<uint32_t>(pll / xtal_);
   const double frac = pll / xtal_ - a;
-  uint32_t b = static_cast<uint32_t>(llround(frac * kDenom));
-  if (b >= kDenom) b = kDenom - 1;
+  uint32_t b = static_cast<uint32_t>(llround(frac * kDenomLo));
+  if (b >= kDenomLo) b = kDenomLo - 1;
   if (a < 15 || a > 90) {
     clk1Actual_ = 0;
     return false;                       // feedback divider outside the 15..90 spec
   }
 
-  bool ok = writeDivider(kRegPllB, encode(a, b, kDenom), 0);
+  bool ok = writeDivider(kRegPllB, encode(a, b, kDenomLo), 0);
   ok = writeDivider(kRegMs1, encode(d, 0, 1), rExp) && ok;
   // MS1_INT = 1, MS1_SRC = PLLB, source = multisynth 1, 8 mA drive.
   ok = write8(static_cast<uint8_t>(kRegClkCtrl0 + 1), 0x6F) && ok;
 
-  clk1Actual_ = static_cast<double>(xtal_) * (a + static_cast<double>(b) / kDenom) /
+  // Every factor is exact in a double and the division is correctly rounded, so
+  // for a lattice frequency this is 4 V x latticeStep() to the last bit.
+  clk1Actual_ = static_cast<double>(xtal_) * (a + static_cast<double>(b) / kDenomLo) /
                 (static_cast<double>(d) * (1u << rExp));
 
   ok = enable(1, true) && ok;
+  return ok && present_;
+}
+
+// CLK2 = beatWord x crystal / 2^27, the IF on the lattice, from the integer PLLA
+// that CLK0 runs on (setClk0 must have found an integer solution: 36 x 25 MHz for
+// the 50 MHz DDS clock). The output divider is PLLA / CLK2 = mul x 2^27 /
+// (beatWord x R), reduced to a + b/c with c at most 2^20 - 1. R is the smallest
+// that brings the multisynth to kMsMax or below - for 5.4 kHz: R = 128,
+// MS2 = 1302.08; the slowest CLK2 is kClk2MinHz. Not yet measured on the board.
+// 2 mA drive is plenty for one panel input. The output enable is the caller's:
+// the NMR sequencer switches CLK2 on for a scan set only, so the reference input
+// is quiet while the console is idle.
+bool Si5351::setClk2Exact(uint32_t beatWord) {
+  clk2Actual_ = 0;
+  if (beatWord == 0) {
+    const bool ok = enable(2, false);
+    return write8(static_cast<uint8_t>(kRegClkCtrl0 + 2), 0x80) && ok;   // powered down
+  }
+  if (pllaMul_ == 0) return false;
+
+  const uint64_t num = static_cast<uint64_t>(pllaMul_) << 27;
+  int rExp = -1;
+  for (int r = 0; r < 8; r++) {
+    if (num <= static_cast<uint64_t>(kMsMax) * (static_cast<uint64_t>(beatWord) << r)) { rExp = r; break; }
+  }
+  if (rExp < 0) return false;               // below kClk2MinHz
+  const uint64_t den = static_cast<uint64_t>(beatWord) << rExp;
+  if (num < 8 * den) return false;          // above the multisynth range
+  const uint64_t g = gcd64(num, den);
+  const uint64_t n = num / g;
+  uint64_t c = den / g;
+  const uint32_t a = static_cast<uint32_t>(n / c);
+  const uint32_t b = static_cast<uint32_t>(n % c);
+  if (b == 0) c = 1;
+  if (c > kDenom) return false;             // the 20-bit denominator cannot hold it
+
+  bool ok = writeDivider(kRegMs2, encode(a, b, static_cast<uint32_t>(c)), static_cast<uint8_t>(rExp));
+  // MS2_SRC = PLLA, source = multisynth 2, 2 mA drive; MS2_INT only for an even
+  // whole divider, which the arithmetic rarely gives.
+  const uint8_t ctrl = static_cast<uint8_t>(((b == 0 && (a & 1u) == 0) ? 0x40 : 0x00) | 0x0C);
+  ok = write8(static_cast<uint8_t>(kRegClkCtrl0 + 2), ctrl) && ok;
+  clk2Actual_ = static_cast<double>(xtal_) * pllaMul_ * static_cast<double>(c) /
+                ((static_cast<double>(a) * static_cast<double>(c) + b) * (1u << rExp));
   return ok && present_;
 }
 

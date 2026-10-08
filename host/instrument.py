@@ -328,6 +328,7 @@ def nmr(
     f_tx: float = typer.Option(NMR_DEFAULTS["f_tx_hz"], "--f-tx", help="transmit frequency, Hz"),
     f_lo: float = typer.Option(NMR_DEFAULTS["f_lo_hz"], "--f-lo", help="local-oscillator frequency, Hz"),
     sequence: str = typer.Option("fid", help="fid or echo"),
+    ref_ch: int = typer.Option(1, "--ref-ch", min=0, max=6, help="panel input carrying the Si5351 CLK2 phase reference (0 = none)"),
     csv_path: str | None = typer.Option(None, "--csv", help="write t_ms,I,Q rows of the averaged record here"),
     timeout: float = typer.Option(600.0, help="seconds to wait for the scan set"),
     host: str | None = HostOpt,
@@ -336,9 +337,10 @@ def nmr(
 
     async def go():
         async with Client(discover(host)) as c:
-            cfg = await nmr_config(c, f_tx_hz=f_tx, f_lo_hz=f_lo, sequence=sequence, n_avg=n_avg)
+            cfg = await nmr_config(c, f_tx_hz=f_tx, f_lo_hz=f_lo, sequence=sequence, n_avg=n_avg, ref_ch=ref_ch)
             lo = float(cfg.get("f_lo_actual_hz", cfg.get("f_lo_hz", f_lo)))
-            typer.echo(f"IF = {float(cfg.get('f_tx_actual_hz', f_tx)) - lo:.1f} Hz, {n_avg} scan(s)", err=True)
+            if_hz = float(cfg.get("if_hz", float(cfg.get("f_tx_actual_hz", f_tx)) - lo))
+            typer.echo(f"IF = {if_hz:.2f} Hz, {n_avg} scan(s)", err=True)
             await nmr_start(c)
             st = await nmr_wait(c, timeout_s=timeout, progress=True)
             rate_hz, z, scans = await nmr_record(c)
@@ -356,6 +358,8 @@ def nmr(
                         "noise_rms_v": noise,
                         "snr_db": round(snr_db, 2),
                         "board_snr_db": st.get("snr_db"),
+                        "ref_phase_deg": st.get("ref_phase_deg"),
+                        "ref_amp_v": st.get("ref_amp"),
                     },
                     indent=2,
                 )

@@ -17,7 +17,8 @@
 // Commands: config, start, abort, pulse, clock, dds, blank, get_record,
 //           sim_larmor (simulation build only)
 // Status:   state, scan, n_avg, f_tx_hz, f_lo_hz, if_hz, rate_hz, peak_hz,
-//           larmor_hz, peak_amp, snr_db, i_flag, t_flag, error, sim
+//           larmor_hz, peak_amp, snr_db, ref_ch, ref_phase_deg, ref_amp,
+//           i_flag, t_flag, tx_clip_warning, error, sim
 //
 // While a scan set runs the block owns TX_EN, RX_BLANK, DDS_PSEL and - if the
 // scan polarizes - FET_GATE and HB_IN1/2. b4 refuses to touch those two for the

@@ -4,7 +4,9 @@
 // The eight DIO lines and the seven module outputs are not MCU pins: they come
 // from the TCA9535 I2C port expander U505 on B5 (drivers/Tca9535.h), which frees
 // GPIO for the NMR console (DDS, TX gate, receiver blanking, the field-cycling
-// H-bridge and the polarizer switch). GPIO4/6/7/15 are not connected.
+// H-bridge and the polarizer switch). GPIO4/6/7/15 have no net on the main board;
+// the rework of 2026-10-08 wires 4, 6 and 7 by hand (below), and 15 is kept for
+// the next board revision.
 //
 // Never use: GPIO 0, 45, 46 (strapping), 3 (unused input, no pull), 35-37 (octal PSRAM).
 #pragma once
@@ -53,6 +55,24 @@ constexpr int PIN_DDS_FSYNC = 41;  // AD9834 FSYNC = its SPI chip select, active
 constexpr int PIN_DDS_PSEL  = 42;  // AD9834 PSELECT pin; ignored (PIN/SW = 0), held low; no pull resistor
 constexpr int PIN_TX_EN     = 40;  // OPA564 enable = transmit gate (10 k pull-down; 1 = transmit)
 
+// OPA564 current-limit and thermal flags (nets TX_IFLAG / TX_TFLAG): push-pull
+// 3.3 V CMOS, active high. Rework A2 of 2026-10-08 wires them from the DNP pads
+// R811 / R812 to the socket pins of GPIO6 / GPIO7 through 1 k. On an unmodified
+// board the pins float; INPUT_PULLDOWN makes them read 0 = no flag.
+constexpr int PIN_TX_IFLAG  = 6;
+constexpr int PIN_TX_TFLAG  = 7;
+
+// +VEXT sense (rework B6 of 2026-10-08): 100 k / 10 k divider from +VEXT to GPIO4
+// (ADC1 channel 3), 100 nF across the 10 k; 24 V reads 2.18 V. Floats on an
+// unmodified board, where b2 reads noise (`b2 vext_check off`).
+constexpr int PIN_VEXT_SENSE = 4;
+constexpr float kVextDivider = 11.0f;   // (100 k + 10 k) / 10 k
+
+// Si5351 CLK2 as a digital trigger: planned for the V0.2 board, where CLK2 also
+// reaches GPIO15 so a pulse can start on its edge. No code uses it yet; on the
+// ordered boards CLK2 reaches the firmware only as an analog input (rework A1).
+constexpr int PIN_REF_CLK   = 15;
+
 // ---- NMR console, section A: receiver ------------------------------------
 // DG419 blanking switch. The 10 k pull-down means a reset board comes up blanked,
 // which is what protects the LNA if the firmware never runs.
@@ -88,13 +108,3 @@ constexpr uint8_t EXP_BIT_MOD[kModuleOutputs] = {0, 1, 2, 3, 5, 6, 7};
 
 // Power-on value of port 1: every module output off, /CLR released (high).
 constexpr uint8_t EXP_CTRL_IDLE = 1 << EXP_BIT_JCLR;
-
-// The OPA564 current-limit and thermal flags (nets TX_IFLAG / TX_TFLAG) are
-// push-pull 3.3 V CMOS outputs. In the v0.7 schematic they end on global labels
-// and two DNP pull-up footprints (R811 / R812) - they are NOT wired to the
-// expander or to any MCU pin, so the firmware reports them as not connected.
-// The expander has no spare line left for them; if a bring-up bodge links them
-// to a port-1 line, set these to its bit number and the drivers read it there.
-
-constexpr int EXP_BIT_IFLAG = -1;   // -1 = not connected
-constexpr int EXP_BIT_TFLAG = -1;

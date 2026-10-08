@@ -10,10 +10,11 @@
 //   * A "complex record" is 2 x n floats, interleaved I, Q, I, Q, ... in volts
 //     at the ADC input. That is also exactly the payload of the kind-3 binary
 //     frame, so the averaged record never has to be copied to be sent.
-//   * A "raw record" is 2 x n int16 in ADC codes, one pair per scan, in the
-//     order the ADS8688 auto-scan returns them: ascending ADC channel. On this
-//     board Q (AIN_2) comes before I (AIN_3), so each pair is Q, I; the caller
-//     says which way round with `qFirst`.
+//   * A "raw record" is stride x n int16 in ADC codes, one frame of `stride`
+//     channels per sampling instant, in the order the ADS8688 auto-scan returns
+//     them: ascending ADC channel. On this board Q (AIN_2) comes before I
+//     (AIN_3), and the phase reference on AI1 (AIN_1) before both, so a frame
+//     is Q, I or R, Q, I; the caller says where each channel sits.
 //   * Frequencies are signed and relative to the local oscillator: positive
 //     means the line sits above the LO. The Larmor frequency is f_lo + peak.
 #pragma once
@@ -33,15 +34,29 @@ float meanI16(const int16_t* first, uint32_t n, uint32_t stride);
 // Returns the index of the first sample to average over.
 uint32_t dcStart(uint32_t n, uint32_t t_acq_ms);
 
-// Boxcar-decimate: each output complex sample is the mean of `decim` raw pairs,
+// Boxcar-decimate: each output complex sample is the mean of `decim` raw frames,
 // with the DC offset removed and the ADC code converted to volts. Averaging
 // `decim` samples is also a (crude) anti-alias filter - crude because its
 // response only falls as sin(x)/x, which costs 0.6 dB at 5.4 kHz for decim 4 at
 // 100 kS/s. That is the price of a filter that costs one add per sample.
-// `qFirst` = each raw pair is Q, I instead of I, Q; the output is always I, Q.
-void decimate(const int16_t* raw, bool qFirst, uint32_t nOut, uint32_t decim,
-              float dcI, float dcQ, float voltsPerCodeI, float voltsPerCodeQ,
-              float* outIq);
+// `stride` = channels per raw frame, `offI` / `offQ` = where I and Q sit in it;
+// the output is always I, Q.
+void decimate(const int16_t* raw, uint32_t stride, uint32_t offI, uint32_t offQ,
+              uint32_t nOut, uint32_t decim, float dcI, float dcQ,
+              float voltsPerCodeI, float voltsPerCodeQ, float* outIq);
+
+// Least-squares fit of r[k] = m + amp cos(w k + phase) to one channel of a raw
+// record (stride as above), at a known angular frequency w in radians per
+// sample. It is how the phase reference is read (section 3.9): the tone's
+// frequency is known exactly, so three linear unknowns (offset, cosine and sine
+// amplitude) are all there is, and the fit is exact for any number of cycles.
+// Accumulated in float with a stepped phasor, solved in double. amp in ADC codes,
+// phase in radians at k = 0.
+struct Tone {
+  float amp;
+  float phase;
+};
+Tone fitTone(const int16_t* first, uint32_t n, uint32_t stride, float w);
 
 
 // Rotate every complex sample by `deg`. CYCLOPS moves the transmitter phase

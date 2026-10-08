@@ -14,6 +14,8 @@
 // The LED 'press' button + 'presses' counter is the minimal fallback.
 // Private members the recipe adds:
 //   static constexpr int ADC_PIN = 4, ADC_MAX_N = 4096;
+// GPIO4 is the example pin for the bare dev board only: on a class board with the
+// 2026-10-08 rework (B6) it carries +VEXT / 11 from the sense divider, which b2 reads.
 //   uint16_t adcBuf_[ADC_MAX_N]; int adcHead_ = 0, adcN_ = 16; uint32_t lastSample_ = 0;
 #pragma once
 #include <Adafruit_NeoPixel.h>

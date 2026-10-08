@@ -59,6 +59,10 @@ class Ads8688 {
   uint32_t burst(uint8_t mask, int16_t* out, uint32_t n_per_channel,
                  uint32_t rate_hz, uint32_t* achieved_hz);
 
+  // The pacing burst() uses: whole microseconds per scan of the mask. A rate that
+  // does not divide 1 MHz is really 1e6 / periodUs(rate_hz) when the loop keeps up.
+  static uint32_t periodUs(uint32_t rate_hz) { return rate_hz ? (1000000u + rate_hz / 2) / rate_hz : 0; }
+
   bool present() const { return present_; }
 
  private:

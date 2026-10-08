@@ -33,19 +33,6 @@ void take(JsonObjectConst a, const char* key, bool& v) {
   if (!a[key].isNull()) v = a[key].as<bool>();
 }
 
-// What the local oscillator really is: the Si5351 makes 4 x f_lo and the
-// Johnson counter divides it by four. If there is no clock generator on the bus
-// (a bare dev board) the driver reports nothing and we fall back to the request.
-double actualLo(double asked) {
-  const double clk1 = clockgen.actualClk1();
-  return clk1 > 0.0 ? clk1 / 4.0 : asked;
-}
-
-double actualTx(double asked) {
-  const double f = dds.actualFrequency();
-  return f > 0.0 ? f : asked;
-}
-
 }  // namespace
 
 void NmrBlock::begin() {
@@ -64,20 +51,16 @@ void NmrBlock::begin() {
   pinMode(PIN_FET_GATE, OUTPUT);
   pinMode(PIN_HB_IN1, OUTPUT);
   pinMode(PIN_HB_IN2, OUTPUT);
+  // The transmitter flags (rework A2). Unwired, the pull-down reads "no flag".
+  pinMode(PIN_TX_IFLAG, INPUT_PULLDOWN);
+  pinMode(PIN_TX_TFLAG, INPUT_PULLDOWN);
 #endif
 
-  // The DDS master clock has to exist before the DDS is worth talking to.
+  // The DDS master clock has to exist before the DDS is worth talking to; then
+  // the default frequencies, so status reports the lattice values from the start.
   clockgen.setClk0(50000000);
   dds.begin(50000000);                 // PHASE0 selected, RESET bit set
-
-  // If the flags ever get bodged onto the spare expander lines, those two lines
-  // have to become inputs; with EXP_BIT_IFLAG at -1 this does nothing at all.
-  if (Sequencer::flagsConnected()) {
-    uint8_t mask = 0;
-    if (EXP_BIT_IFLAG >= 0) mask |= static_cast<uint8_t>(1u << (EXP_BIT_IFLAG & 7));
-    if (EXP_BIT_TFLAG >= 0) mask |= static_cast<uint8_t>(1u << (EXP_BIT_TFLAG & 7));
-    expander.setInputs(EXP_PORT_CTRL, mask);
-  }
+  seq_.programClocks();
 
   seq_.idleHardware();                 // blanked, gate off, carrier asleep
   seq_.begin();                        // buffers and the sequencer task
@@ -110,7 +93,8 @@ void NmrBlock::fillSettings(JsonObject out) const {
   out["polarize_ms"] = c.polarize_ms;
   out["t_polarize_settle_ms"] = c.t_polarize_settle_ms;
   out["hb_mode"] = c.hb_mode == 1 ? "fwd" : (c.hb_mode == 2 ? "rev" : "off");
-  out["if_hz"] = c.f_tx_hz - c.f_lo_hz;
+  out["ref_ch"] = c.ref_ch;
+  out["if_hz"] = seq_.ifHz();
   out["n"] = seq_.recordSamples();
   out["record_rate_hz"] = seq_.recordRate();
 }
@@ -138,6 +122,12 @@ bool NmrBlock::handle(JsonObjectConst cmd, JsonObject reply) {
     take(a, "t_repeat_ms", want.t_repeat_ms);
     take(a, "polarize_ms", want.polarize_ms);
     take(a, "t_polarize_settle_ms", want.t_polarize_settle_ms);
+    if (!a["ref_ch"].isNull()) {
+      // Read as a signed number: as<uint32_t>() would turn -1 into 0 = "none".
+      const long r = a["ref_ch"].as<long>();
+      if (r < 0 || r > 8) { reply["error"] = "ref_ch must be 0 (none) or 1..6"; return false; }
+      want.ref_ch = static_cast<uint8_t>(r);
+    }
     if (!a["sequence"].isNull()) {
       const char* s = a["sequence"] | "";
       if (strcmp(s, "fid") == 0) want.echo = false;
@@ -151,20 +141,25 @@ bool NmrBlock::handle(JsonObjectConst cmd, JsonObject reply) {
       else if (strcmp(m, "rev") == 0) want.hb_mode = 2;
       else { reply["error"] = "hb_mode must be off, fwd or rev"; return false; }
     }
+    const NmrConfig before = seq_.config();
     if (!seq_.applyConfig(want, &err)) { reply["error"] = err; return false; }
 
-    // Program the two frequencies now, so the reply can say what the hardware
-    // will really do rather than what was asked for. The carrier stays asleep;
-    // only the registers are loaded.
-    const NmrConfig& eff = seq_.config();
-    clockgen.setClk1(4.0 * eff.f_lo_hz);
-    clockgen.resetPllB();
-    expander.pulseJohnsonClear();
-    dds.setFrequency(eff.f_tx_hz);
+    // Program the frequencies now, so the reply can say what the hardware will
+    // really do rather than what was asked for: f_lo snapped to the lattice, the
+    // exact IF, CLK2's divider. The carrier stays asleep and CLK2 off; only the
+    // registers are loaded. If CLK2 cannot be set, the old settings come back,
+    // so a refused config changes nothing.
+    if (!seq_.programClocks()) {
+      seq_.applyConfig(before, &err);
+      seq_.programClocks();
+      reply["error"] = "CLK2 could not be set to the IF - check the Si5351";
+      return false;
+    }
 
     fillSettings(reply);
-    reply["f_tx_actual_hz"] = actualTx(eff.f_tx_hz);
-    reply["f_lo_actual_hz"] = actualLo(eff.f_lo_hz);
+    reply["f_tx_actual_hz"] = dds.actualFrequency();
+    reply["f_lo_actual_hz"] = seq_.loActualHz();
+    if (seq_.config().ref_ch) reply["clk2_actual_hz"] = clockgen.actualClk2();
     return true;
   }
 
@@ -185,11 +180,14 @@ bool NmrBlock::handle(JsonObjectConst cmd, JsonObject reply) {
     if (seq_.running()) { reply["error"] = "scan running"; return false; }
     const uint32_t t_us = a["t_us"] | 0u;
     if (t_us < 1 || t_us > 5000) { reply["error"] = "t_us must be 1..5000"; return false; }
+    if (const char* p = seq_.supplyProblem()) { reply["error"] = p; return false; }
     // A single gate with the carrier running, for a scope on the coil.
     seq_.prepareHardware();
     seq_.pulseOnce(t_us);
     seq_.idleHardware();
     reply["t_us"] = t_us;
+    reply["i_flag"] = seq_.iFlag();
+    reply["t_flag"] = seq_.tFlag();
     return true;
   }
 
@@ -201,6 +199,9 @@ bool NmrBlock::handle(JsonObjectConst cmd, JsonObject reply) {
     if (hz < 2500.0 || hz > 200000000.0) { reply["error"] = "hz must be 2500..200000000"; return false; }
     // CLK0 is the DDS master clock; the fitted AD9834BRUZ is a 50 MHz part.
     if (clk == 0 && hz > 50e6) { reply["error"] = "CLK0 above 50 MHz (AD9834BRUZ limit)"; return false; }
+    // A bench clock breaks the lattice: the reference is invalid until the next
+    // config or scan set reprograms everything, so it is switched off now.
+    clockgen.setClk2Exact(0);
     if (clk == 0) {
       // CLK0 is the DDS master clock: the driver's frequency arithmetic follows it.
       if (clockgen.setClk0(static_cast<uint32_t>(hz))) dds.setMclk(static_cast<uint32_t>(lround(clockgen.actualClk0())));
@@ -221,6 +222,7 @@ bool NmrBlock::handle(JsonObjectConst cmd, JsonObject reply) {
       const double hz = a["hz"].as<double>();
       if (hz < 0.0 || hz > 25000000.0) { reply["error"] = "hz must be 0..25000000"; return false; }
       dds.setFrequency(hz);
+      clockgen.setClk2Exact(0);           // off the lattice: no reference until the next config
     }
     if (!a["phase0_deg"].isNull()) dds.setPhase(0, a["phase0_deg"].as<double>());
     if (!a["phase1_deg"].isNull()) dds.setPhase(1, a["phase1_deg"].as<double>());
@@ -279,28 +281,29 @@ void NmrBlock::status(JsonObject out) {
   out["n_avg"] = c.n_avg;
   out["f_tx_hz"] = c.f_tx_hz;
   out["f_lo_hz"] = c.f_lo_hz;
-  out["if_hz"] = c.f_tx_hz - c.f_lo_hz;
+  out["if_hz"] = seq_.ifHz();
   // The rate the converter really managed, once it has been asked to manage it.
   out["rate_hz"] = seq_.achievedRate() ? seq_.achievedRate() : c.rate_hz;
 
   if (seq_.scansDone() > 0) {
     const dsp::Spectrum& s = seq_.spectrum();
     out["peak_hz"] = s.peak_hz;
-    out["larmor_hz"] = c.f_lo_hz + static_cast<double>(s.peak_hz);
+    out["larmor_hz"] = seq_.loActualHz() + static_cast<double>(s.peak_hz);
     out["peak_amp"] = s.peak_amp;
     out["snr_db"] = s.snr_db;
   }
 
-  // v0.7 brings the transmitter's current-limit and thermal flags to test
-  // points only, so there is nothing to read: null says "not connected", which
-  // is not the same answer as false.
-  if (Sequencer::flagsConnected()) {
-    out["i_flag"] = seq_.iFlag();
-    out["t_flag"] = seq_.tFlag();
-  } else {
-    out["i_flag"] = nullptr;
-    out["t_flag"] = nullptr;
+  out["ref_ch"] = c.ref_ch;
+  if (c.ref_ch && seq_.refMeasured()) {
+    out["ref_phase_deg"] = seq_.refPhaseDeg();
+    out["ref_amp"] = seq_.refAmp();
   }
+
+  // The transmitter's current-limit and thermal flags on GPIO6 / GPIO7 (rework
+  // A2). Without the rework the pull-downs make them read false.
+  out["i_flag"] = seq_.iFlag();
+  out["t_flag"] = seq_.tFlag();
+  out["tx_clip_warning"] = Sequencer::txClipWarning();
 
   if (seq_.state() == Sequencer::kError && seq_.error()[0]) out["error"] = seq_.error();
 #ifdef SIM

@@ -39,25 +39,71 @@ uint32_t dcStart(uint32_t n, uint32_t t_acq_ms) {
   return n - n / 10;                      // the last tenth
 }
 
-void decimate(const int16_t* raw, bool qFirst, uint32_t nOut, uint32_t decim,
-              float dcI, float dcQ, float voltsPerCodeI, float voltsPerCodeQ,
-              float* outIq) {
-  if (!raw || !outIq || decim == 0) return;
+void decimate(const int16_t* raw, uint32_t stride, uint32_t offI, uint32_t offQ,
+              uint32_t nOut, uint32_t decim, float dcI, float dcQ,
+              float voltsPerCodeI, float voltsPerCodeQ, float* outIq) {
+  if (!raw || !outIq || decim == 0 || stride == 0) return;
   const float inv = 1.0f / static_cast<float>(decim);
-  const uint32_t oi = qFirst ? 1 : 0;     // position of I within a raw pair
-  const uint32_t oq = 1 - oi;
   for (uint32_t k = 0; k < nOut; k++) {
-    const int16_t* p = raw + (size_t)k * decim * 2;
+    const int16_t* p = raw + (size_t)k * decim * stride;
     float si = 0.0f;
     float sq = 0.0f;
     for (uint32_t j = 0; j < decim; j++) {
-      si += static_cast<float>(p[2 * j + oi]);
-      sq += static_cast<float>(p[2 * j + oq]);
+      si += static_cast<float>(p[j * stride + offI]);
+      sq += static_cast<float>(p[j * stride + offQ]);
     }
 
     outIq[2 * k]     = (si * inv - dcI) * voltsPerCodeI;
     outIq[2 * k + 1] = (sq * inv - dcQ) * voltsPerCodeQ;
   }
+}
+
+Tone fitTone(const int16_t* first, uint32_t n, uint32_t stride, float w) {
+  Tone t = {0.0f, 0.0f};
+  if (!first || n < 8 || stride == 0) return t;
+
+  // Normal equations of the model m + c cos(wk) + s sin(wk). The sums of the
+  // basis products are accumulated too rather than assumed to be n/2 and 0:
+  // that would need a whole number of cycles in the window.
+  float s1 = 0, sc = 0, ss = 0, scc = 0, sss = 0, scs = 0, sr = 0, src = 0, srs = 0;
+  const float wr = cosf(w);
+  const float wi = sinf(w);
+  float cr = 1.0f;
+  float ci = 0.0f;
+  for (uint32_t k = 0; k < n; k++) {
+    const float r = static_cast<float>(first[(size_t)k * stride]);
+    s1 += 1.0f;
+    sc += cr;
+    ss += ci;
+    scc += cr * cr;
+    sss += ci * ci;
+    scs += cr * ci;
+    sr += r;
+    src += r * cr;
+    srs += r * ci;
+    const float nr = cr * wr - ci * wi;
+    ci = cr * wi + ci * wr;
+    cr = nr;
+    if ((k & 255u) == 255u) {     // pull the phasor back onto the unit circle
+      const float m = sqrtf(cr * cr + ci * ci);
+      if (m > 0.0f) { cr /= m; ci /= m; }
+    }
+  }
+
+  // Cramer's rule on the symmetric 3 x 3 system.
+  const double a11 = s1, a12 = sc, a13 = ss, a22 = scc, a23 = scs, a33 = sss;
+  const double b1 = sr, b2 = src, b3 = srs;
+  const double det = a11 * (a22 * a33 - a23 * a23) - a12 * (a12 * a33 - a23 * a13) +
+                     a13 * (a12 * a23 - a22 * a13);
+  if (fabs(det) < 1e-12) return t;
+  const double c = (a11 * (b2 * a33 - a23 * b3) - b1 * (a12 * a33 - a23 * a13) +
+                    a13 * (a12 * b3 - b2 * a13)) / det;
+  const double s = (a11 * (a22 * b3 - b2 * a23) - a12 * (a12 * b3 - b2 * a13) +
+                    b1 * (a12 * a23 - a22 * a13)) / det;
+  // c cos + s sin = amp cos(wk + phase) with c = amp cos(phase), s = -amp sin(phase).
+  t.amp = static_cast<float>(sqrt(c * c + s * s));
+  t.phase = static_cast<float>(atan2(-s, c));
+  return t;
 }
 
 void rotate(float* zIq, uint32_t n, float deg) {

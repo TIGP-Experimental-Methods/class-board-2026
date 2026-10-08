@@ -127,12 +127,6 @@ uint8_t Tca9535::cached(uint8_t port) const {
   return port > 1 ? 0 : out_[port];
 }
 
-bool Tca9535::setInputs(uint8_t port, uint8_t mask) {
-  if (port > 1) return false;
-  cfg_[port] = mask;
-  return write8(static_cast<uint8_t>(kRegConfig + port), mask);
-}
-
 bool Tca9535::readPort(uint8_t port, uint8_t& value) {
   if (port > 1) return false;
   return read8(static_cast<uint8_t>(kRegInput + port), value);

@@ -64,7 +64,8 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | | `info` | — | `{fw, chip, mac, ip, sim, expander, clockgen}` (the last two: did the TCA9535 / Si5351A answer on I²C) |
 | `b1` | `read_all` | — | `{ai:[8 volts]}` |
 | | `set_range` | `{ch:1..8, range}` (`ch` = panel input AI1…AI8; `range` 0 = ±10.24 V, 1 = ±5.12 V, 2 = ±2.56 V, 5 = 0–10.24 V, 6 = 0–5.12 V; any other code → `error:"range code not on this ADC"`) | `{ch, range}` |
-| `b2` | `rails` | — | `{v5_raw, v3v3, v12p, v12n, v5a, measured}` |
+| `b2` | `rails` | — | `{v5_raw, v3v3, v12p, v12n, v5a, measured, vext, vext_measured, vext_check}` |
+| | `vext_check` | `{on}` (default `true`; kept in RAM, on again after every start) | `{on}` — whether the NMR console checks +VEXT before it transmits (§7.3); `false` when the sense divider is not fitted |
 | `b3` | `set_dc` | `{ch:1..2, volts}` (−10 .. +10) | `{ch, mode}` |
 | | `sine` | `{ch, freq, amp, offset}` | `{ch, mode}` |
 | | `off` | `{ch}` | `{ch, mode}` |
@@ -94,10 +95,12 @@ Alarm rule fields: `key` = a numeric or true/false top-level status key (true = 
 ## 5. Status keys per block
 
 `base`: counter, temp_c, uptime_s, rssi, heap_free, clients (the number of stations connected to the board's own access point, 0 when the board has joined a network; not the number of app connections), led{r,g,b,brightness} ·
-`b1`: ai1…ai8, range (the range code of AI1) · `b2`: v5_raw, v3v3, v12p, v12n, v5a, measured ·
+`b1`: ai1…ai8, range (the range code of AI1) · `b2`: v5_raw, v3v3, v12p, v12n, v5a, measured, vext, vext_measured, vext_check ·
 `b3`: ao1, ao2, mode1, mode2 · `b4`: module1…module7, opto1, opto2, opto1_level, opto2_level, hbridge, polarizer (the H-bridge and polarizer are on the main board and are the instructor's hardware) ·
 `b5`: dio, dio1…dio8, trig_dir, trig, fast1_hz, fast2_hz (achieved frequencies on hardware; the requested value in the SIM build) · `template`: value, setpoint · `alarms`: rules, active ·
 `nmr`: see §7
+
+`b2` in detail: the five rails are design values on board v0.7 (`measured: false`; the SIM build wobbles them and says `true`). `vext` is +VEXT in volts to one decimal, read at 2 Hz (16 readings averaged) on GPIO4 through the 100 k / 10 k sense divider of rework B6 (2026-10-08); `vext_measured` is `true` (the SIM build reports 24.0). On a board without the divider GPIO4 floats and `vext` is noise: send `vext_check {on:false}`. `vext_check` is the setting of that command.
 
 `b4` in detail: `module1`…`module7` are true/false, the outputs as last written. `opto1`, `opto2` count the falling edges of the two isolated inputs (counted by the hardware pulse counter (1 µs glitch filter), so short pulses are not missed) since start-up or the last `opto_reset`; `opto1_level`, `opto2_level` are the input levels, polled (the 6N137 output is active low: `false` means current flows in the isolated input). `hbridge` (`off`, `fwd`, `rev`, `brake`) and `polarizer` (true/false) reflect the real pin levels on hardware, so they also show when the NMR sequencer or the polarizer timer has switched a coil off.
 
@@ -133,12 +136,12 @@ Demo regime: protons in water at about 2.1 mT, Larmor ≈ 89.4 kHz, IF ≈ 5.4 k
 
 | `cmd` | `args` | `result` |
 |---|---|---|
-| `config` | any subset of the settings in §7.2 | the full effective settings, plus `f_tx_actual_hz`, `f_lo_actual_hz` |
-| `start` | — | `{state:"running", n_avg}` — the scan set runs in the background |
+| `config` | any subset of the settings in §7.2 | the full effective settings, plus `f_tx_actual_hz`, `f_lo_actual_hz`, and `clk2_actual_hz` when `ref_ch` is set. Refused with *"CLK2 could not be set to the IF - check the Si5351"* (and the old settings kept) when the reference clock cannot be programmed |
+| `start` | — | `{state:"running", n_avg}` — the scan set runs in the background; refused on +VEXT (§7.3) |
 | `abort` | — | `{state:"idle"}` |
-| `pulse` | `{t_us}` 1–5000 | `{t_us}` — one transmit gate without acquisition, for a scope check |
-| `clock` | `{clk:0..1, hz}` (2500 Hz .. 200 MHz; CLK0, the DDS master clock, is refused above 50 MHz) | `{clk, hz_actual}` — low-level Si5351 test |
-| `dds` | `{hz, phase0_deg, phase1_deg, psel, on}` | the values programmed (`on`, default true, wakes the carrier) |
+| `pulse` | `{t_us}` 1–5000 | `{t_us, i_flag, t_flag}` — one transmit gate without acquisition, for a scope check; refused on +VEXT (§7.3) |
+| `clock` | `{clk:0..1, hz}` (2500 Hz .. 200 MHz; CLK0, the DDS master clock, is refused above 50 MHz) | `{clk, hz_actual}` — low-level Si5351 test; switches CLK2 off, and `if_hz` reports the frequencies it set until the next `config` or `start` |
+| `dds` | `{hz, phase0_deg, phase1_deg, psel, on}` | the values programmed (`on`, default true, wakes the carrier); a new `hz` switches CLK2 off as `clock` does |
 | `blank` | `{receive:bool}` | `{receive}` — manual receiver blanking for bench tests |
 | `get_record` | — | `{n, rate_hz, scan}` — and the last averaged record is resent as a binary frame (§7.4) |
 | `sim_larmor` | `{hz}` (simulation build only) | `{hz}` — the simulated Larmor frequency |
@@ -149,6 +152,13 @@ Demo regime: protons in water at about 2.1 mT, Larmor ≈ 89.4 kHz, IF ≈ 5.4 k
 set plus `f_tx_actual_hz` and `f_lo_actual_hz` (what the AD9834 and the Si5351 were really programmed
 to), `if_hz`, `n` and `record_rate_hz`. Every setting is checked, and a rejected `config` changes
 nothing at all.
+
+**The frequency lattice.** The carrier and the local oscillator sit on one grid of the Si5351's
+25 MHz crystal: f_tx = W × 25 MHz / 2²⁷ (the AD9834's 0.19 Hz steps) and f_lo = V × 25 MHz / 2²⁷
+with V even, so **`f_lo_hz` is snapped to the nearest 0.37 Hz step** and `f_lo_actual_hz` says
+where it landed (84 000 → 84 000.08). `if_hz` (in the reply, the status and the record header) is
+then exact: (W − V) × 25 MHz / 2²⁷, 5 399.99 Hz at the defaults. `clk2_actual_hz`, with a reference
+channel, is the frequency of the reference tone, equal to `if_hz` (NMR-FIRMWARE.md §3.9).
 
 | setting | default | accepted |
 |---|---|---|
@@ -162,7 +172,7 @@ nothing at all.
 | `t_dead_us` | 1000 | 0 .. 100000 |
 | `t_acq_start_us` | 1200 | 0 .. 100000 |
 | `t_acq_ms` | 2000 | 1 .. 4000 |
-| `rate_hz` | 100000 | 1000 .. 250000, per channel |
+| `rate_hz` | 100000 | 1000 .. 250000 per channel; 1000 .. 166666 with `ref_ch` (the ADC's 500 kS/s is shared by three channels) |
 | `decim` | 4 | 1 .. 1024 |
 | `n_avg` | 1 | 1 .. 256 |
 | `cyclops` | true | the pulse phase steps 0/90/180/270 across scans and the record is rotated back before averaging |
@@ -170,18 +180,22 @@ nothing at all.
 | `polarize_ms` | 0 | 0 .. 10000 |
 | `t_polarize_settle_ms` | 15 | 0 .. 1000 |
 | `hb_mode` | `"off"` | `"off"` / `"fwd"` / `"rev"`, during the polarize step |
+| `ref_ch` | 1 | 1 .. 6 = the panel input that carries Si5351 CLK2 (rework A1 of 2026-10-08 wires it to AI1 on every board, hence the default, in the SIM build too); 0 = no phase reference. 7 and 8 are refused (the receiver I and Q). A board without the wire fails its first scan set with *"reference tone missing on AI1 - is CLK2 wired?"*: send `ref_ch` 0. Needs an IF of at least 3.91 kHz, the slowest CLK2 the Si5351 makes (an Earth's-field IF of a few hundred hertz has no reference, and `config` refuses it until `ref_ch` is 0), an IF below 30 kHz (*"ref_ch needs an IF below 30 kHz"*: the ADC's input filter), and a `rate_hz` that folds no odd harmonic (3rd to 9th) of the square wave to within 100 Hz of the IF (*"rate_hz folds a reference harmonic onto the IF - change rate_hz"*). The defaults pass |
 
 Two more rules are about the record itself, and both come back as `ok:false` with the reason:
 
 * **It must not fold over.** The record the clients receive is decimated: its sample rate is
-  `rate_hz / decim`. Complex sampling covers −rate/2 to +rate/2, so the decimated rate has to be more
+  the paced rate / `decim` (the converter is paced in whole microseconds, so the paced rate is
+  1e6 / round(1e6 / `rate_hz`): 100 000 stays 100 000, 150 000 becomes 142 857; `record_rate_hz`, the
+  frame header and the board's spectrum use it). Complex sampling covers −rate/2 to +rate/2, so the decimated rate has to be more
   than twice the IF or the line comes back at the wrong frequency, looking perfectly convincing:
-  *"rate_hz / decim must be more than twice the IF — lower decim or move f_lo"*. At the default
+  *"rate_hz / decim must be more than twice the IF - lower decim or move f_lo"*. At the default
   5.4 kHz IF, 100 kS/s and `decim` 4 give 25 kS/s, with room to spare.
-* **It must fit in memory.** The capture buffer holds at most 1 000 000 samples per channel (4 MB of
-  PSRAM: *"t_acq_ms x rate_hz exceeds the 4 MB capture buffer"*) and the record that goes out at most
-  131 072 complex samples (a 1 MB frame: *"record too long to send — raise decim or shorten
-  t_acq_ms"*). The defaults use 800 kB and 400 kB of the board's 8 MB.
+* **It must fit in memory.** The capture buffer holds at most 2 000 000 samples over all the
+  channels of the burst (4 MB of PSRAM: *"t_acq_ms x rate_hz x channels exceeds the 4 MB capture
+  buffer"*) and the record that goes out at most 131 072 complex samples (a 1 MB frame: *"record too
+  long to send - raise decim or shorten t_acq_ms"*). The defaults (three channels) use 1.2 MB (800 kB
+  without the reference) and 400 kB of the board's 8 MB.
 
 While a scan set is in progress, `config`, `pulse`, `clock`, `dds`, `blank` and `sim_larmor` are refused
 with `error:"scan running"` and `start` with `error:"scan already running"`; `abort` and `get_record` are
@@ -190,24 +204,44 @@ not refused.
 ### 7.3 Status keys
 
 `state` (`idle` / `running` / `done` / `error`) · `scan` (scans done in this set) · `n_avg` · `f_tx_hz` ·
-`f_lo_hz` · `if_hz` · `rate_hz` (the rate the ADC really achieved) · `peak_hz` (signed, relative to the
-local oscillator) · `larmor_hz` (= `f_lo_hz` + `peak_hz`) · `peak_amp` (V) · `snr_db` · `i_flag` (the
-transmit amplifier hit its current limit) · `t_flag` (thermal) · `error` (string, when `state` is
-`error`) · `sim`. `peak_hz`, `larmor_hz`, `peak_amp` and `snr_db` appear once there is a record to
-measure. `i_flag` and `t_flag` are **null** on board v0.7: the OPA564 flags reach test points only, and
-null says "not connected", which is not the same answer as false.
+`f_lo_hz` (the settings as sent) · `if_hz` (exact, on the lattice of §7.2) · `rate_hz` (the rate the ADC
+really achieved, per channel) · `peak_hz` (signed, relative to the local oscillator) · `larmor_hz`
+(= `f_lo_actual_hz` + `peak_hz`) · `peak_amp` (V) · `snr_db` · `ref_ch` · `ref_phase_deg` (the phase of
+the reference tone at the start of this scan's record, −180 .. 180) · `ref_amp` (its amplitude in V,
+about 2.1 for the 0–3.3 V square wave) · `i_flag` (the transmit amplifier hit its current limit) ·
+`t_flag` (thermal) · `tx_clip_warning` · `error` (string, when `state` is `error`) · `sim`. `peak_hz`,
+`larmor_hz`, `peak_amp` and `snr_db` appear once there is a record to measure; `ref_phase_deg` and
+`ref_amp` once a scan with `ref_ch` has run.
 
-A current-limit or thermal flag stops the scan set: the board never keeps pulsing on a flag.
+**Flags.** `i_flag` and `t_flag` are true/false: the OPA564's flags reach GPIO6 and GPIO7 through rework
+A2 of 2026-10-08, sampled at the end of every pulse and after every acquisition. Without the rework the
+pins' pull-downs make both read false. A current-limit or thermal flag stops the scan set (*"current limit -
+check the coil and the gain jumper"*, *"thermal - duty cycle too high"*), before the receiver opens when
+it was raised during the pulse: the board never keeps pulsing on a flag.
+
+**Phase reference.** With `ref_ch` set, every scan's IF phase is measured from the CLK2 tone recorded on
+that input and the record is rotated onto the first scan's before the running mean (NMR-FIRMWARE.md §3.9).
+A tone under 0.2 V stops the set with *"reference tone missing on AI1 - is CLK2 wired?"*; a burst that
+falls more than 1 % behind the paced rate stops it with *"ADC fell behind rate_hz on three channels -
+lower rate_hz"*. Without `ref_ch` the scans are averaged as recorded and their random IF phases
+cancel part of the signal (NMR-FIRMWARE.md §3.8); the SIM build reproduces both.
+
+**+VEXT.** While `b2 vext_check` is on (the default) and `b2` has a reading, `start` and `pulse` are
+refused when +VEXT is below 6.5 V (*"+VEXT below 6.5 V (reads 3.2 V) - bench supply off? (or b2
+vext_check off if the sense divider is not fitted)"*) or above 25 V (*"+VEXT above 25 V (reads 26.1 V) -
+OPA564 limit (or …)"*). `tx_clip_warning` is true below 16 V, where the gain-25 transmitter output clips;
+it is a warning, not a refusal.
 
 ### 7.4 Binary frame, kind 3 — the averaged record
 
 Same 28-byte header as §6, so one parser handles both:
 
 `uint8 kind = 3` · `uint8 block_id = 9` · `uint8 ch = 0` · `uint8 bits = 32` (float32 pairs) ·
-`uint32 t_ms` · `uint32 rate_hz` (the **decimated** rate) · `uint32 n` (complex samples) ·
+`uint32 t_ms` · `uint32 rate_hz` (the **decimated** rate: paced rate / `decim`, to the nearest hertz) · `uint32 n` (complex samples) ·
 `int32 trig_index` = **scans averaged so far** · `float32 volts_per_lsb = 1.0` (the payload is already
-in volts) · `float32 offset_v` = **the IF in Hz** (`f_tx − f_lo`, so a client can label its frequency
-axis in Larmor Hz) · then `n × (float32 I, float32 Q)` in volts at the ADC input.
+in volts) · `float32 offset_v` = **the IF in Hz** (`f_tx − f_lo` as programmed, exact on the lattice,
+so a client can label its frequency axis in Larmor Hz) · then `n × (float32 I, float32 Q)` in volts at
+the ADC input.
 
 The board sends one frame to every client after every scan, and `get_record` resends the last one.
 The app (`host/pwa/panels/nmr.js`) draws the free induction decay from this record and computes the
