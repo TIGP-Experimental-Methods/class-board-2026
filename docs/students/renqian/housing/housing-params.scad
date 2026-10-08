@@ -190,12 +190,16 @@ REAR_Y = BY1 + GAP;
 // floor to within 2.4 mm of the wall top. Two staggered rows, because the
 // openings are only 15 to 18 mm apart and "H-BRIDGE COIL" is 26 mm long at
 // 2.6 (measured, not estimated); staggered, a name only has to clear the next
-// name in its own row, 31 mm or more away. The rows sit 0.8 mm apart, 0.8 mm
-// in from the cover's rear edge (y -10) and 0.8 mm clear of the AI1-FAST1
-// names at y -19.17.
+// name in its own row, 31 mm or more away.
+// Size 2.2, not 2.6: at 2.6 with 0.8 mm everywhere, the back row sat 0.8 mm
+// from the AI1-FAST1 names and "5V IN" read as one line with "AUX" below it.
+// 2.2 frees 0.8 mm, and all of it goes to that one gap: the rows now sit
+// 0.6 mm in from the cover's rear edge (y -10), 0.8 mm apart, and 1.87 mm
+// clear of the AI1-FAST1 names (their tops at y -17.59). Glyphs are 2.16 mm
+// tall at 2.2. 2.2 is the smallest size on the coupon - legibility unproven.
 // [ text, x = centre of its REAR opening, row 0 nearer the edge | row 1 ]
-REAR_NAME_SIZE = 2.6;
-REAR_NAME_ROW  = [-12.10, -15.45];
+REAR_NAME_SIZE = 2.2;
+REAR_NAME_ROW  = [-11.68, -14.64];
 REAR_NAMES = [
   ["COIL ≤24V",    98.40, 0],   // J905  silkscreen "+VCOIL COIL GND <=24V"
   ["H-BRIDGE COIL",    116.00, 1],   // J903  silkscreen "H-BRIDGE COIL"
