@@ -61,6 +61,19 @@ module deck_names()
       text(L[2], size = L[4], halign = L[3], valign = "center",
            font = "Liberation Sans:style=Bold");
 
+// Version 2: the rear connectors' names along the low cover's rear edge, and
+// my name - SPEC.md decision 6. Both on the low deck, both in the same inlay.
+module rear_names()
+  for (L = REAR_NAMES)
+    translate([L[1], REAR_NAME_ROW[L[2]]])
+      text(L[0], size = REAR_NAME_SIZE, halign = "center", valign = "center",
+           font = "Liberation Sans:style=Bold");
+
+module my_name()
+  translate([MY_NAME[1], MY_NAME[2]])
+    text(MY_NAME[0], size = MY_NAME[3], halign = "center", valign = "center",
+         font = "Liberation Sans:style=Bold");
+
 module cover(engrave = true) {
   difference() {
     union() {
@@ -128,7 +141,9 @@ module cover(engrave = true) {
     // labels at the end of this file. engrave = false gives the cover with no
     // names cut, which is only there so the labels can be worked out from it.
     if (engrave) {
-      translate([0, 0, LOW_TOP - ENGRAVE])  linear_extrude(ENGRAVE + 1) sma_names();
+      translate([0, 0, LOW_TOP - ENGRAVE])  linear_extrude(ENGRAVE + 1) {
+        sma_names(); rear_names(); my_name();
+      }
       translate([0, 0, HIGH_TOP - ENGRAVE]) linear_extrude(ENGRAVE + 1) deck_names();
     }
 

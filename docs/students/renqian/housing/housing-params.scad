@@ -178,3 +178,50 @@ REAR = TERM_SLOT
       ["term J903",    110.7, 121.3, -17.55,  -4.15, PAD_TERM, KF301_FIX],
       ["term J905 3P",  88.8, 108.0, -22.60,  -8.40, PAD_TERM, 0] ];
 REAR_Y = BY1 + GAP;
+
+// ---- names for the back, and my name (version 2) -----------------------------
+// SPEC.md decisions 4 and 6, and answers 1, 2 and 4.
+// Everything here was read from hardware/class-board.kicad_pcb - the pad nets
+// and the silkscreen printed beside each connector - not from a photo or the
+// brief. The main board is turned over in the housing, so housing x = 180 - x.
+
+// The names go on the TOP of the low cover along its rear edge, one above each
+// opening: the rear wall has no room for them - the DC opening runs from the
+// floor to within 2.4 mm of the wall top. Two staggered rows, because the
+// openings are only 15 to 18 mm apart and "H-BRIDGE COIL" is 26 mm long at
+// 2.6 (measured, not estimated); staggered, a name only has to clear the next
+// name in its own row, 31 mm or more away. The rows sit 0.8 mm apart, 0.8 mm
+// in from the cover's rear edge (y -10) and 0.8 mm clear of the AI1-FAST1
+// names at y -19.17.
+// [ text, x = centre of its REAR opening, row 0 nearer the edge | row 1 ]
+REAR_NAME_SIZE = 2.6;
+REAR_NAME_ROW  = [-12.10, -15.45];
+REAR_NAMES = [
+  ["COIL ≤24V",    98.40, 0],   // J905  silkscreen "+VCOIL COIL GND <=24V"
+  ["H-BRIDGE COIL",    116.00, 1],   // J903  silkscreen "H-BRIDGE COIL"
+  ["VEXT 7-18V",       131.50, 0],   // J901  silkscreen "+VEXT 7-18V DC FUSE 5A"
+  ["5V IN",            147.10, 1],   // J202  silkscreen "5V IN"
+  ["USB-C 5V",         162.00, 0],   // J201  silkscreen "USB-C 5V"
+];
+
+// The poles, engraved in the rear wall under each terminal opening, one mark
+// at each wire entry. x is the pad, from the board file:
+//   J901  pad 1 /c_switch/VIN  +    pad 2 GND  -
+//   J903  pad 1 HB_OUT1  1          pad 2 HB_OUT2  2   - an H-bridge: the two
+//         poles take turns being positive, so + and - would be a lie
+//   J905  pad 1 +VCOIL  +   pad 2 COIL  C   pad 3 GND  -
+// U+2212 is a real minus, not a hyphen.
+POLE_SIZE = 3.2;
+POLES = [
+  ["+",      127.62], ["−", 132.62],                        // J901
+  ["1",      113.22], ["2",      118.23],                        // J903
+  ["+",       95.10], ["C",      100.10], ["−", 105.10],    // J905
+];
+// Centred in the band between the bottom of the base and the lowest terminal
+// opening - 4.45 mm, so the 3.15 mm glyphs keep 0.65 mm each side.
+POLE_TOP = min([for (i = [2:4]) REAR[i][3] + REAR[i][6] - REAR[i][5]]);
+POLE_Z   = (FLOOR_BOT + POLE_TOP) / 2;
+
+// My name, one line, in the empty left part of the low cover: no SMA there
+// left of x 72. 57.4 mm wide at size 6 (measured), centred in x -2 .. 70.
+MY_NAME = ["TEE REN QIAN", 34.0, -40.0, 6.0];   // [ text, x, y, size ]
