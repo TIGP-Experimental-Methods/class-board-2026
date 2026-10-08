@@ -25,6 +25,7 @@
 9. The reference firmware and its protocol
 10. Known defects and open points
 11. Sources
+12. The rework fitted on the boards (2026-10-08)
 
 ---
 
@@ -61,7 +62,7 @@
 These follow from the datasheets and the netlist. They are listed once here and repeated where they apply.
 
 1. **Power-on order: USB (or the 5 V jack) first, let the board boot, then +VEXT, then +VCOIL. Off in reverse.** The transmitter amplifier OPA564 is damaged if its main supply rises before its 3.3 V logic supply (datasheet SBOS372E, Fig. 36). The main board's silkscreen says "USB FIRST, THEN BENCH SUPPLY".
-2. **One 5 V source at a time: USB-C or the jack, never both.** The two LM66100 ideal-diode controllers have their chip-enable pins on ground, which the datasheet calls "always on" without reverse-current blocking (SLVSEZ8A §8.3.1). With both connected, the higher source feeds the lower one through about 0.16 Ω. The same applies to the dev board's own USB sockets, which join +5V_RAW through the dev board's 5 V pin: flash through the main board's USB-C.
+2. **One 5 V source at a time: USB-C or the jack, never both, unless the board carries rework B1** (section 12). As shipped, the two LM66100 ideal-diode controllers have their chip-enable pins on ground, which the datasheet calls "always on" without reverse-current blocking (SLVSEZ8A §8.3.1): with both connected, the higher source feeds the lower one through about 0.16 Ω. The same applies to the dev board's own USB sockets, which join +5V_RAW through the dev board's 5 V pin: flash through the main board's USB-C.
 3. **+VEXT is 24 V (the course's bench supply); 7 V minimum, never above 24 V.** 24 V is the OPA564's rated maximum (absolute maximum 26 V), so the supply must not overshoot. **At 24 V, J12 must be on 2-3** (the polarizer gate driver fed from +5V_RAW): the UCC27517 allows 18 V and the FET gate 20 V. The silkscreen's "7–18 V" predates this. The jack is 5 V only.
 4. **Keep TX_EN (GPIO40) low except during a pulse.** The amplifier draws 39 mA idle against 5 mA shut down, and blanking relies on the gate being closed.
 5. **Never open the receiver (RX_BLANK = 1) while TX_EN = 1 or within the dead time after a pulse** (default 1 ms): the coil rings and the first amplifier stage would be driven into its rails.
@@ -107,7 +108,11 @@ Derived from the dev-board socket nets (main-board J1 = DevKitC-1 left row, J2 =
 | 44 | `PIN_UART0_RX` | GPIO44 | 0 Ω → panel LED D3 "ACT" through 1 k | out | UART0 RX; the dev board's USB-UART bridge can drive it |
 | 47 | `PIN_FET_GATE` | FET_GATE | 100 Ω → UCC27517 U904 IN+ → AOD4184A gate; 10 k to GND | out | low = polarizer off |
 | 48 | `PIN_RGB_LED` | — | the WS2812 on the dev board itself; nothing on the main board | out | — |
-| 0, 3, 4, 6, 7, 15, 35, 36, 37, 45, 46 | — | not connected | — | — | never use 0/3/45/46 (strapping), 35–37 (PSRAM); 4/6/7/15 are free pins with no connector |
+| 4 | `PIN_VEXT_SENSE` | VEXT_SENSE (rework B6; not connected as shipped) | 100 k / 10 k divider from +VEXT, 100 nF; 24 V reads 2.2 V | in (ADC1) | floats without the divider: `b2 vext_check off` then |
+| 6 | `PIN_TX_IFLAG` | rework A2 (not connected as shipped) | OPA564 IFLAG (pin 8) through 1 kΩ; active high | in, pull-down | reads 0 when unwired |
+| 7 | `PIN_TX_TFLAG` | rework A2 (not connected as shipped) | OPA564 TFLAG (pin 3) through 1 kΩ; active high | in, pull-down | reads 0 when unwired |
+| 15 | `PIN_REF_CLK` | V0.2 boards only | Si5351 CLK2 (the beat-frequency reference) | in | not wired on the ordered boards |
+| 0, 3, 35, 36, 37, 45, 46 | — | not connected | — | — | never use: 0/3/45/46 strapping, 35–37 PSRAM |
 
 Other socket pins: the dev board's **3V3 pins are not connected** to the main board's +3V3 (the ESP32 runs from the dev board's own regulator; all main-board logic runs from the AMS1117). The dev board's **5V pin is +5V_RAW**: the dev board is powered by the main board, and its own USB sockets back-feed +5V_RAW. RST (EN) reaches test point TP1 only.
 
@@ -769,3 +774,22 @@ Found while writing this document by comparing the code with the datasheets and 
 - Firmware: `firmware/` at the same commit (last source change 2026-09-30).
 - Datasheets, cited by section in the text: TI ADS8688 (SBAS582C), DAC8563 (SLAS719E), TCA9535 (SCPS201F), SN74AHCT541 (SCLS269Q), SN74LVC1T45 (SCES515N), OPA564 (SBOS372E), OPA1656 (SBOS901C), OPA1612 (SBOS450C), OPA2192, TS5A23157 (SCDS165F), DRV8871 (SLVSCY9B), UCC27517 (SLUSAY4D), LM66100 (SLVSEZ8A), LM78L05 (SNVS754O); Nexperia 74HCT125 Rev. 8; Vishay DG419 (70051 Rev. G); Skyworks Si5351A/B/C Rev 1.3 and AN619 Rev 0.8; Analog Devices AD9834 Rev. D; Lite-On 6N137 (DS70-2008-0035 B); Solomon Systech SSD1306 Rev 1.1; AOS AOD4184A, AOD4185; Mornsun B_S-2WR3; Advanced Monolithic AMS1117; Espressif ESP32-S3 datasheet v2.2 and the DevKitC-1 user guide. Links in `docs/references.md`.
 - The detailed working notes behind this document (connectivity tables, chip-by-chip datasheet extracts, the firmware audit, the signal-path derivations) are kept in the course repository under `notes/2026-10-08-board-reference/`.
+
+---
+
+## 12. The rework fitted on the boards (2026-10-08)
+
+The ordered boards are modified by hand before use (course repository `notes/2026-10-08-board-rework-plan.md`, Decision #85). What changes for an app or firmware author:
+
+| Rework | What it is | What the firmware does with it |
+|---|---|---|
+| **A1 phase reference** | Si5351 CLK2 (test point TP701) wired into the **AI1** jack. CLK2 is programmed to exactly f_tx − f_lo on a common frequency lattice (f_lo snaps to 0.37 Hz steps). | `nmr config {ref_ch: 1}`: the burst samples AI1 with I and Q, the phase of the reference tone gives each scan's beat phase, and the record is rotated by it before averaging; status `ref_phase_deg`, `ref_amp`. A missing tone fails the scan set. While `ref_ch` is 1, AI1 is not available as a general input. |
+| **A2 transmitter flags** | OPA564 IFLAG → GPIO6, TFLAG → GPIO7 (1 kΩ in series). | `i_flag`/`t_flag` are real booleans; a flag during or after a pulse stops the scan set. Unwired pins read 0 (pull-downs). |
+| **A3 labels** | J905 pin order, J901 polarity, ISO IN 1. | — |
+| **A4 fuse** | In the external +VCOIL lead. | — (the 10 s deadline stays) |
+| **A5 jumpers** | J3 1-2, J9 1-2, J10 1-2, J11 1-2, J12 2-3, J14 2-3, J15 2-3 for the NMR console. | — |
+| **B1 both 5 V inputs** | LM66100 chip-enable pins lifted to their own outputs: the inputs diode-OR. | After verification on the bench, USB-C and the jack may be connected together (rule 2). |
+| **B2 TRIG defined at boot** | 10 kΩ pull-down on TRIG_DIR. | The TRIG jack is an input from power-up. |
+| **B6 +VEXT sense** | 100 k / 10 k divider to GPIO4. | `b2` status `vext`; the sequencer refuses to pulse below 6.5 V or above 25 V and warns when the gain-25 output would clip (below 16 V); `b2 vext_check {on:false}` on a board without the divider. |
+
+**+VEXT:** 20–22 V is the recommended single supply (clean transmitter output with margin, the OPA564 well inside its rating, most of the bridge voltage); 24 V is allowed with the supply's over-voltage limit at 25 V. **V0.2 boards** (`hardware/V0.2/`, in design) make all of this permanent, add CLK2 on GPIO15, move the WIFI LED to GPIO42 and the pull resistors onto the board; their change list is `hardware/V0.2/CHANGES-V0.2.md`.
