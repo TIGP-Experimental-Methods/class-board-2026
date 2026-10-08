@@ -30,18 +30,32 @@ module wire_slot(cx, w, z0, z1, zcap, ycen, dep) {
                    [ f, z1 + r], [-f, z1 + r], [-w/2, z1]]);
 }
 
-// A vent is a stadium - a rectangle capped with a half circle at each end. The
-// half circle is horizontal only right at its apex, and over 3 mm that is
-// nothing to print, so it needs no gable and no support. It also just looks
-// better than a row of little gabled houses.
+// A vent is a teardrop - a half circle at the bottom, straight sides, and a top
+// that is a half circle with a 45 degree point on it.
+//
+// It was a plain stadium (a half circle at each end) until I sliced it. A circle
+// has every tangent angle on it somewhere, including horizontal at the very top,
+// so a round-topped hole ALWAYS contains surface the slicer scores as needing
+// support - a 1.5 mm cap on each of these - and 24 of them is 83 mm2 of it,
+// which was 89% of everything flagged in the whole part.
+//
+// The fix is the standard teardrop: hull the top circle with a point sqrt(2)*r
+// above its centre. The tangents from a point at that distance touch the circle
+// at exactly 45 degrees, so the top becomes two 45 degree faces and the sub-45
+// surface goes to zero, while the shoulders stay round. It is not the row of
+// gabled houses I rejected before - only the last 1.5 mm comes to a point.
+//
+// The apex is placed AT z1 and the circle dropped to z1 - sqrt(2)*r, so the vent
+// keeps exactly its old envelope and the 2 mm of solid wall above it.
 module vent_slot(cx, w, z0, z1, ycen, dep) {
   r = w/2;
   translate([cx, ycen + dep/2, 0])
     rotate([90, 0, 0])
       linear_extrude(height = dep)
         hull() {
-          translate([0, z0 + r]) circle(r = r);
-          translate([0, z1 - r]) circle(r = r);
+          translate([0, z0 + r])            circle(r = r);     // round bottom
+          translate([0, z1 - r*sqrt(2)])    circle(r = r);     // the shoulders
+          translate([0, z1 - 0.01])         circle(r = 0.01);  // the 45 deg point
         }
 }
 

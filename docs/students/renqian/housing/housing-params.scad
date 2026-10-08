@@ -18,6 +18,15 @@ M3_CLEAR  = 3.3;        // brief: holes 0.3 over the part
 FLOOR_AIR = 2;          // air under the lowest thing on the boards
 NUT_AF    = 5.8;        // brief: nut across flats
 NUT_DEEP  = 2.5;
+
+// How far the 45 degree roof over each nut pocket rises. Taking it to the hex's
+// across-CORNERS radius rather than its across-flats one puts the pocket's six
+// roof faces at atan(3.35/2.9) = 49.1 degrees instead of exactly 45, which is
+// the difference between "inside the rule" and "on the line".
+// Idea from the instructor's own housing, whose pockets "open at 45 degrees into
+// the box, so each nut slides in and cannot turn":
+//   https://shaynebennetts.github.io/class-board-instrument/
+NUT_ROOF  = NUT_AF/(2*cos(30));   // 3.349
 FIT       = 0.3;        // brief's general clearance
 ENGRAVE   = 0.6;        // depth of the engraved names
 ROUND_R   = 1.0;        // corner rounding on the wire slots
@@ -144,6 +153,17 @@ HOLES = [ [BX0+HOLE_INSET, BY1-HOLE_INSET], [BX1-HOLE_INSET, BY1-HOLE_INSET],
           [BX0+HOLE_INSET, BY0+HOLE_INSET], [BX1-HOLE_INSET, BY0+HOLE_INSET] ];
 function wdir(h) = [ h.x < CTRB.x ? -1 : 1, h.y < CTRB.y ? -1 : 1 ];
 
+// FIVE CONNECTORS, FOUR OPENINGS. The DC jack ends at x 152.5 and the USB-C
+// starts at 157.5, so there is 5.0 mm between them, and PAD_USB alone takes 3.0
+// of it. The rib would be 5.0 - PAD_USB - PAD_DC = -0.5 mm: the two openings
+// overlap and print as one 30.3 mm opening from z -17.2 up to the gables.
+// That is the right answer rather than a fault. Any rib I could fit here would
+// be under 2 mm, which is the trap PAD_TERM exists to avoid, and the only way
+// to widen it is to take clearance off the USB-C boot - the one opening that
+// needs it most. Measured on base.stl: continuous 139.20..169.45 at z = -9.
+// Where the two 45 degree gables separate again, at z about -6.5, they leave a
+// wedge of plastic whose tip is 0.15 mm wide. The slicer will drop the first
+// layer or two of it. That is cosmetic; it is not a bridge and needs no support.
 REAR = TERM_SLOT
   ? [ ["USB-C J201",   157.5, 166.5, -14.18, -10.02, PAD_USB, 0],
       ["DC jack J202", 141.7, 152.5, -23.40,  -8.90, PAD_DC,  0],
