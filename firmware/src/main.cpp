@@ -32,6 +32,7 @@
 #include "blocks/nmr/NmrBlock.h"
 #include "blocks/watch/WatchBlock.h"
 #include "blocks/push/PushBlock.h"
+#include "blocks/tg/TgBlock.h"
 #include "alarm/AlarmEngine.h"
 #include "net/WsOut.h"
 
@@ -65,6 +66,7 @@ static DioTrigBlock b5;
 static NmrBlock nmr;
 static WatchBlock watch;
 static PushBlock push_blk;
+static TgBlock tg_blk(registry);
 static AlarmEngine alarms(registry);
 
 // ---- network -------------------------------------------------------------
@@ -241,7 +243,8 @@ void setup() {
   registry.add(&nmr);
   registry.add(&watch);
   registry.add(&push_blk);
-  registry.add(&tpl);      // the copy-me example; remove once every block exists
+  registry.add(&tg_blk);   // after push: pairing points push at the Telegram chat
+  registry.add(&tpl);     // the copy-me example; remove once every block exists
   registry.add(&alarms);
   registry.beginAll();
 

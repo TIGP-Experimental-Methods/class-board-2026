@@ -84,6 +84,11 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | | `add` | `{block, key, op, threshold, action}` | the new rule incl. `id` |
 | | `remove` | `{id}` | `{removed}` |
 | | `clear` | — | `{}` |
+| `tg` | `set_token` | `{token}` (from @BotFather; stored in NVS, never echoed) | `{token:true}` |
+| | `unpair` / `clear` | — | `{paired:false}` / `{token:false}` |
+| | `test` | `{text}` | `{queued}` — to the paired chat |
+
+**`tg` (Telegram).** The board long-polls `getUpdates` from a task on core 0 and needs the internet, so it must have joined a WiFi (`secrets.h`; a phone hotspot works). Status: `token`, `paired`, `bot` (username), `state` (`no token` / `no internet` / `connecting` / `online` / `error`), `wifi`, `code` (the pairing code, until paired), `received`, `sent`, `errors`, `error`. Pairing: send the bot `/start <code>` (the panel's link does it in one tap); from then on only that chat is obeyed, and the alarm action `push` is pointed at it. Five wrong codes change the code and pause pairing for a minute. Messages that arrived while the board was off are skipped, not executed. Chat commands, each run through the registry exactly like the panel's buttons: `/status`, `/read [AIn]`, `/module N on|off`, `/led red|green|blue|white|off`, `/alarms`, `/alarm KEY OP VALUE` (a rule with action `push`; KEY is `ai1`…`ai8` or `block.key`), `/unalarm ID`, `/unpair`. TLS is not certificate-checked (as `push`), so someone on the network path could read the token.
 
 Alarm rule fields: `op` ∈ `gt lt ge le eq ne`; `action` = `notify` or `module:<n>:on` / `module:<n>:off` (a module output on the front panel; renamed from `relay:<n>:...` on 2026-09-17). Rules fire once per rising edge and are saved to `/alarms.json` on the board.
 
