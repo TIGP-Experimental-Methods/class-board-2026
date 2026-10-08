@@ -118,7 +118,11 @@ DECK_LABELS = [
   [120.00,  -86.95,"PWR",     "left",   2.2],
   [120.00,  -89.90,"WIFI",    "left",   2.2],
   [120.00,  -92.85,"ACT",     "left",   2.2],
-  [126.50,  -77.75,"QWIIC",   "left",   3.2],
+  // QWIIC was at x 126.5, where it ran 1.67 mm into the OLED window and lost
+  // half its C - invisible while the names were the cover's own colour, obvious
+  // once they were white. At 123.6 it spans 123.78..136.57: 0.68 mm clear of
+  // the Qwiic cutout and 1.23 mm clear of the window.
+  [123.60,  -77.75,"QWIIC",   "left",   3.2],
 ];
 
 // ---- the two cover heights ---------------------------------------------------

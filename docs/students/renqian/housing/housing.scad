@@ -5,6 +5,10 @@
 //                     the rear connector openings, ventilation slots
 //   PART = "cover_low"   the cover's low deck over the SMA field     -> cover-low.stl
 //   PART = "cover_high"  the cover's raised box over the OLED end    -> cover-high.stl
+//   PART = "cover_low_labels", "cover_high_labels"
+//                        the names as a separate part for a second colour, to be
+//                        loaded together with their half as one object
+//                                       -> cover-low-labels.stl, cover-high-labels.stl
 //                        Both come out FACE DOWN, ready for the plate. The cover
 //                        has two heights 12.3 mm apart and cannot print as one
 //                        part without supports - see the split in housing-cover.
@@ -30,7 +34,7 @@
 // NOT DONE: nothing has been printed. Until coupon.stl is printed and measured,
 // M3_CLEAR, NUT_AF and FIT are assumptions, not results.
 
-PART = "base";  // [base, cover_low, cover_high, cover, coupon, cover2d, assembly]
+PART = "base";  // [base, cover_low, cover_high, cover_low_labels, cover_high_labels, cover, coupon, cover2d, assembly]
 
 include <BOSL2/std.scad>
 include <housing-params.scad>
@@ -42,6 +46,8 @@ include <housing-coupon.scad>
 if (PART == "base")       base();
 if (PART == "cover_low")  cover_low();
 if (PART == "cover_high") cover_high();
+if (PART == "cover_low_labels")  cover_low_labels();
+if (PART == "cover_high_labels") cover_high_labels();
 if (PART == "cover")      cover();
 if (PART == "coupon")  coupon();
 if (PART == "cover2d") projection(cut = false) cover();
@@ -49,15 +55,26 @@ if (PART == "cover2d") projection(cut = false) cover();
 // Everything in place for housing.png: the boards where they really sit, and the
 // two cover halves lifted and pulled apart so the split shows. Preview only (F5);
 // the colours do not survive F6.
+// It draws the EXPORTED STL files, not the modules - so export first. Two
+// reasons: the picture is then of exactly the files handed in, and the label
+// inlays (a cover minus a cover, inside an intersection) are more CSG than the
+// preview can draw - it gave up and painted the whole cover white and lost the
+// base walls. face_down() undoes itself, so it turns the face-down halves back.
 EXPLODE_Z = 28;
 EXPLODE_Y = 10;
 if (PART == "assembly") {
-  color("Teal")          base();
+  color("Teal")          import("base.stl");
   color("ForestGreen")   import("../../../../hardware/release/front-panel.stl");
   color("DarkGreen")     translate([180, 0, -BOARD_GAP]) rotate([0, 180, 0])
                            import("../../../../hardware/release/class-board.stl");
-  color("SteelBlue")     translate([0, 0, EXPLODE_Z])              cover_low_asm();
-  color("LightSteelBlue") translate([0, -EXPLODE_Y, EXPLODE_Z])    cover_high_asm();
+  translate([0, 0, EXPLODE_Z]) face_down(LOW_TOP) {
+    color("SteelBlue")      import("cover-low.stl");
+    color("White")          import("cover-low-labels.stl");
+  }
+  translate([0, -EXPLODE_Y, EXPLODE_Z]) face_down(HIGH_TOP) {
+    color("LightSteelBlue") import("cover-high.stl");
+    color("White")          import("cover-high-labels.stl");
+  }
 }
 
 // ---- check the numbers -------------------------------------------------------

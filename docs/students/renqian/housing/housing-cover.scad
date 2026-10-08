@@ -47,7 +47,21 @@ module cover_lip_root()
     translate([-50, SPLIT_Y - 150, -50]) cube([300, 150, 100]);
   }
 
-module cover() {
+// The names, flat. One definition, used both to cut the engraving and - by the
+// difference at the end of this file - to make the inlay that fills it.
+module sma_names()
+  for (L = SMA_LABELS)
+    translate([L[0], L[1] + 6.5])
+      text(L[2], size = 3.2, halign = "center", valign = "center",
+           font = "Liberation Sans:style=Bold");
+
+module deck_names()
+  for (L = DECK_LABELS)
+    translate([L[0], L[1]])
+      text(L[2], size = L[4], halign = L[3], valign = "center",
+           font = "Liberation Sans:style=Bold");
+
+module cover(engrave = true) {
   difference() {
     union() {
       // low deck over the SMA field - threads stand 5.5 mm proud of its top
@@ -109,19 +123,14 @@ module cover() {
                   HIGH_IN - 0.5, OUT_Y0 + 4, 2*WALL + 12);
     }
 
-    // The panel silkscreen is hidden under the cover, so the names go on top.
-    // Engraved, not raised: nothing to knock off, and it needs no support.
-    for (L = SMA_LABELS)
-      translate([L[0], L[1] + 6.5, LOW_TOP - ENGRAVE])
-        linear_extrude(ENGRAVE + 1)
-          text(L[2], size = 3.2, halign = "center", valign = "center",
-               font = "Liberation Sans:style=Bold");
-
-    for (L = DECK_LABELS)
-      translate([L[0], L[1], HIGH_TOP - ENGRAVE])
-        linear_extrude(ENGRAVE + 1)
-          text(L[2], size = L[4], halign = L[3], valign = "center",
-               font = "Liberation Sans:style=Bold");
+    // The panel silkscreen is hidden under the cover, so the names go on top,
+    // engraved ENGRAVE deep - and then filled with a second colour, see the
+    // labels at the end of this file. engrave = false gives the cover with no
+    // names cut, which is only there so the labels can be worked out from it.
+    if (engrave) {
+      translate([0, 0, LOW_TOP - ENGRAVE])  linear_extrude(ENGRAVE + 1) sma_names();
+      translate([0, 0, HIGH_TOP - ENGRAVE]) linear_extrude(ENGRAVE + 1) deck_names();
+    }
 
     // the four screws
     for (h = HOLES)
@@ -155,19 +164,41 @@ module cover() {
 // expensive mistake. rotate 180 about x maps (x, y, z) -> (x, -y, -z); then
 // the old top face is lifted to z = 0. clash-test.py undoes exactly this.
 
-module cover_low_asm()
-  intersection() {
-    cover();
-    translate([-50, SPLIT_Y + FIT, -50]) cube([300, 150, 100]);
-  }
+module low_half()  translate([-50, SPLIT_Y + FIT, -50]) cube([300, 150, 100]);
+module high_half() translate([-50, SPLIT_Y - 150, -50]) cube([300, 150, 100]);
 
-module cover_high_asm()
-  intersection() {
-    cover();
-    translate([-50, SPLIT_Y - 150, -50]) cube([300, 150, 100]);
-  }
+module cover_low_asm()  intersection() { cover(); low_half(); }
+module cover_high_asm() intersection() { cover(); high_half(); }
 
 module face_down(top) translate([0, 0, top]) rotate([180, 0, 0]) children();
 
 module cover_low()  face_down(LOW_TOP)  cover_low_asm();
 module cover_high() face_down(HIGH_TOP) cover_high_asm();
+
+// ---- the names, in a second colour --------------------------------------------
+// The brief: "label text as cutouts in the cover with a white sheet behind".
+// Engraved names in the cover's own colour cannot be read across a bench, so
+// they have to differ in colour - but not by cutting through. A, O, R, Q, 4, 6,
+// 8 and 0 all have closed middles that would fall out, and nearly every name
+// here has one (AI1, AO2, TRIG, QWIIC, MODULE). And there is nowhere for a
+// sheet: the low deck sits FIT = 0.3 mm over the SMA hex bases, so a sheet
+// means a higher deck and less thread for the plug nut.
+//
+// So the names are an inlay: a separate part that exactly fills the 0.6 mm
+// engraving, printed in white. It is worked out as the cover without names
+// minus the cover with them, so it is precisely what the engraving removed -
+// clipped by every hole and window without having to list them again.
+//
+// In Bambu Studio: import cover-low.stl and cover-low-labels.stl TOGETHER and
+// answer Yes to "load as a single object with multiple parts", then give the
+// labels part white. Same for the high half. Printed face down, the names are
+// the first three layers only, so the AMS swaps colour a handful of times, not
+// every layer. With no AMS, print the cover alone: the names are still there,
+// engraved.
+module cover_low_labels_asm()
+  intersection() { difference() { cover(engrave = false); cover(); } low_half(); }
+module cover_high_labels_asm()
+  intersection() { difference() { cover(engrave = false); cover(); } high_half(); }
+
+module cover_low_labels()  face_down(LOW_TOP)  cover_low_labels_asm();
+module cover_high_labels() face_down(HIGH_TOP) cover_high_labels_asm();
