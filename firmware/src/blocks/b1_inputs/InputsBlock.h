@@ -7,9 +7,10 @@
 // when J14 / J15 are fitted and start on the +-5.12 V range.
 // The fast path - one input at kHz rates as binary frames, roll mode and a
 // triggered capture - is the Scope (Scope.h, PROTOCOL.md section 6).
-// Commands: read_all, set_range {ch, range}, stream {ch, rate_hz, chunk},
-//           capture {ch, rate_hz, n, trig:{level, edge, pre}, timeout_ms}, stop
-// Status:   ai1..ai8 (volts), range (AI1), ranges [8], scope {mode, ch, rate_hz, ...}
+// Commands: read_all, set_range {ch, range}, stream {ch, ch2, rate_hz, chunk},
+//           capture {ch, ch2, rate_hz, n, trig:{level, edge, pre}, timeout_ms}, stop
+//           (ch2 optional: a second input sampled in the same scans)
+// Status:   ai1..ai8 (volts), range (AI1), ranges [8], scope {mode, ch, ch2, rate_hz, ...}
 #pragma once
 #include "../Block.h"
 #include "Scope.h"

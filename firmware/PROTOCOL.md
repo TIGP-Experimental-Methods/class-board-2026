@@ -64,8 +64,8 @@ Numeric top-level keys inside a block (`base.counter`, `b1.ai1`, …) are what t
 | | `info` | — | `{fw, chip, mac, ip, sim, expander, clockgen}` (the last two: did the TCA9535 / Si5351A answer on I²C) |
 | `b1` | `read_all` | — | `{ai:[8 volts]}` |
 | | `set_range` | `{ch:1..8, range:0,1,2,5,6}` (`ch` = panel input AI1…AI8) | `{ch, range}` |
-| | `stream` | `{ch, rate_hz:10..20000, chunk}` (`rate_hz:0` = stop; renew within 10 s) | `{ch, rate_hz, chunk, lease_s}` — then kind-1 frames (§6) |
-| | `capture` | `{ch, rate_hz:10..250000, n:16..10000, trig:{level, edge, pre}, timeout_ms}` | `{ch, rate_hz, n, armed, trig}` — then one kind-2 frame (§6) |
+| | `stream` | `{ch, ch2, rate_hz:10..20000, chunk}` (`ch2` optional, then ≤ 10000; `rate_hz:0` = stop; renew within 10 s) | `{ch, ch2, rate_hz, chunk, lease_s}` — then kind-1 frames (§6) |
+| | `capture` | `{ch, ch2, rate_hz:10..250000, n:16..10000, trig:{level, edge, pre}, timeout_ms}` (`ch2` optional, then n ≤ 5000) | `{ch, ch2, rate_hz, n, armed, trig}` — then one kind-2 frame per input (§6) |
 | | `stop` | — | `{mode:"idle"}` — ends a stream or an armed capture |
 | `b2` | `rails` | — | `{v5_raw, v3v3, v12p, v12n, v5a, measured}` |
 | `b3` | `set_dc` | `{ch:1..2, volts}` | `{ch, mode}` |
@@ -93,7 +93,7 @@ Alarm rule fields: `op` ∈ `gt lt ge le eq ne`; `action` = `notify` or `module:
 ## 5. Status keys per block
 
 `base`: counter, temp_c, uptime_s, rssi, heap_free, clients, led{r,g,b,brightness} ·
-`b1`: ai1…ai8, range (AI1), ranges[8], scope{mode, ch, rate_hz, frames, dropped, last} · `b2`: v5_raw, v3v3, v12p, v12n, v5a, measured ·
+`b1`: ai1…ai8, range (AI1), ranges[8], scope{mode, ch, ch2, rate_hz, frames, dropped, last} · `b2`: v5_raw, v3v3, v12p, v12n, v5a, measured ·
 `b3`: ao1, ao2, mode1, mode2 · `b4`: module1…module7, opto1, opto2, opto1_level, opto2_level, hbridge, polarizer (the H-bridge and polarizer are on the main board and are the instructor's hardware) ·
 `b5`: dio, dio1…dio8, trig_dir, trig, fast1_hz, fast2_hz · `template`: value, setpoint · `alarms`: rules, active ·
 `nmr`: see §7
@@ -115,8 +115,9 @@ The 20 Hz `status` broadcast is the slow channel. Fast data uses **binary WebSoc
 **As built in `b1` (`firmware/src/blocks/b1_inputs/Scope.cpp`).** One input at a time, sampled by a worker task on core 1 that holds the SPI lock for one burst at a time (`Ads8688::burst`, auto-scan on a one-channel mask); the main loop sends each finished frame. Neither mode runs while an NMR scan does (refused with `ok:false`, and a running one stops with `scope.last` = "an NMR scan started").
 - **`stream`**: kind 1, `trig_index` −1. `chunk` defaults to `rate_hz/20` (a frame every 50 ms), at most 2000 samples and 100 ms. The stream is a **lease**: it stops 10 s after the last `stream` command (`scope.last` = "lease expired"), so a phone that leaves stops it; the same `stream` again renews it without restarting. Inside a frame the samples are evenly spaced; **on real hardware there is a short gap between frames** (the main loop sending), and `t_ms` says where each frame starts. Under SIM there is none. A chunk is dropped, not queued, when a client's send queue is full (`scope.dropped`), so the 20 Hz status keeps getting through.
 - **`capture`**: kind 2. Without `trig`, `n` samples now. With `trig`, the board takes bursts of 2n samples and looks for the crossing (0.5 % of full scale hysteresis) where `pre` samples fit before it and `n − pre` after, so the window is always from one burst; `trig_index` = `pre`. `timeout_ms` 0 waits for ever (normal); > 0 sends the last burst untriggered after that long (auto, `trig_index` −1). `n / rate_hz` ≤ 1 s, because a burst busy-waits on the main loop's core. `rate_hz` in the frame is the rate the burst achieved.
+- **Two inputs (`ch2`)**: both are scanned in the same ADC auto-scan, so they are sampled within microseconds of each other at every point; each burst is sent as **two frames, `ch` first then `ch2`, with the same `t_ms` and `trig_index`**, and the trigger looks at `ch`. A client pairs them by `t_ms`. Limits halve: a stream ≤ 10 000 S/s per input, a capture ≤ 5000 samples per input.
 - `ch` in the frame is the panel input (1..8); `volts_per_lsb` / `offset_v` follow the input's range (unipolar ranges have `offset_v` = full scale / 2).
-- `instrument capture` and `instrument scope` are the Python side; the b1 panel is the phone side (Roll / Auto / Normal / Single, CSV).
+- `instrument capture` and `instrument scope` (both take `--ch2`) are the Python side; the b1 panel is the phone side (Roll / Auto / Normal / Single, a second input, a Time / Spectrum view, the phase and gain of the second input at the first one's main frequency, CSV of either view). The spectrum is computed in the browser (Hann window, mean removed, dBV); the board sends samples only.
 
 **Same socket, no extra ports:** text frames stay JSON as above; the app tells them apart by frame type (`typeof data === "string"`).
 

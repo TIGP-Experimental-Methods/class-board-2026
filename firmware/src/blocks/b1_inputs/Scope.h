@@ -22,6 +22,13 @@
 // only fed from the main task). It never runs while an NMR scan does - both want
 // the ADC, and the NMR record matters more.
 //
+// Two inputs: `ch2` adds a second input to either mode. The ADC scans both
+// (auto-scan on a two-channel mask), so the two traces are sampled within a
+// couple of microseconds of each other at every point - which is what makes a
+// phase or delay between them meaningful. Each mode then sends TWO frames per
+// burst, one per input, with the same t_ms and trig_index; the trigger always
+// looks at the first input.
+//
 // Timing, honestly: inside one frame the samples are evenly spaced. On real
 // hardware a stream has a short gap between chunks (the main loop sending the
 // last one); each frame's t_ms says where it starts. Under SIM the samples are
@@ -44,6 +51,10 @@ class Scope {
   static constexpr uint32_t kMaxChunk      = 2000;    // samples in one stream frame
   static constexpr uint32_t kMaxCaptureMs  = 1000;    // n / rate_hz
   static constexpr uint32_t kStreamLeaseMs = 10000;
+  // With two inputs: half the stream rate (the same bytes per second on the
+  // WiFi) and half the capture length (a triggered burst is 2n scans of 2).
+  static constexpr uint32_t kStreamMaxHzDual = kStreamMaxHz / 2;
+  static constexpr uint32_t kMaxNDual        = kMaxN / 2;
 
   enum class Mode : uint8_t { Idle, Stream, Capture };
 
@@ -58,16 +69,19 @@ class Scope {
   // All of these run on the main task.
   void begin();
   // `ain` is the ADC channel (pins.h kAinOfAi), `panel_ch` the AI number the
-  // frame carries. Return nullptr when accepted, else the reason.
-  const char* startStream(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz, uint32_t chunk);
+  // frame carries; `panel_ch2` = 0 means one input. Return nullptr when
+  // accepted, else the reason.
+  const char* startStream(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz, uint32_t chunk,
+                          uint8_t panel_ch2 = 0, uint8_t ain2 = 0);
   const char* startCapture(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz, uint32_t n,
-                           const Trigger& trig);
+                           const Trigger& trig, uint8_t panel_ch2 = 0, uint8_t ain2 = 0);
   void stop();
   // Call every loop(): sends a finished frame, if there is one.
   void poll();
 
   Mode mode() const { return mode_; }
   uint8_t channel() const { return job_.panel_ch; }
+  uint8_t channel2() const { return job_.panel_ch2; }
   uint32_t rateHz() const { return achievedHz_ ? achievedHz_ : job_.rate_hz; }
   uint32_t chunk() const { return job_.n; }
   uint32_t frames() const { return frames_; }
@@ -81,6 +95,8 @@ class Scope {
     Mode mode = Mode::Idle;
     uint8_t panel_ch = 1;
     uint8_t ain = 0;
+    uint8_t panel_ch2 = 0;     // 0 = one input
+    uint8_t ain2 = 0;
     uint32_t rate_hz = 1000;
     uint32_t n = 500;          // stream: chunk; capture: window length
     Trigger trig;
@@ -91,13 +107,22 @@ class Scope {
   void runStream(const Job& j, uint32_t gen);
   void runCapture(const Job& j, uint32_t gen);
 
-  // Fill `out` with n samples of ADC channel `ain` at rate_hz. `t0_us` is the
-  // time base of the first sample (SIM only: makes the stream continuous).
+  // Fill `out` with n scans at rate_hz: one sample per scan, or two
+  // interleaved in ascending ADC-channel order (Ads8688::burst). `t0_us` is the
+  // time base of the first scan (SIM only: makes the stream continuous).
   // Returns false if the SPI bus could not be had.
   bool sample(const Job& j, int16_t* out, uint32_t n, int64_t t0_us, uint32_t* achieved_hz);
   bool waitForSlot(uint32_t gen);   // until the main task has sent the last frame
-  void publish(uint8_t kind, const Job& j, uint32_t t_ms, uint32_t rate_hz,
-               const int16_t* samples, uint32_t n, int32_t trig_index);
+  // One frame for one input: samples raw[(first + k) * stride + slot], k < n.
+  void publish(uint8_t kind, uint8_t panel_ch, uint8_t ain, uint32_t t_ms, uint32_t rate_hz,
+               const int16_t* raw, uint32_t first, uint32_t stride, uint32_t slot, uint32_t n,
+               int32_t trig_index);
+  // Both inputs of a burst (or the one), waiting for the slot between them.
+  bool publishAll(uint8_t kind, const Job& j, uint32_t gen, uint32_t t_ms, uint32_t rate_hz,
+                  uint32_t first, uint32_t n, int32_t trig_index);
+  static bool dual(const Job& j) { return j.panel_ch2 != 0; }
+  // Where the first input sits in an interleaved scan.
+  static uint32_t slotA(const Job& j) { return dual(j) && j.ain > j.ain2 ? 1 : 0; }
   bool stale(uint32_t gen) const { return gen != gen_; }
   bool allocate();
   void setJob(const Job& j);

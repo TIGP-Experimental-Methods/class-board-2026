@@ -6,6 +6,7 @@ Mirrors the WebSocket protocol in firmware/PROTOCOL.md one-to-one:
     instrument send base led --args '{"r":0,"g":255,"b":0}'
     instrument stream base.counter --seconds 5 --csv out.csv
     instrument capture --ch 3 --rate 50000 --n 1000 --level 0.5 --pre 250 --csv ai3.csv
+    instrument capture --ch 3 --ch2 6 --rate 50000 --n 1000 --level 0.5 --csv ai3-ai6.csv
     instrument scope --ch 1 --rate 1000 --seconds 10 --csv ai1.csv
     instrument alarms list
     instrument alarms add --block b1 --key ai1 --op gt --threshold 9 --action module:1:off
@@ -224,7 +225,7 @@ def stream(
 
 
 # --------------------------------------------------------------------------
-# Scope: one b1 input at kHz rates (PROTOCOL.md section 6)
+# Scope: one or two b1 inputs at kHz rates (PROTOCOL.md section 6)
 # --------------------------------------------------------------------------
 FRAME_KIND_STREAM = 1
 FRAME_KIND_CAPTURE = 2
@@ -238,54 +239,68 @@ def frame_volts(head: dict, payload: bytes) -> list[float]:
     return [head["offset_v"] + head["volts_per_lsb"] * r for r in raw]
 
 
-def write_trace_csv(path: str, comment: str, t0_s: float, rate_hz: float, volts: list[float]) -> None:
+def write_trace_csv(path: str, comment: str, t0_s: float, rate_hz: float, columns: dict[str, list[float]]) -> None:
+    """t_s plus one column per input; with one input the column is called `volts`."""
+    names = list(columns)
+    n = min(len(c) for c in columns.values())
     with open(path, "w", newline="") as f:
         f.write(f"# {comment}\n")
         w = csv.writer(f)
-        w.writerow(["t_s", "volts"])
-        w.writerows((f"{t0_s + k / rate_hz:.8g}", f"{v:.5f}") for k, v in enumerate(volts))
+        w.writerow(["t_s", "volts"] if len(names) == 1 else ["t_s", *(f"{k}_volts" for k in names)])
+        for k in range(n):
+            w.writerow([f"{t0_s + k / rate_hz:.8g}", *(f"{columns[c][k]:.5f}" for c in names)])
+
+
+def summary(name: str, v: list[float]) -> str:
+    return f"{name}: min {min(v):.4f} V  max {max(v):.4f} V  mean {sum(v) / len(v):.4f} V"
 
 
 @app.command()
 def capture(
     ch: int = typer.Option(1, help="panel input AI1..AI8"),
+    ch2: int = typer.Option(0, help="a second input sampled in the same scans (0 = none)"),
     rate: int = typer.Option(50000, help="samples per second (10..250000)"),
-    n: int = typer.Option(1000, help="samples (16..10000, at most 1 s)"),
-    level: float | None = typer.Option(None, help="trigger level in volts; omit for no trigger"),
+    n: int = typer.Option(1000, help="samples (16..10000, 5000 with --ch2, at most 1 s)"),
+    level: float | None = typer.Option(None, help="trigger level in volts on --ch; omit for no trigger"),
     edge: str = typer.Option("rising", help="rising or falling"),
     pre: int = typer.Option(0, help="samples kept before the trigger"),
     timeout_ms: int = typer.Option(0, help="give up waiting and send untriggered after this long (0 = wait)"),
     wait_s: float = typer.Option(10.0, help="how long this client waits for the frame"),
-    csv_path: str | None = typer.Option(None, "--csv", help="write t_s,volts rows here (t = 0 at the trigger)"),
+    csv_path: str | None = typer.Option(None, "--csv", help="write t_s plus one volts column per input (t = 0 at the trigger)"),
     host: str | None = HostOpt,
 ):
-    """One triggered (or immediate) capture of a b1 input."""
+    """One triggered (or immediate) capture of one or two b1 inputs."""
     args: dict[str, Any] = {"ch": ch, "rate_hz": rate, "n": n}
+    if ch2:
+        args["ch2"] = ch2
     if level is not None:
         args["trig"] = {"level": level, "edge": edge, "pre": pre}
         args["timeout_ms"] = timeout_ms
+    wanted = [ch, ch2] if ch2 else [ch]
 
     async def go():
+        got: dict[int, tuple[dict, bytes]] = {}
         async with Client(discover(host)) as c:
             await c.send("b1", "capture", args)
-            while True:
+            # One frame per input, the first input's first, both with the same t_ms.
+            while len(got) < len(wanted):
                 head, payload = await c.next_binary(kind=FRAME_KIND_CAPTURE, timeout=wait_s)
-                if head["block_id"] == 1:
-                    break
-        v = frame_volts(head, payload)
+                if head["block_id"] == 1 and head["ch"] in wanted:
+                    got[head["ch"]] = (head, payload)
+        head = got[ch][0]
         rate_hz = head["rate_hz"] or rate
         trig = head["trig_index"]
         t0 = -trig / rate_hz if trig >= 0 else 0.0
-        mean = sum(v) / len(v)
-        typer.echo(
-            f"AI{head['ch']}: {len(v)} samples at {rate_hz} S/s, "
-            f"{'trigger at sample ' + str(trig) if trig >= 0 else 'untriggered'}; "
-            f"min {min(v):.4f} V  max {max(v):.4f} V  mean {mean:.4f} V"
-        )
+        columns = {f"ai{k}": frame_volts(*got[k]) for k in wanted}
+        where = f"trigger at sample {trig}" if trig >= 0 else "untriggered"
+        typer.echo(f"{len(columns[f'ai{ch}'])} samples at {rate_hz} S/s, {where}")
+        for k in wanted:
+            typer.echo(summary(f"AI{k}", columns[f"ai{k}"]))
         if csv_path:
-            note = f"b1 AI{head['ch']}, {rate_hz} S/s, capture" + (", t = 0 at the trigger" if trig >= 0 else "")
-            write_trace_csv(csv_path, note, t0, rate_hz, v)
-            typer.echo(f"wrote {len(v)} rows to {csv_path}", err=True)
+            names = " + ".join(f"AI{k}" for k in wanted)
+            note = f"b1 {names}, {rate_hz} S/s, capture" + (", t = 0 at the trigger" if trig >= 0 else "")
+            write_trace_csv(csv_path, note, t0, rate_hz, columns)
+            typer.echo(f"wrote {len(columns[f'ai{ch}'])} rows to {csv_path}", err=True)
 
     run(go())
 
@@ -293,48 +308,54 @@ def capture(
 @app.command()
 def scope(
     ch: int = typer.Option(1, help="panel input AI1..AI8"),
-    rate: int = typer.Option(1000, help="samples per second (10..20000)"),
+    ch2: int = typer.Option(0, help="a second input sampled in the same scans (0 = none)"),
+    rate: int = typer.Option(1000, help="samples per second (10..20000, 10000 with --ch2)"),
     seconds: float = typer.Option(5.0, help="how long to record"),
-    csv_path: str | None = typer.Option(None, "--csv", help="write t_s,volts rows here"),
+    csv_path: str | None = typer.Option(None, "--csv", help="write t_s plus one volts column per input"),
     host: str | None = HostOpt,
 ):
-    """Record a b1 input in roll mode (the `stream` command) for a while."""
+    """Record one or two b1 inputs in roll mode (the `stream` command) for a while."""
+    wanted = [ch, ch2] if ch2 else [ch]
+    args: dict[str, Any] = {"ch": ch, "rate_hz": rate}
+    if ch2:
+        args["ch2"] = ch2
 
     async def go():
-        volts: list[float] = []
-        first_ms = None
+        columns: dict[str, list[float]] = {f"ai{k}": [] for k in wanted}
         rate_hz = rate
         async with Client(discover(host)) as c:
-            reply = await c.send("b1", "stream", {"ch": ch, "rate_hz": rate})
-            typer.echo(f"streaming AI{ch} at {rate} S/s, {reply.get('chunk')} samples per frame", err=True)
+            reply = await c.send("b1", "stream", args)
+            typer.echo(f"streaming {' + '.join(f'AI{k}' for k in wanted)} at {rate} S/s, {reply.get('chunk')} samples per frame", err=True)
             t_end = time.monotonic() + seconds
             renew_at = time.monotonic() + STREAM_RENEW_S
             try:
                 while time.monotonic() < t_end:
                     if time.monotonic() >= renew_at:
-                        await c.send("b1", "stream", {"ch": ch, "rate_hz": rate})
+                        await c.send("b1", "stream", args)
                         renew_at = time.monotonic() + STREAM_RENEW_S
                     msg = await asyncio.wait_for(c.recv_any(), timeout=5)
                     if not isinstance(msg, bytes):
                         continue
                     head = parse_frame_header(msg)
-                    if not head or head["kind"] != FRAME_KIND_STREAM or head["block_id"] != 1:
+                    if not head or head["kind"] != FRAME_KIND_STREAM or head["block_id"] != 1 or head["ch"] not in wanted:
                         continue
-                    if first_ms is None:
-                        first_ms = head["t_ms"]
                     rate_hz = head["rate_hz"] or rate
-                    volts.extend(frame_volts(head, msg[FRAME_HEADER_BYTES:]))
+                    columns[f"ai{head['ch']}"].extend(frame_volts(head, msg[FRAME_HEADER_BYTES:]))
             finally:
                 await c.send("b1", "stream", {"ch": ch, "rate_hz": 0})
-        if not volts:
+        if not all(columns.values()):
             typer.echo("no stream frames arrived", err=True)
             raise typer.Exit(1)
-        typer.echo(f"{len(volts)} samples, min {min(volts):.4f} V  max {max(volts):.4f} V")
+        n = min(len(v) for v in columns.values())
+        typer.echo(f"{n} samples")
+        for k in wanted:
+            typer.echo(summary(f"AI{k}", columns[f"ai{k}"]))
         if csv_path:
             # Chunks are joined end to end; on real hardware there is a short gap
             # between chunks (PROTOCOL.md section 6), so t is nominal.
-            write_trace_csv(csv_path, f"b1 AI{ch}, {rate_hz} S/s, roll (chunks joined)", 0.0, rate_hz, volts)
-            typer.echo(f"wrote {len(volts)} rows to {csv_path}", err=True)
+            names = " + ".join(f"AI{k}" for k in wanted)
+            write_trace_csv(csv_path, f"b1 {names}, {rate_hz} S/s, roll (chunks joined)", 0.0, rate_hz, columns)
+            typer.echo(f"wrote {n} rows to {csv_path}", err=True)
 
     run(go())
 

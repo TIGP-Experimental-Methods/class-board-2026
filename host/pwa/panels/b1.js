@@ -1,4 +1,5 @@
-// Panel for b1_inputs: an eight-channel voltmeter and a one-channel oscilloscope.
+// Panel for b1_inputs: an eight-channel voltmeter and a two-channel oscilloscope
+// with a spectrum view.
 //
 // Voltmeter: the 20 Hz status values ai1..ai8, each with its own range.
 // Scope: the fast path (firmware/PROTOCOL.md section 6). The board samples one
@@ -11,6 +12,13 @@
 //   Auto    the same, but the board sends an untriggered frame if nothing
 //           crosses the level in time - so a flat line still shows.
 // Tap the trace to put the trigger level there.
+// A second input (`ch2`) is sampled in the same ADC scans as the first, so the
+// two traces line up to within microseconds; the board sends one frame per
+// input with the same t_ms, and this panel pairs them. With two inputs the
+// panel also gives the phase and gain of the second relative to the first at
+// the first one's main frequency - one point of a Bode plot.
+// Spectrum: a Hann-windowed FFT of what is on screen, in dBV (dB relative to
+// 1 V rms), the mean removed. A sine of amplitude A reads 20 log10(A / sqrt 2).
 //
 // A panel is a plain object: { id, title, render(container, api), onStatus(st) }.
 let els = {};
@@ -29,19 +37,25 @@ const CAPTURE_RATES = [1000, 5000, 10000, 20000, 50000, 100000, 250000];
 const CAPTURE_N = [500, 1000, 2000, 4000, 5000, 10000];
 const ROLL_N = 2000;               // samples shown in roll mode
 const MAX_CAPTURE_S = 1;           // the board refuses n / rate above this
+const MAX_N_DUAL = 5000;           // ...and n above this with two inputs
+const MAX_ROLL_DUAL = 10000;       // ...and a stream above this with two inputs
+const MAX_FFT = 16384;
+const COLOR_A = '#4fa3ff', COLOR_B = '#3ddc84';
 const LEASE_RENEW_MS = 4000;       // the board's lease is 10 s
 const AUTO_TIMEOUT_MS = 150;
 
 // What the scope is set to. Kept across tab switches and reloads.
 const cfg = Object.assign({
-  ch: 3, mode: 'auto', rollRate: 1000, rate: 50000, n: 500,
+  ch: 3, ch2: 0, mode: 'auto', view: 'time', rollRate: 1000, rate: 50000, n: 500,
   level: 0.5, edge: 'rising', prePct: 25,
 }, load());
 
 let running = false;               // the user pressed Run (roll / normal / auto)
 let renewTimer = null;
-let trace = null;                  // { v: Float32Array, rate, t0, trig, ch, kind }
-const roll = { buf: new Float32Array(ROLL_N), head: 0, filled: 0, rate: 0, ch: 0 };
+let trace = null;                  // { v, v2 (or null), rate, trig, ch, ch2, kind, t_ms, lsb }
+let pending = null;                // first input's capture frame, waiting for the second's
+const roll = { buf: new Float32Array(ROLL_N), buf2: new Float32Array(ROLL_N), head: 0, filled: 0,
+  rate: 0, ch: 0, ch2: 0, pendingN: 0 };
 let boardScope = {};               // b1.scope from the status broadcast
 
 function load() {
@@ -79,6 +93,8 @@ export default {
         .b1-meas b { font-weight: normal; color: var(--accent); font-variant-numeric: tabular-nums; font-size: 15px; }
         .b1-state { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-height: 1.4em; }
         .b1-state .warn { color: var(--warn); }
+        .b1-meas .b { color: ${COLOR_B}; }
+        .b1-meas .wide { grid-column: 1 / -1; }
       </style>
       <h2>B1 Precision inputs</h2>
       <p class="help">ADS8688, 8 × 16 bit. Each input has its own range; a reading in amber is at the end of its range.
@@ -94,6 +110,7 @@ export default {
       </div>
       <div class="b1-form" style="margin-top:8px">
         <label>input<select id="ch">${opts([1, 2, 3, 4, 5, 6, 7, 8], cfg.ch, v => 'AI' + v)}</select></label>
+        <label>second input<select id="ch2">${opts([0, 1, 2, 3, 4, 5, 6, 7, 8], cfg.ch2, v => v ? 'AI' + v : '—')}</select></label>
         <label class="roll-only">sample rate<select id="rollRate">${opts(ROLL_RATES, cfg.rollRate, hz)}</select></label>
         <label class="cap-only">sample rate<select id="rate">${opts(CAPTURE_RATES, cfg.rate, hz)}</select></label>
         <label class="cap-only">samples<select id="n">${opts(CAPTURE_N, cfg.n, v => String(v))}</select></label>
@@ -106,6 +123,10 @@ export default {
         <button class="btn" id="csv">CSV</button>
         <span class="b1-state" id="state"></span>
       </div>
+      <div class="b1-modes" id="views">
+        <button class="btn" data-v="time">Time</button>
+        <button class="btn" data-v="spectrum">Spectrum</button>
+      </div>
       <canvas id="scope" class="b1-scope"></canvas>
       <div class="b1-meas" id="meas"></div>
 
@@ -114,7 +135,7 @@ export default {
 
     els = {
       tiles: el.querySelector('#tiles'), modes: el.querySelector('#modes'),
-      ch: el.querySelector('#ch'), rollRate: el.querySelector('#rollRate'), rate: el.querySelector('#rate'),
+      ch: el.querySelector('#ch'), ch2: el.querySelector('#ch2'), views: el.querySelector('#views'), rollRate: el.querySelector('#rollRate'), rate: el.querySelector('#rate'),
       n: el.querySelector('#n'), level: el.querySelector('#level'), edge: el.querySelector('#edge'),
       pre: el.querySelector('#pre'), run: el.querySelector('#run'), state: el.querySelector('#state'),
       scope: el.querySelector('#scope'), meas: el.querySelector('#meas'), root: el,
@@ -148,7 +169,10 @@ export default {
         if (running) restart(); else draw();
       };
     };
-    for (const k of ['ch', 'rollRate', 'rate', 'n']) {
+    for (const b of els.views.querySelectorAll('button')) {
+      b.onclick = () => { cfg.view = b.dataset.v; save(); showMode(); draw(); };
+    }
+    for (const k of ['ch', 'ch2', 'rollRate', 'rate', 'n']) {
       els[k].onchange = () => {
         cfg[k] = Number(els[k].value); fitLength(); save();
         if (running) restart();
@@ -208,17 +232,24 @@ export default {
 // ---------------------------------------------------------------------------
 function err(e) { api.toast(e.message || String(e)); }
 
+function dual() { return cfg.ch2 > 0 && cfg.ch2 !== cfg.ch; }
+
 function fitLength() {
-  // n / rate must stay within a second; shorten the record rather than refuse.
-  while (cfg.n / cfg.rate > MAX_CAPTURE_S && cfg.n > CAPTURE_N[0]) {
+  // n / rate must stay within a second (and n within 5000 with two inputs);
+  // shorten the record rather than refuse. The same for a two-input stream.
+  const maxN = dual() ? MAX_N_DUAL : Infinity;
+  while ((cfg.n / cfg.rate > MAX_CAPTURE_S || cfg.n > maxN) && cfg.n > CAPTURE_N[0]) {
     cfg.n = CAPTURE_N[Math.max(0, CAPTURE_N.indexOf(cfg.n) - 1)] ?? CAPTURE_N[0];
   }
+  if (dual() && cfg.rollRate > MAX_ROLL_DUAL) cfg.rollRate = MAX_ROLL_DUAL;
   if (els.n) els.n.value = String(cfg.n);
+  if (els.rollRate) els.rollRate.value = String(cfg.rollRate);
 }
 
 function captureArgs() {
   fitLength();
   const args = { ch: cfg.ch, rate_hz: cfg.rate, n: cfg.n };
+  if (dual()) args.ch2 = cfg.ch2;
   args.trig = { level: cfg.level, edge: cfg.edge, pre: Math.round(cfg.n * cfg.prePct / 100) };
   if (cfg.mode === 'auto') args.timeout_ms = AUTO_TIMEOUT_MS + Math.round(2000 * cfg.n / cfg.rate);
   return args;
@@ -226,8 +257,11 @@ function captureArgs() {
 
 function startScope() {
   if (cfg.mode === 'roll') {
-    roll.filled = 0; roll.head = 0; roll.rate = cfg.rollRate; roll.ch = cfg.ch;
-    const ask = () => api.send('b1', 'stream', { ch: cfg.ch, rate_hz: cfg.rollRate });
+    fitLength();
+    roll.filled = 0; roll.head = 0; roll.rate = cfg.rollRate; roll.ch = cfg.ch; roll.ch2 = dual() ? cfg.ch2 : 0;
+    const args = { ch: cfg.ch, rate_hz: cfg.rollRate };
+    if (dual()) args.ch2 = cfg.ch2;
+    const ask = () => api.send('b1', 'stream', args);
     ask().then(() => {
       running = true; showRun();
       clearInterval(renewTimer);
@@ -240,6 +274,7 @@ function startScope() {
     return;
   }
   running = cfg.mode !== 'single';
+  pending = null;
   api.send('b1', 'capture', captureArgs())
     .then(() => showRun())
     .catch(e => { running = false; showRun(); err(e); });
@@ -262,16 +297,43 @@ function onFrame(f) {
   const v = new Float32Array(n);
   for (let k = 0; k < n; k++) v[k] = f.offset_v + f.volts_per_lsb * f.payload.getInt16(2 * k, true);
 
+  const two = dual();
   if (f.kind === 1) {
     if (cfg.mode !== 'roll') return;
-    if (f.rate_hz !== roll.rate || f.ch !== roll.ch) { roll.filled = 0; roll.head = 0; roll.rate = f.rate_hz; roll.ch = f.ch; }
-    for (let k = 0; k < n; k++) { roll.buf[roll.head] = v[k]; roll.head = (roll.head + 1) % ROLL_N; }
+    if (f.rate_hz !== roll.rate || roll.ch !== cfg.ch || roll.ch2 !== (two ? cfg.ch2 : 0)) {
+      roll.filled = 0; roll.head = 0; roll.pendingN = 0;
+      roll.rate = f.rate_hz; roll.ch = cfg.ch; roll.ch2 = two ? cfg.ch2 : 0;
+    }
+    // The board sends the first input's chunk, then the second's: write the
+    // first, then the second over the same span, and only then move the head.
+    if (f.ch === roll.ch) {
+      for (let k = 0; k < n; k++) roll.buf[(roll.head + k) % ROLL_N] = v[k];
+      if (two) { roll.pendingN = n; return; }
+    } else if (two && f.ch === roll.ch2 && roll.pendingN === n) {
+      for (let k = 0; k < n; k++) roll.buf2[(roll.head + k) % ROLL_N] = v[k];
+      roll.pendingN = 0;
+    } else return;
+    roll.head = (roll.head + n) % ROLL_N;
     roll.filled = Math.min(ROLL_N, roll.filled + n);
-    const lin = new Float32Array(roll.filled);
-    for (let k = 0; k < roll.filled; k++) lin[k] = roll.buf[(roll.head - roll.filled + k + ROLL_N) % ROLL_N];
-    trace = { v: lin, rate: f.rate_hz, trig: -1, ch: f.ch, kind: 1, t_ms: f.t_ms, lsb: f.volts_per_lsb };
+    const lin = (buf) => {
+      const o = new Float32Array(roll.filled);
+      for (let k = 0; k < roll.filled; k++) o[k] = buf[(roll.head - roll.filled + k + ROLL_N) % ROLL_N];
+      return o;
+    };
+    trace = { v: lin(roll.buf), v2: two ? lin(roll.buf2) : null, rate: f.rate_hz, trig: -1,
+      ch: roll.ch, ch2: two ? roll.ch2 : 0, kind: 1, t_ms: f.t_ms, lsb: f.volts_per_lsb };
   } else {
-    trace = { v, rate: f.rate_hz, trig: f.trig_index, ch: f.ch, kind: 2, t_ms: f.t_ms, lsb: f.volts_per_lsb };
+    if (two) {
+      if (f.ch === cfg.ch) { pending = { v, f }; return; }          // wait for the second input
+      if (f.ch !== cfg.ch2 || !pending || pending.f.t_ms !== f.t_ms) return;
+      trace = { v: pending.v, v2: v, rate: f.rate_hz, trig: f.trig_index, ch: cfg.ch, ch2: cfg.ch2,
+        kind: 2, t_ms: f.t_ms, lsb: pending.f.volts_per_lsb };
+      pending = null;
+    } else {
+      if (f.ch !== cfg.ch) return;
+      trace = { v, v2: null, rate: f.rate_hz, trig: f.trig_index, ch: f.ch, ch2: 0, kind: 2, t_ms: f.t_ms,
+        lsb: f.volts_per_lsb };
+    }
     if (cfg.mode === 'single') running = false;
     // Normal / auto: arm the next one - unless the user left this tab.
     if (running) {
@@ -284,9 +346,9 @@ function onFrame(f) {
 }
 
 function tapLevel(ev) {
-  if (cfg.mode === 'roll' || !trace) return;
+  if (cfg.mode === 'roll' || cfg.view !== 'time' || !trace) return;
   const rect = els.scope.getBoundingClientRect();
-  const { lo, hi, padT, plotH } = scaleOf(trace.v, rect.height, 1);
+  const { lo, hi, padT, plotH } = scaleOf(trace.v, trace.v2, rect.height, 1);
   const y = ev.clientY - rect.top;
   const v = hi - ((y - padT) / plotH) * (hi - lo);
   cfg.level = Math.round(v * 20) / 20;
@@ -304,6 +366,7 @@ function showMode() {
   for (const e of els.root.querySelectorAll('.roll-only')) e.style.display = isRoll ? '' : 'none';
   for (const e of els.root.querySelectorAll('.cap-only')) e.style.display = isRoll ? 'none' : '';
   els.run.textContent = cfg.mode === 'single' ? 'Arm' : 'Run';
+  for (const b of els.views.querySelectorAll('button')) b.classList.toggle('sel', b.dataset.v === cfg.view);
 }
 
 function showRun() {
@@ -317,8 +380,9 @@ function showState() {
   if (!els.state) return;
   const s = boardScope;
   const parts = [];
-  if (s.mode === 'stream') parts.push(`streaming AI${s.ch} · ${fmtHz(s.rate_hz)}`);
-  else if (s.mode === 'armed') parts.push(`armed AI${s.ch} · waiting for trigger`);
+  const inputs = s.ch2 ? `AI${s.ch} + AI${s.ch2}` : `AI${s.ch}`;
+  if (s.mode === 'stream') parts.push(`streaming ${inputs} · ${fmtHz(s.rate_hz)}`);
+  else if (s.mode === 'armed') parts.push(`armed ${inputs} · waiting for trigger`);
   else parts.push('idle');
   if (s.dropped) parts.push(`<span class="warn">${s.dropped} dropped</span>`);
   if (s.mode === 'idle' && s.last && s.last !== 'stopped') parts.push(s.last);
@@ -347,9 +411,11 @@ function niceStep(span, target) {
   return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p;
 }
 
-function scaleOf(v, cssH, dpr) {
+function scaleOf(v, v2, cssH, dpr) {
   let lo = Infinity, hi = -Infinity;
-  for (let k = 0; k < v.length; k++) { if (v[k] < lo) lo = v[k]; if (v[k] > hi) hi = v[k]; }
+  for (const arr of v2 ? [v, v2] : [v]) {
+    for (let k = 0; k < arr.length; k++) { if (arr[k] < lo) lo = arr[k]; if (arr[k] > hi) hi = arr[k]; }
+  }
   if (cfg.mode !== 'roll') { lo = Math.min(lo, cfg.level); hi = Math.max(hi, cfg.level); }
   if (!Number.isFinite(lo)) { lo = -1; hi = 1; }
   if (hi - lo < 0.02) { const c = (hi + lo) / 2; lo = c - 0.01; hi = c + 0.01; }
@@ -380,6 +446,103 @@ function measure(v, rate) {
   return { lo, hi, pp: hi - lo, mean, rms, acRms, freq };
 }
 
+// ---------------------------------------------------------------------------
+// Spectrum: Hann window, radix-2 FFT, magnitude in dBV
+// ---------------------------------------------------------------------------
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {               // bit-reversal permutation
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < len / 2; k++) {
+        const a = i + k, b = a + len / 2;
+        const tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti;
+        re[a] += tr; im[a] += ti;
+        const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+      }
+    }
+  }
+}
+
+function hann(n) {
+  const w = new Float64Array(n);
+  for (let k = 0; k < n; k++) w[k] = 0.5 - 0.5 * Math.cos(2 * Math.PI * k / Math.max(1, n - 1));
+  return w;
+}
+
+// { db: Float64Array (bins 0..N/2), binHz, peaks: [{hz, db}] } - the mean removed,
+// zero-padded to a power of two. A sine of amplitude A reads 20 log10(A / sqrt 2).
+function spectrum(v, rate) {
+  const n = Math.min(v.length, MAX_FFT);
+  if (n < 16) return null;
+  let N = 1; while (N < n) N <<= 1;
+  const w = hann(n);
+  let mean = 0; for (let k = 0; k < n; k++) mean += v[k]; mean /= n;
+  let sumW = 0; for (let k = 0; k < n; k++) sumW += w[k];
+  const re = new Float64Array(N), im = new Float64Array(N);
+  for (let k = 0; k < n; k++) re[k] = (v[k] - mean) * w[k];
+  fft(re, im);
+  const half = N / 2;
+  const db = new Float64Array(half + 1);
+  for (let k = 0; k <= half; k++) {
+    const amp = 2 * Math.hypot(re[k], im[k]) / sumW;      // sine amplitude, volts
+    db[k] = 20 * Math.log10(Math.max(amp / Math.SQRT2, 1e-9));
+  }
+  const binHz = rate / N;
+  // Local maxima, strongest first, at least 4 bins apart (a Hann main lobe is 4
+  // bins wide at this padding or less); the lowest bins are what is left of DC.
+  const skip = Math.max(3, Math.ceil(2 * N / n));
+  // A peak has to stand 10 dB clear of the median bin - the noise floor - or
+  // every wiggle in the noise would be listed.
+  const floor = Float64Array.from(db.subarray(skip)).sort()[Math.floor((half - skip) / 2)];
+  const cand = [];
+  for (let k = skip; k < half; k++) if (db[k] > db[k - 1] && db[k] >= db[k + 1] && db[k] > floor + 10) cand.push(k);
+  cand.sort((a, b) => db[b] - db[a]);
+  const peaks = [];
+  for (const k of cand) {
+    if (peaks.some(p => Math.abs(p.k - k) < 4 * N / n)) continue;
+    const a = db[k - 1], b = db[k], c = db[k + 1];       // parabolic interpolation
+    const d = a - 2 * b + c;
+    const delta = d !== 0 ? 0.5 * (a - c) / d : 0;
+    peaks.push({ k, hz: (k + delta) * binHz, db: b - 0.25 * (a - c) * delta });
+    if (peaks.length === 3) break;
+  }
+  return { db, binHz, peaks };
+}
+
+// Phase (degrees) and gain (dB) of v2 relative to v at frequency hz: one DFT
+// bin of each, Hann-windowed, the means removed.
+function phaseGain(v, v2, rate, hz) {
+  const n = Math.min(v.length, v2.length);
+  const w = hann(n);
+  let m1 = 0, m2 = 0; for (let k = 0; k < n; k++) { m1 += v[k]; m2 += v2[k]; } m1 /= n; m2 /= n;
+  let r1 = 0, i1 = 0, r2 = 0, i2 = 0;
+  for (let k = 0; k < n; k++) {
+    const a = -2 * Math.PI * hz * k / rate, c = Math.cos(a) * w[k], s = Math.sin(a) * w[k];
+    r1 += (v[k] - m1) * c; i1 += (v[k] - m1) * s;
+    r2 += (v2[k] - m2) * c; i2 += (v2[k] - m2) * s;
+  }
+  let ph = (Math.atan2(i2, r2) - Math.atan2(i1, r1)) * 180 / Math.PI;
+  while (ph > 180) ph -= 360;
+  while (ph <= -180) ph += 360;
+  return { phase: ph, gain: 20 * Math.log10(Math.hypot(r2, i2) / Math.max(Math.hypot(r1, i1), 1e-12)) };
+}
+
+function fmtFreq(hz) {
+  return hz >= 1000 ? `${(hz / 1000).toFixed(3)} kHz` : `${hz.toFixed(hz < 100 ? 2 : 1)} Hz`;
+}
+
+// ---------------------------------------------------------------------------
+// Drawing
+// ---------------------------------------------------------------------------
 function draw() {
   const c = els.scope;
   if (!c || !c.isConnected) return;
@@ -400,13 +563,17 @@ function draw() {
     els.meas.innerHTML = '';
     return;
   }
+  if (cfg.view === 'spectrum') drawSpectrum(ctx, w, h, dpr);
+  else drawTime(ctx, w, h, dpr);
+}
 
-  const { v, rate } = trace;
+function drawTime(ctx, w, h, dpr) {
+  const { v, v2, rate } = trace;
   const n = v.length;
   const nAxis = trace.kind === 1 ? ROLL_N : n;          // roll: fixed window, fills from the right
   const t0 = trace.kind === 2 && trace.trig >= 0 ? -trace.trig / rate : (trace.kind === 1 ? -(nAxis - 1) / rate : 0);
   const t1 = t0 + (nAxis - 1) / rate;
-  const { lo, hi, padT, padB, plotH } = scaleOf(v, h / dpr, dpr);
+  const { lo, hi, padT, plotH } = scaleOf(v, v2, h / dpr, dpr);
   const padL = 44 * dpr, padR = 6 * dpr;
   const plotW = w - padL - padR;
   const x = t => padL + ((t - t0) / (t1 - t0 || 1)) * plotW;
@@ -437,58 +604,182 @@ function draw() {
     ctx.setLineDash([]);
   }
 
-  // The trace: at most one min/max pair per pixel column, so 10 000 samples
+  // The traces: at most one min/max pair per pixel column, so 10 000 samples
   // draw as fast as 500 and a narrow spike still shows.
-  ctx.strokeStyle = '#4fa3ff'; ctx.lineWidth = 1.5 * dpr;
-  ctx.beginPath();
   const offset = nAxis - n;                               // roll: empty on the left
   const cols = Math.max(1, Math.floor(plotW));
   const per = (nAxis - 1) / cols;
-  if (per <= 1) {
-    for (let k = 0; k < n; k++) {
-      const px = x(t0 + (k + offset) / rate);
-      k ? ctx.lineTo(px, y(v[k])) : ctx.moveTo(px, y(v[k]));
+  const line = (arr, color) => {
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5 * dpr;
+    ctx.beginPath();
+    if (per <= 1) {
+      for (let k = 0; k < n; k++) {
+        const px = x(t0 + (k + offset) / rate);
+        k ? ctx.lineTo(px, y(arr[k])) : ctx.moveTo(px, y(arr[k]));
+      }
+    } else {
+      let started = false;
+      for (let col = 0; col < cols; col++) {
+        const a = Math.floor(col * per) - offset, b = Math.floor((col + 1) * per) - offset;
+        if (b < 0 || a >= n) continue;
+        let mn = Infinity, mx = -Infinity;
+        for (let k = Math.max(0, a); k <= Math.min(n - 1, b); k++) { if (arr[k] < mn) mn = arr[k]; if (arr[k] > mx) mx = arr[k]; }
+        const px = padL + col;
+        if (!started) { ctx.moveTo(px, y(mn)); started = true; } else ctx.lineTo(px, y(mn));
+        ctx.lineTo(px, y(mx));
+      }
     }
-  } else {
-    let started = false;
-    for (let col = 0; col < cols; col++) {
-      const a = Math.floor(col * per) - offset, b = Math.floor((col + 1) * per) - offset;
-      if (b < 0 || a >= n) continue;
-      let mn = Infinity, mx = -Infinity;
-      for (let k = Math.max(0, a); k <= Math.min(n - 1, b); k++) { if (v[k] < mn) mn = v[k]; if (v[k] > mx) mx = v[k]; }
-      const px = padL + col;
-      if (!started) { ctx.moveTo(px, y(mn)); started = true; } else ctx.lineTo(px, y(mn));
-      ctx.lineTo(px, y(mx));
-    }
-  }
-  ctx.stroke();
+    ctx.stroke();
+  };
+  if (v2) line(v2, COLOR_B);
+  line(v, COLOR_A);
 
+  ctx.textAlign = 'right';
   if (trace.kind === 2 && trace.trig < 0) {
-    ctx.fillStyle = '#ffb020'; ctx.textAlign = 'right';
+    ctx.fillStyle = '#ffb020';
     ctx.fillText('untriggered', w - padR - 4 * dpr, padT + 12 * dpr);
-    ctx.textAlign = 'left';
   }
+  if (v2) legend(ctx, w, padR, padT, dpr);
+  ctx.textAlign = 'left';
 
-  const m = measure(v, rate);
-  const f = m && Number.isFinite(m.freq) ? (m.freq >= 1000 ? `${(m.freq / 1000).toFixed(3)} kHz` : `${m.freq.toFixed(2)} Hz`) : '–';
+  // Measurements, one block per input.
   const V = x => `${(Math.abs(x) < 5e-4 ? 0 : x).toFixed(3)} V`;   // no "-0.000"
-  els.meas.innerHTML = m ? [
-    ['input', `AI${trace.ch}`], ['rate', fmtHz(rate)], ['samples', n],
-    ['Vpp', V(m.pp)], ['min', V(m.lo)], ['max', V(m.hi)],
-    ['mean', V(m.mean)], ['RMS (AC)', V(m.acRms)], ['frequency', f],
-    // Section A's number: the noise floor in LSB rms (short the SMA, capture 4000 in Auto).
-    ['noise', trace.lsb > 0 ? `${(m.acRms / trace.lsb).toFixed(1)} LSB rms` : '–'],
-  ].map(([k, val]) => `<div><span class="muted">${k}</span><b>${val}</b></div>`).join('') : '';
+  const cells = [['rate', fmtHz(rate)], ['samples', n]];
+  const block = (arr, ch, cls) => {
+    const m = measure(arr, rate);
+    if (!m) return;
+    const f = Number.isFinite(m.freq) ? fmtFreq(m.freq) : '–';
+    cells.push(
+      [`AI${ch} Vpp`, V(m.pp), cls], [`AI${ch} min`, V(m.lo), cls], [`AI${ch} max`, V(m.hi), cls],
+      [`AI${ch} mean`, V(m.mean), cls], [`AI${ch} RMS (AC)`, V(m.acRms), cls], [`AI${ch} frequency`, f, cls],
+    );
+    // Section A's number: with the SMA shorted this is the noise floor (capture
+    // 4000 in Auto); with a signal on the input it is just the signal's RMS.
+    if (!cls) cells.push([`AI${ch} AC RMS in LSB`, trace.lsb > 0 ? `${(m.acRms / trace.lsb).toFixed(1)} LSB` : '–']);
+  };
+  block(v, trace.ch, '');
+  if (v2) {
+    block(v2, trace.ch2, 'b');
+    const sp = spectrum(v, rate);
+    if (sp && sp.peaks.length) {
+      const f0 = sp.peaks[0].hz;
+      const pg = phaseGain(v, v2, rate, f0);
+      cells.push([`AI${trace.ch2} vs AI${trace.ch} at ${fmtFreq(f0)}`,
+        `${pg.phase >= 0 ? '+' : ''}${pg.phase.toFixed(1)}° · ${pg.gain >= 0 ? '+' : ''}${pg.gain.toFixed(2)} dB`, 'wide']);
+    }
+  }
+  showCells(cells);
 }
 
-// The trace on screen as CSV: share sheet on a phone, a download elsewhere.
+function legend(ctx, w, padR, padT, dpr) {
+  const y0 = padT + 26 * dpr;
+  const bw = 34 * dpr;
+  ctx.fillStyle = 'rgba(15, 17, 21, 0.85)';
+  ctx.fillRect(w - padR - bw - 8 * dpr, y0 - 12 * dpr, bw + 6 * dpr, 30 * dpr);
+  ctx.fillStyle = COLOR_A; ctx.fillText(`AI${trace.ch}`, w - padR - 4 * dpr, y0);
+  ctx.fillStyle = COLOR_B; ctx.fillText(`AI${trace.ch2}`, w - padR - 4 * dpr, y0 + 14 * dpr);
+}
+
+function drawSpectrum(ctx, w, h, dpr) {
+  const { v, v2, rate } = trace;
+  const sa = spectrum(v, rate);
+  const sb = v2 ? spectrum(v2, rate) : null;
+  if (!sa) return;
+  const half = sa.db.length - 1;
+  const fMax = half * sa.binHz;
+  let top = -Infinity;
+  for (const s of sb ? [sa, sb] : [sa]) for (let k = 3; k <= half; k++) if (s.db[k] > top) top = s.db[k];
+  top = Math.ceil((top + 5) / 20) * 20;
+  const bottom = top - 120;                               // a 16-bit converter spans ~96 dB
+  const padL = 44 * dpr, padR = 6 * dpr, padT = 8 * dpr, padB = 20 * dpr;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+  const x = hz => padL + (hz / fMax) * plotW;
+  const y = db => padT + ((top - Math.max(bottom, Math.min(top, db))) / (top - bottom)) * plotH;
+
+  ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = dpr; ctx.fillStyle = '#8b93a7';
+  ctx.textAlign = 'right';
+  for (let g = top; g >= bottom; g -= 20) {
+    ctx.beginPath(); ctx.moveTo(padL, y(g)); ctx.lineTo(w - padR, y(g)); ctx.stroke();
+    ctx.fillText(`${g}`, padL - 4 * dpr, y(g) + 4 * dpr);
+  }
+  const fs = niceStep(fMax, 5);
+  ctx.textAlign = 'center';
+  for (let g = 0; g <= fMax + fs * 1e-6; g += fs) {
+    ctx.beginPath(); ctx.moveTo(x(g), padT); ctx.lineTo(x(g), padT + plotH); ctx.stroke();
+    ctx.textAlign = x(g) > w - padR - 14 * dpr ? 'right' : 'center';     // keep the last label on the canvas
+    ctx.fillText(g === 0 ? '0' : (g >= 1000 ? `${+(g / 1000).toFixed(2)}k` : `${+g.toFixed(1)}`), x(g), h - 5 * dpr);
+  }
+  ctx.textAlign = 'left';
+  ctx.fillText('dBV', 4 * dpr, padT + 10 * dpr);
+
+  const curve = (s, color) => {
+    ctx.strokeStyle = color; ctx.lineWidth = 1.2 * dpr;
+    ctx.beginPath();
+    const cols = Math.max(1, Math.floor(plotW));
+    const per = half / cols;
+    if (per <= 1) {
+      for (let k = 0; k <= half; k++) { const px = x(k * s.binHz); k ? ctx.lineTo(px, y(s.db[k])) : ctx.moveTo(px, y(s.db[k])); }
+    } else {
+      for (let col = 0; col < cols; col++) {                // the loudest bin per column: peaks never vanish
+        let mx = -Infinity;
+        for (let k = Math.floor(col * per); k <= Math.min(half, Math.floor((col + 1) * per)); k++) if (s.db[k] > mx) mx = s.db[k];
+        col ? ctx.lineTo(padL + col, y(mx)) : ctx.moveTo(padL + col, y(mx));
+      }
+    }
+    ctx.stroke();
+  };
+  if (sb) curve(sb, COLOR_B);
+  curve(sa, COLOR_A);
+
+  // Mark the strongest peak of the first input.
+  const p = sa.peaks[0];
+  if (p) {
+    ctx.fillStyle = '#ffb020';
+    ctx.beginPath(); ctx.arc(x(p.hz), y(p.db), 3.5 * dpr, 0, 2 * Math.PI); ctx.fill();
+    ctx.textAlign = x(p.hz) > w * 0.7 ? 'right' : 'left';
+    ctx.fillText(`${fmtFreq(p.hz)}  ${p.db.toFixed(1)} dBV`, x(p.hz) + (ctx.textAlign === 'left' ? 6 : -6) * dpr, y(p.db) - 6 * dpr);
+  }
+  ctx.textAlign = 'right';
+  if (v2) legend(ctx, w, padR, padT, dpr);
+  ctx.textAlign = 'left';
+
+  const cells = [['rate', fmtHz(rate)], ['resolution', `${sa.binHz < 10 ? sa.binHz.toFixed(2) : sa.binHz.toFixed(1)} Hz/bin`],
+    ['span', `0 – ${fmtFreq(fMax)}`]];
+  sa.peaks.forEach((q, i) => cells.push([`AI${trace.ch} peak ${i + 1}`, `${fmtFreq(q.hz)} · ${q.db.toFixed(1)} dBV`]));
+  if (sb) sb.peaks.slice(0, 2).forEach((q, i) => cells.push([`AI${trace.ch2} peak ${i + 1}`, `${fmtFreq(q.hz)} · ${q.db.toFixed(1)} dBV`, 'b']));
+  showCells(cells);
+}
+
+function showCells(cells) {
+  els.meas.innerHTML = cells.map(([k, val, cls]) =>
+    `<div class="${cls === 'wide' ? 'wide' : ''}"><span class="muted">${k}</span><b class="${cls === 'b' ? 'b' : ''}">${val}</b></div>`).join('');
+}
+
+// What is on screen as CSV - the samples, or in the spectrum view the spectrum.
+// Share sheet on a phone, a download elsewhere.
 function exportCsv() {
   if (!trace || !trace.v.length) { api.toast('nothing to export yet', 'info'); return; }
-  const { v, rate } = trace;
-  const t0 = trace.kind === 2 && trace.trig >= 0 ? -trace.trig / rate : 0;
-  const lines = [`# b1 AI${trace.ch}, ${rate} S/s, ${trace.kind === 1 ? 'roll' : 'capture'}${trace.trig >= 0 ? ', t = 0 at the trigger' : ''}`, 't_s,volts'];
-  for (let k = 0; k < v.length; k++) lines.push(`${(t0 + k / rate).toPrecision(8)},${v[k].toFixed(5)}`);
-  const name = `ai${trace.ch}-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.csv`;
+  const { v, v2, rate } = trace;
+  const names = v2 ? `AI${trace.ch} + AI${trace.ch2}` : `AI${trace.ch}`;
+  let lines;
+  if (cfg.view === 'spectrum') {
+    const sa = spectrum(v, rate), sb = v2 ? spectrum(v2, rate) : null;
+    if (!sa) { api.toast('too few samples for a spectrum', 'info'); return; }
+    lines = [`# b1 ${names}, ${rate} S/s, spectrum (Hann, mean removed), dBV`,
+      v2 ? `f_hz,ai${trace.ch}_dbv,ai${trace.ch2}_dbv` : `f_hz,ai${trace.ch}_dbv`];
+    for (let k = 0; k < sa.db.length; k++) {
+      lines.push(`${(k * sa.binHz).toPrecision(8)},${sa.db[k].toFixed(2)}${sb ? ',' + sb.db[k].toFixed(2) : ''}`);
+    }
+  } else {
+    const t0 = trace.kind === 2 && trace.trig >= 0 ? -trace.trig / rate : 0;
+    lines = [`# b1 ${names}, ${rate} S/s, ${trace.kind === 1 ? 'roll' : 'capture'}${trace.trig >= 0 ? ', t = 0 at the trigger' : ''}`,
+      v2 ? `t_s,ai${trace.ch}_volts,ai${trace.ch2}_volts` : 't_s,volts'];
+    for (let k = 0; k < v.length; k++) {
+      lines.push(`${(t0 + k / rate).toPrecision(8)},${v[k].toFixed(5)}${v2 ? ',' + v2[k].toFixed(5) : ''}`);
+    }
+  }
+  const tag = v2 ? `ai${trace.ch}-ai${trace.ch2}` : `ai${trace.ch}`;
+  const name = `${tag}${cfg.view === 'spectrum' ? '-spectrum' : ''}-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.csv`;
   const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/csv' });
   const file = typeof File === 'function' ? new File([blob], name, { type: 'text/csv' }) : null;
   if (file && navigator.canShare?.({ files: [file] })) {

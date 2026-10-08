@@ -96,6 +96,9 @@ bool InputsBlock::scopeCommand(const char* c, JsonObjectConst a, JsonObject repl
 
   const int ch = a["ch"] | 1;
   if (ch < 1 || ch > kChannels) { reply["error"] = "ch 1..8"; return true; }
+  const int ch2 = a["ch2"] | 0;                 // optional second input, 0 = none
+  if (ch2 < 0 || ch2 > kChannels) { reply["error"] = "ch2 0..8 (0 = one input)"; return true; }
+  const uint8_t ain2 = ch2 ? kAinOfAi[ch2 - 1] : 0;
   const uint32_t rate = a["rate_hz"] | 0u;
 #ifndef SIM
   if (!adc.present()) { reply["error"] = "ADS8688 not found (bare dev board? flash esp32s3-sim)"; return true; }
@@ -108,9 +111,10 @@ bool InputsBlock::scopeCommand(const char* c, JsonObjectConst a, JsonObject repl
       reply["rate_hz"] = 0;
       return true;
     }
-    const char* why = scope_.startStream(ch, kAinOfAi[ch - 1], rate, a["chunk"] | 0u);
+    const char* why = scope_.startStream(ch, kAinOfAi[ch - 1], rate, a["chunk"] | 0u, ch2, ain2);
     if (why) { reply["error"] = why; return true; }
     reply["ch"] = ch;
+    if (ch2) reply["ch2"] = ch2;
     reply["rate_hz"] = rate;
     reply["chunk"] = scope_.chunk();
     reply["lease_s"] = Scope::kStreamLeaseMs / 1000;
@@ -132,9 +136,10 @@ bool InputsBlock::scopeCommand(const char* c, JsonObjectConst a, JsonObject repl
     trig.timeout_ms = a["timeout_ms"] | 0u;
   }
   const uint32_t n = a["n"] | 1000u;
-  const char* why = scope_.startCapture(ch, kAinOfAi[ch - 1], rate, n, trig);
+  const char* why = scope_.startCapture(ch, kAinOfAi[ch - 1], rate, n, trig, ch2, ain2);
   if (why) { reply["error"] = why; return true; }
   reply["ch"] = ch;
+  if (ch2) reply["ch2"] = ch2;
   reply["rate_hz"] = rate;
   reply["n"] = n;
   reply["armed"] = true;
@@ -156,6 +161,7 @@ void InputsBlock::status(JsonObject out) {
   const Scope::Mode m = scope_.mode();
   s["mode"] = m == Scope::Mode::Stream ? "stream" : m == Scope::Mode::Capture ? "armed" : "idle";
   s["ch"] = scope_.channel();
+  s["ch2"] = scope_.channel2();
   s["rate_hz"] = scope_.rateHz();
   s["frames"] = scope_.frames();
   s["dropped"] = scope_.dropped();

@@ -40,15 +40,16 @@ void* allocBuffer(size_t bytes) {
   return p ? p : malloc(bytes);
 }
 
-// Index of the first trigger crossing that leaves `pre` samples before it and
-// n - pre after it inside raw[0 .. len), or -1. `armed` starts false, so a
-// crossing only counts once the signal has been on the far side of the level.
-int32_t findTrigger(const int16_t* raw, uint32_t len, uint32_t n, uint32_t pre,
-                    int32_t level, bool rising) {
-  const uint32_t last = n + pre;            // start = k - pre must leave n samples
+// Index (in scans) of the first trigger crossing that leaves `pre` scans before
+// it and n - pre after it inside `len` scans, or -1. Only the input at `slot` of
+// a `stride`-wide scan is looked at. `armed` starts false, so a crossing only
+// counts once the signal has been on the far side of the level.
+int32_t findTrigger(const int16_t* raw, uint32_t len, uint32_t stride, uint32_t slot, uint32_t n,
+                    uint32_t pre, int32_t level, bool rising) {
+  const uint32_t last = n + pre;            // start = k - pre must leave n scans
   bool armed = false;
   for (uint32_t k = 0; k < len && k <= last; k++) {
-    const int32_t v = raw[k];
+    const int32_t v = raw[k * stride + slot];
     if (rising) {
       if (v < level - kHysteresisCodes) armed = true;
       else if (armed && v >= level) {
@@ -94,9 +95,13 @@ void Scope::setJob(const Job& j) {
   if (task_) xTaskNotifyGive(task_);
 }
 
-const char* Scope::startStream(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz, uint32_t chunk) {
+const char* Scope::startStream(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz, uint32_t chunk,
+                               uint8_t panel_ch2, uint8_t ain2) {
+  const bool two = panel_ch2 != 0;
   if (nmr_busy()) return "an NMR scan is running";
-  if (rate_hz < kMinHz || rate_hz > kStreamMaxHz) return "stream rate_hz 10..20000 (0 = stop)";
+  if (two && ain2 == ain) return "ch2 must be a different input";
+  if (rate_hz < kMinHz || rate_hz > (two ? kStreamMaxHzDual : kStreamMaxHz))
+    return two ? "stream rate_hz 10..10000 with two inputs (0 = stop)" : "stream rate_hz 10..20000 (0 = stop)";
   if (chunk == 0) chunk = rate_hz / 20;                 // a frame every 50 ms
   const uint32_t maxChunk = rate_hz / 10 > 0 ? rate_hz / 10 : 1;   // <= 100 ms per frame
   if (chunk > maxChunk) chunk = maxChunk;
@@ -107,14 +112,16 @@ const char* Scope::startStream(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz, 
   leaseUntil_ = millis() + kStreamLeaseMs;
   // The same stream asked for again is a renewal, not a restart: the panel sends
   // it every few seconds and the waveform must not jump when it does.
-  if (mode_ == Mode::Stream && job_.panel_ch == panel_ch && job_.rate_hz == rate_hz &&
-      job_.n == chunk)
+  if (mode_ == Mode::Stream && job_.panel_ch == panel_ch && job_.panel_ch2 == panel_ch2 &&
+      job_.rate_hz == rate_hz && job_.n == chunk)
     return nullptr;
 
   Job j;
   j.mode = Mode::Stream;
   j.panel_ch = panel_ch;
   j.ain = ain;
+  j.panel_ch2 = panel_ch2;
+  j.ain2 = ain2;
   j.rate_hz = rate_hz;
   j.n = chunk;
   setJob(j);
@@ -122,10 +129,13 @@ const char* Scope::startStream(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz, 
 }
 
 const char* Scope::startCapture(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz, uint32_t n,
-                                const Trigger& trig) {
+                                const Trigger& trig, uint8_t panel_ch2, uint8_t ain2) {
+  const bool two = panel_ch2 != 0;
   if (nmr_busy()) return "an NMR scan is running";
+  if (two && ain2 == ain) return "ch2 must be a different input";
   if (rate_hz < kMinHz || rate_hz > kCaptureMaxHz) return "capture rate_hz 10..250000";
-  if (n < 16 || n > kMaxN) return "capture n 16..10000";
+  if (n < 16 || n > (two ? kMaxNDual : kMaxN))
+    return two ? "capture n 16..5000 with two inputs" : "capture n 16..10000";
   if (static_cast<uint64_t>(n) * 1000 > static_cast<uint64_t>(kMaxCaptureMs) * rate_hz)
     return "capture longer than 1 s (n / rate_hz): use stream for slow signals";
   if (trig.on && trig.pre >= n) return "trig.pre must be less than n";
@@ -136,6 +146,8 @@ const char* Scope::startCapture(uint8_t panel_ch, uint8_t ain, uint32_t rate_hz,
   j.mode = Mode::Capture;
   j.panel_ch = panel_ch;
   j.ain = ain;
+  j.panel_ch2 = panel_ch2;
+  j.ain2 = ain2;
   j.rate_hz = rate_hz;
   j.n = n;
   j.trig = trig;
@@ -207,17 +219,29 @@ void Scope::finish(uint32_t gen, const char* why) {
 bool Scope::sample(const Job& j, int16_t* out, uint32_t n, int64_t t0_us, uint32_t* achieved_hz) {
 #ifdef SIM
   // Computed from one time base, so consecutive stream chunks join up exactly.
+  // Two inputs are written in ascending ADC-channel order, as the real burst does.
   const double dt = 1.0 / static_cast<double>(j.rate_hz);
   const double t0 = static_cast<double>(t0_us) * 1e-6;
-  for (uint32_t i = 0; i < n; i++)
-    out[i] = b1SimCode(j.ain, b1SimVolts(j.panel_ch - 1, t0 + i * dt, seed_));
+  if (!dual(j)) {
+    for (uint32_t i = 0; i < n; i++)
+      out[i] = b1SimCode(j.ain, b1SimVolts(j.panel_ch - 1, t0 + i * dt, seed_));
+  } else {
+    const uint32_t a = slotA(j), b = 1 - a;
+    for (uint32_t i = 0; i < n; i++) {
+      const double t = t0 + i * dt;
+      out[2 * i + a] = b1SimCode(j.ain, b1SimVolts(j.panel_ch - 1, t, seed_));
+      out[2 * i + b] = b1SimCode(j.ain2, b1SimVolts(j.panel_ch2 - 1, t, seed_));
+    }
+  }
   *achieved_hz = j.rate_hz;
   return true;
 #else
   (void)t0_us;
   spibus::Guard g(50);
   if (!g.ok) return false;
-  return adc.burst(static_cast<uint8_t>(1u << j.ain), out, n, j.rate_hz, achieved_hz) == n;
+  uint8_t mask = static_cast<uint8_t>(1u << j.ain);
+  if (dual(j)) mask |= static_cast<uint8_t>(1u << j.ain2);
+  return adc.burst(mask, out, n, j.rate_hz, achieved_hz) == n;
 #endif
 }
 
@@ -229,14 +253,15 @@ bool Scope::waitForSlot(uint32_t gen) {
   return !stale(gen);
 }
 
-void Scope::publish(uint8_t kind, const Job& j, uint32_t t_ms, uint32_t rate_hz,
-                    const int16_t* samples, uint32_t n, int32_t trig_index) {
-  const float offset_v = adc.toVolts(j.ain, 0);
-  const float volts_per_lsb = adc.toVolts(j.ain, 1) - offset_v;
+void Scope::publish(uint8_t kind, uint8_t panel_ch, uint8_t ain, uint32_t t_ms, uint32_t rate_hz,
+                    const int16_t* raw, uint32_t first, uint32_t stride, uint32_t slot, uint32_t n,
+                    int32_t trig_index) {
+  const float offset_v = adc.toVolts(ain, 0);
+  const float volts_per_lsb = adc.toVolts(ain, 1) - offset_v;
   uint8_t* f = frame_;
   f[0] = kind;
   f[1] = kBlockId;
-  f[2] = j.panel_ch;
+  f[2] = panel_ch;
   f[3] = 16;
   memcpy(f + 4, &t_ms, 4);          // the ESP32 is little-endian, as the frame is
   memcpy(f + 8, &rate_hz, 4);
@@ -244,16 +269,34 @@ void Scope::publish(uint8_t kind, const Job& j, uint32_t t_ms, uint32_t rate_hz,
   memcpy(f + 16, &trig_index, 4);
   memcpy(f + 20, &volts_per_lsb, 4);
   memcpy(f + 24, &offset_v, 4);
-  memcpy(f + kHeaderBytes, samples, n * sizeof(int16_t));
+  int16_t* out = reinterpret_cast<int16_t*>(f + kHeaderBytes);
+  if (stride == 1) {
+    memcpy(out, raw + first, n * sizeof(int16_t));
+  } else {
+    for (uint32_t k = 0; k < n; k++) out[k] = raw[(first + k) * stride + slot];
+  }
   achievedHz_ = rate_hz;
-  lastVolts_ = offset_v + volts_per_lsb * samples[n - 1];
   frameLen_ = kHeaderBytes + n * sizeof(int16_t);   // last: hands the frame over
+}
+
+bool Scope::publishAll(uint8_t kind, const Job& j, uint32_t gen, uint32_t t_ms, uint32_t rate_hz,
+                       uint32_t first, uint32_t n, int32_t trig_index) {
+  const uint32_t stride = dual(j) ? 2 : 1;
+  const uint32_t a = slotA(j);
+  if (!waitForSlot(gen)) return false;
+  publish(kind, j.panel_ch, j.ain, t_ms, rate_hz, raw_, first, stride, a, n, trig_index);
+  const int16_t last = raw_[(first + n - 1) * stride + a];
+  lastVolts_ = adc.toVolts(j.ain, last);
+  if (!dual(j)) return true;
+  if (!waitForSlot(gen)) return false;
+  publish(kind, j.panel_ch2, j.ain2, t_ms, rate_hz, raw_, first, stride, 1 - a, n, trig_index);
+  return true;
 }
 
 void Scope::runStream(const Job& j, uint32_t gen) {
   const uint32_t n = j.n;
   const int64_t t0 = esp_timer_get_time();
-  uint64_t done = 0;                 // samples sent so far (the SIM time base)
+  uint64_t done = 0;                 // scans sent so far (the SIM time base)
   while (!stale(gen)) {
     if (nmr_busy()) { finish(gen, "an NMR scan started"); return; }
     if (static_cast<int32_t>(millis() - leaseUntil_) > 0) { finish(gen, "lease expired"); return; }
@@ -274,8 +317,8 @@ void Scope::runStream(const Job& j, uint32_t gen) {
 
     uint32_t achieved = 0;
     if (!sample(j, raw_, n, start, &achieved)) { vTaskDelay(2); continue; }   // bus busy
-    if (!waitForSlot(gen)) return;
-    publish(kKindStream, j, static_cast<uint32_t>(start / 1000), achieved, raw_, n, -1);
+    if (!publishAll(kKindStream, j, gen, static_cast<uint32_t>(start / 1000), achieved, 0, n, -1))
+      return;
     done += n;
 #ifndef SIM
     vTaskDelay(pdMS_TO_TICKS(kStreamYieldMs));
@@ -286,10 +329,11 @@ void Scope::runStream(const Job& j, uint32_t gen) {
 void Scope::runCapture(const Job& j, uint32_t gen) {
   const uint32_t n = j.n;
   const bool trig = j.trig.on;
-  const uint32_t len = trig ? 2 * n : n;
+  const uint32_t len = trig ? 2 * n : n;           // scans per burst
+  const uint32_t stride = dual(j) ? 2 : 1;
   const uint32_t armedAt = millis();
 
-  // The level as a raw code on this channel's current range.
+  // The level as a raw code on the first input's current range.
   const float off = adc.toVolts(j.ain, 0);
   const float lsb = adc.toVolts(j.ain, 1) - off;
   float lv = lsb > 0.0f ? roundf((j.trig.level_v - off) / lsb) : 0.0f;
@@ -313,25 +357,21 @@ void Scope::runCapture(const Job& j, uint32_t gen) {
     const uint32_t t0_ms = static_cast<uint32_t>(t0 / 1000);
 
     if (!trig) {
-      if (!waitForSlot(gen)) return;
-      publish(kKindCapture, j, t0_ms, rate, raw_, n, -1);
-      finish(gen, "done");
+      if (publishAll(kKindCapture, j, gen, t0_ms, rate, 0, n, -1)) finish(gen, "done");
       return;
     }
 
-    const int32_t k = findTrigger(raw_, len, n, j.trig.pre, level, j.trig.rising);
+    const int32_t k = findTrigger(raw_, len, stride, slotA(j), n, j.trig.pre, level, j.trig.rising);
     if (k >= 0) {
       const uint32_t first = static_cast<uint32_t>(k) - j.trig.pre;
-      if (!waitForSlot(gen)) return;
-      publish(kKindCapture, j, t0_ms + static_cast<uint32_t>(static_cast<uint64_t>(first) * 1000 / rate),
-              rate, raw_ + first, n, static_cast<int32_t>(j.trig.pre));
-      finish(gen, "triggered");
+      const uint32_t t_ms = t0_ms + static_cast<uint32_t>(static_cast<uint64_t>(first) * 1000 / rate);
+      if (publishAll(kKindCapture, j, gen, t_ms, rate, first, n, static_cast<int32_t>(j.trig.pre)))
+        finish(gen, "triggered");
       return;
     }
     if (j.trig.timeout_ms && millis() - armedAt >= j.trig.timeout_ms) {
-      if (!waitForSlot(gen)) return;
-      publish(kKindCapture, j, t0_ms, rate, raw_, n, -1);   // auto: show what is there
-      finish(gen, "auto (no trigger)");
+      // Auto: show what is there.
+      if (publishAll(kKindCapture, j, gen, t0_ms, rate, 0, n, -1)) finish(gen, "auto (no trigger)");
       return;
     }
     // Between attempts the main loop gets the core back - for a tenth of a burst,
