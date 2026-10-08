@@ -68,7 +68,7 @@ These follow from the datasheets and the netlist. They are listed once here and 
 6. **Never leave the polarizer on.** FET_GATE = 1 switches a low-resistance coil onto an external supply with no on-board limit. Bound every polarize interval in code (the sequencer allows at most 10 s; the `b4 polarizer` command has no limit).
 7. **H-bridge: coast (both inputs low) is the resting state.** Brake or a held direction at the 2 A trip point dissipates about 2.3 W in the DRV8871, which shuts down thermally without telling anyone (no fault pin).
 8. **Never program Si5351 CLK0 above 50 MHz.** It is the AD9834's master clock; the fitted BRUZ grade is a 50 MHz part. The firmware's `nmr clock` command does not enforce this.
-9. **Three jumper headers need a shunt before use: J3, J11 and J12.** J3 open leaves the receiver's first stage with no feedback at all; J11 open disconnects TX; J12 open leaves the polarizer driver unpowered. J10, J14 and J15 have defined open states (follower; ADC input floating). Section 6.2.
+9. **Every 1×3 header is a jumper selector and carries a shunt by design; check the seven positions before power-up: J3, J9, J10, J11, J12, J14, J15.** Section 6.2 lists what each position does and, as a fault-finding aid, the symptom of a missing shunt. The NMR default is J3 1-2, J9 1-2, J10 1-2, J11 1-2, J12 2-3, J14 2-3, J15 2-3.
 10. **Inputs and outputs are not isolated** (except ISO IN 1/2). Board ground is the USB host's ground and the +VEXT supply's minus. Limits: AI ±22 V continuous; AO must never be driven from outside; MOD and FAST −0.5 to +5.5 V; TTL about −8 to +13 V through its 1 kΩ; TRIG 0–5 V logic; RX millivolts only (never connect TX to RX).
 11. **Safe GPIO levels before `pinMode(OUTPUT)`:** `digitalWrite(pin, LOW)` first, then `pinMode(pin, OUTPUT)`, for TX_EN, RX_BLANK, HB_IN1/2 and FET_GATE. The board's 10 k pull-downs hold these five pins low through reset; TRIG_DIR, DDS_PSEL and FAST_OUT1/2 have no pull resistor and are undefined until the firmware runs.
 12. **Never use GPIO 0, 3, 45, 46 (strapping) or 35, 36, 37 (octal PSRAM).** They are not wired on the main board; the strapping pins set the boot mode and the PSRAM pins belong to the memory.
@@ -226,18 +226,20 @@ GPIO43/44 are the ESP32's UART0 pins, not the USB port the firmware prints to. A
 
 ### 6.2 Option headers (1×3 jumper selectors, no position labels printed; pin 1 is the square pad)
 
-| Header | Sheet | 1-2 | 2-3 | Open | Shunt required? |
-|---|---|---|---|---|---|
-| **J3** | receiver, stage-1 feedback | R712 10 k: gain **101** | R714 1 k: gain **11** | **no feedback: the stage saturates** | **yes, always** |
-| **J9** | receiver, stage 2 | gain **10.1** (9.1 k / 1 k) | — | follower, gain 1 | no |
-| **J10** | transmitter gain | gain **25** | — | follower, gain 1 (bring-up into a dummy load) | no |
-| **J11** | transmitter output | direct output (4.7 Ω, 10 µF coupling) | **−20 dB** tap (910 Ω / 100 Ω) | TX disconnected | **yes** |
-| **J12** | polarizer gate-driver supply | from **+VEXT** (only with +VEXT ≤ 18 V: **not at the 24 V the course uses**) | from **+5V_RAW**: **the position for 24 V** | driver unpowered, coil stays off | **yes, to use the polarizer** |
-| **J14** | ADC channel AIN_3 | panel **AI7** | receiver **I** | AIN_3 floats (reads about +2 V) | one or the other |
-| **J15** | ADC channel AIN_2 | panel **AI8** | receiver **Q** | AIN_2 floats | one or the other |
-| J13 (1×2) | coil current sense | shorts the (already 0 Ω) R933 | — | — | no; replace R933 by a 10 mΩ shunt and read ISENSE_COIL here to measure the polarizer current |
+Every 1×3 header carries a shunt by design (Decision #73). The last column is a fault-finding aid: what you would see if a shunt were missing.
 
-Default for the NMR demonstration: J3 1-2, J9 1-2, J10 1-2, J11 1-2, J12 2-3, J14 2-3, J15 2-3. Default for a general-purpose instrument without the receiver: J14 1-2, J15 1-2 (all eight AI jacks live), J3 still fitted.
+| Header | Sheet | 1-2 | 2-3 | Symptom if the shunt is missing | Note |
+|---|---|---|---|---|---|
+| **J3** | receiver, stage-1 feedback | R712 10 k: gain **101** | R714 1 k: gain **11** | no feedback: the stage sits at a rail | — |
+| **J9** | receiver, stage 2 | gain **10.1** (9.1 k / 1 k) | — | follower, gain 1 | — |
+| **J10** | transmitter gain | gain **25** | — | follower, gain 1 | the follower is useful for bring-up into a dummy load |
+| **J11** | transmitter output | direct output (4.7 Ω, 10 µF coupling) | **−20 dB** tap (910 Ω / 100 Ω) | TX disconnected | — |
+| **J12** | polarizer gate-driver supply | from **+VEXT** (only with +VEXT ≤ 18 V: **not at the 24 V the course uses**) | from **+5V_RAW**: **the position for 24 V** | driver unpowered, coil stays off | 2-3 at the 24 V supply |
+| **J14** | ADC channel AIN_3 | panel **AI7** | receiver **I** | AIN_3 floats (reads about +2 V) | — |
+| **J15** | ADC channel AIN_2 | panel **AI8** | receiver **Q** | AIN_2 floats | — |
+| J13 (1×2) | coil current sense | shorts the (already 0 Ω) R933 | — | — | replace R933 by a 10 mΩ shunt and read ISENSE_COIL here to measure the polarizer current |
+
+Positions for the NMR demonstration: J3 1-2, J9 1-2, J10 1-2, J11 1-2, J12 2-3, J14 2-3, J15 2-3. For a general-purpose instrument without the receiver: J14 1-2, J15 1-2 (all eight AI jacks live), the rest unchanged.
 
 ### 6.3 Test points
 
@@ -504,7 +506,7 @@ void oledBegin() {
 
 ```
 panel SMA J13 "RX" → link J6/J1 pin 20 → tank 1.32 nF to GND, 1 MΩ to GND, crossed 1N4148W limiter (±0.6 V)
- → 100 Ω → OPA1656 stage 1, gain by J3 (1-2: 101 · 2-3: 11 · open: NO FEEDBACK)
+ → 100 Ω → OPA1656 stage 1, gain by J3 (1-2: 101 · 2-3: 11)
  → 10 nF → DG419 blanking switch (RX_BLANK = GPIO8: 0 = stage-2 input grounded = blanked, 1 = receive)
  → OPA1656 stage 2, gain by J9 (1-2: 10.1 · open: 1), 175 kHz low-pass
  → double-balanced commutating mixer (2 × TS5A23157, +3V3A, bias 1.65 V), switched by the quadrature LO
@@ -749,16 +751,15 @@ Found while writing this document by comparing the code with the datasheets and 
 **Hardware, as ordered**
 
 7. **The two LM66100s do not OR the 5 V inputs** (chip-enable on ground = always on, no reverse-current blocking): one 5 V source at a time. Next revision: each chip-enable to the other input, or to the output.
-8. **J3 must always carry a shunt** (no feedback otherwise); the schematic note that R712 is permanent is wrong. J11 and J12 likewise need a shunt to do anything.
-9. Receiver gains differ from the design notes: stage 2 is 10.1 (not 11), the difference amplifiers give 10 (not 20), so the ADC sees about half the designed amplitude. No loss of sensitivity; adjust expectations and the SIM.
-10. The transmitter at gain 25 clips below about 16–17.5 V of +VEXT (clean at the 24 V supply); the DDS level is about 0.6 V pp (the design note's 3.18 mA uses a 1.20 V reference, the datasheet's formula 1.15 V).
-11. TRIG_DIR, DDS_PSEL and FAST_OUT1/2 have no pull resistors: undefined from reset until the firmware runs. A pull-down on TRIG_DIR would make "input" the hardware default.
-12. The OPA564's current-limit and thermal flags reach no GPIO (the pull-ups R811/R812 are unfitted and there is no spare expander line); thermal shutdown is invisible to the firmware.
-13. Panel LEDs WIFI and ACT sit on UART0 (8.11). The J905 legend is printed in the reverse order of its pins (6.1). J901 has no +/− marks. J411 has no "ISO IN 1" legend.
-14. A reversed supply on J901 forward-biases the TVS and blows the 5 A fuse. The ±12 V rails cannot sink current, so several overdriven AI inputs raise them. FAST and TRIG into 50 Ω exceed their drivers' ratings. MOD outputs are not short-proof.
+8. Receiver gains differ from the design notes: stage 2 is 10.1 (not 11), the difference amplifiers give 10 (not 20), so the ADC sees about half the designed amplitude. No loss of sensitivity; adjust expectations and the SIM.
+9. The transmitter at gain 25 clips below about 16–17.5 V of +VEXT (clean at the 24 V supply); the DDS level is about 0.6 V pp (the design note's 3.18 mA uses a 1.20 V reference, the datasheet's formula 1.15 V).
+10. TRIG_DIR, DDS_PSEL and FAST_OUT1/2 have no pull resistors: undefined from reset until the firmware runs. A pull-down on TRIG_DIR would make "input" the hardware default.
+11. The OPA564's current-limit and thermal flags reach no GPIO (the pull-ups R811/R812 are unfitted and there is no spare expander line); thermal shutdown is invisible to the firmware.
+12. Panel LEDs WIFI and ACT sit on UART0 (8.11). The J905 legend is printed in the reverse order of its pins (6.1). J901 has no +/− marks. J411 has no "ISO IN 1" legend.
+13. A reversed supply on J901 forward-biases the TVS and blows the 5 A fuse. The ±12 V rails cannot sink current, so several overdriven AI inputs raise them. FAST and TRIG into 50 Ω exceed their drivers' ratings. MOD outputs are not short-proof.
 15. Not determined until measured: the ADC rate the burst reaches; whether +5VA lets AO reach +10 V; the isolated inputs' exact threshold; the FAST outputs' usable frequency; whether the dev board has a blocking diode on its 5 V pin and series resistors on GPIO43/44.
 
-**Stale text an assistant will meet** (ignore it): in the `.kicad_sch` notes and `hardware/README.md`, the AGND net and net tie NT1, an expansion header J5, Qwiic J4, solder jumpers JP1/JP2/JP101/JP102/JP70x/JP802/JP904, resistor arrays RN521/RN522, 17 SMA with a spare and TP1, module outputs on J8 pins 19–33, OPTO_IN on J8 pins 35/37, TX on link pins 19/21 or J6.32, link pins 37–40 = RX/AGND/TX/AGND, a pairwise pad swap on the panel headers, the D-19 channel map (AI1→AIN_6), the OPA564 flags on TCA9535 P1.5/P1.6, "PIN/SW = 1", the 6N137 on +3V3, a main-board TX terminal, an AD9834 with 75 MHz (the fitted BRUZ grade is a 50 MHz part). The main PCB also has a copper zone named `AGND_B` that is on the TX net.
+**Stale text an assistant will meet** (ignore it): in the `.kicad_sch` notes and `hardware/README.md`, the AGND net and net tie NT1, an expansion header J5, Qwiic J4, solder jumpers JP1/JP2/JP101/JP102/JP70x/JP802/JP904, resistor arrays RN521/RN522, 17 SMA with a spare and TP1, module outputs on J8 pins 19–33, OPTO_IN on J8 pins 35/37, TX on link pins 19/21 or J6.32, link pins 37–40 = RX/AGND/TX/AGND, a pairwise pad swap on the panel headers, the D-19 channel map (AI1→AIN_6), the OPA564 flags on TCA9535 P1.5/P1.6, "PIN/SW = 1", the 6N137 on +3V3, a main-board TX terminal, an AD9834 with 75 MHz (the fitted BRUZ grade is a 50 MHz part), "R712 permanent, J3 pin 1 tied to pin 2" (the header is a selector with a shunt fitted by design). The main PCB also has a copper zone named `AGND_B` that is on the TX net.
 
 ---
 
