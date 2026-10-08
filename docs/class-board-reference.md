@@ -50,7 +50,7 @@
 | 3 panel LEDs (PWR, WIFI, ACT), the dev board's RGB LED | — | GPIO43/44, GPIO48 | `base` (RGB only) |
 | WiFi (access point or station), web app, WebSocket, mDNS, OTA | — | ESP32-S3 | `main.cpp` |
 
-**Power.** 5 V in by USB-C or a 5.5/2.1 mm jack (one at a time, section 2) makes +5V_RAW, +3V3 and, through two isolated converters, ±12 V and +5VA. A separate 7–18 V bench supply on the rear terminal (+VEXT) powers only the transmitter power stage, the H-bridge and, by jumper, the polarizer gate driver. The polarizer coil has its own supply terminal (+VCOIL). One ground net: there is no separate analog ground.
+**Power.** 5 V in by USB-C or a 5.5/2.1 mm jack (one at a time, section 2) makes +5V_RAW, +3V3 and, through two isolated converters, ±12 V and +5VA. A separate 24 V bench supply on the rear terminal (+VEXT, 7–24 V) powers only the transmitter power stage, the H-bridge and, by jumper, the polarizer gate driver. The polarizer coil has its own supply terminal (+VCOIL). One ground net: there is no separate analog ground.
 
 **Firmware.** PlatformIO, Arduino framework, two environments: `esp32s3-sim` fakes every chip so the whole app runs on a bare dev board; `esp32s3` is the real board. One WebSocket carries JSON commands and a 20 Hz status broadcast; binary frames carry records. Section 9.
 
@@ -62,7 +62,7 @@ These follow from the datasheets and the netlist. They are listed once here and 
 
 1. **Power-on order: USB (or the 5 V jack) first, let the board boot, then +VEXT, then +VCOIL. Off in reverse.** The transmitter amplifier OPA564 is damaged if its main supply rises before its 3.3 V logic supply (datasheet SBOS372E, Fig. 36). The main board's silkscreen says "USB FIRST, THEN BENCH SUPPLY".
 2. **One 5 V source at a time: USB-C or the jack, never both.** The two LM66100 ideal-diode controllers have their chip-enable pins on ground, which the datasheet calls "always on" without reverse-current blocking (SLVSEZ8A §8.3.1). With both connected, the higher source feeds the lower one through about 0.16 Ω. The same applies to the dev board's own USB sockets, which join +5V_RAW through the dev board's 5 V pin: flash through the main board's USB-C.
-3. **+VEXT is 7–18 V.** The silkscreen says so, and 18 V is the UCC27517's supply limit when J12 is on 1-2 (the OPA564 itself allows 24 V). The jack is 5 V only.
+3. **+VEXT is 24 V (the course's bench supply); 7 V minimum, never above 24 V.** 24 V is the OPA564's rated maximum (absolute maximum 26 V), so the supply must not overshoot. **At 24 V, J12 must be on 2-3** (the polarizer gate driver fed from +5V_RAW): the UCC27517 allows 18 V and the FET gate 20 V. The silkscreen's "7–18 V" predates this. The jack is 5 V only.
 4. **Keep TX_EN (GPIO40) low except during a pulse.** The amplifier draws 39 mA idle against 5 mA shut down, and blanking relies on the gate being closed.
 5. **Never open the receiver (RX_BLANK = 1) while TX_EN = 1 or within the dead time after a pulse** (default 1 ms): the coil rings and the first amplifier stage would be driven into its rails.
 6. **Never leave the polarizer on.** FET_GATE = 1 switches a low-resistance coil onto an external supply with no on-board limit. Bound every polarize interval in code (the sequencer allows at most 10 s; the `b4 polarizer` command has no limit).
@@ -220,7 +220,7 @@ GPIO43/44 are the ESP32's UART0 pins, not the USB port the firmware prints to. A
 |---|---|---|---|
 | J201 USB-C | USB-C 5V | VBUS → 1.5 A polyfuse → TVS → LM66100 → +5V_RAW; D+/D− → GPIO20/19 | flashing and the serial console; 5.1 k on CC1/CC2 (a 5 V sink) |
 | J202 DC jack 5.5/2.1 mm | 5V IN | centre = +5 V → 1.5 A polyfuse → TVS → LM66100 → +5V_RAW; sleeve = GND | **5 V only**; not together with USB-C (rule 2) |
-| J901 2-way 5 mm | +VEXT 7-18V DC FUSE 5A | pin 1 (right, x 52.4) = +, pin 2 = GND; no +/− printed | 5 A fast fuse, 26 V TVS, reverse-polarity P-FET; a reversed supply blows the fuse |
+| J901 2-way 5 mm | +VEXT 7-18V DC FUSE 5A | pin 1 (right, x 52.4) = +, pin 2 = GND; no +/− printed | run at **24 V** (7–24 V; the printed "7-18V" is outdated); 5 A fast fuse, 26 V TVS, reverse-polarity P-FET, 35 V capacitors; a reversed supply blows the fuse |
 | J903 2-way 5 mm | H-BRIDGE COIL | pin 1 = DRV8871 OUT1, pin 2 = OUT2 | the field-cycling coil, current regulated at 2.0 A |
 | J905 3-way 5 mm | +VCOIL COIL GND <=24V | pin 1 = +VCOIL (the polarizer supply's +), pin 2 = COIL (FET drain), pin 3 = GND (that supply's −) | the coil goes between pins 1 and 2. **The legend is printed in the reverse order of the pins**: seen from above, the pins run GND, COIL, +VCOIL from left to right. Wire by pin number. No fuse: the supply must limit the current |
 
@@ -232,12 +232,12 @@ GPIO43/44 are the ESP32's UART0 pins, not the USB port the firmware prints to. A
 | **J9** | receiver, stage 2 | gain **10.1** (9.1 k / 1 k) | — | follower, gain 1 | no |
 | **J10** | transmitter gain | gain **25** | — | follower, gain 1 (bring-up into a dummy load) | no |
 | **J11** | transmitter output | direct output (4.7 Ω, 10 µF coupling) | **−20 dB** tap (910 Ω / 100 Ω) | TX disconnected | **yes** |
-| **J12** | polarizer gate-driver supply | from **+VEXT** (only with +VEXT ≤ 18 V) | from **+5V_RAW** | driver unpowered, coil stays off | **yes, to use the polarizer** |
+| **J12** | polarizer gate-driver supply | from **+VEXT** (only with +VEXT ≤ 18 V: **not at the 24 V the course uses**) | from **+5V_RAW**: **the position for 24 V** | driver unpowered, coil stays off | **yes, to use the polarizer** |
 | **J14** | ADC channel AIN_3 | panel **AI7** | receiver **I** | AIN_3 floats (reads about +2 V) | one or the other |
 | **J15** | ADC channel AIN_2 | panel **AI8** | receiver **Q** | AIN_2 floats | one or the other |
 | J13 (1×2) | coil current sense | shorts the (already 0 Ω) R933 | — | — | no; replace R933 by a 10 mΩ shunt and read ISENSE_COIL here to measure the polarizer current |
 
-Default for the NMR demonstration: J3 1-2, J9 1-2, J10 1-2, J11 1-2, J12 as the supply dictates, J14 2-3, J15 2-3. Default for a general-purpose instrument without the receiver: J14 1-2, J15 1-2 (all eight AI jacks live), J3 still fitted.
+Default for the NMR demonstration: J3 1-2, J9 1-2, J10 1-2, J11 1-2, J12 2-3, J14 2-3, J15 2-3. Default for a general-purpose instrument without the receiver: J14 1-2, J15 1-2 (all eight AI jacks live), J3 still fitted.
 
 ### 6.3 Test points
 
@@ -542,7 +542,7 @@ TX_EN = GPIO40 → OPA564 enable (10 k pull-down: off at reset); 1 = transmit, o
 | Quantity | Value |
 |---|---|
 | Frequency | 0.19 Hz steps (50 MHz / 2²⁸), usable to about 1 MHz on this board |
-| Output, J10 1-2 | about **15 V pp** around +VEXT/2; needs +VEXT of about 16 V (typical output swing) to 17.5 V (worst case) for a clean sine. At 12 V it clips to about 11 V pp, at 15 V slightly. For 12 V use a lower gain (R808 1 kΩ gives 7.5, 3.3 kΩ gives 3) or accept the clipping |
+| Output, J10 1-2 | about **15 V pp** around +VEXT/2: clean at the 24 V supply (mid-rail 12 V, ±8 V). It needs at least about 16–17.5 V, so a 12 or 15 V supply clips; for a low supply use a lower gain (R808 1 kΩ gives 7.5, 3.3 kΩ gives 3) |
 | Output, J10 open | about 0.6 V pp (bring-up into a dummy load) |
 | J11 2-3 | −20 dB: about 1.5 V pp from a 90 Ω source |
 | Current limit | 1.5 A (R809 11 kΩ); the ISET pin must never be left open |
@@ -550,7 +550,7 @@ TX_EN = GPIO40 → OPA564 enable (10 k pull-down: off at reset); 1 = transmit, o
 | Into test equipment | ±8 V into a 50 Ω scope input is 0.6 W and above the usual 5 V rms limit: use a 1 MΩ input or J11 2-3 |
 | Amplitude control | **none in the DDS**: only J10, J11 and the resistor options |
 | Flags | the OPA564's current-limit and thermal flags end on unfitted pull-ups and reach no GPIO; the firmware reports them as `null`. Thermal shutdown is silent |
-| Idle current | 39 mA at TX_EN = 1 against 5 mA shut down: keep TX_EN low between pulses |
+| Idle current | 39 mA at TX_EN = 1 (about 0.9 W at 24 V) against 5 mA shut down: keep TX_EN low between pulses |
 
 **AD9834 protocol (datasheet, "Programming the AD9834").** 16-bit words, MSB first, FSYNC low per word, data clocked on the falling SCLK edge with SCLK high when FSYNC falls = **SPI mode 2**, 10 MHz. PIN/SW = 0 on this board (the RESET and SLEEP pins are strapped low, FSELECT to ground), so reset, sleep, frequency select and phase select are **register bits**. Control word (DB15:14 = 00): B28 (bit 13) = 1 for two-word frequency writes · FSEL (11) · PSEL (10) · PIN/SW (9) = 0 · RESET (8) · SLEEP1 (7) · SLEEP12 (6) · OPBITEN, SIGN/PIB, DIV2, MODE = 0. FREQ0 = `0x4000 | 14 bits` written LSBs then MSBs; FREQ1 = `0x8000 | …`; PHASE0 = `0xC000 | 12 bits`, PHASE1 = `0xE000 | 12 bits` (0.088° per step). f = MCLK × word / 2²⁸. Start-up: control `0x2100` (B28 + RESET), FREQ0 low word, FREQ0 high word, PHASE0, PHASE1, control `0x2000` (RESET off: the carrier runs). Phase switch during a sequence: one control word, `0x2000` (PHASE0) or `0x2400` (PHASE1). RESET zeroes the phase accumulator and parks the output at midscale without clearing the registers; SLEEP1 + SLEEP12 (`0x20C0`) stops the clock and powers the DAC down for an idle console. The carrier is never gated at the DDS; TX_EN gates the power stage, so the phase reference survives between pulses. **Consecutive 28-bit writes to the same frequency register are not allowed** while the output runs: for a live retune write the other register and flip FSEL (the class firmware always rewrites FREQ0, which is harmless only under RESET or SLEEP).
 
@@ -582,7 +582,7 @@ void txPulse(uint32_t t_us, uint32_t dead_us) {            // RX blanked first; 
 ### 8.10 Coil switches: field-cycling H-bridge and the polarizer (rear terminals)
 
 ```
-J901 (+VEXT in, 7–18 V) → 5 A fuse → 26 V TVS → reverse-polarity P-FET → +VEXT
+J901 (+VEXT in, 24 V; 7–24 V) → 5 A fuse → 26 V TVS → reverse-polarity P-FET → +VEXT
 H-bridge: GPIO9 HB_IN1, GPIO14 HB_IN2 (10 k pull-downs) → DRV8871 (VM = +VEXT, ILIM 32 kΩ → 2.0 A) → J903 pins 1, 2
 Polarizer: GPIO47 FET_GATE (10 k pull-down) → UCC27517 (VDD by J12: 1-2 +VEXT, 2-3 +5V_RAW) → AOD4184A → J905: 1 = +VCOIL (external supply +), 2 = COIL (drain), 3 = GND
 Flyback fitted: SS54 freewheel diode from COIL to +VCOIL (τ = L/R, about 2.6 ms for the reference coil); SMBJ20A fast-dump option unfitted
@@ -597,7 +597,7 @@ Flyback fitted: SS54 freewheel diode from COIL to +VCOIL (τ = L/R, about 2.6 ms
 
 DRV8871: current regulated at 2.0 A by chopping (not a fault); overcurrent at 3.7 A retries after 3 ms; undervoltage below 6.1 V and thermal shutdown recover silently, **no fault pin**; at the 2 A trip point it dissipates about 2.3 W. 3.3 V logic is fine (V_IH 1.5 V). Transitions need no detour through coast (220 ns dead time is built in). Keep +VEXT ≥ 6.5 V or it sits in undervoltage lockout.
 
-Polarizer: FET_GATE = 1 → coil on (UCC27517 IN− is grounded, so OUT follows IN+; a floating input gives OUT low). J12 1-2 is allowed only with +VEXT ≤ 18 V (driver supply and gate rating); J12 open = no drive, coil stays off. The FET is 40 V / 13 A; +VCOIL ≤ 24 V, **no fuse**: the coil supply must limit the current. After switching off, wait at least 5 τ (about 13 ms for the reference coil) before the pulse; the class default of 5 ms leaves about 15 % of the current. To measure the coil current, replace R933 (0 Ω, 2512) by a 10 mΩ shunt and read ISENSE_COIL at J13 with an AI input on ±2.56 V.
+Polarizer: FET_GATE = 1 → coil on (UCC27517 IN− is grounded, so OUT follows IN+; a floating input gives OUT low). J12 1-2 is allowed only with +VEXT ≤ 18 V (driver supply and gate rating), so **at the 24 V supply J12 is on 2-3**; J12 open = no drive, coil stays off. The FET is 40 V / 13 A; +VCOIL ≤ 24 V, **no fuse**: the coil supply must limit the current. After switching off, wait at least 5 τ (about 13 ms for the reference coil) before the pulse; the class default of 5 ms leaves about 15 % of the current. To measure the coil current, replace R933 (0 Ω, 2512) by a 10 mΩ shunt and read ISENSE_COIL at J13 with an AI input on ±2.56 V.
 
 ```cpp
 void coilBegin() { for (int p : {PIN_HB_IN1, PIN_HB_IN2, PIN_FET_GATE}) { digitalWrite(p, LOW); pinMode(p, OUTPUT); } }
@@ -623,7 +623,7 @@ Panel D1 PWR: on with +3V3. D2 WIFI = GPIO43, D3 ACT = GPIO44, through 0 Ω link
 | +3V3A, +3V3D | ferrite beads from +3V3 | 3.3 V | — | counter and mixer; DDS |
 | +12 V, −12 V | two isolated 2 W converters (B0512S) | ±12 V unregulated, about +5 % at light load | 167 mA each, 17 mA minimum load (bleeders fitted) | the op-amps, the DG419, the input clamps, the 78L05 |
 | +5VA | 78L05 from +12 V | 5 V | 100 mA | ADC analog, DAC, DAC level shifter, DG419 logic |
-| +VEXT | J901 | 7–18 V | 5 A fuse | **only** the OPA564, the DRV8871 and (J12 1-2) the gate driver |
+| +VEXT | J901 | 24 V (7–24 V) | 5 A fuse | **only** the OPA564, the DRV8871 and (J12 1-2) the gate driver |
 | +VCOIL | J905 pin 1 | the user's supply, ≤ 24 V | external | the polarizer coil only |
 
 **No rail is measurable by the firmware**: no divider reaches a GPIO or an ADC input, and the ADC's AUX input is grounded. The `b2 rails` status reports constants with `measured: false`. The only indicators are the LEDs D203 (+5V_RAW), D204 (+3V3), D205 (+12 V), D206 (−12 V) and D933 (+VEXT) on the main board.
@@ -752,7 +752,7 @@ Found while writing this document by comparing the code with the datasheets and 
 9. **The two LM66100s do not OR the 5 V inputs** (chip-enable on ground = always on, no reverse-current blocking): one 5 V source at a time. Next revision: each chip-enable to the other input, or to the output.
 10. **J3 must always carry a shunt** (no feedback otherwise); the schematic note that R712 is permanent is wrong. J11 and J12 likewise need a shunt to do anything.
 11. Receiver gains differ from the design notes: stage 2 is 10.1 (not 11), the difference amplifiers give 10 (not 20), so the ADC sees about half the designed amplitude. No loss of sensitivity; adjust expectations and the SIM.
-12. The transmitter at gain 25 clips below about 16–17.5 V of +VEXT; the DDS level is about 0.6 V pp (the design note's 3.18 mA uses a 1.20 V reference, the datasheet's formula 1.15 V).
+12. The transmitter at gain 25 clips below about 16–17.5 V of +VEXT (clean at the 24 V supply); the DDS level is about 0.6 V pp (the design note's 3.18 mA uses a 1.20 V reference, the datasheet's formula 1.15 V).
 13. TRIG_DIR, DDS_PSEL and FAST_OUT1/2 have no pull resistors: undefined from reset until the firmware runs. A pull-down on TRIG_DIR would make "input" the hardware default.
 14. The OPA564's current-limit and thermal flags reach no GPIO (the pull-ups R811/R812 are unfitted and there is no spare expander line); thermal shutdown is invisible to the firmware.
 15. Panel LEDs WIFI and ACT sit on UART0 (8.11). The J905 legend is printed in the reverse order of its pins (6.1). J901 has no +/− marks. J411 has no "ISO IN 1" legend.
