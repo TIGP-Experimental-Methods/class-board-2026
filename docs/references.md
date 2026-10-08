@@ -12,7 +12,7 @@ everything else is a link to the publisher or manufacturer.
 | **Tayler, M. C. D. and Bodenstedt, S. — "NMRduino: A modular, open-source, low-field magnetic resonance platform"**, J. Magn. Reson. 362, 107665 (2024), CC BY 4.0 | An open-source sub-MHz spectrometer built from a microcontroller, a DDS and a power stage — the same architecture as our board (Si5351/AD9834 clock and DDS, OPA564 transmitter, OPA1656 receiver, commutating mixer). Their design files and firmware are on Zenodo and GitHub. | [PDF in this repository](references/Tayler-Bodenstedt-2024-NMRduino-JMR-362-107665.pdf) · [DOI 10.1016/j.jmr.2024.107665](https://doi.org/10.1016/j.jmr.2024.107665) |
 | **Michal, C. A. — "A low-cost spectrometer for NMR measurements in the Earth's magnetic field"**, Meas. Sci. Technol. 21, 105902 (2010) | The classic Earth's-field spectrometer: coil design, pre-polarisation, receiver noise budget. Publisher copyright, so only the link; the Academia Sinica library has access. | [DOI 10.1088/0957-0233/21/10/105902](https://doi.org/10.1088/0957-0233/21/10/105902) |
 
-How the board implements this: [`hardware/docs/design-decisions.md`](../hardware/docs/design-decisions.md)
+How the board is built and used, pin by pin: [`class-board-reference.md`](class-board-reference.md) (netlist-derived, 2026-10-08). How the board implements this: [`hardware/docs/design-decisions.md`](../hardware/docs/design-decisions.md)
 (the design record, D-1 … D-6x) and [`firmware/NMR-FIRMWARE.md`](../firmware/NMR-FIRMWARE.md) (pulse sequence, I/Q detection, the
 scan protocol). Bring-up tests: [`hardware/docs/bring-up.md`](../hardware/docs/bring-up.md).
 

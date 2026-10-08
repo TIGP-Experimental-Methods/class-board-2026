@@ -1,5 +1,7 @@
 # TIGP class board 2026 — hardware (rev B, v0.7)
 
+> **Superseded for the boards as ordered (2026-10-05) by [`../docs/class-board-reference.md`](../docs/class-board-reference.md).** This file describes the generated design of 17 September. The link pin assignments, the ADC channel map, the SMA count, the AGND/NT1 statements, the expansion header and the routing status below are out of date; the reference and [`docs/link-pinout.md`](docs/link-pinout.md) are derived from the netlist of the final design. The generator rules and the file map are still valid.
+
 Two boards: the **main board** (ESP32-S3 dev-board carrier / lab instrument **and NMR console**, 4-layer
 **180 × 100 mm**) and the **front panel** (**4-layer 180 × 100 mm**: 17 SMA on an 18 mm grid, OLED module socket,
 3 LEDs, TTL screw strip, TX terminal, Qwiic, two isolated 5–24 V inputs, a 5 V TTL module header, three 2×20 links).

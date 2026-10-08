@@ -1,6 +1,6 @@
 # Message protocol (JSON over WebSocket)
 
-One WebSocket at `ws://<board>/ws` (`instrument.local` or `192.168.4.1`). All messages are UTF-8 JSON text frames. Three message kinds flow over it.
+One WebSocket at `ws://<board>/ws` (`instrument-XXXX.local`, XXXX = the last four hex digits of the MAC as printed in the boot log, or `192.168.4.1` on the board's own access point). All messages are UTF-8 JSON text frames. Three message kinds flow over it.
 
 ## 1. Request → reply (client to board)
 
@@ -11,7 +11,7 @@ One WebSocket at `ws://<board>/ws` (`instrument.local` or `192.168.4.1`). All me
 | Field | Meaning |
 |---|---|
 | `id` | any number/string; echoed in the reply so the client can match them |
-| `block` | block name: `base`, `b1`…`b5`, `template`, `alarms` |
+| `block` | block name: `base`, `b1`…`b5`, `nmr`, `template`, `alarms` |
 | `cmd` | command name, block-specific (see §4) |
 | `args` | object, may be omitted |
 
@@ -29,7 +29,7 @@ Requests are handled in the firmware's `loop()`, in order, one at a time.
 **`hello`** — sent once when a client connects; lists the registered blocks so the app can build its tabs.
 
 ```json
-{"type": "hello", "fw": "0.1.0", "sim": true, "blocks": ["base", "b1", "b2", "b3", "b4", "b5", "template", "alarms"]}
+{"type": "hello", "fw": "0.1.0", "sim": true, "blocks": ["base", "b1", "b2", "b3", "b4", "b5", "nmr", "template", "alarms"]}
 ```
 
 **`status`** — every 50 ms (20 Hz). `t` is the board's `millis()`.

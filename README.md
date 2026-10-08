@@ -75,7 +75,7 @@ It finds `instrument.local`, then `192.168.4.1`; `--host 10.0.0.42` overrides.
 2. Write the **SIM branch first**: `status()` returns plausible fake values; `handle()` accepts your commands. Flash; your tab appears with a generic key/value view.
 3. Copy `host/pwa/panels/template.js` → `panels/b3.js`, set `id: 'b3'`, replace the example control. Add it to `PANELS` in `app.js`. `pio run -t uploadfs`; reload the phone.
 4. Register the driver in `firmware/src/main.cpp` (one `registry.add(&b3)` line — the stub drivers are already registered, so you only replace the stub of the driver you are writing).
-5. Fill the `#ifndef SIM` branches with the real driver using the pin constants in `firmware/include/pins.h`.
+5. Fill the `#ifndef SIM` branches with the real driver using the pin constants in `firmware/include/pins.h`; the chip's protocol, the signal path and the limits are in [`docs/class-board-reference.md`](docs/class-board-reference.md) (one subsection per capability, with a minimal snippet).
 6. Open a pull request (PR — a request to merge your changes into the shared project; someone reviews it first); CI (continuous integration — the automatic build GitHub runs on every pull request) builds both envs.
 
 The rules: a driver talks only to its own hardware; all driver code runs from `loop()` (no tasks, no locks); every status key you show in the panel is one your `status()` emits.
@@ -99,7 +99,7 @@ Rules are data: `{block, key, op, threshold, action}`, evaluated 20× per second
 ```
 firmware/
   platformio.ini            envs esp32s3 (real) and esp32s3-sim (-DSIM=1)
-  include/pins.h            GPIO map v0.6 (design brief §4.2)
+  include/pins.h            GPIO map of the boards as ordered (docs/class-board-reference.md §3)
   include/secrets.h.example WiFi credentials template
   scripts/copy_pwa.py       pre-build: host/pwa -> firmware/data
   src/main.cpp              WiFi, mDNS, OTA, HTTP + WebSocket, 20 Hz broadcast
@@ -119,6 +119,7 @@ hardware/front-panel/sections/    the front panel split four ways for routing (A
 hardware/scripts/panel_sections.py  split / check / merge the four sections back into one board
 docs/
   references.md             papers (NMR at low field), datasheets of every part, tools and suppliers
+  class-board-reference.md  THE BOARD, PIN BY PIN: connectors, links, every chip's protocol, levels, limits, firmware state, known defects (netlist-derived, 2026-10-08)
   references/               the two Creative-Commons papers as PDF
 .github/workflows/build.yml  both envs + ruff on every push/PR
 ```
