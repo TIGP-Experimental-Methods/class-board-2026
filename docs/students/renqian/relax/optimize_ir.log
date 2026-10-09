@@ -1,0 +1,122 @@
+# optimize_ir.cpp - the runs behind SPEC.md step 4 (2026-10-09)
+#
+# RUN 1. Score: sigma(r1) x sqrt(fine-scan seconds), one pass must fit 30 min.
+# (An earlier scoring that counted the fixed coarse scan let averages 4 -> 16
+# 'win' by measuring for 60 min; that run was thrown away, see SPEC.md.)
+# Produced by the version before the joint-fit option was added.
+
+Inversion-recovery protocol optimization. Score = sigma(r1) x sqrt(seconds), worst of estimate x0.7/x1/x1.4; %-column = r1 error if all five get 30 min, coarse included.
+Constraint: r1 bias <= 0.5% and T1 bias <= 3% under ideal / t90 -10% / 3 Hz off / both.
+
+round      score   r1 30m     one set
+Round 0: the coarse scan. Cheapest one whose T1 estimate stays within x0.8..x1.25 everywhere:
+     wait phase            dummy  seconds  estimate range
+       1s 180 fixed            0     146s  0.497 .. 1.000 
+       2s 180 fixed            0     226s  0.603 .. 1.000 
+       3s 180 fixed            0     306s  0.704 .. 1.000 
+       3s 180 fixed            1     383s  1.000 .. 1.143 ok
+       3s 180 alternates       1     383s  1.000 .. 1.141 ok
+       5s 180 fixed            0     466s  0.850 .. 1.000 ok
+       5s 180 fixed            1     583s  1.000 .. 1.041 ok
+       5s 180 alternates       0     466s  0.817 .. 1.000 ok
+       5s 180 alternates       1     583s  1.000 .. 1.041 ok
+       8s 180 fixed            0     706s  0.951 .. 1.000 ok
+       8s 180 fixed            1     883s  1.000 .. 1.009 ok
+       8s 180 alternates       0     706s  0.935 .. 1.000 ok
+       8s 180 alternates       1     883s  1.000 .. 1.009 ok
+      12s 180 fixed            0    1026s  0.990 .. 1.000 ok
+      12s 180 fixed            1    1283s  1.000 .. 1.002 ok
+      12s 180 alternates       0    1026s  0.986 .. 1.000 ok
+      12s 180 alternates       1    1283s  1.000 .. 1.002 ok
+   -> chosen: wait 3 s, 180 fixed, 1 dummy: 383 s for all five samples
+
+start     0.1564    0.42%    20.0 min  r1 bias 0.33%  T1 bias 0.44%  8 pts 0.1-5 T1 log, wait 5 T1, 4 avg + 0 dummy, 180 fixed, ascending
+1         0.1498    0.40%    19.8 min  r1 bias 0.31%  T1 bias 0.41%  shortest tau -> 0.0667 T1   (4.20% better)
+2         0.1460    0.39%    19.6 min  r1 bias 0.28%  T1 bias 0.38%  shortest tau -> 0.0444 T1   (2.50% better)
+3         0.1444    0.38%    19.5 min  r1 bias 0.26%  T1 bias 0.36%  shortest tau -> 0.0296 T1   (1.10% better)
+4         0.1441    0.38%    19.3 min  r1 bias 0.24%  T1 bias 0.34%  shortest tau -> 0.0198 T1   (0.20% better)
+5         0.1320    0.35%    17.2 min  r1 bias 0.48%  T1 bias 0.69%  wait -> 4 T1   (8.40% better)
+6         0.1320    0.35%    17.2 min  r1 bias 0.48%  T1 bias 0.69%  order -> 2   (0.00% better)
+stop    no single change and no kick improves the score by 1 % any more
+
+RESULT  8 pts 0.0198-5 T1 log, wait 4 T1, 4 avg + 0 dummy, 180 fixed, interleaved
+
+Coarse scan at 4001 isochromats (taus 0.01 0.1 0.5 2.5 s, 4 shots, wait 3 s, 180 fixed, 1 dummy), estimate / true T1:
+   ideal         0 mM 1.007     1 mM 1.000     2 mM 1.000     5 mM 1.000    10 mM 1.000
+   t90 -10%      0 mM 1.142     1 mM 1.002     2 mM 1.000     5 mM 1.000    10 mM 1.000
+   3 Hz off      0 mM 1.008     1 mM 1.000     2 mM 1.000     5 mM 1.000    10 mM 1.000
+   both          0 mM 1.141     1 mM 1.002     2 mM 1.000     5 mM 1.000    10 mM 1.000
+   range 1.000 .. 1.142 -> inside x0.7..x1.4, the robustness cases cover it
+
+START at 4001 isochromats: 8 pts 0.1-5 T1 log, wait 5 T1, 4 avg + 0 dummy, 180 fixed, ascending
+score     0.1564    0.42%    20.0 min  r1 bias 0.33%  T1 bias 0.44%  feasible
+  Monte Carlo, 2000 sets with noise: r1 = 1.0008 +- 0.0055 -> score 0.1581 (predicted 0.1369, estimate x1); error bar / scatter 0.89
+
+BEST at 4001 isochromats: 8 pts 0.0198-5 T1 log, wait 4 T1, 4 avg + 0 dummy, 180 fixed, interleaved
+score     0.1321    0.35%    17.2 min  r1 bias 0.48%  T1 bias 0.69%  feasible
+  Monte Carlo, 2000 sets with noise: r1 = 1.0014 +- 0.0054 -> score 0.1376 (predicted 0.1193, estimate x1); error bar / scatter 0.90
+
+# RUN 2. Score: sigma(r1) when all five samples share 30 min, coarse included;
+# start = the RUN 1 result adopted in T1Fit.h; new option: joint coarse + fine fit.
+# This is what the current optimize_ir.cpp reproduces.
+
+Inversion-recovery protocol optimization. Score = sigma(r1) x sqrt(seconds), worst of estimate x0.7/x1/x1.4; %-column = r1 error if all five get 30 min, coarse included.
+Constraint: r1 bias <= 0.5% and T1 bias <= 3% under ideal / t90 -10% / 3 Hz off / both.
+
+round      score   r1 30m     one set
+Round 0: the coarse scan. Cheapest one whose T1 estimate stays within x0.8..x1.25 everywhere:
+     wait phase            dummy  seconds  estimate range
+       1s 180 fixed            0     146s  0.497 .. 1.000 
+       2s 180 fixed            0     226s  0.603 .. 1.000 
+       3s 180 fixed            0     306s  0.704 .. 1.000 
+       3s 180 fixed            1     383s  1.000 .. 1.143 ok
+       3s 180 alternates       1     383s  1.000 .. 1.141 ok
+       5s 180 fixed            0     466s  0.850 .. 1.000 ok
+       5s 180 fixed            1     583s  1.000 .. 1.041 ok
+       5s 180 alternates       0     466s  0.817 .. 1.000 ok
+       5s 180 alternates       1     583s  1.000 .. 1.041 ok
+       8s 180 fixed            0     706s  0.951 .. 1.000 ok
+       8s 180 fixed            1     883s  1.000 .. 1.009 ok
+       8s 180 alternates       0     706s  0.935 .. 1.000 ok
+       8s 180 alternates       1     883s  1.000 .. 1.009 ok
+      12s 180 fixed            0    1026s  0.990 .. 1.000 ok
+      12s 180 fixed            1    1283s  1.000 .. 1.002 ok
+      12s 180 alternates       0    1026s  0.986 .. 1.000 ok
+      12s 180 alternates       1    1283s  1.000 .. 1.002 ok
+   -> chosen: wait 3 s, 180 fixed, 1 dummy: 383 s for all five samples
+
+start     0.0035    0.35%    17.3 min  r1 bias 0.48%  T1 bias 0.69%  8 pts 0.02-5 T1 log, wait 4 T1, 4 avg + 0 dummy, 180 fixed, ascending
+1         0.0030    0.30%    17.3 min  r1 bias 0.35%  T1 bias 0.68%  joint coarse + fine fit -> 1   (13.9% better)
+2         0.0030    0.30%    17.3 min  r1 bias 0.36%  T1 bias 0.68%  order -> 2   (0.00% better)
+stop    no single change and no kick improves the score by 1 % any more
+
+RESULT  8 pts 0.02-5 T1 log, wait 4 T1, 4 avg + 0 dummy, 180 fixed, interleaved, joint fit
+
+Coarse scan at 4001 isochromats (taus 0.01 0.1 0.5 2.5 s, 4 shots, wait 3 s, 180 fixed, 1 dummy), estimate / true T1:
+   ideal         0 mM 1.007     1 mM 1.000     2 mM 1.000     5 mM 1.000    10 mM 1.000
+   t90 -10%      0 mM 1.142     1 mM 1.002     2 mM 1.000     5 mM 1.000    10 mM 1.000
+   3 Hz off      0 mM 1.008     1 mM 1.000     2 mM 1.000     5 mM 1.000    10 mM 1.000
+   both          0 mM 1.141     1 mM 1.002     2 mM 1.000     5 mM 1.000    10 mM 1.000
+   range 1.000 .. 1.142 -> inside x0.7..x1.4, the robustness cases cover it
+
+START at 4001 isochromats: 8 pts 0.02-5 T1 log, wait 4 T1, 4 avg + 0 dummy, 180 fixed, ascending
+score     0.0035    0.35%    17.3 min  r1 bias 0.48%  T1 bias 0.69%  feasible
+  Monte Carlo, 2000 sets in 30 min (fine scan x2.17): r1 = 1.0014 +- 0.0037 = 0.37% (predicted 0.32%), error bar / scatter 0.92
+
+BEST at 4001 isochromats: 8 pts 0.02-5 T1 log, wait 4 T1, 4 avg + 0 dummy, 180 fixed, interleaved, joint fit
+score     0.0030    0.30%    17.3 min  r1 bias 0.36%  T1 bias 0.68%  feasible
+  Monte Carlo, 2000 sets in 30 min (fine scan x2.17): r1 = 1.0010 +- 0.0031 = 0.31% (predicted 0.28%), error bar / scatter 0.98
+
+# The three protocols on one scale: ./optimize_ir --compare
+
+ORIGINAL (8 pts 0.1-5 T1, wait 5 T1) at 4001 isochromats: 8 pts 0.1-5 T1 log, wait 5 T1, 4 avg + 0 dummy, 180 fixed, ascending
+score     0.0042    0.42%    20.0 min  r1 bias 0.33%  T1 bias 0.44%  feasible
+  Monte Carlo, 2000 sets in 30 min (fine scan x1.74): r1 = 1.0007 +- 0.0042 = 0.42% (predicted 0.36%), error bar / scatter 0.89
+
+ROUND 1 (T1Fit.h) at 4001 isochromats: 8 pts 0.02-5 T1 log, wait 4 T1, 4 avg + 0 dummy, 180 fixed, ascending
+score     0.0035    0.35%    17.3 min  r1 bias 0.48%  T1 bias 0.69%  feasible
+  Monte Carlo, 2000 sets in 30 min (fine scan x2.17): r1 = 1.0014 +- 0.0037 = 0.37% (predicted 0.32%), error bar / scatter 0.92
+
+ROUND 2 (+ joint fit) at 4001 isochromats: 8 pts 0.02-5 T1 log, wait 4 T1, 4 avg + 0 dummy, 180 fixed, ascending, joint fit
+score     0.0030    0.30%    17.3 min  r1 bias 0.35%  T1 bias 0.68%  feasible
+  Monte Carlo, 2000 sets in 30 min (fine scan x2.17): r1 = 1.0010 +- 0.0031 = 0.31% (predicted 0.28%), error bar / scatter 0.98

@@ -232,13 +232,161 @@ inline double scanSeconds(const double* tr_s, int n, int n_dummy, int n_avg) {
   return t;
 }
 
-// Inversion recovery starts every point from equilibrium, so each 180 - tau - 90
-// waits about recover x T1 first. For the progress screen.
+// ---- the inversion-recovery protocol (SPEC.md decision 3) ---------------------------
+// Chosen by optimize_ir.cpp, which scores r1's error per second of measuring
+// in the Bloch model under four hardware cases (optimize_ir.log). Starting
+// from 0.1 - 5 T1 with a 5 T1 wait, two changes survived:
+//   shortest tau 0.1 -> 0.02 T1   ~8 % better, and r1 bias fell 0.33 -> 0.24 %:
+//                                 the start of the recovery is where it is steepest
+//   wait 5 -> 4 T1                ~8 % more, but r1 bias rose to 0.48 %, against
+//                                 a 0.5 % limit - a trade chosen in SPEC.md
+// The 3-parameter fit is what makes a shorter wait possible at all: with a
+// constant wait every shot starts from the same partly recovered state, which
+// only changes a and b, not the shape.
+static const int kIRPoints = 8;
+static const double kIRLo = 0.02, kIRHi = 5.0;   // tau range, x T1 estimate
+static const double kIRWait = 4.0;               // after each shot, x T1 estimate
+static const int kIRAvg = 4;                     // one CYCLOPS cycle per point
+
+// Fit T1 from the coarse and the fine scan together (fitIRGroups), not from
+// the fine scan alone. optimize_ir.cpp round 2, Monte Carlo over 2000 sets in a
+// 30 minute budget: r1's error 0.37 -> 0.31 %, its bias 0.48 -> 0.35 %, and the
+// reported error bar 0.92 -> 0.98 of the real scatter. It wins on all three,
+// and it gives back the bias that the 4 T1 wait cost.
+static const bool kIRJointFit = true;
+
+// The coarse scan in front of it, also from optimize_ir.cpp round 0. A 1 s wait
+// read pure water's T1 at half its value (the previous shot's transverse
+// magnetization had not gone); 3 s and one unrecorded shot per tau keeps every
+// estimate within x1.00 - x1.14 under all four hardware cases.
+static const double kCoarseTau[4] = {0.01, 0.1, 0.5, 2.5};
+static const double kCoarseWaitS = 3.0;
+static const int kCoarseDummy = 1, kCoarseAvg = 4;
+
+inline int planIR(double t1_est_s, double tau_min_s, double tau_max_s, double* tau_out) {
+  return planTR(t1_est_s, tau_min_s, tau_max_s, tau_out, kIRPoints, kIRLo, kIRHi);
+}
+
+// How long an inversion-recovery scan takes, for the progress screen: every shot
+// is 180 - tau - 90, then the record, then the wait.
 inline double scanSecondsIR(const double* tau_s, int n, double t1_est_s, int n_avg,
-                            double recover = 5.0) {
+                            double wait = kIRWait, double per_shot_s = 0.05) {
   double t = 0;
-  for (int i = 0; i < n; ++i) t += (tau_s[i] + recover * t1_est_s) * n_avg;
+  for (int i = 0; i < n; ++i) t += (tau_s[i] + per_shot_s + wait * t1_est_s) * n_avg;
   return t;
+}
+
+// ---- one T1 from several scans: S = a_g - b_g exp(-tau/T1) --------------------------
+// The coarse scan and the fine scan wait differently, so they have different a
+// and b - but the same T1. Fitting them together keeps the coarse scan's
+// information instead of throwing it away. g[i] says which scan point i is
+// from (0 .. kMaxGroups-1); w[i] is its weight, proportional to 1/sigma^2
+// (number of shots averaged), or null for equal weights.
+
+static const int kMaxGroups = 4;
+
+struct IRGroupResult {
+  bool ok = false, range_ok = false;
+  double t1_s = 0, t1_err = 0;
+  double a[kMaxGroups] = {0, 0, 0, 0}, b[kMaxGroups] = {0, 0, 0, 0};
+  int groups = 0, n = 0;
+  double rms = 0;  // weighted residual rms
+};
+
+namespace detail {
+// For a fixed T1, each group's a and c (= -b) is a weighted linear least squares
+// of its own. Returns the weighted residual sum of squares.
+inline double rssGroups(const double* tau, const double* s, const int* g, const double* w, int n,
+                        int G, double t1, double* a, double* c) {
+  double S0[kMaxGroups] = {0}, S1[kMaxGroups] = {0}, S2[kMaxGroups] = {0}, Y0[kMaxGroups] = {0},
+         Y1[kMaxGroups] = {0};
+  for (int i = 0; i < n; ++i) {
+    const double e = exp(-tau[i] / t1), wi = w ? w[i] : 1.0;
+    const int k = g[i];
+    S0[k] += wi; S1[k] += wi * e; S2[k] += wi * e * e; Y0[k] += wi * s[i]; Y1[k] += wi * s[i] * e;
+  }
+  for (int k = 0; k < G; ++k) {
+    const double det = S0[k] * S2[k] - S1[k] * S1[k];
+    if (!(det > 0)) return 1e300;
+    a[k] = (S2[k] * Y0[k] - S1[k] * Y1[k]) / det;
+    c[k] = (S0[k] * Y1[k] - S1[k] * Y0[k]) / det;
+  }
+  double rss = 0;
+  for (int i = 0; i < n; ++i) {
+    const double r = s[i] - a[g[i]] - c[g[i]] * exp(-tau[i] / t1);
+    rss += (w ? w[i] : 1.0) * r * r;
+  }
+  return rss;
+}
+}  // namespace detail
+
+inline IRGroupResult fitIRGroups(const double* tau_s, const double* s, const int* g, const double* w,
+                                 int n) {
+  IRGroupResult R;
+  R.n = n;
+  int G = 0, count[kMaxGroups] = {0};
+  for (int i = 0; i < n; ++i) {
+    if (g[i] < 0 || g[i] >= kMaxGroups) return R;
+    if (g[i] + 1 > G) G = g[i] + 1;
+    ++count[g[i]];
+  }
+  for (int k = 0; k < G; ++k) if (count[k] < 2) return R;   // a and b need two points each
+  R.groups = G;
+  if (n < 2 * G + 2) return R;                               // and T1 one more, plus one to test
+  double tMin = tau_s[0], tMax = tau_s[0];
+  for (int i = 1; i < n; ++i) {
+    if (tau_s[i] < tMin) tMin = tau_s[i];
+    if (tau_s[i] > tMax) tMax = tau_s[i];
+  }
+  if (!(tMin > 0) || !(tMax > tMin)) return R;
+  double a[kMaxGroups], c[kMaxGroups];
+  const double lo = log(tMin / 20), hi = log(tMax * 20);
+  const int Gd = 64;
+  int best = 0;
+  double bestRss = 1e300;
+  for (int j = 0; j <= Gd; ++j) {
+    const double r = detail::rssGroups(tau_s, s, g, w, n, G, exp(lo + (hi - lo) * j / Gd), a, c);
+    if (r < bestRss) { bestRss = r; best = j; }
+  }
+  if (best == 0 || best == Gd) return R;
+  double l = lo + (hi - lo) * (best - 1) / Gd, u = lo + (hi - lo) * (best + 1) / Gd;
+  const double gr = 0.6180339887498949;
+  double p = u - gr * (u - l), q = l + gr * (u - l);
+  double fp = detail::rssGroups(tau_s, s, g, w, n, G, exp(p), a, c);
+  double fq = detail::rssGroups(tau_s, s, g, w, n, G, exp(q), a, c);
+  for (int it = 0; it < 200 && (u - l) > 1e-12; ++it) {
+    if (fp < fq) { u = q; q = p; fq = fp; p = u - gr * (u - l); fp = detail::rssGroups(tau_s, s, g, w, n, G, exp(p), a, c); }
+    else         { l = p; p = q; fp = fq; q = l + gr * (u - l); fq = detail::rssGroups(tau_s, s, g, w, n, G, exp(q), a, c); }
+  }
+  const double t1 = exp(0.5 * (l + u));
+  const double rss = detail::rssGroups(tau_s, s, g, w, n, G, t1, a, c);
+
+  // sigma(T1): the T1 information left after each group's own a and c are
+  // allowed for - the Schur complement of each group's 2x2 block, summed.
+  double M[kMaxGroups][3][3] = {};
+  for (int i = 0; i < n; ++i) {
+    const double e = exp(-tau_s[i] / t1), wi = w ? w[i] : 1.0;
+    const double J[3] = {1.0, e, c[g[i]] * e * tau_s[i] / (t1 * t1)};
+    for (int r = 0; r < 3; ++r) for (int k = 0; k < 3; ++k) M[g[i]][r][k] += wi * J[r] * J[k];
+  }
+  double info = 0;
+  for (int k = 0; k < G; ++k) {
+    const double d = M[k][0][0] * M[k][1][1] - M[k][0][1] * M[k][1][0];
+    if (!(d > 0)) return R;
+    const double v0 = M[k][0][2], v1 = M[k][1][2];
+    info += M[k][2][2] - (v0 * (M[k][1][1] * v0 - M[k][0][1] * v1) + v1 * (M[k][0][0] * v1 - M[k][1][0] * v0)) / d;
+  }
+  if (!(info > 0)) return R;
+  const double sig2 = rss / (n - (2 * G + 1));
+  R.ok = true;
+  R.range_ok = tMin <= t1 && tMax >= 3 * t1;
+  R.t1_s = t1;
+  R.t1_err = sqrt(sig2 / info);
+  for (int k = 0; k < G; ++k) { R.a[k] = a[k]; R.b[k] = -c[k]; }
+  double wsum = 0;
+  for (int i = 0; i < n; ++i) wsum += w ? w[i] : 1.0;
+  R.rms = sqrt(rss / wsum);
+  return R;
 }
 
 // ---- several samples: 1/T1 = 1/T1(solvent) + r1 [M] -----------------------------
@@ -303,6 +451,21 @@ inline LineResult relaxivity(const double* conc_mM, const T1Result* t1, int n) {
 
 // The same from inversion-recovery results.
 inline LineResult relaxivity(const double* conc_mM, const IRResult* t1, int n) {
+  double x[kMaxSamples], y[kMaxSamples], sy[kMaxSamples];
+  if (n > kMaxSamples) n = kMaxSamples;
+  int m = 0;
+  for (int i = 0; i < n; ++i) {
+    if (!t1[i].ok) continue;
+    x[m] = conc_mM[i];
+    y[m] = 1.0 / t1[i].t1_s;
+    sy[m] = t1[i].t1_err / (t1[i].t1_s * t1[i].t1_s);
+    ++m;
+  }
+  return fitLine(x, y, sy, m);
+}
+
+// The same from joint coarse + fine fits.
+inline LineResult relaxivity(const double* conc_mM, const IRGroupResult* t1, int n) {
   double x[kMaxSamples], y[kMaxSamples], sy[kMaxSamples];
   if (n > kMaxSamples) n = kMaxSamples;
   int m = 0;

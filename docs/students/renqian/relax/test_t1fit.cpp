@@ -65,7 +65,7 @@ static IRResult measureIR(double t1, double a, double b_over_a, double sigma, st
   double s[8], tau[8];
   for (int i = 0; i < 3; ++i) s[i] = a * (1 - 2 * std::exp(-kCoarseTR[i] / t1)) + noise(rng);
   const T1Result coarse = fitT1(kCoarseTR, s, 3, 2.0);
-  planTR(coarse.ok ? coarse.t1_s : 1.0, kTrMin, kTrMax, tau, 8);
+  planIR(coarse.ok ? coarse.t1_s : 1.0, kTrMin, kTrMax, tau);
   for (int i = 0; i < 8; ++i) s[i] = a * (1 - b_over_a * std::exp(-tau[i] / t1)) + noise(rng);
   return fitIR(tau, s, 8);
 }
@@ -170,7 +170,7 @@ int main() {
     for (double c : kConc) {
       const double t1 = t1Of(c);
       double tau[8], s[8];
-      planTR(t1, kTrMin, kTrMax, tau, 8);
+      planIR(t1, kTrMin, kTrMax, tau);
       for (int i = 0; i < 8; ++i) s[i] = 1.5 * (1 - boa * std::exp(-tau[i] / t1));
       const IRResult r = fitIR(tau, s, 8);
       char msg[160];
@@ -219,11 +219,79 @@ int main() {
     check(r1bar.mean() / r1.sd() > 0.8 && r1bar.mean() / r1.sd() < 1.5, "IR whole chain: r1 error bar 0.8-1.5x its scatter");
   }
 
-  std::printf("\n7. how long one IR scan takes: 8 taus, 4 phase-cycle steps, 5 T1 recovery before each\n");
+  std::printf("\n7. how long one IR scan takes: 8 taus, 4 shots each, 50 ms + a 4 T1 wait per shot\n");
   for (double c : kConc) {
     double tau[8];
-    planTR(t1Of(c), kTrMin, kTrMax, tau, 8);
+    planIR(t1Of(c), kTrMin, kTrMax, tau);
     std::printf("   %4.0f mM: %6.1f s\n", c, scanSecondsIR(tau, 8, t1Of(c), 4));
+  }
+
+  // ---- 8. one T1 from the coarse and the fine scan together -------------------
+  // The two scans wait differently, so each has its own a and b; T1 is shared.
+  // Coarse: kCoarseTau, a = 0.7, b = 1.3. Fine: planIR, a = 1.0, b = 1.8.
+  std::printf("\n8. joint coarse + fine fit (fitIRGroups)\n");
+  {
+    double tau[8], s[8];
+    planIR(0.7, kTrMin, kTrMax, tau);
+    for (int i = 0; i < 8; ++i) s[i] = 1.2 * (1 - 1.9 * std::exp(-tau[i] / 0.7));
+    int g[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    const IRResult a = fitIR(tau, s, 8);
+    const IRGroupResult b = fitIRGroups(tau, s, g, nullptr, 8);
+    check(b.ok && std::fabs(b.t1_s / a.t1_s - 1) < 1e-9 && std::fabs(b.t1_err - a.t1_err) < 1e-9 * a.t1_s + 1e-15,
+          "one group: the same T1 and error as fitIR");
+  }
+  for (double c : kConc) {
+    const double t1 = t1Of(c);
+    double tau[12], s[12];
+    int g[12];
+    for (int i = 0; i < 4; ++i) { tau[i] = kCoarseTau[i]; g[i] = 0; s[i] = 0.7 - 1.3 * std::exp(-tau[i] / t1); }
+    planIR(t1, kTrMin, kTrMax, tau + 4);
+    for (int i = 4; i < 12; ++i) { g[i] = 1; s[i] = 1.0 - 1.8 * std::exp(-tau[i] / t1); }
+    const IRGroupResult r = fitIRGroups(tau, s, g, nullptr, 12);
+    char msg[200];
+    std::snprintf(msg, sizeof msg, "%4.0f mM, noise-free: T1 %.6f (true %.6f), a %.4f/%.4f b %.4f/%.4f",
+                  c, r.t1_s, t1, r.a[0], r.a[1], r.b[0], r.b[1]);
+    check(r.ok && std::fabs(r.t1_s / t1 - 1) < 1e-6 && std::fabs(r.a[0] - 0.7) < 1e-6 && std::fabs(r.b[1] - 1.8) < 1e-6, msg);
+  }
+  {
+    const double tau[5] = {0.1, 0.2, 0.4, 0.8, 1.6}, s5[5] = {-1, -0.5, 0, 0.5, 0.8};
+    const int g5[5] = {0, 0, 0, 0, 1};
+    check(!fitIRGroups(tau, s5, g5, nullptr, 5).ok, "a group with one point: refused");
+  }
+  // With noise: coarse 4 shots, fine scanned twice (8 shots) - weights 4 and 8.
+  // The joint fit must be unbiased, honest about its error, and better than the
+  // fine scan alone, since it uses the coarse scan's points as well.
+  for (double snr : {100.0}) {
+    std::printf("   %d noisy repeats, SNR %.0f per shot\n", kTrials, snr);
+    std::normal_distribution<double> unit(0.0, 1.0);
+    const double sig = 1.0 / snr;
+    for (double c : kConc) {
+      const double t1 = t1Of(c);
+      Stats joint, fine, bar;
+      for (int k = 0; k < kTrials; ++k) {
+        double tau[12], s[12], w[12];
+        int g[12];
+        for (int i = 0; i < 4; ++i) {
+          tau[i] = kCoarseTau[i]; g[i] = 0; w[i] = 4;
+          s[i] = 0.7 - 1.3 * std::exp(-tau[i] / t1) + unit(rng) * sig / 2;
+        }
+        planIR(t1, kTrMin, kTrMax, tau + 4);
+        for (int i = 4; i < 12; ++i) {
+          g[i] = 1; w[i] = 8;
+          s[i] = 1.0 - 1.8 * std::exp(-tau[i] / t1) + unit(rng) * sig / std::sqrt(8.0);
+        }
+        const IRGroupResult r = fitIRGroups(tau, s, g, w, 12);
+        const IRResult f = fitIR(tau + 4, s + 4, 8);
+        if (!r.ok || !f.ok) continue;
+        joint.add(r.t1_s / t1 - 1); bar.add(r.t1_err / t1); fine.add(f.t1_s / t1 - 1);
+      }
+      const double ratio = bar.mean() / joint.sd(), se = joint.sd() / std::sqrt(double(joint.n));
+      char msg[220];
+      std::snprintf(msg, sizeof msg, "%4.0f mM: joint scatter %.3f%% vs fine alone %.3f%%, bias %.3f%%, bar/scatter %.2f",
+                    c, 100 * joint.sd(), 100 * fine.sd(), 100 * joint.mean(), ratio);
+      check(joint.n == kTrials && std::fabs(joint.mean()) < 3 * se + 0.001 && ratio > 0.8 && ratio < 1.2 &&
+                joint.sd() <= fine.sd(), msg);
+    }
   }
 
   std::printf("\n%s: %d failure(s)\n", g_fail ? "FAILED" : "ALL PASSED", g_fail);
