@@ -18,7 +18,9 @@
 //                        has two heights 12.3 mm apart and cannot print as one
 //                        part without supports - see the split in housing-cover.
 //   PART = "cover"       the whole cover in place, for looking at only
-//   PART = "coupon"      the fit test. PRINT THIS ONE FIRST
+//   PART = "coupon"      the fit test. PRINT THIS ONE FIRST          -> coupon.stl
+//   PART = "coupon_labels" its names, for white, loaded with coupon.stl as one
+//                        object - the same as the cover's     -> coupon-labels.stl
 //   PART = "cover2d"     flat outline of the whole cover, for cover.dxf
 //
 // The work is split across four more files, each of which opens on its own:
@@ -26,7 +28,7 @@
 //   housing-shapes.scad   the wire-entry shape
 //   housing-base.scad     base(), and its pole-mark inlay
 //   housing-cover.scad    cover(), and its two printed halves
-//   housing-coupon.scad   module coupon()
+//   housing-coupon.scad   coupon(), and its names for white
 //
 // About cover.dxf: it is the flat outline of the cover, and it cannot be more
 // than that. The cover is a printed part with two heights and a flat projection
@@ -39,7 +41,7 @@
 // NOT DONE: nothing has been printed. Until coupon.stl is printed and measured,
 // M3_CLEAR, NUT_AF and FIT are assumptions, not results.
 
-PART = "base";  // [base, base_labels, cover_low, cover_high, cover_low_labels, cover_high_labels, cover, coupon, cover2d, assembly]
+PART = "base";  // [base, base_labels, cover_low, cover_high, cover_low_labels, cover_high_labels, cover, coupon, coupon_labels, cover2d, assembly]
 
 include <BOSL2/std.scad>
 include <housing-params.scad>
@@ -56,6 +58,7 @@ if (PART == "cover_low_labels")  cover_low_labels();
 if (PART == "cover_high_labels") cover_high_labels();
 if (PART == "cover")      cover();
 if (PART == "coupon")  coupon();
+if (PART == "coupon_labels") coupon_labels();
 if (PART == "cover2d") projection(cut = false) cover();
 
 // Everything in place for housing.png: the boards where they really sit, and the
@@ -97,7 +100,7 @@ echo(str("cover  split at y ", SPLIT_Y, " with a ", FIT, " mm gap:  low ",
 echo(str("SMA thread proud of the low deck: ", SMA_TOP - LOW_TOP, " mm"));
 echo(str("raised deck inner z ", HIGH_IN, " clears TX terminal ", TXT[2],
          " by ", HIGH_IN - TXT[2]));
-echo(str("coupon holes 3.0..3.6 step 0.1, nut pocket ", NUT_AF, " af x ", NUT_DEEP));
+echo(str("coupon ", CL, " x ", CW, ": M3 holes 3.0..3.6, SMA holes 6.6 6.8 7.0, the base's own corner and nut pocket, names face down at 2.0 2.2 2.6"));
 
 // Two screw lengths, not one: the near pair's heads land on the low deck and the
 // far pair's on the raised deck, 12.3 mm higher.
@@ -143,6 +146,15 @@ echo(str("   DC/USB rib ", RIB_DC_USB, " mm -> ",
 //             0.42 mm line width is 4.8 lines; at the default 2 loops the middle
 //             of every wall is infill, including the 2.00 mm rib between the
 //             J903 and J905 terminal openings.
+//   wall generator
+//             ARACHNE, not Classic, which is what the A1 profile starts with.
+//             Sliced in Bambu Studio 2026-10-09 on the coupon, which carries
+//             the cover's own 2.2 names: with Classic the first layer - the
+//             face you read - put white on 0.8 % of "H-BRIDGE COIL" and under
+//             16 % of every other 2.2 name. Their strokes are 0.44 mm, the
+//             first-layer line is 0.5 mm, and elephant-foot compensation takes
+//             0.075 off each side, so Classic drops them. With Arachne it is
+//             95-97 %. The 3.2 names come out either way.
 //   infill    25%. The four bosses are the only bulk and they carry the screws.
 //   brim      yes. 190 mm of 2 mm floor is a corner-lift shape.
 //   support   none.
