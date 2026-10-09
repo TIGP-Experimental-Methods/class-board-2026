@@ -11,10 +11,11 @@ import b5 from './panels/b5.js';
 import nmr from './panels/nmr.js';
 import watch from './panels/watch.js';
 import push from './panels/push.js';
+import tg from './panels/tg.js';
 import template from './panels/template.js';
 import alarms from './panels/alarms.js';
 
-const PANELS = [base, b1, b2, b3, b4, b5, nmr, watch, push, template, alarms];
+const PANELS = [base, b1, b2, b3, b4, b5, nmr, watch, push, tg, template, alarms];
 
 // Binary frames (fast data: scope captures, NMR records) share the WebSocket
 // with the JSON text messages. Header layout: PROTOCOL.md section 6.
