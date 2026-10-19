@@ -1,5 +1,7 @@
 # TIGP class board 2026 — hardware (rev B, v0.7)
 
+> **Revision names.** The boards ordered on 2026-10-05 and delivered in October 2026 are **rev B = v0.7** (the title block says v0.7; the panel's "rev C" text was a leftover). "Rev A" was the unbuilt v0.6 design of early September (`release/revA/`); no rev A board exists. The next revision, drawn after the order, is **V0.2** in [`V0.2/`](V0.2/) (`V0.2/CHANGES-V0.2.md`); it has not been ordered.
+>
 > **Superseded for the boards as ordered (2026-10-05) by [`../docs/class-board-reference.md`](../docs/class-board-reference.md).** This file describes the generated design of 17 September. The link pin assignments, the ADC channel map, the SMA count, the AGND/NT1 statements, the expansion header and the routing status below are out of date; the reference and [`docs/link-pinout.md`](docs/link-pinout.md) are derived from the netlist of the final design. The generator rules and the file map are still valid.
 
 Two boards: the **main board** (ESP32-S3 dev-board carrier / lab instrument **and NMR console**, 4-layer
@@ -134,9 +136,10 @@ inputs and every change diffs.  Therefore:
   **+3V3A** (ferrite-filtered, for the Johnson divider and the mixer switches); **+VEXT** (external 7–18 V input, for
   the OPA564, the DRV8871 and the polarizer gate driver only).  AGND ↔ GND only at the net tie NT1.  L2 and L3 are
   unbroken GND planes (D-01).
-- ADC channel map (D-19, must match the firmware): AI1→AIN_6, AI2→AIN_7, AI3→AIN_0, AI4→AIN_1, AI5→AIN_2, AI6→AIN_3,
-  AI7→AIN_4, AI8→AIN_5.  In v0.7 **channels 7 and 8 (AIN_4/AIN_5) carry the mixer I and Q by default**; JP101/JP102
-  restore the panel SMA per channel.
+- ADC channel map **on the ordered boards (netlist audit 2026-09-30, firmware `kAinOfAi`, `boards/class-board.json`):
+  AI1→AIN_1, AI2→AIN_0, AI3→AIN_7, AI4→AIN_6, AI5→AIN_5, AI6→AIN_4, AI7→AIN_3, AI8→AIN_2.** The D-19 order
+  (AI1→AIN_6 … AI8→AIN_5) was the generated design's and is no longer true. **Channels 7 and 8 (AIN_3/AIN_2) carry the
+  mixer I and Q** when J14/J15 are on 2-3; 1-2 gives the panel SMA per channel.
 - GPIO v0.7d (D-40, D-53, D-54; root sheet carries the table): 41 DDS_FSYNC · 42 DDS_PSEL · 40 TX_EN · 8 RX_BLANK ·
   9/14 HB_IN1/2 · 47 FET_GATE · **16/17 OPTO_IN1/2 (the isolated inputs, now on the panel, over J8 pins 35/37)**;
   DIO1–8 = TCA9535 P0.0–P0.7, **MODULE OUT 1…7 = P1.0–P1.3 and P1.5–P1.7** (P1.4 = the NMR receiver's 74HC74 `/CLR`);

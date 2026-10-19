@@ -202,6 +202,10 @@ release package (authoritative).
   AI1→AIN_6, AI2→AIN_7, AI3→AIN_0, AI4→AIN_1, AI5→AIN_2, AI6→AIN_3, AI7→AIN_4, AI8→AIN_5.
 - The schematic (b1_inputs) carries this table; the firmware channel-select table must use it.  Any later change of
   the ADC orientation must update both.
+- **Superseded on the built boards (netlist audit 2026-09-30, recorded 2026-10-16):** the instructor's hand-routed
+  v0.7 board fans in as AI1→AIN_1, AI2→AIN_0, AI3→AIN_7, AI4→AIN_6, AI5→AIN_5, AI6→AIN_4, AI7→AIN_3, AI8→AIN_2; the
+  firmware's `kAinOfAi`, `boards/class-board.json`, `../../docs/class-board-reference.md` and the V0.2 sheet notes carry
+  this order. I and Q (J14/J15 on 2-3) are therefore on AIN_3 and AIN_2.
 
 ## D-20 Front-panel link: pin 1 at the LEFT end, B1 centre-front, B3 right-front (2026-09-08)
 
