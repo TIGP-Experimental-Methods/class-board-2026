@@ -4,6 +4,7 @@ firmware/.vscode/
 # generated: copied from host/pwa by scripts/copy_pwa.py
 firmware/data/
 firmware/include/secrets.h
+firmware/secrets.ini
 
 # Python
 __pycache__/

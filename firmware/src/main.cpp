@@ -3,7 +3,8 @@
 // What happens here, in order:
 //   1. Serial (native USB), LittleFS (holds the web app + alarm rules)
 //   2. WiFi: join the network from include/secrets.h, else open our own AP
-//   3. mDNS "instrument-XXXX.local", OTA (ArduinoOTA), HTTP server for the PWA,
+//   3. mDNS "instrument-XXXX.local", OTA (ArduinoOTA) only when secrets.h
+//      defines OTA_PASSWORD, HTTP server for the PWA,
 //      WebSocket at /ws for commands + the 20 Hz status broadcast
 //   4. Register the blocks; loop() runs them and the broadcast.
 //
@@ -249,15 +250,20 @@ void setup() {
   startWiFi();
 
   if (MDNS.begin(hostName())) MDNS.addService("http", "tcp", 80);
+#ifdef OTA_PASSWORD
   ArduinoOTA.setHostname(hostName());
+  ArduinoOTA.setPassword(OTA_PASSWORD);
   ArduinoOTA.begin();
+#endif
 
   startServer();
 }
 
 void loop() {
   registry.loopAll();
+#ifdef OTA_PASSWORD
   ArduinoOTA.handle();
+#endif
 
   // Commands queued by the WebSocket task.
   std::vector<Pending> batch;

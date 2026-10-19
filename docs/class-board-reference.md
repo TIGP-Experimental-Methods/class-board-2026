@@ -651,14 +651,14 @@ The class repository's `firmware/` is the reference and the fallback. It is the 
 | Commands | `pio run -d firmware -e esp32s3-sim -t upload` (program) · `pio run -d firmware -e esp32s3-sim -t uploadfs` (the web app; `scripts/copy_pwa.py` copies `host/pwa/` into `firmware/data/` before every build) · add `--upload-port COMx` when needed |
 | First flash of a factory-fresh board | it enumerates as `303A:4001` and ignores the automatic reset: hold BOOT, tap RST, release BOOT; it re-enumerates as `303A:1001` on a **new COM port**; flash to that port. Afterwards uploads reset it automatically |
 | Reading the port from an agent | `pio device monitor` needs an interactive terminal. Use pyserial with `s.dtr = False; s.rts = False` set **before** `s.open()` and never toggled (toggling can enter download mode). The port disappears and reappears at every reset |
-| Network | with `include/secrets.h` (git-ignored; `WIFI_SSID`, `WIFI_PASSWORD`) the board joins that network and opens **no** access point; otherwise, or after 10 s without a connection, it opens the access point `instrument-XXXX` / password `instrument` at 192.168.4.1. mDNS and OTA name: `instrument-XXXX.local` (XXXX = the last four hex digits of the MAC, printed in the boot log). There is no `instrument.local` |
+| Network | with `include/secrets.h` (git-ignored; `WIFI_SSID`, `WIFI_PASSWORD`, `OTA_PASSWORD`) the board joins that network and opens **no** access point; otherwise, or after 10 s without a connection, it opens the access point `instrument-XXXX` / password `instrument` at 192.168.4.1. mDNS and OTA name: `instrument-XXXX.local` (XXXX = the last four hex digits of the MAC, printed in the boot log). There is no `instrument.local` |
 | Boot log | `[boot] class-board firmware 0.1.0 (SIM)`, one `[registry] <name> ready` per block, `[wifi] AP "instrument-XXXX" …` or `[wifi] STA <ip> …`, `[http] server started` |
-| OTA | enabled, no password, no `espota` upload environment configured, never used |
+| OTA | starts only when `secrets.h` defines `OTA_PASSWORD`, and then asks for that password. Upload over WiFi with the environment `esp32s3-ota` (the `esp32s3` build, `upload_protocol = espota`): `pio run -d firmware -e esp32s3-ota -t upload` (program) or `-t uploadfs` (the web app). The board's name and the same password go in `firmware/secrets.ini` (git-ignored; copy `secrets.ini.example`), which `platformio.ini` reads through `extra_configs`; without it the defaults `instrument-XXXX.local` and an empty password apply. Never used on a board |
 
 ### 9.2 Structure
 
-- `main.cpp` boots Serial, LittleFS, registers the blocks in the order `base, b1, b2, b3, b4, b5, nmr, template, alarms`, calls every `begin()` in that order (base first: it starts the SPI lock, I²C, the expander and the clock generator), starts WiFi, mDNS, OTA, the HTTP server (the web app from LittleFS, `GET /api/info`) and the WebSocket at `/ws`.
-- `loop()`: every block's `loop()`, OTA, the queued WebSocket requests (at most 32 pending; extra or fragmented messages are dropped without a reply), then every 50 ms the status broadcast. The web server itself runs on the AsyncTCP task.
+- `main.cpp` boots Serial, LittleFS, registers the blocks in the order `base, b1, b2, b3, b4, b5, nmr, template, alarms`, calls every `begin()` in that order (base first: it starts the SPI lock, I²C, the expander and the clock generator), starts WiFi, mDNS, OTA (only with `OTA_PASSWORD`), the HTTP server (the web app from LittleFS, `GET /api/info`) and the WebSocket at `/ws`.
+- `loop()`: every block's `loop()`, OTA (only with `OTA_PASSWORD`), the queued WebSocket requests (at most 32 pending; extra or fragmented messages are dropped without a reply), then every 50 ms the status broadcast. The web server itself runs on the AsyncTCP task.
 - **A block** is one class with `name() / begin() / loop() / handle(cmd, reply) / status(out)` in `src/blocks/<id>/`, registered by one line in `main.cpp`, with one panel file `host/pwa/panels/<id>.js` and one entry in `PANELS` in `app.js`. All block code runs on the main task, so blocks need no locks for their own state; a block never calls another block; under `SIM` it fakes its hardware. Copy `src/blocks/template/` to start a new one. The alarm engine is the one cross-block actor (`module:N:on|off` actions on `b4`).
 - `blocks/Busy.h`: `g_nmrBusy` is set while a scan runs; `b4` refuses `hbridge` and `polarizer` then.
 - `net/WsOut.h`: `wsBinaryAll(data, len)` is the only way to send a binary frame, **from the main task only**; a worker task sets a flag and the block's `loop()` sends.
@@ -722,7 +722,8 @@ The class repository's `CLAUDE.md` says the same: every `#ifndef SIM` branch is 
 The class firmware is not packaged as a library, so **copy** the parts you need into your repository and note the class commit you copied from:
 
 ```
-firmware/platformio.ini                 both environments and the memory settings
+firmware/platformio.ini                 the three environments and the memory settings
+firmware/secrets.ini.example            the OTA upload template; secrets.ini stays git-ignored
 firmware/include/pins.h                 the only source of pin numbers
 firmware/include/secrets.h.example      the template; secrets.h stays git-ignored
 firmware/src/main.cpp                   WiFi, mDNS, OTA, WebSocket, queue, broadcast
@@ -734,7 +735,7 @@ firmware/src/blocks/<what your instrument needs>
 firmware/src/alarm/                     if you want alarm rules
 ```
 
-Add `firmware/.pio/`, `firmware/include/secrets.h` and `firmware/data/` to `.gitignore`; register only the blocks you copied, `base` first; keep `host/pwa/` next to `firmware/` or change the path in `scripts/copy_pwa.py`.
+Add `firmware/.pio/`, `firmware/include/secrets.h`, `firmware/secrets.ini` and `firmware/data/` to `.gitignore`; register only the blocks you copied, `base` first; keep `host/pwa/` next to `firmware/` or change the path in `scripts/copy_pwa.py`.
 
 **Keep as they are:** `pins.h` with `kAinOfAi` and `EXP_BIT_MOD`; the drivers and the SPI-lock discipline; the expander's outputs-before-configuration start; the safe-level-then-`pinMode` order for the five console pins; RX_BLANK low by default and TX_EN low except in a pulse; the CLK1 → PLLB reset → counter clear order; `wsBinaryAll` from the main task only; no `delay()` in a block (long timing belongs on a task like the sequencer, which never touches the network); the `#ifdef SIM` branches so you can build on a bare dev board until the boards arrive. **Yours to replace:** the protocol, the block names, the app, the WiFi logic and the LED colours. If you keep the class protocol, the class web app and `instrument.py` are ready-made test clients. The class firmware's state is that of 2026-10-08: everything compiles, the SIM build runs on a bare dev board, and no `#ifndef SIM` branch has been measured.
 
@@ -749,7 +750,6 @@ Found while writing this document by comparing the code with the datasheets and 
 1. **The NMR sequencer's ADC burst busy-waits on core 1** at priority 5 for the whole record, so the main loop sends no status and handles no command, not even `abort`, for `t_acq_ms` (2 s by default). SIM does not reproduce it. Needs timer-paced sampling or a yield budget, after the achieved rate has been measured.
 2. **Scan-to-scan phase**: resolved by rework A1 and the firmware's reference channel (section 12); without the wire, `ref_ch 0` averages with random phases (the SIM reproduces this).
 3. The AsyncTCP task (priority 10, any core) and the Arduino event task (core 1) can preempt the sequencer: pulse-timing jitter is possible and unmeasured.
-4. OTA is enabled with no password and no upload environment.
 5. `sine` is updated once per millisecond and aliases above a few hundred hertz.
 6. `hardware/README.md` describes the September design (it carries a superseded notice); the notes inside the schematic files are stale (list below).
 

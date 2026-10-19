@@ -55,7 +55,7 @@ If the upload says *"No serial data received"* (a factory-fresh board, USB ID `3
 3. Open **http://192.168.4.1** in the browser (type the `http://`; stay connected when the phone warns about no internet, mobile data off on Android). Tap *Red* on the Base tab: the LED changes. The chart plots `base.counter`; pick another key from the dropdown.
 4. *Add to Home screen* gives an app icon. (Full "install" prompts need HTTPS, which the board does not have; the shortcut is enough.)
 
-To use the lab WiFi instead: copy `firmware/include/secrets.h.example` to `secrets.h`, fill in SSID/password — type the password into that file yourself, never into a Claude chat; the file is git-ignored (`git check-ignore -v firmware/include/secrets.h` prints a line) — and re-flash. The LED turns **green** and the board is at `http://instrument-XXXX.local` (mDNS: the board announces its own name on the local network, so no IP address is needed; `XXXX` is the same suffix as its access-point name, so several boards can share one network). If joining fails within 10 s it falls back to the AP.
+To use the lab WiFi instead: copy `firmware/include/secrets.h.example` to `secrets.h`, fill in SSID/password, and an OTA password of your own over `choose-a-password` (or delete that line to keep OTA, the update over WiFi, off) — type the passwords into that file yourself, never into a Claude chat; the file is git-ignored (`git check-ignore -v firmware/include/secrets.h` prints a line) — and re-flash. For uploads over WiFi, copy `firmware/secrets.ini.example` to `firmware/secrets.ini` (git-ignored too), type the board's name and the same OTA password there, and run `pio run -d firmware -e esp32s3-ota -t upload`. The LED turns **green** and the board is at `http://instrument-XXXX.local` (mDNS: the board announces its own name on the local network, so no IP address is needed; `XXXX` is the same suffix as its access-point name, so several boards can share one network). If joining fails within 10 s it falls back to the AP.
 
 ## Python client
 
@@ -98,9 +98,10 @@ Rules are data: `{block, key, op, threshold, action}`, evaluated 20× per second
 
 ```
 firmware/
-  platformio.ini            envs esp32s3 (real) and esp32s3-sim (-DSIM=1)
+  platformio.ini            envs esp32s3 (real), esp32s3-sim (-DSIM=1), esp32s3-ota (esp32s3 over WiFi)
+  secrets.ini.example       OTA upload template (board name, OTA password)
   include/pins.h            GPIO map of the boards as ordered (docs/class-board-reference.md §3)
-  include/secrets.h.example WiFi credentials template
+  include/secrets.h.example WiFi and OTA password template
   scripts/copy_pwa.py       pre-build: host/pwa -> firmware/data
   src/main.cpp              WiFi, mDNS, OTA, HTTP + WebSocket, 20 Hz broadcast
   src/blocks/Block.h        the 5-method driver interface

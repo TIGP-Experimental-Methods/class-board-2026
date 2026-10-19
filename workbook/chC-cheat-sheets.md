@@ -193,7 +193,7 @@ Source Control is the branching icon in the left bar. Changed files are marked *
 | publish the project website | GitHub → repository → *Settings → Pages → Deploy from a branch → main → / → Save*; `index.html` at the root is the page, the app is in `app/` |
 | put a project on the class wall | Claude clones `TIGP-Experimental-Methods/showcase-2026` next to `class-board-2026` (`gh repo clone …`; later *Sync Changes*) → write `projects/<github-username>--<slug>.json` (title, student, github, project, blurb, live_url, site_url, repo_url, image, video_url, updated — the format is in the wall's README) → picture into `images/` (under 8 MB) → Claude runs `python scripts/build.py` → stage both files, commit, *Sync Changes* |
 | open a pull request | push the branch; GitHub offers *Compare & pull request* |
-| is this file ignored? (the secrets check) | ask Claude to run `git check-ignore -v firmware/include/secrets.h` — it must print the rule; nothing printed means the file is NOT ignored |
+| is this file ignored? (the secrets check) | ask Claude to run `git check-ignore -v firmware/include/secrets.h firmware/secrets.ini` — it must print the rule for each; nothing printed means the file is NOT ignored |
 
 Rules: every project is its own public repository under your own GitHub account — push at every milestone (plan reviewed, first working version, deployed, project page written). `main` in the class repository is protected — your work there goes on your branch (`w1-<name>`, later `<section>-<name>`, `<section>-fw-<name>` — `a-`, `b-` or `c-` for the section of the board the work belongs to); one pull request per deliverable; the pull request description carries the screenshot; the instructor merges (*Squash and merge*). Review: *Files changed → + on a line → comment*; finish with *Approve* or *Request changes*. With an agent: commit before it starts · ask it to commit as it goes · review the diff, not the file · never let it rewrite history — say no to force-push and reset. Stuck in a merge conflict? Do not fight it — ask the tutor for the fix, then e-mail the instructor (C.8).
 
@@ -206,6 +206,7 @@ pio run -e esp32s3-sim -t uploadfs     # flash the web app (host/pwa → LittleF
 pio device monitor                     # serial console, 115200
 pio device list                        # which port is the board on
 pio run -e esp32s3 -t upload           # the REAL class board (no SIM) — from Workshop 3
+pio run -e esp32s3-ota -t upload       # the same over WiFi (OTA; needs secrets.ini, see Secrets below)
 ```
 (Or from the repository root with `-d firmware`. In VS Code: PlatformIO side bar → `esp32s3-sim` → *Upload*, *Upload Filesystem Image*, *Monitor*.)
 
@@ -222,7 +223,7 @@ pio run -e esp32s3 -t upload           # the REAL class board (no SIM) — from 
 
 **Secrets**
 - Never type a password, WiFi key or API token into a Claude chat, a prompt, `PROGRESS.md`, `SPEC.md`, a commit message, a pull request, an issue or a screenshot. Transcripts are stored; repositories are shared or public; commits are forever.
-- An existing WiFi network: copy `firmware/include/secrets.h.example` → `firmware/include/secrets.h` (network name filled in, password as `PUT-THE-PASSWORD-HERE`) · **you** type the password into the file in the editor · `git check-ignore -v firmware/include/secrets.h` must print a line (nothing printed → stop, do not commit, tell the instructor) · `git status` before every commit: no `secrets.h` · rebuild, flash.
+- An existing WiFi network: copy `firmware/include/secrets.h.example` → `firmware/include/secrets.h` (network name filled in, password as `PUT-THE-PASSWORD-HERE`) · **you** type the password into the file in the editor, and an OTA password of your own over `choose-a-password` (or delete that line: OTA stays off) · for uploads over WiFi: copy `firmware/secrets.ini.example` → `firmware/secrets.ini`, **you** type the board's name and the same OTA password · `git check-ignore -v firmware/include/secrets.h firmware/secrets.ini` must print a line for each (nothing printed → stop, do not commit, tell the instructor) · `git status` before every commit: no `secrets.h`, no `secrets.ini` · rebuild, flash.
 - The tutor never asks for a secret. Pasted one anyway? Remove it from the chat history if you can, treat it as exposed, tell the instructor.
 - Bot tokens (LINE / Telegram) and cloud keys (Cloudflare, GitHub, Anthropic) go the same way: a git-ignored config file, an environment variable, or the host's secret store (Cloudflare → *Settings → Variables*) — never source code that is committed. If a key is ever committed, revoke it; the history is public forever.
 
