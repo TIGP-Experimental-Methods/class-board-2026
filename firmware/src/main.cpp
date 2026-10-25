@@ -32,6 +32,7 @@
 #include "blocks/nmr/NmrBlock.h"
 #include "blocks/watch/WatchBlock.h"
 #include "blocks/push/PushBlock.h"
+#include "blocks/tg/TgBlock.h"
 #include "alarm/AlarmEngine.h"
 #include "net/WsOut.h"
 
@@ -65,6 +66,7 @@ static DioTrigBlock b5;
 static NmrBlock nmr;
 static WatchBlock watch;
 static PushBlock push_blk;
+static TgBlock tg_blk(registry);
 static AlarmEngine alarms(registry);
 
 // ---- network -------------------------------------------------------------
@@ -179,6 +181,18 @@ static void startWiFi() {
     return;
   }
   Serial.println("[wifi] STA failed, falling back to AP");
+  // Say what the board CAN see, so a wrong name (a phone's curly apostrophe, a
+  // 5 GHz-only hotspot, a hotspot that is not advertising) is visible at once
+  // instead of guessed at. SSIDs are printed in quotes, exactly as received.
+  {
+    WiFi.disconnect();                  // a join still in progress makes the scan fail (-2)
+    delay(100);
+    const int n = WiFi.scanNetworks();
+    Serial.printf("[wifi] %d networks in range (2.4 GHz only - the ESP32-S3 has no 5 GHz radio):\n", n);
+    for (int i = 0; i < n && i < 20; i++)
+      Serial.printf("[wifi]   \"%s\"  %d dBm  ch %d\n", WiFi.SSID(i).c_str(), WiFi.RSSI(i), WiFi.channel(i));
+    WiFi.scanDelete();
+  }
 #endif
   // Access point "instrument-XXXX" (last 4 hex digits of the MAC), 192.168.4.1.
   String mac = WiFi.macAddress();       // "AA:BB:CC:DD:EE:FF"
@@ -241,7 +255,8 @@ void setup() {
   registry.add(&nmr);
   registry.add(&watch);
   registry.add(&push_blk);
-  registry.add(&tpl);      // the copy-me example; remove once every block exists
+  registry.add(&tg_blk);   // after push: pairing points push at the Telegram chat
+  registry.add(&tpl);     // the copy-me example; remove once every block exists
   registry.add(&alarms);
   registry.beginAll();
 
