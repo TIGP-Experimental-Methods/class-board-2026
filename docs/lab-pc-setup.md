@@ -85,7 +85,9 @@ pio run -e esp32s3
 
 Purpose: find the board's COM port. Windows 10 and 11 carry the driver for the ESP32-S3's native USB; nothing is installed.
 
-Tell the person: plug the dev board in with a **USB-C data cable** (a charge-only cable shows nothing). On an assembled class board use the **main board's USB-C socket** at the rear edge; on a bare dev board use the port marked **USB**. **Never the port marked UART**: it drives a panel LED line and is not used for flashing.
+**Before the cable goes in, tell the person, and wait for a yes:** on an assembled class board the 24 V bench supply (J901) and the coil supply (J905) must be switched off **and unplugged**. Every flash and every reset restarts the 3.3 V logic, and 24 V present at that moment destroys the transmitter amplifier. The board is powered by the USB cable alone while it is flashed.
+
+Tell the person: plug in with a **USB-C data cable** (a charge-only cable shows nothing). On an assembled class board use the **main board's USB-C socket** at the rear edge: it carries the data lines to the dev board. On a bare dev board use the port marked **USB**. **Never the port marked UART**: it drives a panel LED line and is not used for flashing. **Never two cables at once** (the main board's socket and a dev-board socket feed the same 5 V rail).
 
 ```powershell
 pio device list
@@ -108,6 +110,8 @@ git -C C:\Claude\class-board-2026 check-ignore -v firmware/include/secrets.h
 ## Step 8 — Flash
 
 Purpose: write the firmware, then the web app, onto the board. Two commands, one at a time, from `firmware`.
+
+**Ask again before the first command: is the bench supply unplugged from J901?** (Step 6. This applies to every later flash too, not only the first.)
 
 ```powershell
 cd C:\Claude\class-board-2026\firmware

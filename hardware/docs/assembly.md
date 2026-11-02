@@ -9,6 +9,27 @@ step says what to check before the next.
 Rule of thumb: **look before you solder**. The records do not say exactly which connectors the factory fitted on
 each board, so step 1 is an inspection, and a part that is already there is skipped.
 
+## Rules that protect the board
+
+Read these before the first cable goes in. Each one is repeated at the step where it matters.
+
+1. **Bench supply and coil supply off and unplugged before the USB cable goes in, before every flash, before
+   every press of RST, before the housing is opened.** A flash and a reset restart the 3.3 V logic; if the 24 V
+   is still on J901 at that moment, the transmitter amplifier is destroyed. Unplug the terminal, do not just
+   switch the supply off: a supply's output capacitors hold the voltage for seconds.
+2. **Power on in this order: USB (or the 5 V jack), let the board boot, then the 24 V bench supply on J901, then
+   the coil supply on J905. Off in the reverse order.**
+3. **One 5 V source at a time:** the main board's USB-C, the 5 V jack, or one of the dev board's own USB sockets;
+   never two of them together. They feed the same rail without blocking.
+4. **Which USB socket.** Plug the computer into the **main board's USB-C socket at the rear edge**: it carries the
+   data lines to the dev board, and it is the socket that the housing exposes. If you must plug into the dev board
+   itself (a bare dev board, or a cable that does not reach), use the port marked **USB**, the native port that the
+   firmware talks on. **Never the port marked UART:** its bridge chip drives the panel's ACT LED line, and nothing
+   you need comes out of it. Never a cable in the main board's socket and in the dev board at the same time (rule 3).
+5. **Dev board orientation:** the two 3V3 pins at the square-pad end of J1, the USB sockets pointing away from
+   it. A dev board plugged in reversed puts 5 V on signal pins.
+6. **Screws M3 × 6 into the 11 mm stand-offs** from both sides, never longer: the tips meet inside the stand-off.
+
 ## 0. What you need
 
 **Your kit** (one per board): the main board (class board v0.7, 180 × 100 mm, "rev B" on the silkscreen), the
@@ -142,9 +163,11 @@ them plugged onto the panel:
 
 ## 8. First power-up
 
-Two rules from the board: **one 5 V source at a time**, the USB-C socket on the main board or the 5 V jack, never
-both; and **USB first, then the bench supply**, off in the reverse order. The transmitter amplifier is damaged if
-its 24 V arrives before the 3.3 V logic.
+**Before anything is plugged in: nothing on J901 and nothing on J905.** The bench supply and the coil supply
+stay unplugged through the whole of this section. One 5 V source at a time, the USB-C socket on the main board or
+the 5 V jack, never both; USB first, then (only in section 10) the bench supply, off in the reverse order. The
+transmitter amplifier is destroyed if its 24 V is present while the 3.3 V logic starts, and every flash and
+every reset starts the logic again.
 
 1. **Without the dev board.** Plug a USB-C cable from a laptop or a 5 V / 2 A supply into the main board's USB-C
    socket at the rear edge. Four LEDs by the rear edge light: D203 (+5 V), D204 (+3V3), D205 (+12 V), D206 (−12 V).
@@ -153,9 +176,12 @@ its 24 V arrives before the 3.3 V logic.
    nothing on the board should be too hot to touch; the 3.3 V regulator runs warm, that is normal.
 2. **Unplug. Dev board in.** Orientation as in step 3: 3V3 pins at the square-pad end of J1, USB sockets away from
    it. Press it fully home.
-3. **Plug the USB-C into the main board again.** The dev board's RGB LED comes on. A fresh dev board has nothing
+3. **Plug the USB-C into the main board again**, the socket at the rear edge: it carries the data lines to the
+   dev board, so flashing and the serial monitor work through it. (Directly on the dev board only the port marked
+   **USB**, never **UART**, and never together with the main board's socket.) The dev board's RGB LED comes on. A fresh dev board has nothing
    useful on it yet; a board flashed in Workshop 1 starts the simulator build and shows blue (its own WiFi network).
-4. **Flash the real build.** In VS Code, open the class repository's `firmware` folder in the PlatformIO terminal,
+4. **Flash the real build.** J901 and J905 are still unplugged (rule 1; every flash restarts the logic). In VS
+   Code, open the class repository's `firmware` folder in the PlatformIO terminal,
    one command per line:
 
    ```
@@ -204,6 +230,8 @@ After A1, A2 or B6 the bring-up order is section E of the rework plan: rails, th
    connected. One wrong reading on a whole group of signals means a link header mated one pin off: unplug and look.
 5. The 24 V bench supply on J901 only now, + to the labelled pin, current limit set, over-voltage limit at 25 V.
    D933 (+VEXT) lights. The coil supply on J905 last, through the in-line fuse. Switch off in the reverse order.
+6. **Before the next flash, the next press of RST, or opening the housing:** coil supply off and unplugged,
+   bench supply off and unplugged, then the USB. A flash with 24 V on J901 destroys the transmitter amplifier.
 
 The jumpers, the dev board's buttons and the terminal screws all face down inside the stack: to reach them, open
 the housing and turn the instrument over.
