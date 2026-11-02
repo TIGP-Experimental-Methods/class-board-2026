@@ -110,7 +110,7 @@ directory: [`AGENTS.md`](AGENTS.md).
   Economic PCBA, **top side only** (all parts are on F.Cu), SMD + THT; DNP parts (TCXO option, the SMBJ20A fast-dump
   clamp, the I²C pull-ups duplicated on the RX sheet, the flag pull-ups) are excluded from BOM and CPL.
 - **Front panel: 6 boards, 180 × 100 mm, 4-layer**, 1.6 mm, all assembled; every part on the outer face except the
-  three 2×20 female link headers on the inner face (THT, CPL layer "Bottom") — the panel is single-sided for
+  three 2×20 male link headers on the inner face (hand-soldered; the main board carries the female sockets on its back, Decision #62) — the panel is single-sided for
   assembly apart from those headers (Decision #58 d).
 - BOM columns *Comment, Designator, Footprint, LCSC Part #*; CPL *Designator, Mid X, Mid Y, Layer, Rotation*, origin
   bottom-left, mm, y up.  **Check the component rotations in JLC's upload preview** — still not done (finding F-13),

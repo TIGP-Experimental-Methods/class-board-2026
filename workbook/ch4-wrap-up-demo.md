@@ -1,6 +1,6 @@
-# Chapter 4 — Assembly, then the project presentation and demonstration (26–30 Oct)
+# Chapter 4 — Assembly, then the project presentation and demonstration (date to be announced)
 
-**Collect the manufactured PCBs and housings around Fri 16 Oct. Assemble your ESP32, PCB and housing. Test and refine your firmware and app. Then present and demonstrate your project, app, website and video — 26–30 Oct, about 15 minutes each.**
+**About the week of 26 October the boards are back: solder the headers and fit the shunts (`hardware/docs/assembly.md`), collect your printed housing, assemble your ESP32, PCB and housing. Test and refine your firmware and app. Then present and demonstrate your project, app, website and your video if you made one — date to be announced, about 15 minutes each.**
 
 **Assessment** is based on the project: 20 % hardware demonstration · 30 % app/software demonstration · 30 % presentation · 20 % project website.
 
@@ -8,7 +8,7 @@
 Rails at the test points (+5V, +3V3, ±12 V, +5VA) with no dev board → dev board in, LED blue, AP (the board's own WiFi network) up, app opens → `esp32s3` build flashed (written onto the board over USB; no SIM — the firmware talks to real hardware instead of faking it) → each section's smoke test: **A** AI1 reads a known voltage and the receiver passes a small test signal · **B** AO1 sine seen on a scope, the synthesizer puts a carrier on the TX connector, DIO1 toggles · **C** the panel LEDs and the OLED alive, module output 1 toggles, isolated input 1 counts.
 
 ## Exercise E13 — assemble and measure — `/tutor WRAP`
-- [ ] **E13a Assemble and run on real hardware.** Both boards into the housing — the front panel is the face, the main board's rear edge the back — dev board on the *USB* port. Build **without SIM**, one command per line: `pio run -e esp32s3 -t upload`, then `pio run -e esp32s3 -t uploadfs`. Open your app. See your instrument move real hardware — the smoke test for each part of the board it uses:
+- [ ] **E13a Assemble and run on real hardware.** Solder, power up and plug the boards together as `hardware/docs/assembly.md` says. Both boards into the housing — the front panel is the face, the main board's rear edge the back — dev board on the *USB* port. Build **without SIM**, one command per line: `pio run -e esp32s3 -t upload`, then `pio run -e esp32s3 -t uploadfs`. Open your app. See your instrument move real hardware — the smoke test for each part of the board it uses:
   **A** a voltage on AI1, and the I and Q channels responding to a signal · **B** a sine on AO1 into AI1, a carrier from the synthesizer, a TTL line and the TRIG direction · **C** the panel alive and your status panel, a module output toggling and an isolated-input count.
   Fix one thing with the tutor (there is always one thing). Commit (save a snapshot with a one-line message).
 - [ ] **E13b One measured number.** A number your instrument measures, chosen by you; your plan says what you expected. Measure it, write the value **and the method** under the expectation. The section pages suggest one for each part of the board:

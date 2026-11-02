@@ -22,8 +22,7 @@ a small air-core coil (≈ 1 mH, a few ohms) for the polarizer test; a 100 MHz s
 sessions with two; and the design coil of the workbook (400 turns AWG26, 4 cm × 10 cm) with its tuning capacitor.
 
 Safety for the v0.7 tests: **power the board from USB first and only then switch on the +VEXT bench supply** (R-43,
-D-35 — the OPA564 requires VDIG before V+).  Switch off in the reverse order.  +VEXT never above 18 V with U802
-fitted; +VCOIL never above 24 V (external RC snubber) or 12 V (SMBJ20A fitted).  Keep a hand away from the polarizer
+D-35 — the OPA564 requires VDIG before V+).  Switch off in the reverse order.  +VEXT 24 V at most (Decision #84; the supply's over-voltage limit at 25 V); +VCOIL never above 24 V (external RC snubber) or 12 V (SMBJ20A fitted).  Keep a hand away from the polarizer
 terminal while a coil is connected: 13 A and 81 mJ of stored energy.
 
 Safety: **nothing on either board switches mains** (D-53 — the relays are removed).  The only nodes that may carry an
