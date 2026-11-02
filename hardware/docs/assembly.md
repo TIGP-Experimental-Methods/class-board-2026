@@ -16,7 +16,7 @@ front panel (same size, "rev C"), the ESP32-S3 dev board (Jinhua #40729), and co
 
 | Part | Where it goes | Pieces per board |
 |---|---|---|
-| 1×20 female socket, 8.5 mm body (Jinhua 10116) | main board J1, J2 (the dev board plugs in here) | 2 |
+| 1×22 female socket, 8.5 mm body | main board J1, J2 (the dev board plugs in here) | 2 |
 | 2×20 female socket, 8.5 mm body (10108) | main board J6, J7, J8, on the **back** of the board | 3 |
 | 2×20 male header, cut from a 2×40 strip (41522) | panel J1, J2, J3, on the panel's **inner** face | 3 |
 | 1×3 male header, cut from a 1×40 strip (41504) | main board J3, J9, J10, J11, J12, J14, J15, **only if the factory left them empty** | up to 7 |
@@ -66,15 +66,9 @@ pad.** The 1×3 headers carry no position labels on the silkscreen, so count fro
 
 ## 3. Main board: the dev-board sockets J1 and J2
 
-The footprints have 22 holes; the sockets have 20 pins. Solder them offset: nothing is lost.
-
-- **J1** (count from the square pad): holes 1 and 2 are the dev board's two 3V3 pins, which the main board does not connect. Put the socket in **holes 3 to 22**, leaving
-  the two holes at the square-pad end empty. Hole 21 (5 V in) and hole 22 (ground) keep their socket pins.
-- **J2**: holes 21 and 22 are two of the dev board's four ground pins. Put the socket in **holes 1 to 20**, leaving
-  the two holes at the far end empty. Ground stays through J2 hole 1 and J1 hole 22.
-
-The placement above is the recommended answer to an open question to the instructor; follow what the instructor
-says on the day if it differs.
+Two 1×22 female sockets, one in each row of 22 holes, 25.4 mm apart. Counting from the square pad, J1 holes 1
+and 2 are the dev board's 3V3 pins, hole 21 its 5 V input and hole 22 ground; J2 hole 1 is ground and hole 2 the
+serial TX line.
 
 How to solder them straight: plug both sockets onto the dev board's pins first, so the dev board holds them at the
 right spacing. Check the orientation: the dev board's two **3V3** pins (printed on the dev board) sit at the
@@ -84,8 +78,7 @@ end of each socket, look that both sockets stand square, then solder the rest. U
 a small shiny cone; a dull blob or a bridge to the neighbouring pad is reworked with the iron and a little flux.
 
 **Tails on the back.** The J1 and J2 tails come through on the back, inside the 11 mm gap that the panel will
-cover. On the instructor's first board three rework wires are soldered to those tails (section 9); nothing is
-soldered there on a student board.
+cover. The optional rework wires of section 9 (A2 and B6) are soldered to those tails, before the panel goes on.
 
 ## 4. Panel: the three link headers J1, J2, J3
 
@@ -159,7 +152,7 @@ its 24 V arrives before the 3.3 V logic.
    5.00 V (4.85 to 5.15). A dark LED or a rail out of range: unplug and show the instructor. After a few minutes
    nothing on the board should be too hot to touch; the 3.3 V regulator runs warm, that is normal.
 2. **Unplug. Dev board in.** Orientation as in step 3: 3V3 pins at the square-pad end of J1, USB sockets away from
-   it, the two unsocketed pins of each row hanging over the empty holes. Press it fully home.
+   it. Press it fully home.
 3. **Plug the USB-C into the main board again.** The dev board's RGB LED comes on. A fresh dev board has nothing
    useful on it yet; a board flashed in Workshop 1 starts the simulator build and shows blue (its own WiFi network).
 4. **Flash the real build.** In VS Code, open the class repository's `firmware` folder in the PlatformIO terminal,
@@ -180,17 +173,23 @@ its 24 V arrives before the 3.3 V logic.
    and open 192.168.4.1. The RGB LED: yellow while joining, green on your network, blue on its own.
 6. Unplug the USB before the next step.
 
-## 9. The instructor's first board
+## 9. Fixes to the ordered board (each one optional)
 
-The first board carries the rework of `notes/2026-10-08-board-rework-plan.md` before anything is done to the
-others; whether the other boards get it is decided after that board's measurements. It touches the J1 tails on the
-back and is done after step 3 and before step 10: A2, two wires with 1 kΩ in series from the pads of R811 and R812
-(the pad on the U802 side) to the J1 tails at pins 6 and 7; B6, a 100 kΩ / 10 kΩ divider with 100 nF across the
-10 kΩ from +VEXT (the C940 pad, or the J901 side of F901) to the J1 tail at pin 4; A1, the clock generator's CLK2
-from TP701 into the AI1 path, as an SMA pigtail into the panel's AI1 jack or a wire to the R111 pad on the link
-side. Pins 4, 6 and 7 keep a socket pin under the offset of step 3. The bring-up order after that is section E of
-the rework plan: rails, then the analog loop-back, the digital lines, the transmitter at 24 V into a dummy load with
-J10 open first, the receiver, and last the H-bridge and polarizer with the external fuse.
+The ordered board has a few known weaknesses, and each has a small fix you can make on your own board with a wire, a resistor or a part swap. Every item is optional: the firmware runs on an unmodified board and detects, or is told, what is fitted. A1, A2 and B6 improve every board that runs the NMR console and are worth doing; B1 to B7 serve particular uses, so read the last column and decide. All of them touch the component side or the J1 tails on the back, so they go on now, after step 3 and before the panel covers the tails in step 10. Pad names are on the map below; the full reasoning is in the rework plan of 8 October in the course repository.
+
+| # | Optional rework | Exactly where | Parts | What it gives |
+|---|---|---|---|---|
+| A1 | Phase reference: the clock generator's CLK2 into analog input AI1 | TP701 (CLK2 through R705) → an SMA pigtail into the panel's AI1 jack, or a wire to the AI1 net at the R111 pad on the link side | 1 pigtail or 1 wire | Every scan carries its own phase reference, so scans average instead of cancelling. Firmware setting `ref_ch 1`. Check: a scope on AI1 during a scan shows a 0–3.3 V square wave at the IF. |
+| A2 | Transmitter flags to GPIO | The empty pads R811 (IFLAG) and R812 (TFLAG), the pad on the U802 side → 1 kΩ → the J1 tails at pin 6 (GPIO6) and pin 7 (GPIO7), on the back | 2 wires, 2 × 1 kΩ | A current limit or a thermal shutdown of the transmitter amplifier stops the scan set; `status` reports the flags instead of null. |
+| B6 | +VEXT sense | 100 kΩ from +VEXT (the C940 pad, or the J901 side of F901) to the J1 tail at pin 4 (GPIO4); 10 kΩ from there to GND; 100 nF across the 10 kΩ | 2 resistors, 1 capacitor, 1 wire | The firmware reads the bench voltage (about 2 %), refuses to pulse outside 7–24 V and warns before the output clips. |
+| B1 | Reverse-current blocking on both 5 V inputs | U201 and U202 (LM66100, SC-70-6): lift pin 3 (CE) from its ground pad and wire it to pin 6 (VOUT) of the same device | fine wire, a microscope | USB-C and the 5 V jack may then be connected together. Check that each source alone still powers the board. Without it: one source at a time. |
+| B2 | Pull-down on TRIG_DIR | 10 kΩ from U503 pin 5 (DIR) to GND (U503 pin 2) | 1 × 10 kΩ, 0603 | The TRIG jack is an input from power-up instead of undefined until the firmware runs. |
+| B3 | Pull-up on CS_DAC | 10 kΩ from U302 pin 9 to +3V3 (TP3 or TP202), not to U302's own 5 V supply | 1 × 10 kΩ, 1 wire | A guard against the DAC latching stray SPI traffic at boot; the firmware already drives the chip selects high first. Only if an output glitch at boot is ever seen. |
+| B4 | AUX jack live | Fit R715 (0 Ω, 0805, an empty footprint) | 1 × 0 Ω | A second receiver input, for a second coil or a test signal into the LNA. |
+| B5 | Difference-amplifier gain 20 as designed | R915, R917, R919, R924: 20 kΩ → 40.2 kΩ; C914, C915: 560 pF → 270 pF | 4 resistors, 2 capacitors | 1 V peak at the ADC instead of 0.5 V. Not recommended: setting the ADC range to ±2.56 V does the same. |
+| B7 | Separate transmitter supply | Remove FB802; feed the FB802 pad on the C815 side (+VEXT_TX) from an 18–20 V source (a small buck module, or an LM317 from +VEXT) | 1 regulator module (1 A) | The H-bridge runs at the full 24 V while the transmitter amplifier keeps its margin. |
+
+After A1, A2 or B6 the bring-up order is section E of the rework plan: rails, the analog loop-back, the digital lines, the transmitter at 24 V into a dummy load with J10 open first, the receiver, and last the H-bridge and polarizer with the external fuse.
 
 ## 10. Plug the two boards together
 

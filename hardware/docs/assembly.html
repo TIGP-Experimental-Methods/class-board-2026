@@ -1,0 +1,383 @@
+<title>Class Board Assembly</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column of about 68 characters, figures break out to the full width of a 1100px frame;
+   a workshop sheet: paper neutral, copper for pin 1 and every marker, solder-mask green for the section index. */
+:root {
+  --bg: #f5f6f3;
+  --paper: #ffffff;
+  --fg: #1c2420;
+  --muted: #5b665f;
+  --rule: #d6dad4;
+  --accent: #b4641f;        /* copper: pin 1, markers, links */
+  --accent-soft: #f6e6d6;
+  --green: #2f6b4e;         /* solder mask: section numbers, kit table head */
+  --green-soft: #e3eee7;
+  --warn-bg: #fff4de;
+  --warn-rule: #e3b55c;
+  --code-bg: #eef0ec;
+  --display: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171c19; --paper: #1f2622; --fg: #e6e9e4; --muted: #a3ada6; --rule: #3a443e;
+    --accent: #e39a56; --accent-soft: #3a2a1c; --green: #8fc9a8; --green-soft: #22332a;
+    --warn-bg: #3a3120; --warn-rule: #a8843b; --code-bg: #262e29; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #171c19; --paper: #1f2622; --fg: #e6e9e4; --muted: #a3ada6; --rule: #3a443e;
+  --accent: #e39a56; --accent-soft: #3a2a1c; --green: #8fc9a8; --green-soft: #22332a;
+  --warn-bg: #3a3120; --warn-rule: #a8843b; --code-bg: #262e29; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+.frame { max-width: 1100px; margin: 0 auto; }
+header.top { padding-block: 40px 24px; border-bottom: 2px solid var(--green); margin-bottom: 28px; }
+.eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--green); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4.6vw, 46px); line-height: 1.08; margin: 8px 0 12px; text-wrap: balance; max-width: 18ch; }
+.lede { max-width: 68ch; font-size: 19px; color: var(--muted); margin: 0; }
+.rule-of-thumb { font-style: italic; }
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.contents { background: var(--paper); border: 1px solid var(--rule); padding: 18px 22px; margin: 0 0 36px; }
+.contents ol { columns: 2; column-gap: 32px; margin: 8px 0 0; padding-left: 22px; }
+.contents li { break-inside: avoid; padding: 2px 0; }
+.contents a { color: var(--fg); text-decoration: none; }
+.contents a:hover, .contents a:focus { color: var(--accent); text-decoration: underline; }
+section.step { padding-block: 28px 8px; border-top: 1px solid var(--rule); }
+section.step h2 { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: baseline; font-size: 27px; font-weight: 700; margin: 0 0 14px; text-wrap: balance; }
+section.step h2 .n { font-family: var(--mono); font-weight: 500; font-size: 16px; color: var(--green); background: var(--green-soft); padding: 3px 9px; border-radius: 3px; }
+h3 { font-size: 19px; margin: 22px 0 8px; }
+p, li { max-width: 68ch; }
+ol.steps { padding-left: 24px; }
+ol.steps > li { margin: 0 0 10px; }
+ul { padding-left: 22px; }
+strong { font-weight: 600; }
+code, kbd { font-family: var(--mono); font-size: .9em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+pre { font-family: var(--mono); font-size: 15px; background: var(--code-bg); padding: 12px 16px; border-left: 3px solid var(--green); overflow-x: auto; max-width: 100%; }
+pre code { background: none; padding: 0; }
+.ref { font-family: var(--mono); font-size: .92em; }
+.pin1 { color: var(--accent); font-weight: 600; }
+figure { margin: 18px 0 22px; max-width: 100%; }
+figure img { width: 100%; height: auto; display: block; border: 1px solid var(--rule); background: #fff; }
+figcaption { font-size: 15px; color: var(--muted); margin-top: 8px; max-width: 80ch; }
+.fig-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.fig-row figure { margin: 0; }
+table { border-collapse: collapse; width: 100%; font-size: 16px; margin: 10px 0 16px; }
+.tablewrap { overflow-x: auto; max-width: 100%; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+th { font-weight: 600; background: var(--green-soft); color: var(--fg); }
+td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.callout { background: var(--warn-bg); border-left: 4px solid var(--warn-rule); padding: 12px 16px; margin: 16px 0; max-width: 72ch; }
+.callout.copper { background: var(--accent-soft); border-left-color: var(--accent); }
+.callout p { margin: 0; }
+.callout p + p { margin-top: 8px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; align-items: start; }
+.two > * { min-width: 0; }
+.orient { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 24px; margin: 12px 0; padding: 0; list-style: none; }
+.orient li { background: var(--paper); border: 1px solid var(--rule); padding: 10px 14px; font-size: 16px; }
+.orient b { display: block; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--green); margin-bottom: 2px; }
+svg text { font-family: var(--body); }
+svg .mono { font-family: var(--mono); }
+.diagram { max-width: 100%; height: auto; display: block; }
+.instr { background: var(--paper); border: 1px dashed var(--rule); padding: 6px 20px 14px; }
+footer { border-top: 1px solid var(--rule); margin-top: 36px; padding-top: 16px; color: var(--muted); font-size: 15px; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 640px) { .contents ol { columns: 1; } body { font-size: 16px; } section.step h2 { font-size: 23px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="frame">
+<header class="top">
+  <div class="eyebrow">Modern Experimental Techniques · Project 3 · the class board v0.7</div>
+  <h1>Assembling the class board</h1>
+  <p class="lede">The factory fitted every surface-mount part and the large through-hole parts. What remains is yours: the 2.54 mm headers and sockets, the jumper shunts, three labels, the first power-up, plugging the two boards together and putting the instrument into its housing. Work through the steps in order; each one says what to check before the next.</p>
+  <p class="lede rule-of-thumb">Rule of thumb: look before you solder. A part that is already on the board is skipped.</p>
+</header>
+
+<main>
+<nav class="contents" aria-label="Contents">
+  <div class="eyebrow">Contents</div>
+  <ol>
+    <li><a href="#kit">What you need</a></li>
+    <li><a href="#s1">Inspect the boards</a></li>
+    <li><a href="#s2">Cut and mark the headers</a></li>
+    <li><a href="#s3">Dev-board sockets J1 and J2</a></li>
+    <li><a href="#s4">Panel link headers J1, J2, J3</a></li>
+    <li><a href="#s5">Main-board link sockets J6, J7, J8</a></li>
+    <li><a href="#s6">Panel J30 and J40</a></li>
+    <li><a href="#s7">Shunts and labels</a></li>
+    <li><a href="#s8">First power-up</a></li>
+    <li><a href="#s9">Fixes to the ordered board (optional)</a></li>
+    <li><a href="#s10">Plug the two boards together</a></li>
+    <li><a href="#s11">Into the housing</a></li>
+  </ol>
+</nav>
+
+<section class="step" id="kit">
+  <h2><span class="n">0</span>What you need</h2>
+  <div class="fig-row">
+    <figure><img src="assembly-img/main-top-3d.png" alt="Rendering of the main board, component side, with the dev-board socket rows in the middle and the connectors along the rear edge"><figcaption>The main board, component side. The two rows of 22 holes in the middle take the dev board; the USB-C socket, the 5 V jack and the three screw terminals sit along the rear edge (top).</figcaption></figure>
+    <figure><img src="assembly-img/panel-outer-3d.png" alt="Rendering of the front panel, outer face, with the field of sixteen SMA jacks"><figcaption>The front panel, outer face: the face of the instrument, with sixteen SMA jacks, the terminal strips, the module header and the OLED position.</figcaption></figure>
+  </div>
+  <p><strong>Your kit</strong>, one per board: the main board (class board v0.7, 180 × 100 mm, "rev B" on the silkscreen), the front panel (same size, "rev C"), the ESP32-S3 dev board (Jinhua #40729), and connectors from the class stock:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Part</th><th>Where it goes</th><th>Per board</th></tr></thead>
+    <tbody>
+      <tr><td>1×22 female socket, 8.5 mm body</td><td>main board J1, J2 (the dev board plugs in here)</td><td class="num">2</td></tr>
+      <tr><td>2×20 female socket, 8.5 mm body (Jinhua 10108)</td><td>main board J6, J7, J8, on the <strong>back</strong> of the board</td><td class="num">3</td></tr>
+      <tr><td>2×20 male header, cut from a 2×40 strip (41522)</td><td>panel J1, J2, J3, on the panel's <strong>inner</strong> face</td><td class="num">3</td></tr>
+      <tr><td>1×3 male header, cut from a 1×40 strip (41504)</td><td>main board J3, J9, J10, J11, J12, J14, J15, <strong>only if the factory left them empty</strong></td><td class="num">up to 7</td></tr>
+      <tr><td>2.54 mm jumper shunt (15293)</td><td>on the seven 1×3 headers</td><td class="num">7</td></tr>
+      <tr><td>1×4 female socket (33637)</td><td>panel J30, the OLED socket, <strong>only if J30 is empty or carries a male header</strong></td><td class="num">1</td></tr>
+      <tr><td>2×6 male header, cut from a 2×40 strip</td><td>panel J40, <strong>only if the factory left it empty</strong></td><td class="num">1</td></tr>
+      <tr><td>M3 × 11 mm stand-off, female–female, with 2 × M3 × 6 screws</td><td>between the two boards, four corners (lab stock)</td><td class="num">4 + 8</td></tr>
+      <tr><td>M2 × 10 mm stand-off with PM2 × 5 screws (22500, 22578)</td><td>the OLED module, when it arrives</td><td class="num">4 + 8</td></tr>
+    </tbody>
+  </table></div>
+  <p>The OLED modules are not in stock yet. The board works without one: the class firmware does not drive it, and J30 is a socket, so the module plugs in later without soldering.</p>
+  <p><strong>Tools:</strong> a temperature-controlled soldering iron with a small chisel or conical tip, 0.5–0.8 mm solder (the boards are lead-free HASL; leaded or lead-free solder both wet it), flux, flush cutters, masking tape, a multimeter, a magnifier or a phone camera, and a USB-C data cable. Desoldering wick or a pump only if a wrong part has to come off. Solder in a ventilated place and wash your hands afterwards.</p>
+
+  <h3>Orientation words used on this page</h3>
+  <ul class="orient">
+    <li><b>Rear edge</b>The main board's edge with the USB-C socket, the 5 V jack and the three screw terminals. The panel's rear edge meets it.</li>
+    <li><b>Component side</b>The main board's side with the surface-mount parts; it faces the dev board.</li>
+    <li><b>Back</b>The main board's plain side; the front panel sits on it.</li>
+    <li><b>Outer face / inner face</b>The panel's outer face carries the SMA jacks and is the face of the instrument; the inner face looks at the main board.</li>
+    <li><b>Pin 1</b>The <span class="pin1">square pad</span> of every header footprint. The 1×3 headers carry no position labels on the silkscreen, so count from the square pad.</li>
+  </ul>
+  <figure>
+    <svg class="diagram" viewBox="0 0 760 250" role="img" aria-label="Side view of the stack: front panel on top, main board below it, dev board hanging under the main board">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="var(--accent)"/></marker></defs>
+      <!-- panel -->
+      <rect x="120" y="40" width="440" height="10" fill="var(--green)"/>
+      <text x="570" y="49" font-size="14" fill="var(--fg)">front panel (outer face up)</text>
+      <!-- SMA jacks on the outer face -->
+      <g fill="var(--muted)"><rect x="250" y="22" width="10" height="18"/><rect x="300" y="22" width="10" height="18"/><rect x="350" y="22" width="10" height="18"/><rect x="400" y="22" width="10" height="18"/></g>
+      <!-- link headers between -->
+      <g fill="var(--accent)"><rect x="150" y="50" width="14" height="26"/><rect x="500" y="50" width="14" height="26"/></g>
+      <g fill="var(--fg)"><rect x="146" y="76" width="22" height="30" opacity=".75"/><rect x="496" y="76" width="22" height="30" opacity=".75"/></g>
+      <!-- stand-off -->
+      <rect x="120" y="50" width="8" height="56" fill="var(--muted)"/><rect x="552" y="50" width="8" height="56" fill="var(--muted)"/>
+      <!-- main board -->
+      <rect x="120" y="106" width="440" height="10" fill="var(--green)"/>
+      <text x="570" y="115" font-size="14" fill="var(--fg)">main board (component side down)</text>
+      <!-- dev board sockets and board -->
+      <g fill="var(--accent)"><rect x="300" y="116" width="12" height="30"/><rect x="420" y="116" width="12" height="30"/></g>
+      <rect x="280" y="146" width="170" height="8" fill="var(--green)"/>
+      <rect x="290" y="154" width="50" height="14" fill="var(--muted)"/>
+      <text x="460" y="156" font-size="14" fill="var(--fg)">dev board, about 17 mm below</text>
+      <!-- small parts on the component side -->
+      <g fill="var(--muted)"><rect x="140" y="116" width="40" height="8"/><rect x="200" y="116" width="30" height="12"/><rect x="480" y="116" width="40" height="10"/></g>
+      <!-- 11 mm dimension -->
+      <line x1="90" y1="50" x2="90" y2="106" stroke="var(--accent)" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
+      <text x="30" y="82" font-size="14" fill="var(--accent)" class="mono">11 mm</text>
+      <text x="120" y="200" font-size="14" fill="var(--muted)">The 11 mm gap is the 8.5 mm socket body plus the 2.5 mm header body; four M3 × 11 stand-offs hold it. The jumpers, the terminal screws and the dev board's buttons all face down.</text>
+      <text x="120" y="222" font-size="14" fill="var(--muted)">Copper marks the parts you solder.</text>
+    </svg>
+    <figcaption>The stack, seen from the side. In the housing the panel faces up and the main board hangs under it, component side down.</figcaption>
+  </figure>
+</section>
+
+<section class="step" id="s1">
+  <h2><span class="n">1</span>Inspect the boards</h2>
+  <ol class="steps">
+    <li><strong>Main board, component side:</strong> find J1 and J2, two rows of 22 holes, 25.4 mm apart, under the silkscreen "ESP32-S3-DevKitC-1". They should be empty. Find the seven 1×3 positions J3, J9, J10, J11, J12, J14, J15: note whether the factory fitted a header on them. J13 (1×2, near the centre) stays empty whatever you find.</li>
+    <li><strong>Main board, back:</strong> J6 along the rear edge (right half), J7 along the right edge, J8 along the left edge, each a 2×20 field of holes. They should be empty.</li>
+    <li><strong>Panel, inner face:</strong> J1 along the rear edge, J2 and J3 along the two side edges, 2×20 each. Empty.</li>
+    <li><strong>Panel, outer face:</strong> J30, four holes in a row next to the four M2 holes of the OLED, silkscreen GND VCC SCL SDA. Empty, or a <strong>male</strong> header, which is wrong and comes off in step 6. J40, the 2×6 module header: the factory preview showed a shrouded header fitted; if it is there, leave it.</li>
+    <li><strong>Meter on ohms,</strong> from the main board's ground (the shell of the USB-C socket, or test point TP2) to +5V_RAW (TP4), +3V3 (TP3), +12 V (TP203), −12 V (TP204) and +5VA (TP205): none below about 1 kΩ. A reading near zero is a short from the factory; stop and show the instructor.</li>
+  </ol>
+  <figure><img src="assembly-img/main-top-map.png" alt="Map of the main board's component side with the hand-soldered positions, the test points, the LEDs and the rear-edge connectors marked"><figcaption>The component side of the main board: the sockets and headers you solder (copper), pin 1 as a square, the test points and LEDs of step 8, the rear-edge connectors.</figcaption></figure>
+</section>
+
+<section class="step" id="s2">
+  <h2><span class="n">2</span>Cut and mark the headers</h2>
+  <ol class="steps">
+    <li>From a 2×40 male strip cut three 2×20 pieces per panel (one strip gives two). Cut between pins with the flush cutters, square to the strip; file nothing. The strip has a short side (about 3 mm) and a long side (about 6 mm): the short side goes into the panel, the long side into the socket.</li>
+    <li>If J40 was empty: cut a 2×6 piece from a spare half. It has no key, so mark its pin-1 corner with a paint dot or a scratch now.</li>
+    <li>If the 1×3 positions were empty: cut seven 1×3 pieces from a 1×40 male strip.</li>
+  </ol>
+</section>
+
+<section class="step" id="s3">
+  <h2><span class="n">3</span>Main board: the dev-board sockets J1 and J2</h2>
+  <p>Two 1×22 female sockets, one in each row of 22 holes, 25.4 mm apart. Counting from the <span class="pin1">square pad</span>, J1 holes 1 and 2 are the dev board's 3V3 pins, hole 21 its 5 V input and hole 22 ground; J2 hole 1 is ground and hole 2 the serial TX line.</p>
+  <p><strong>How to solder them straight.</strong> Plug both sockets onto the dev board's pins first, so the dev board holds them at the right spacing. Check the orientation: the dev board's two <strong>3V3</strong> pins (printed on the dev board) sit at the square-pad end of J1, its <strong>5V</strong> pin at hole 21, and its two USB-C sockets point away from the square pads. Push the socket tails into the holes, turn the board over, tape the dev board down, solder one pin at each end of each socket, look that both sockets stand square, then solder the rest. Unplug the dev board.</p>
+  <p>Each joint is a small shiny cone; a dull blob or a bridge to the neighbouring pad is reworked with the iron and a little flux.</p>
+  <div class="callout"><p><strong>Tails on the back.</strong> The J1 and J2 tails come through on the back, inside the 11 mm gap that the panel will cover. The optional rework wires of step 9 (A2 and B6) are soldered to those tails, before the panel goes on.</p></div>
+</section>
+
+<section class="step" id="s4">
+  <h2><span class="n">4</span>Panel: the three link headers J1, J2, J3</h2>
+  <ol class="steps">
+    <li>Push a 2×20 piece into panel J1 from the <strong>inner</strong> face, short side into the board, so the plastic body sits on the inner face and the long pins stand up from it. The pin-1 square pad takes any pin; the header has no polarity, the board does.</li>
+    <li>Tape it, turn the panel over, solder the two corner pins on the outer face, check that the body sits flat and square, then solder the other 38. The joints land among the SMA jacks; they are 9.8 mm tall, keep the iron clear of them.</li>
+    <li>The same for J2 and J3 along the side edges.</li>
+  </ol>
+  <figure><img src="assembly-img/panel-inner-map.png" alt="Map of the panel's inner face with the three link header positions and their pin 1 marked"><figcaption>The panel's inner face, as you look at it: J1 along the rear edge, J3 and J2 along the sides. Each mates the main-board socket named beside it.</figcaption></figure>
+</section>
+
+<section class="step" id="s5">
+  <h2><span class="n">5</span>Main board: the three link sockets J6, J7, J8, soldered while mated</h2>
+  <p>The three 2×20 sockets must line up with the three panel headers to within a fraction of a millimetre, so solder them plugged onto the panel:</p>
+  <ol class="steps">
+    <li>Push a socket onto each of the panel's three headers, all the way down onto the header body.</li>
+    <li>Lay the main board <strong>back down</strong> onto the three socket tails. The panel and the main board meet <strong>rear edge to rear edge</strong>; the panel's silkscreen says "REAR / TOP EDGE ... meets the main board's rear edge". Only this way do the three fields line up: main J6 on panel J1, J7 on J3, J8 on J2, pin for pin.</li>
+    <li>Fit the four M3 × 11 stand-offs between the boards with a screw from each side, finger-tight, so the boards are parallel and the sockets sit flat against the main board's back.</li>
+    <li>Solder the 120 pins on the main board's <strong>component side</strong>. They sit among small parts; use the fine tip and work from the outside in. Look at every row with the magnifier: no bridges between the two rows, which are 2.54 mm apart.</li>
+    <li>Take the screws out and pull the boards apart, straight and evenly, a little at each corner. They come apart again whenever a jumper or the dev board needs reaching.</li>
+  </ol>
+  <div class="fig-row">
+    <figure><img src="assembly-img/main-bottom-map.png" alt="Map of the main board's back with the three link socket positions and their pin 1 marked"><figcaption>The back of the main board, as you look at it: J6 at the rear edge, J7 and J8 along the sides, each with the panel header it takes.</figcaption></figure>
+    <figure><img src="assembly-img/main-bottom-3d.png" alt="Rendering of the main board's back"><figcaption>The back of the main board. Only the three sockets and the J1/J2 tails are on this side.</figcaption></figure>
+  </div>
+</section>
+
+<section class="step" id="s6">
+  <h2><span class="n">6</span>Panel: J30 and J40</h2>
+  <ul>
+    <li><strong>J30 empty:</strong> push the 1×4 female socket in from the outer face, body on the outer face, and solder the four tails on the inner face. Pin 1 (square pad) is GND.</li>
+    <li><strong>J30 with a male header:</strong> the OLED module's own pins cannot plug into it. Cut the plastic strip away from the four pins with the flush cutters, pull each pin out with the iron on its joint, clear the four holes with wick, then fit the female socket as above. Ask the tutor for help the first time.</li>
+    <li><strong>J40 empty:</strong> push the marked 2×6 piece in from the outer face. Pin 1, the marked corner, goes on the square pad: it is at the right-hand end of the row nearer the board's centre. Solder on the inner face. Pins 1 and 2 carry +5 V, 11 and 12 ground; a cable plugged in backwards puts 5 V on a module's ground, so the mark matters.</li>
+  </ul>
+  <figure><img src="assembly-img/panel-outer-map.png" alt="Map of the panel's outer face with J30, J40, the J411 label position, the LEDs and the SMA field marked"><figcaption>The panel's outer face: J30 with its pin order, J40 with its pin-1 corner, the terminal that gets the "ISO IN 1" label, the three LEDs.</figcaption></figure>
+</section>
+
+<section class="step" id="s7">
+  <h2><span class="n">7</span>Main board: option headers, shunts and labels</h2>
+  <ol class="steps">
+    <li>If the seven 1×3 positions were empty, solder a 1×3 piece on each from the component side, pin 1 on the square pad.</li>
+    <li>Fit the shunts. Each 1×3 header is a selector and <strong>every one carries a shunt</strong>; an open header leaves a stage without feedback or a driver without supply. Positions for the NMR console, counted from the square pad:</li>
+  </ol>
+  <div class="two">
+    <div class="tablewrap"><table>
+      <thead><tr><th>Header</th><th>Shunt</th><th>What it selects</th></tr></thead>
+      <tbody>
+        <tr><td class="ref">J3</td><td class="ref">1-2</td><td>receiver stage 1 gain 101 (2-3: gain 11)</td></tr>
+        <tr><td class="ref">J9</td><td class="ref">1-2</td><td>receiver stage 2 gain 10</td></tr>
+        <tr><td class="ref">J10</td><td class="ref">1-2</td><td>transmitter gain 25 (open: follower, for a first test)</td></tr>
+        <tr><td class="ref">J11</td><td class="ref">1-2</td><td>transmitter output direct (2-3: through the 20 dB pad)</td></tr>
+        <tr><td class="ref">J12</td><td class="ref"><strong>2-3</strong></td><td>polarizer gate driver fed from 5 V. 1-2 feeds it from the bench supply and is allowed only below 18 V; the course runs 24 V</td></tr>
+        <tr><td class="ref">J14</td><td class="ref">2-3</td><td>ADC channel 7 = receiver I (1-2: panel input AI7)</td></tr>
+        <tr><td class="ref">J15</td><td class="ref">2-3</td><td>ADC channel 8 = receiver Q (1-2: panel input AI8)</td></tr>
+      </tbody>
+    </table></div>
+    <figure>
+      <svg class="diagram" viewBox="0 0 420 200" role="img" aria-label="A 1 by 3 header with the shunt on pins 1 and 2, and another with the shunt on pins 2 and 3">
+        <g transform="translate(20,30)">
+          <rect x="0" y="40" width="150" height="34" rx="3" fill="var(--code-bg)" stroke="var(--rule)"/>
+          <rect x="18" y="47" width="20" height="20" fill="var(--accent)"/>
+          <circle cx="75" cy="57" r="10" fill="var(--muted)"/><circle cx="122" cy="57" r="10" fill="var(--muted)"/>
+          <rect x="8" y="2" width="86" height="40" rx="4" fill="var(--fg)" opacity=".85"/>
+          <text x="28" y="27" font-size="14" fill="var(--bg)" class="mono">1-2</text>
+          <text x="20" y="100" font-size="14" fill="var(--accent)" class="mono">pin 1 = square pad</text>
+          <text x="0" y="125" font-size="14" fill="var(--fg)">shunt on 1-2</text>
+        </g>
+        <g transform="translate(230,30)">
+          <rect x="0" y="40" width="150" height="34" rx="3" fill="var(--code-bg)" stroke="var(--rule)"/>
+          <rect x="18" y="47" width="20" height="20" fill="var(--accent)"/>
+          <circle cx="75" cy="57" r="10" fill="var(--muted)"/><circle cx="122" cy="57" r="10" fill="var(--muted)"/>
+          <rect x="56" y="2" width="86" height="40" rx="4" fill="var(--fg)" opacity=".85"/>
+          <text x="76" y="27" font-size="14" fill="var(--bg)" class="mono">2-3</text>
+          <text x="0" y="125" font-size="14" fill="var(--fg)">shunt on 2-3 (J12, J14, J15)</text>
+        </g>
+      </svg>
+      <figcaption>The two shunt positions. The silkscreen prints no 1-2 / 2-3; the square pad is pin 1.</figcaption>
+    </figure>
+  </div>
+  <ol class="steps" start="3">
+    <li>Three labels, because the silkscreen misleads: on J905 (the 3-way terminal at the rear) "1 +VCOIL · 2 COIL · 3 GND" with pin 1 marked, the printed legend is in reverse order; on J901 (the 24 V input) "+" at pin 1, the square pad, no polarity is printed; on the panel's J411 "ISO IN 1". A strip of masking tape and a fine pen are enough.</li>
+  </ol>
+</section>
+
+<section class="step" id="s8">
+  <h2><span class="n">8</span>First power-up</h2>
+  <div class="callout copper">
+    <p><strong>One 5 V source at a time:</strong> the USB-C socket on the main board or the 5 V jack, never both.</p>
+    <p><strong>USB first, then the bench supply,</strong> off in the reverse order. The transmitter amplifier is damaged if its 24 V arrives before the 3.3 V logic.</p>
+  </div>
+  <ol class="steps">
+    <li><strong>Without the dev board.</strong> Plug a USB-C cable from a laptop or a 5 V / 2 A supply into the main board's USB-C socket at the rear edge. Four LEDs by the rear edge light: D203 (+5 V), D204 (+3V3), D205 (+12 V), D206 (−12 V). With the meter against ground:
+      <div class="tablewrap"><table>
+        <thead><tr><th>Test point</th><th>Rail</th><th>Expected</th></tr></thead>
+        <tbody>
+          <tr><td class="ref">TP3</td><td>+3V3</td><td>3.30 V (3.24 to 3.36)</td></tr>
+          <tr><td class="ref">TP203</td><td>+12 V</td><td>within 1.2 V of +12</td></tr>
+          <tr><td class="ref">TP204</td><td>−12 V</td><td>within 1.2 V of −12</td></tr>
+          <tr><td class="ref">TP205</td><td>+5VA</td><td>5.00 V (4.85 to 5.15)</td></tr>
+        </tbody>
+      </table></div>
+      A dark LED or a rail out of range: unplug and show the instructor. After a few minutes nothing on the board should be too hot to touch; the 3.3 V regulator runs warm, that is normal.</li>
+    <li><strong>Unplug. Dev board in.</strong> Orientation as in step 3: 3V3 pins at the square-pad end of J1, USB sockets away from it. Press it fully home.</li>
+    <li><strong>Plug the USB-C into the main board again.</strong> The dev board's RGB LED comes on. A fresh dev board has nothing useful on it yet; a board flashed in Workshop 1 starts the simulator build and shows blue (its own WiFi network).</li>
+    <li><strong>Flash the real build.</strong> In VS Code, open the class repository's <code>firmware</code> folder in the PlatformIO terminal, one command per line:
+<pre><code>pio run -e esp32s3 -t upload
+pio run -e esp32s3 -t uploadfs</code></pre>
+      The first command writes the firmware, the second the web app. A dev board that has never been flashed ignores the upload until you hold <kbd>BOOT</kbd>, tap <kbd>RST</kbd> and release BOOT; it then comes back on a <strong>new COM port</strong>, and the upload works to that port (<code>--upload-port COMx</code> if PlatformIO picks the wrong one). This is needed once. BOOT and RST are the two small buttons on the dev board, reachable while the panel is off.</li>
+    <li><strong>Watch it boot.</strong> The serial monitor in PlatformIO shows <code>[boot]</code>, then one <code>[registry] &lt;name&gt; ready</code> line per block, then <code>[wifi] AP instrument-XXXX</code> or <code>[wifi] STA &lt;ip&gt;</code> and <code>[http] server started</code>. With no WiFi credentials in your git-ignored <code>secrets.h</code> the board opens its own network <code>instrument-XXXX</code> (password <code>instrument</code>); join it and open 192.168.4.1. The RGB LED: yellow while joining, green on your network, blue on its own.</li>
+    <li>Unplug the USB before the next step.</li>
+  </ol>
+</section>
+
+<section class="step" id="s9">
+  <h2><span class="n">9</span>Fixes to the ordered board (each one optional)</h2>
+  <p>The ordered board has a few known weaknesses, and each has a small fix you can make on your own board with a wire, a resistor or a part swap. Every item is optional: the firmware runs on an unmodified board and detects, or is told, what is fitted. A1, A2 and B6 improve every board that runs the NMR console and are worth doing; B1 to B7 serve particular uses, so read the last column and decide. All of them touch the component side or the J1 tails on the back, so they go on now, after step 3 and before the panel covers the tails in step 10. Pad names are on the map below; the full reasoning is in the rework plan of 8 October in the course repository.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>Optional rework</th><th>Exactly where</th><th>Parts</th><th>What it gives</th></tr></thead>
+    <tbody>
+        <tr><td class="ref">A1</td><td><strong>Phase reference: the clock generator's CLK2 into analog input AI1</strong></td><td>TP701 (CLK2 through R705) → an SMA pigtail into the panel's AI1 jack, or a wire to the AI1 net at the R111 pad on the link side</td><td>1 pigtail or 1 wire</td><td>Every scan carries its own phase reference, so scans average instead of cancelling. Firmware setting <code>ref_ch 1</code>. Check: a scope on AI1 during a scan shows a 0–3.3 V square wave at the IF.</td></tr>
+        <tr><td class="ref">A2</td><td><strong>Transmitter flags to GPIO</strong></td><td>The empty pads R811 (IFLAG) and R812 (TFLAG), the pad on the U802 side → 1 kΩ → the J1 tails at pin 6 (GPIO6) and pin 7 (GPIO7), on the back</td><td>2 wires, 2 × 1 kΩ</td><td>A current limit or a thermal shutdown of the transmitter amplifier stops the scan set; <code>status</code> reports the flags instead of null.</td></tr>
+        <tr><td class="ref">B6</td><td><strong>+VEXT sense</strong></td><td>100 kΩ from +VEXT (the C940 pad, or the J901 side of F901) to the J1 tail at pin 4 (GPIO4); 10 kΩ from there to GND; 100 nF across the 10 kΩ</td><td>2 resistors, 1 capacitor, 1 wire</td><td>The firmware reads the bench voltage (about 2 %), refuses to pulse outside 7–24 V and warns before the output clips.</td></tr>
+        <tr><td class="ref">B1</td><td><strong>Reverse-current blocking on both 5 V inputs</strong></td><td>U201 and U202 (LM66100, SC-70-6): lift pin 3 (CE) from its ground pad and wire it to pin 6 (VOUT) of the same device</td><td>fine wire, a microscope</td><td>USB-C and the 5 V jack may then be connected together. Check that each source alone still powers the board. Without it: one source at a time.</td></tr>
+        <tr><td class="ref">B2</td><td><strong>Pull-down on TRIG_DIR</strong></td><td>10 kΩ from U503 pin 5 (DIR) to GND (U503 pin 2)</td><td>1 × 10 kΩ, 0603</td><td>The TRIG jack is an input from power-up instead of undefined until the firmware runs.</td></tr>
+        <tr><td class="ref">B3</td><td><strong>Pull-up on CS_DAC</strong></td><td>10 kΩ from U302 pin 9 to +3V3 (TP3 or TP202), not to U302's own 5 V supply</td><td>1 × 10 kΩ, 1 wire</td><td>A guard against the DAC latching stray SPI traffic at boot; the firmware already drives the chip selects high first. Only if an output glitch at boot is ever seen.</td></tr>
+        <tr><td class="ref">B4</td><td><strong>AUX jack live</strong></td><td>Fit R715 (0 Ω, 0805, an empty footprint)</td><td>1 × 0 Ω</td><td>A second receiver input, for a second coil or a test signal into the LNA.</td></tr>
+        <tr><td class="ref">B5</td><td><strong>Difference-amplifier gain 20 as designed</strong></td><td>R915, R917, R919, R924: 20 kΩ → 40.2 kΩ; C914, C915: 560 pF → 270 pF</td><td>4 resistors, 2 capacitors</td><td>1 V peak at the ADC instead of 0.5 V. Not recommended: setting the ADC range to ±2.56 V does the same.</td></tr>
+        <tr><td class="ref">B7</td><td><strong>Separate transmitter supply</strong></td><td>Remove FB802; feed the FB802 pad on the C815 side (+VEXT_TX) from an 18–20 V source (a small buck module, or an LM317 from +VEXT)</td><td>1 regulator module (1 A)</td><td>The H-bridge runs at the full 24 V while the transmitter amplifier keeps its margin.</td></tr>
+    </tbody>
+  </table></div>
+  <figure><img src="assembly-img/main-rework-map.png" alt="Map of the main board's component side with the pads of every rework item marked"><figcaption>Where each rework item lands on the component side. The A2 and B6 wires end on the J1 tails, on the back.</figcaption></figure>
+  <p>After A1, A2 or B6 the bring-up order is section E of the rework plan: rails, the analog loop-back, the digital lines, the transmitter at 24 V into a dummy load with J10 open first, the receiver, and last the H-bridge and polarizer with the external fuse.</p>
+</section>
+
+<section class="step" id="s10">
+  <h2><span class="n">10</span>Plug the two boards together</h2>
+  <ol class="steps">
+    <li>USB unplugged. Main board component side down, dev board hanging below. Panel outer face up.</li>
+    <li>Rear edge to rear edge, the three headers over the three sockets, press down evenly at the four corners until the socket bodies meet the header bodies: the gap between the boards is 11 mm all round.</li>
+    <li>Four M3 × 11 stand-offs in the corner holes, M3 × 6 screws from both sides. Do not use longer screws from the two sides into an 11 mm stand-off: the tips meet.</li>
+    <li>USB in. The panel's three LEDs: D1 PWR on; D2 WIFI lit and flickering during boot (it shares a serial line), then under the firmware's control; D3 ACT. Open the app: the <strong>A</strong> / <strong>B</strong> / <strong>C</strong> smoke tests of workbook chapter 4 (a voltage on AI1, a sine from AO1, a TTL line, a module output, an isolated input) show that the panel is connected. One wrong reading on a whole group of signals means a link header mated one pin off: unplug and look.</li>
+    <li>The 24 V bench supply on J901 only now, + to the labelled pin, current limit set, over-voltage limit at 25 V. D933 (+VEXT) lights. The coil supply on J905 last, through the in-line fuse. Switch off in the reverse order.</li>
+  </ol>
+  <p>The jumpers, the dev board's buttons and the terminal screws all face down inside the stack: to reach them, open the housing and turn the instrument over.</p>
+  <figure><img src="assembly-img/panel-inner-3d.png" alt="Rendering of the panel's inner face"><figcaption>The panel's inner face, the side that meets the main board. The three link headers stand on it; nothing else does.</figcaption></figure>
+</section>
+
+<section class="step" id="s11">
+  <h2><span class="n">11</span>Into the housing</h2>
+  <p>Your housing is your own design, so its README is the authority; the common points:</p>
+  <ol class="steps">
+    <li>Print and check the test coupon first; fit an M3 screw and a nut in it.</li>
+    <li>Anything that goes <strong>between</strong> the panel and its cover goes on before the stack enters the housing: Yi-Tsai's OLED surround sits in the cover window and goes onto the panel before the shell.</li>
+    <li>Lower the mated stack in, rear edge to the rear wall: the USB-C, the 5 V jack and the three terminals show in the rear openings, the SMA field and the module header in the cover openings.</li>
+    <li>Cover on, then the bottom lid; the lid's small holes sit under the terminal screws where the design has them.</li>
+    <li>Stick-on feet taller than the lid's screw heads.</li>
+  </ol>
+  <p>The OLED module, when it comes, plugs into J30 with its pins in the order <strong>GND VCC SCL SDA</strong>, the same as the silkscreen. Modules with VCC and GND swapped exist and would be powered backwards; read the pin names on the module before plugging it in. It is held by four M2 × 10 stand-offs or by the cover, as your design says.</p>
+  <div class="fig-row">
+    <figure><img src="assembly-img/housing-assembly.png" alt="Rendering of the instructor's housing with the board stack inside"><figcaption>One example: the instructor's housing, the stack inside it, the dev board hanging below the main board.</figcaption></figure>
+    <figure><img src="assembly-img/housing-print-plate.png" alt="The printed parts of the instructor's housing laid out on one print plate"><figcaption>Its printed parts on one plate: base, cover, SMA plate, OLED surround and the label inlays.</figcaption></figure>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>Class board v0.7 and front panel rev C as manufactured (JLCPCB order of 5 October 2026). The bring-up page <span class="ref">hardware/docs/bring-up.md</span> holds the instructor's full measurement sequence; the board reference <span class="ref">docs/class-board-reference.md</span> §6.2 and §7 the jumper table and the link pinout; workbook chapter 4 the exercises that start once the app runs on the real board. Help: the tutor, then s.p.bennetts@g.iams.sinica.edu.tw.</p>
+</footer>
+</div>
