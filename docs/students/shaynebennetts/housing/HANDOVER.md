@@ -66,7 +66,7 @@ Dev board: `multmatrix` in `devboard()`, header plastic on the socket tops at z 
   The 3D model is a plain 13.82 mm block, so the clash test always reports its 4 top corners touching the OLED bosses.
 - Dev board: Jinhua #40729 = VCC-GND YD-ESP32-S3 (57.15 × 27.94). Port identity from the user: **COM** on the buttons'
   side (model z −5.65, housing y −63.15), **USB** on the regulator's side (z +5.85, y −74.65).
-- 3D-model quirks: the DC jack model sits 2.35 mm off its pin pads in x (the hole follows the **model**, user's call);
+- 3D-model quirks: the DC jack model sits 2.35 mm off its pin pads in x (the hole follows the **pads**, x 34.9, as measured on the first print);
   the J901/J903 terminal models sit ~2.7 mm low (sizes taken from J905, which sits right).
 
 ## User's decisions this session (keep them)
@@ -76,7 +76,7 @@ Dev board: `multmatrix` in `devboard()`, header plastic on the socket tops at z 
 - All nut pockets open at **45 degrees** into the box (shared `nut_pocket()`); M3 nut pockets 0.3 mm all round,
   lid pockets 0.8 mm extra height; board bosses hold **two nuts stacked** in one pocket (5.6 mm).
 - Lid screw holes 8 mm from the outer edges; corner columns run full height (print without support under them).
-- Rear openings are rounded slots/holes: USB 16 × 10, DC 11, terminal slots 6 mm high.
+- Rear openings are rounded slots/holes: USB 16 × 12, DC 11, terminal slots 8 mm tall with 6 mm wide ends (heights as measured on the first print, 4 Nov 2026).
 - Top cover 2 mm; OLED gets its own housing; SMA field is a separate flat piece; labels white inlay 0.4 mm on top
   pieces, engraved 0.6 mm on walls.
 - SMA plate: 0.5 mm placement tolerance on every jack (`sma_tol`): holes 7.65, edge gap 0.8; verified with the plate
@@ -87,7 +87,7 @@ Dev board: `multmatrix` in `devboard()`, header plastic on the socket tops at z 
 1. **Main board dev-board socket spacing is 25.0 mm; the YD-ESP32-S3 rows are 25.4 mm** (footprint and model).
    The board is not ordered; the user said "we can bump it": move J1 to y 81.5 and J2 to y 56.1 in KiCad and reroute.
    The housing already assumes 25.4 (centre 68.8 unchanged).
-2. DC jack hole is on the model axis, 2.35 mm off the pads — measure the real jack before printing.
+2. Rear openings corrected 4 Nov 2026, as measured on the first print against the soldered board: USB-C slot centre 4 mm further from the board (`usb_z` 5.1) and 16 x 12, terminal slots 2 mm further (`slot_z` 6.5) and 8 mm tall, DC jack hole on the tip/sleeve pad axis (x 34.9, not the model's 32.55); `base.stl` re-exported. The slots grow vertically only (`rear_slot()` argument `h`), so their widths and the webs between them are unchanged.
 3. OLED display window and glass thickness (`oled_win`, `oled_glass` = 1.5) are from the footprint / a typical module — check.
 4. The LED well in the cover was removed on 3 Nov 2026 (its floor needed support and printed badly): the LEDs show through plain 3 mm holes in the 2 mm plate; no part of the cover needs support.
 5. Panel silkscreen says module header pin 10 is spare, but the copper routes MODOUT8 there.

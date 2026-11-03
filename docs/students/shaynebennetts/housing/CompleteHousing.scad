@@ -90,27 +90,30 @@ module bosses() {
 
 // ---- rear-wall openings -----------------------------------------------------
 // Positions in the main board's own frame (before the flip), from the footprint pads in
-// class-board.kicad_pcb; heights are above the board's top face.
+// class-board.kicad_pcb; heights are above the board's top face, as measured on the first print
+// against the soldered board (3 Nov 2026).
 
-// USB-C: a rounded slot 16 x 10 around the mid-mount receptacle, room for the plug boot
+// USB-C: a rounded slot 16 x 12 around the mid-mount receptacle, room for the plug boot
 usb_x = [18.0 - 3, 18.0 + 3];   // end centres
-usb_z = 1.1;                    // receptacle centre
-usb_d = 10;
+usb_z = 5.1;                    // receptacle centre, as measured on the first print (3 Nov 2026)
+usb_d = 10;                     // end diameter
+usb_h = 2;                      // extra height: the slot is usb_d + usb_h = 12 tall, as measured on the first print (3 Nov 2026)
 
-// DC jack: one round hole on the barrel axis of the 3D model (circle fit to its front face)
-dc_axis = [32.55, 7.8];  // x, height above the board
+// DC jack: one round hole on the axis of the jack's tip and sleeve pads
+dc_axis = [34.9, 7.8];   // x, height above the board; x on the pad axis, as measured on the first print (3 Nov 2026)
 dc_d    = 11;
 
 // Terminal wire entries: one rounded slot per terminal block, through its outer poles.
-// Entry centre 4.5 mm above the board, read from the J905 model.
 terminals = [[47.38, 52.38], [61.78, 66.78], [74.9, 84.9]];   // J901, J903, J905: first and last pole
-slot_d    = 6;      // slot height = end diameter
-slot_z    = 4.5;    // wire-entry centre above the board
+slot_d    = 6;      // end diameter: 6 mm wide ends
+slot_h    = 2;      // extra height: 8 mm tall, as measured on the first print (3 Nov 2026)
+slot_z    = 6.5;    // wire-entry centre above the board, as measured on the first print (3 Nov 2026)
 
-// a hole through the rear wall: round for one x, a rounded slot for two
-module rear_slot(xs, z, d) {
-  hull() for (x = xs)
-    translate([180 - x, -15 + gap_y - 1, -z]) rotate([-90, 0, 0])   // the board's flip: x -> 180 - x, z -> -z
+// a hole through the rear wall: round for one x, a rounded slot for two; h stretches it vertically
+// (end circles at z - h/2 and z + h/2), so the slot is d + h tall and no wider
+module rear_slot(xs, z, d, h = 0) {
+  hull() for (x = xs) for (dz = [-h/2, h/2])
+    translate([180 - x, -15 + gap_y - 1, -(z + dz)]) rotate([-90, 0, 0])   // the board's flip: x -> 180 - x, z -> -z
       cylinder(d = d, h = wall + 2, $fn = 64);
 }
 
@@ -119,9 +122,9 @@ module terminal_notches() {   // the panel's screw-terminal wires leave through 
 }
 
 module rear_cutouts() {
-  rear_slot(usb_x, usb_z, usb_d);
+  rear_slot(usb_x, usb_z, usb_d, usb_h);
   rear_slot([dc_axis[0]], dc_axis[1], dc_d);
-  for (tb = terminals) rear_slot(tb, slot_z, slot_d);
+  for (tb = terminals) rear_slot(tb, slot_z, slot_d, slot_h);
 }
 
 // ---- dev-board USB cable notches: arched, from the wall's bottom edge, in the end wall the ports face ----
