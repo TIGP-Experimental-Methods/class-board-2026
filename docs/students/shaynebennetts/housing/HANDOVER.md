@@ -89,7 +89,7 @@ Dev board: `multmatrix` in `devboard()`, header plastic on the socket tops at z 
    The housing already assumes 25.4 (centre 68.8 unchanged).
 2. DC jack hole is on the model axis, 2.35 mm off the pads — measure the real jack before printing.
 3. OLED display window and glass thickness (`oled_win`, `oled_glass` = 1.5) are from the footprint / a typical module — check.
-4. The LED well in the cover is the only feature that needs a (small, paint-on) support.
+4. The LED well in the cover was removed on 3 Nov 2026 (its floor needed support and printed badly): the LEDs show through plain 3 mm holes in the 2 mm plate; no part of the cover needs support.
 5. Panel silkscreen says module header pin 10 is spare, but the copper routes MODOUT8 there.
 6. Course checklist items not done: the test coupon (`coupon.stl`: holes 3.0–3.6, an M3 pocket, a wall), slicing in
    Bambu Studio (time, grams). E11 (drivers + panels in sim, a pull request) not started.

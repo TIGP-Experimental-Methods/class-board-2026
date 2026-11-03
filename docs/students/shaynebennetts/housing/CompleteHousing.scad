@@ -209,9 +209,8 @@ module lid() { translate([0, 0, z_bot - lid_t]) linear_extrude(lid_t) lid2d(); }
 // LEDs 1.0, Qwiic 4.32, module header 9.1, TTL strip 8.8, isolated inputs 9.95, TX terminal 14.1.
 cover_under = wall_top;            // the cover lies on the walls, 5 mm over the panel
 cover_top   = cover_under + 2;     // a 2 mm plate; the OLED gets its own housing (below)
-low_under   = z_top + 2.5;         // LED area: 1.5 mm over the 1.0 mm LEDs
-low_t       = 2;                   // plate thickness there
-low_rim     = 2;                   // rim joining the LED plate to the cover
+                                   // the LEDs show through plain holes in the plate (the recessed LED well of the
+                                   // first print needed support under its floor and printed badly; removed 3 Nov 2026)
 sma_under   = z_top + 1.8;         // SMA plate: rests on the jacks' 1.8 mm square bases
 sma_t       = 2;                   // 6 mm of thread stands above it for the plug nuts
 sma_lip     = 2.5;                 // the SMA plate reaches this far under the cover around its opening
@@ -232,7 +231,6 @@ module sma_zone() {   // 2D outline of the SMA field: rows 1-2 full, row 3 short
     translate([66.65, -70.67]) square([72, 20]);
   }
 }
-module led_zone() { offset(r = 2) offset(delta = -2) translate([112.5, -96.5]) square([8, 13.2]); }
 
 // windows straight through the cover: [x0, x1, y0, y1], from the mesh outlines plus clearance
 windows = [
@@ -256,16 +254,10 @@ oled_win   = [oled_o[0], oled_o[1] - (3.23 + 22.53)/2, 24, 14];   // display win
 
 module cover() {
   difference() {
-    union() {
-      translate([-gap_x - wall, -115 - gap_y - wall, cover_under])
-        cube([180 + 2*(gap_x + wall), 100 + 2*(gap_y + wall), cover_top - cover_under]);   // the plate
-      translate([0, 0, low_under]) linear_extrude(cover_under - low_under + 0.01)
-        offset(r = low_rim) led_zone();                                                   // the LED plate and its rim
-    }
-    translate([0, 0, low_under + low_t]) linear_extrude(cover_top) led_zone();           // the LED well
-    translate([0, 0, z_top - 1]) linear_extrude(low_under - z_top + 1) offset(r = low_rim) led_zone();
+    translate([-gap_x - wall, -115 - gap_y - wall, cover_under])
+      cube([180 + 2*(gap_x + wall), 100 + 2*(gap_y + wall), cover_top - cover_under]);     // the plate
     translate([0, 0, z_top]) linear_extrude(cover_top) sma_zone();                        // opening for the SMA plate
-    for (p = led_xy) translate([p[0], p[1], z_top]) cylinder(d = led_d, h = 30, $fn = 32);
+    for (p = led_xy) translate([p[0], p[1], z_top]) cylinder(d = led_d, h = 30, $fn = 32);   // LED holes through the plate
     for (w = windows) translate([w[0], w[2], z_top - 1]) cube([w[1] - w[0], w[3] - w[2], 30]);
     for (c = terminal_cuts) translate([c[0], -125, z_top - 1]) cube([c[1] - c[0], c[2] + 125, 30]);
     translate([oled[0], oled[2], z_top - 1]) cube([oled[1] - oled[0], oled[3] - oled[2], 30]);   // under the OLED housing
