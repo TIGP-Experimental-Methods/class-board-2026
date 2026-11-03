@@ -90,7 +90,8 @@ module bosses() {
 
 // ---- rear-wall openings -----------------------------------------------------
 // Positions in the main board's own frame (before the flip), from the footprint pads in
-// class-board.kicad_pcb; heights are above the board's top face, as measured on the first print
+// class-board.kicad_pcb; heights are housing -z, i.e. above the board's back face (the component-side
+// surface is 1.6 mm further: subtract t for heights above the components' surface), as measured on the first print
 // against the soldered board (3 Nov 2026).
 
 // USB-C: a rounded slot 16 x 12 around the mid-mount receptacle, room for the plug boot
