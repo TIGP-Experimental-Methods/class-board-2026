@@ -199,23 +199,30 @@ every reset starts the logic again.
    and open 192.168.4.1. The RGB LED: yellow while joining, green on your network, blue on its own.
 6. Unplug the USB before the next step.
 
-## 9. Fixes to the ordered board (each one optional)
+## 9. Fixes to the ordered board
 
-The ordered board has a few known weaknesses, and each has a small fix you can make on your own board with a wire, a resistor or a part swap. Every item is optional: the firmware runs on an unmodified board and detects, or is told, what is fitted. A1, A2 and B6 improve every board that runs the NMR console and are worth doing; B1 to B7 serve particular uses, so read the last column and decide. All of them touch the component side or the J1 tails on the back, so they go on now, after step 3 and before the panel covers the tails in step 10. Pad names are on the map below; the full reasoning is in the rework plan of 8 October in the course repository.
+The ordered board has a few known weaknesses, and each has a small fix made with a wire, a resistor or a part swap. The firmware runs on an unmodified board and detects, or is told, what is fitted. **Five fixes are on the instructor's board, and these are the ones to make: A1, A2, B2, B4 and B6.** All of them touch the component side or the socket tails on the back, so they go on now, after step 3 and before the panel covers the tails in step 10. Pad names are on the map below; the full reasoning is in the rework plan of 8 October in the course repository.
 
-| # | Optional rework | Exactly where | Parts | What it gives |
+| # | Rework | Exactly where | Parts | What it gives |
 |---|---|---|---|---|
-| A1 | Phase reference: the clock generator's CLK2 into analog input AI1 | TP701 (CLK2 through R705) → an SMA pigtail into the panel's AI1 jack, or a wire to the AI1 net at the R111 pad on the link side | 1 pigtail or 1 wire | Every scan carries its own phase reference, so scans average instead of cancelling. Firmware setting `ref_ch 1`. Check: a scope on AI1 during a scan shows a 0–3.3 V square wave at the IF. |
+| A1 | Phase reference: the clock generator's CLK2 into analog input AI1 | TP701 (CLK2 through R705) → a wire to the AI1 net at the R111 pad on the link side (or an SMA pigtail into the panel's AI1 jack). A ground return runs beside it: the GND pad of C706 (pad 2, the capacitor next to TP701) to the GND pad of C111 (pad 2, next to R111). | 2 wires | Every scan carries its own phase reference, so scans average instead of cancelling. Firmware setting `ref_ch 1`. Check: a scope on AI1 during a scan shows a 0–3.3 V square wave at the IF. |
 | A2 | Transmitter flags to GPIO | The empty pads R811 (IFLAG) and R812 (TFLAG), the pad on the U802 side → 1 kΩ → the J1 tails at pin 6 (GPIO6) and pin 7 (GPIO7), on the back | 2 wires, 2 × 1 kΩ | A current limit or a thermal shutdown of the transmitter amplifier stops the scan set; `status` reports the flags instead of null. |
-| B6 | +VEXT sense | 100 kΩ from +VEXT (the C940 pad, or the J901 side of F901) to the J1 tail at pin 4 (GPIO4); 10 kΩ from there to GND; 100 nF across the 10 kΩ | 2 resistors, 1 capacitor, 1 wire | The firmware reads the bench voltage (about 2 %), refuses to pulse outside 7–24 V and warns before the output clips. |
-| B1 | Reverse-current blocking on both 5 V inputs | U201 and U202 (LM66100, SC-70-6): lift pin 3 (CE) from its ground pad and wire it to pin 6 (VOUT) of the same device | fine wire, a microscope | USB-C and the 5 V jack may then be connected together. Check that each source alone still powers the board. Without it: one source at a time. |
+| B6 | +VEXT sense | 100 kΩ from +VEXT at the + pad of C921 to the J1 tail at pin 4 (GPIO4); 10 kΩ from there to GND at the − pad of C940; 100 nF across the 10 kΩ | 2 resistors, 1 capacitor, 2 wires | The firmware reads the bench voltage (about 2 %), refuses to pulse outside 7–24 V and warns before the output clips. |
 | B2 | Pull-down on TRIG_DIR | 10 kΩ from the J2 tail at pin 9 (GPIO39: the TRIG_DIR net reaches only this tail and U503 pin 5) to the GND tail at J2 pin 1, on the back. U503's own pin 5 is too small to solder a resistor to. | 1 × 10 kΩ, leaded or 0603 | The TRIG jack is an input from power-up instead of undefined until the firmware runs. |
-| B3 | Pull-up on CS_DAC | 10 kΩ from U302 pin 9 to +3V3 (TP3 or TP202), not to U302's own 5 V supply | 1 × 10 kΩ, 1 wire | A guard against the DAC latching stray SPI traffic at boot; the firmware already drives the chip selects high first. Only if an output glitch at boot is ever seen. |
-| B4 | AUX jack live | Fit R715 (0 Ω, 0805, an empty footprint) | 1 × 0 Ω | A second receiver input, for a second coil or a test signal into the LNA. |
-| B5 | Difference-amplifier gain 20 as designed | R915, R917, R919, R924: 20 kΩ → 40.2 kΩ; C914, C915: 560 pF → 270 pF | 4 resistors, 2 capacitors | 1 V peak at the ADC instead of 0.5 V. Not recommended: setting the ADC range to ±2.56 V does the same. |
-| B7 | Separate transmitter supply | Remove FB802; feed the FB802 pad on the C815 side (+VEXT_TX) from an 18–20 V source (a small buck module, or an LM317 from +VEXT) | 1 regulator module (1 A) | The H-bridge runs at the full 24 V while the transmitter amplifier keeps its margin. |
+| B4 | AUX jack live | Fit R715 (0 Ω, 0805, an empty footprint) | 1 × 0 Ω | A second receiver input, for a second coil or a test signal into the LNA. Microvolt to millivolt signals only, like RX. |
 
 After A1, A2 or B6 the bring-up order is section E of the rework plan: rails, the analog loop-back, the digital lines, the transmitter at 24 V into a dummy load with J10 open first, the receiver, and last the H-bridge and polarizer with the external fuse.
+
+### For information only, not for implementation
+
+Four more fixes exist in the rework plan. They are not on the instructor's board and are not part of the course build. They are listed so that two limits of the board are understood: without B1, **one 5 V source at a time** (rule 3); without B7, the transmitter amplifier shares +VEXT, so **24 V on J901 only with the supply's over-voltage limit set to 25 V**, and 20–22 V is the comfortable setting.
+
+| # | Rework (not fitted) | Where it would go | What it would give |
+|---|---|---|---|
+| B1 | Reverse-current blocking on both 5 V inputs | U201 and U202 (LM66100, SC-70-6): lift pin 3 (CE) from its ground pad and wire it to pin 6 (VOUT) of the same device; fine wire and a microscope | USB-C and the 5 V jack could then be connected together. |
+| B3 | Pull-up on CS_DAC | 10 kΩ from U302 pin 9 to +3V3 (TP3 or TP202) | A guard against the DAC latching stray SPI traffic at boot; the firmware already drives the chip selects high first. |
+| B5 | Difference-amplifier gain 20 as designed | R915, R917, R919, R924: 20 kΩ → 40.2 kΩ; C914, C915: 560 pF → 270 pF | 1 V peak at the ADC instead of 0.5 V; setting the ADC range to ±2.56 V does the same. |
+| B7 | Separate transmitter supply | Remove FB802; feed the FB802 pad on the C815 side (+VEXT_TX) from an 18–20 V source | The H-bridge at the full 24 V while the transmitter amplifier keeps its margin. |
 
 ## 10. Plug the two boards together
 

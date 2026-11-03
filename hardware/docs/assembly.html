@@ -136,7 +136,7 @@ html { scroll-behavior: smooth; }
     <li><a href="#s6">Panel J30 and J40</a></li>
     <li><a href="#s7">Shunts and labels</a></li>
     <li><a href="#s8">First power-up</a></li>
-    <li><a href="#s9">Fixes to the ordered board (optional)</a></li>
+    <li><a href="#s9">Fixes to the ordered board</a></li>
     <li><a href="#s10">Plug the two boards together</a></li>
     <li><a href="#s11">Into the housing</a></li>
   </ol>
@@ -349,24 +349,31 @@ pio run -e esp32s3 -t uploadfs</code></pre>
 </section>
 
 <section class="step" id="s9">
-  <h2><span class="n">9</span>Fixes to the ordered board (each one optional)</h2>
-  <p>The ordered board has a few known weaknesses, and each has a small fix you can make on your own board with a wire, a resistor or a part swap. Every item is optional: the firmware runs on an unmodified board and detects, or is told, what is fitted. A1, A2 and B6 improve every board that runs the NMR console and are worth doing; B1 to B7 serve particular uses, so read the last column and decide. All of them touch the component side or the J1 tails on the back, so they go on now, after step 3 and before the panel covers the tails in step 10. Pad names are on the map below; the full reasoning is in the rework plan of 8 October in the course repository.</p>
+  <h2><span class="n">9</span>Fixes to the ordered board</h2>
+  <p>The ordered board has a few known weaknesses, and each has a small fix made with a wire, a resistor or a part swap. The firmware runs on an unmodified board and detects, or is told, what is fitted. <strong>Five fixes are on the instructor's board, and these are the ones to make: A1, A2, B2, B4 and B6.</strong> All of them touch the component side or the socket tails on the back, so they go on now, after step 3 and before the panel covers the tails in step 10. Pad names are on the map below; the full reasoning is in the rework plan of 8 October in the course repository.</p>
   <div class="tablewrap"><table>
-    <thead><tr><th>#</th><th>Optional rework</th><th>Exactly where</th><th>Parts</th><th>What it gives</th></tr></thead>
+    <thead><tr><th>#</th><th>Rework</th><th>Exactly where</th><th>Parts</th><th>What it gives</th></tr></thead>
     <tbody>
-        <tr><td class="ref">A1</td><td><strong>Phase reference: the clock generator's CLK2 into analog input AI1</strong></td><td>TP701 (CLK2 through R705) → an SMA pigtail into the panel's AI1 jack, or a wire to the AI1 net at the R111 pad on the link side</td><td>1 pigtail or 1 wire</td><td>Every scan carries its own phase reference, so scans average instead of cancelling. Firmware setting <code>ref_ch 1</code>. Check: a scope on AI1 during a scan shows a 0–3.3 V square wave at the IF.</td></tr>
+        <tr><td class="ref">A1</td><td><strong>Phase reference: the clock generator's CLK2 into analog input AI1</strong></td><td>TP701 (CLK2 through R705) → a wire to the AI1 net at the R111 pad on the link side (or an SMA pigtail into the panel's AI1 jack). A ground return runs beside it: the GND pad of C706 (pad 2, the capacitor next to TP701) to the GND pad of C111 (pad 2, next to R111).</td><td>2 wires</td><td>Every scan carries its own phase reference, so scans average instead of cancelling. Firmware setting <code>ref_ch 1</code>. Check: a scope on AI1 during a scan shows a 0–3.3 V square wave at the IF.</td></tr>
         <tr><td class="ref">A2</td><td><strong>Transmitter flags to GPIO</strong></td><td>The empty pads R811 (IFLAG) and R812 (TFLAG), the pad on the U802 side → 1 kΩ → the J1 tails at pin 6 (GPIO6) and pin 7 (GPIO7), on the back</td><td>2 wires, 2 × 1 kΩ</td><td>A current limit or a thermal shutdown of the transmitter amplifier stops the scan set; <code>status</code> reports the flags instead of null.</td></tr>
-        <tr><td class="ref">B6</td><td><strong>+VEXT sense</strong></td><td>100 kΩ from +VEXT (the C940 pad, or the J901 side of F901) to the J1 tail at pin 4 (GPIO4); 10 kΩ from there to GND; 100 nF across the 10 kΩ</td><td>2 resistors, 1 capacitor, 1 wire</td><td>The firmware reads the bench voltage (about 2 %), refuses to pulse outside 7–24 V and warns before the output clips.</td></tr>
-        <tr><td class="ref">B1</td><td><strong>Reverse-current blocking on both 5 V inputs</strong></td><td>U201 and U202 (LM66100, SC-70-6): lift pin 3 (CE) from its ground pad and wire it to pin 6 (VOUT) of the same device</td><td>fine wire, a microscope</td><td>USB-C and the 5 V jack may then be connected together. Check that each source alone still powers the board. Without it: one source at a time.</td></tr>
+        <tr><td class="ref">B6</td><td><strong>+VEXT sense</strong></td><td>100 kΩ from +VEXT at the + pad of C921 to the J1 tail at pin 4 (GPIO4); 10 kΩ from there to GND at the − pad of C940; 100 nF across the 10 kΩ</td><td>2 resistors, 1 capacitor, 2 wires</td><td>The firmware reads the bench voltage (about 2 %), refuses to pulse outside 7–24 V and warns before the output clips.</td></tr>
         <tr><td class="ref">B2</td><td><strong>Pull-down on TRIG_DIR</strong></td><td>10 kΩ from the J2 tail at pin 9 (GPIO39: the TRIG_DIR net reaches only this tail and U503 pin 5) to the GND tail at J2 pin 1, on the back. U503's own pin 5 is too small to solder a resistor to.</td><td>1 × 10 kΩ, leaded or 0603</td><td>The TRIG jack is an input from power-up instead of undefined until the firmware runs.</td></tr>
-        <tr><td class="ref">B3</td><td><strong>Pull-up on CS_DAC</strong></td><td>10 kΩ from U302 pin 9 to +3V3 (TP3 or TP202), not to U302's own 5 V supply</td><td>1 × 10 kΩ, 1 wire</td><td>A guard against the DAC latching stray SPI traffic at boot; the firmware already drives the chip selects high first. Only if an output glitch at boot is ever seen.</td></tr>
-        <tr><td class="ref">B4</td><td><strong>AUX jack live</strong></td><td>Fit R715 (0 Ω, 0805, an empty footprint)</td><td>1 × 0 Ω</td><td>A second receiver input, for a second coil or a test signal into the LNA.</td></tr>
-        <tr><td class="ref">B5</td><td><strong>Difference-amplifier gain 20 as designed</strong></td><td>R915, R917, R919, R924: 20 kΩ → 40.2 kΩ; C914, C915: 560 pF → 270 pF</td><td>4 resistors, 2 capacitors</td><td>1 V peak at the ADC instead of 0.5 V. Not recommended: setting the ADC range to ±2.56 V does the same.</td></tr>
-        <tr><td class="ref">B7</td><td><strong>Separate transmitter supply</strong></td><td>Remove FB802; feed the FB802 pad on the C815 side (+VEXT_TX) from an 18–20 V source (a small buck module, or an LM317 from +VEXT)</td><td>1 regulator module (1 A)</td><td>The H-bridge runs at the full 24 V while the transmitter amplifier keeps its margin.</td></tr>
+        <tr><td class="ref">B4</td><td><strong>AUX jack live</strong></td><td>Fit R715 (0 Ω, 0805, an empty footprint)</td><td>1 × 0 Ω</td><td>A second receiver input, for a second coil or a test signal into the LNA. Microvolt to millivolt signals only, like RX.</td></tr>
     </tbody>
   </table></div>
-  <figure><img src="assembly-img/main-rework-map.png" alt="Map of the main board's component side with the pads of every rework item marked"><figcaption>Where each rework item lands on the component side. The A2 and B6 wires end on the J1 tails and the B2 resistor sits on the J2 tails, on the back.</figcaption></figure>
+  <figure><img src="assembly-img/main-rework-map.png" alt="Map of the main board's component side with the pads of the five fitted rework items marked"><figcaption>Where each of the five fixes lands on the component side. The A2 and B6 wires end on the J1 tails and the B2 resistor sits on the J2 tails, on the back.</figcaption></figure>
   <p>After A1, A2 or B6 the bring-up order is section E of the rework plan: rails, the analog loop-back, the digital lines, the transmitter at 24 V into a dummy load with J10 open first, the receiver, and last the H-bridge and polarizer with the external fuse.</p>
+  <h3>For information only, not for implementation</h3>
+  <p>Four more fixes exist in the rework plan. They are not on the instructor's board and are not part of the course build. They are listed so that two limits of the board are understood: without B1, <strong>one 5 V source at a time</strong> (rule 3); without B7, the transmitter amplifier shares +VEXT, so <strong>24 V on J901 only with the supply's over-voltage limit set to 25 V</strong>, and 20–22 V is the comfortable setting.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>Rework (not fitted)</th><th>Where it would go</th><th>What it would give</th></tr></thead>
+    <tbody>
+        <tr><td class="ref">B1</td><td><strong>Reverse-current blocking on both 5 V inputs</strong></td><td>U201 and U202 (LM66100, SC-70-6): lift pin 3 (CE) from its ground pad and wire it to pin 6 (VOUT) of the same device; fine wire and a microscope</td><td>USB-C and the 5 V jack could then be connected together.</td></tr>
+        <tr><td class="ref">B3</td><td><strong>Pull-up on CS_DAC</strong></td><td>10 kΩ from U302 pin 9 to +3V3 (TP3 or TP202)</td><td>A guard against the DAC latching stray SPI traffic at boot; the firmware already drives the chip selects high first.</td></tr>
+        <tr><td class="ref">B5</td><td><strong>Difference-amplifier gain 20 as designed</strong></td><td>R915, R917, R919, R924: 20 kΩ → 40.2 kΩ; C914, C915: 560 pF → 270 pF</td><td>1 V peak at the ADC instead of 0.5 V; setting the ADC range to ±2.56 V does the same.</td></tr>
+        <tr><td class="ref">B7</td><td><strong>Separate transmitter supply</strong></td><td>Remove FB802; feed the FB802 pad on the C815 side (+VEXT_TX) from an 18–20 V source</td><td>The H-bridge at the full 24 V while the transmitter amplifier keeps its margin.</td></tr>
+    </tbody>
+  </table></div>
 </section>
 
 <section class="step" id="s10">
