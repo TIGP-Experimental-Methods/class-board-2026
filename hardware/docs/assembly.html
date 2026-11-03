@@ -365,7 +365,7 @@ pio run -e esp32s3 -t uploadfs</code></pre>
         <tr><td class="ref">B7</td><td><strong>Separate transmitter supply</strong></td><td>Remove FB802; feed the FB802 pad on the C815 side (+VEXT_TX) from an 18–20 V source (a small buck module, or an LM317 from +VEXT)</td><td>1 regulator module (1 A)</td><td>The H-bridge runs at the full 24 V while the transmitter amplifier keeps its margin.</td></tr>
     </tbody>
   </table></div>
-  <figure><img src="assembly-img/main-rework-map.png" alt="Map of the main board's component side with the pads of every rework item marked"><figcaption>Where each rework item lands on the component side. The A2 and B6 wires end on the J1 tails, on the back.</figcaption></figure>
+  <figure><img src="assembly-img/main-rework-map.png" alt="Map of the main board's component side with the pads of every rework item marked"><figcaption>Where each rework item lands on the component side. The A2 and B6 wires end on the J1 tails and the B2 resistor sits on the J2 tails, on the back.</figcaption></figure>
   <p>After A1, A2 or B6 the bring-up order is section E of the rework plan: rails, the analog loop-back, the digital lines, the transmitter at 24 V into a dummy load with J10 open first, the receiver, and last the H-bridge and polarizer with the external fuse.</p>
 </section>
 
