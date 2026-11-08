@@ -57,3 +57,19 @@
   not worked around. Headless Chrome with virtual time barely fires `requestAnimationFrame`, so stroke
   animations never finish there unless shimmed. Removing a pushed commit needs a force-push, which Claude Code's
   auto mode blocks until you say to run it.
+
+## 2026-11-08 — HW1 (between workshops): Project 1, Sounds
+
+- **Done:** Sounds (added 2026-11-06) — hear one syllable, pick it among four that differ only in tone or in one
+  look-alike sound — tried on my phone. The project page now describes it as the fourth question kind, explains
+  how its options are built, and lists its checks; `handover.md` and `PLAN.md` record the phone check. Commit and
+  author names in both project repositories are now `semiconda`; the two repositories were recreated on GitHub to
+  drop the old history, so their GitHub Actions run history starts again.
+- **Verified:** Sounds on my phone: it works. Headless, before that: 400 of 400 sound questions had four
+  different options. Both project sites load after the repositories were recreated.
+- **Next:** rewrite the Huayu Pocket project page in my own words; then its class-wall entry. Project 2: T6
+  measurements, a video, its page numbers and wall entry.
+- **Gotchas:** the project page's kind-share check (⅓ each) was measured before Sounds existed; it was dropped
+  from the page rather than left stale — with Sounds on, the expected share is ¼ each, not yet measured. The
+  course asks for the spec's checks, predicted next to measured, so the page keeps those and puts the phone
+  checks in one line.
