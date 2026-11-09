@@ -73,3 +73,12 @@
   from the page rather than left stale — with Sounds on, the expected share is ¼ each, not yet measured. The
   course asks for the spec's checks, predicted next to measured, so the page keeps those and puts the phone
   checks in one line.
+
+## 2026-11-09 — HW1 (between workshops): Project 1 finished
+
+- **Done:** the start screen is now three rows: what to practise (Words, Sentences, Sounds), how (Reading,
+  Hearing, Writing) and show in (Pinyin, Characters). I went through the project page line by line: impersonal
+  wording, plainer descriptions of each question kind, and a pointer to the guide for adding lessons. The class
+  wall card is up.
+- **Verified:** the page and the app load at their addresses; the card shows on the class wall.
+- **Next:** Project 2: agree a filming method, T6 measurements, a video, the page's numbers and its wall entry.
